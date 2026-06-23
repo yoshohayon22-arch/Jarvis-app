@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Jarvis AI</title>
+    <meta name="description" content="Votre assistant personnel Jarvis, inspiré d'Iron Man.">
+    <meta name="theme-color" content="#000000">
+
+    <!-- PWA Meta Tags -->
+    <link rel="manifest" href="/manifest.json">
+    <link rel="apple-touch-icon" href="/icon-192x192.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Jarvis">
+
+    <style>
+        :root {
+            --neon-blue: #00d4ff;
+            --dark-bg: #000000;
+            --text-color: #e0e0e0;
+            --button-bg: #1a1a1a;
+            --button-hover: #00aaff;
+            --circle-size: 200px;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--dark-bg);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            min-height: 100vh;
+            overflow: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            max-width: 600px;
+            padding: 20px;
+            box-sizing: border-box;
+            flex-grow: 1;
+        }
+
+        h1 {
+            color: var(--neon-blue);
+            text-shadow: 0 0 10px var(--neon-blue);
+            margin-bottom: 20px;
+            font-size: 2.5em;
+        }
+
+        #conversation {
+            width: 100%;
+            max-height: 30vh;
+            overflow-y: auto;
+            border: 1px solid var(--neon-blue);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            background-color: rgba(0, 0, 0, 0.5);
+            box-shadow: 0 0 15px rgba(0, 212, 255, 0.5);
+            font-size: 0.9em;
+            line-height: 1.6;
+            flex-shrink: 0;
+        }
+
+        .message {
+            margin-bottom: 10px;
+        }
+
+        .user-message {
+            color: var(--text-color);
+            text-align: right;
+        }
+
+        .jarvis-message {
+            color: var(--neon-blue);
+            text-align: left;
+        }
+
+        .mic-button-container {
+            position: relative;
+            width: var(--circle-size);
+            height: var(--circle-size);
+            margin: 30px 0;
+            flex-shrink: 0;
+        }
+
+        #micButton {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background-color: var(--button-bg);
+            border: 3px solid var(--neon-blue);
+            color: var(--neon-blue);
+            font-size: 3em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.7);
+            transition: all 0.3s ease;
+            position: relative;
+            z-index: 10;
+        }
+
+        #micButton:hover {
+            background-color: var(--button-hover);
+            color: var(--dark-bg);
+            box-shadow: 0 0 30px var(--neon-blue);
+        }
+
+        #micButton.listening {
+            animation: pulse 1.5s infinite alternate;
+            background-color: var(--neon-blue);
+            color: var(--dark-bg);
+        }
+
+        @keyframes pulse {
+            from { box-shadow: 0 0 20px rgba(0, 212, 255, 0.7); }
+            to { box-shadow: 0 0 40px rgba(0, 212, 255, 1); }
+        }
+
+        .circle-glow {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: var(--circle-size);
+            height: var(--circle-size);
+            border-radius: 50%;
+            background: radial-gradient(circle, var(--neon-blue) 0%, transparent 70%);
+            transform: translate(-50%, -50%) scale(0.8);
+            opacity: 0.3;
+            animation: glow 3s infinite alternate;
+            z-index: 5;
+        }
+
+        @keyframes glow {
+            from { transform: translate(-50%, -50%) scale(0.8); opacity: 0.3; }
+            to { transform: translate(-50%, -50%) scale(1.1); opacity: 0.6; }
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+            flex-shrink: 0;
+        }
+
+        .control-button {
+            padding: 10px 20px;
+            border: 2px solid var(--neon-blue);
+            border-radius: 5px;
+            background-color: var(--button-bg);
+            color: var(--neon-blue);
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .control-button:hover {
+            background-color: var(--button-hover);
+            color: var(--dark-bg);
+            box-shadow: 0 0 10px var(--neon-blue);
+        }
+
+        #revisionModeContainer {
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid var(--neon-blue);
+            border-radius: 10px;
+            background-color: rgba(0, 0, 0, 0.5);
+            box-shadow: 0 0 15px rgba(0, 212, 255, 0.5);
+            display: none; /* Hidden by default */
+            flex-direction: column;
+            gap: 10px;
+            width: 100%;
+            max-width: 400px;
+            box-sizing: border-box;
+            flex-shrink: 0;
+        }
+
+        #revisionModeContainer.active {
+            display: flex;
+        }
+
+        #revisionModeContainer input[type="text"],
+        #revisionModeContainer select {
+            padding: 8px;
+            border: 1px solid var(--neon-blue);
+            border-radius: 5px;
+            background-color: #333;
+            color: var(--text-color);
+            font-size: 0.9em;
+        }
+
+        #revisionModeContainer button {
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            background-color: var(--neon-blue);
+            color: var(--dark-bg);
+            font-size: 1em;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        #revisionModeContainer button:hover {
+            background-color: var(--button-hover);
+        }
+
+        /* Responsive adjustments for smaller screens */
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 2em;
+            }
+
+            #micButton {
+                font-size: 2.5em;
+            }
+
+            .mic-button-container {
+                width: 150px;
+                height: 150px;
+            }
+
+            .controls {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .control-button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Jarvis AI</h1>
+        <div id="conversation"></div>
+
+        <div class="mic-button-container">
+            <button id="micButton"><i class="fas fa-microphone"></i></button>
+            <div class="circle-glow"></div>
+        </div>
+
+        <div class="controls">
+            <button id="revisionModeToggle" class="control-button">Mode Révision</button>
+            <button id="clearConversation" class="control-button">Effacer Conversation</button>
+        </div>
+
+        <div id="revisionModeContainer">
+            <h3>Mode Révision</h3>
+            <input type="text" id="revisionSubject" placeholder="Sujet (ex: Histoire, Maths)">
+            <select id="revisionMode">
+                <option value="quiz">Quiz</option>
+                <option value="fiche">Fiche de révision</option>
+                <option value="explain">Expliquer un concept</option>
+            </select>
+            <input type="text" id="revisionUserInput" placeholder="Détails supplémentaires (optionnel)">
+            <button id="startRevision">Lancer la Révision</button>
+        </div>
+    </div>
+
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    <script>
+        const micButton = document.getElementById('micButton');
+        const conversationDiv = document.getElementById('conversation');
+        const revisionModeToggle = document.getElementById('revisionModeToggle');
+        const revisionModeContainer = document.getElementById('revisionModeContainer');
+        const startRevisionButton = document.getElementById('startRevision');
+        const revisionSubjectInput = document.getElementById('revisionSubject');
+        const revisionModeSelect = document.getElementById('revisionMode');
+        const revisionUserInput = document.getElementById('revisionUserInput');
+        const clearConversationButton = document.getElementById('clearConversation');
+
+        const API_BASE_URL = window.location.origin; // Utilise l'origine actuelle pour les appels API
+
+        let recognition;
+        let synth = window.speechSynthesis;
+        let jarvisVoice = null;
+
+        // Initialiser la voix de Jarvis
+        function setJarvisVoice() {
+            const voices = synth.getVoices();
+            jarvisVoice = voices.find(voice => voice.lang === 'en-GB' && voice.name.includes('Male')) ||
+                          voices.find(voice => voice.lang === 'en-US' && voice.name.includes('Male')) ||
+                          voices.find(voice => voice.default && voice.name.includes('Male'));
+            if (!jarvisVoice) {
+                console.warn("Voix masculine Jarvis non trouvée, utilisation de la voix par défaut.");
+            }
+        }
+
+        if (synth.onvoiceschanged !== undefined) {
+            synth.onvoiceschanged = setJarvisVoice;
+        } else {
+            setJarvisVoice(); // Fallback for browsers that don't fire onvoiceschanged immediately
+        }
+
+        // Fonction pour ajouter un message à la conversation
+        function addMessage(sender, text) {
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('message');
+            messageDiv.classList.add(sender === 'user' ? 'user-message' : 'jarvis-message');
+            messageDiv.textContent = text;
+            conversationDiv.appendChild(messageDiv);
+            conversationDiv.scrollTop = conversationDiv.scrollHeight;
+        }
+
+        // Fonction pour faire parler Jarvis
+        function speak(text) {
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.voice = jarvisVoice;
+            utterance.lang = jarvisVoice ? jarvisVoice.lang : 'en-US'; // Utiliser la langue de la voix ou par défaut
+            utterance.pitch = 1;
+            utterance.rate = 1;
+            synth.speak(utterance);
+        }
+
+        // Initialisation de la reconnaissance vocale
+        if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
+            recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+            recognition.continuous = false;
+            recognition.lang = 'fr-FR'; // Langue de reconnaissance
+            recognition.interimResults = false;
+            recognition.maxAlternatives = 1;
+
+            recognition.onstart = () => {
+                micButton.classList.add('listening');
+                console.log('Écoute...');
+            };
+
+            recognition.onresult = (event) => {
+                const transcript = event.results[0][0].transcript;
+                console.log('Vous avez dit:', transcript);
+                addMessage('user', 'Vous: ' + transcript);
+                sendQuestionToBackend(transcript);
+            };
+
+            recognition.onerror = (event) => {
+                console.error('Erreur de reconnaissance vocale:', event.error);
+                micButton.classList.remove('listening');
+                speak("Désolé, je n'ai pas bien compris. Pourriez-vous répéter ?");
+            };
+
+            recognition.onend = () => {
+                micButton.classList.remove('listening');
+                console.log('Fin de l\'écoute.');
+            };
+
+            micButton.addEventListener('click', () => {
+                if (micButton.classList.contains('listening')) {
+                    recognition.stop();
+                } else {
+                    recognition.start();
+                }
+            });
+        } else {
+            micButton.disabled = true;
+            micButton.textContent = 'API vocale non supportée';
+            console.warn('Web Speech API non supportée dans ce navigateur.');
+            speak("Désolé, votre navigateur ne supporte pas la reconnaissance vocale.");
+        }
+
+        // Envoi de la question au backend
+        async function sendQuestionToBackend(question) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/ask`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ question: question })
+                });
+                const data = await response.json();
+                if (data.answer) {
+                    addMessage('jarvis', 'Jarvis: ' + data.answer);
+                    speak(data.answer);
+                } else if (data.error) {
+                    addMessage('jarvis', 'Jarvis (Erreur): ' + data.error);
+                    speak("Une erreur est survenue: " + data.error);
+                }
+            } catch (error) {
+                console.error('Erreur lors de la communication avec le backend:', error);
+                addMessage('jarvis', 'Jarvis (Erreur): Impossible de contacter le serveur.');
+                speak("Désolé, je n'ai pas pu contacter mon serveur.");
+            }
+        }
+
+        // Toggle Mode Révision
+        revisionModeToggle.addEventListener('click', () => {
+            revisionModeContainer.classList.toggle('active');
+            if (revisionModeContainer.classList.contains('active')) {
+                speak("Mode révision activé. Quel sujet souhaitez-vous réviser ?");
+            } else {
+                speak("Mode révision désactivé.");
+            }
+        });
+
+        // Lancer la révision
+        startRevisionButton.addEventListener('click', async () => {
+            const subject = revisionSubjectInput.value;
+            const mode = revisionModeSelect.value;
+            const userInput = revisionUserInput.value;
+
+            if (!subject) {
+                speak("Veuillez entrer un sujet pour la révision.");
+                return;
+            }
+
+            addMessage('user', `Révision - Sujet: ${subject}, Mode: ${mode}, Détails: ${userInput}`);
+            speak(`Je prépare votre ${mode} sur ${subject}.`);
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/revision`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ subject, mode, user_input: userInput })
+                });
+                const data = await response.json();
+                if (data.answer) {
+                    addMessage('jarvis', 'Jarvis (Révision): ' + data.answer);
+                    speak(data.answer);
+                } else if (data.error) {
+                    addMessage('jarvis', 'Jarvis (Erreur Révision): ' + data.error);
+                    speak("Une erreur est survenue lors de la révision: " + data.error);
+                }
+            } catch (error) {
+                console.error('Erreur lors de la communication avec le backend pour la révision:', error);
+                addMessage('jarvis', 'Jarvis (Erreur Révision): Impossible de contacter le serveur pour la révision.');
+                speak("Désolé, je n'ai pas pu contacter mon serveur pour la révision.");
+            }
+        });
+
+        // Effacer la conversation
+        clearConversationButton.addEventListener('click', () => {
+            conversationDiv.innerHTML = '';
+            speak("Conversation effacée.");
+        });
+
+        // Enregistrement du Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/service-worker.js')
+                    .then(registration => {
+                        console.log('Service Worker enregistré avec succès:', registration);
+                    })
+                    .catch(error => {
+                        console.error('Échec de l\'enregistrement du Service Worker:', error);
+                    });
+            });
+        }
+    </script>
+</body>
+</html>

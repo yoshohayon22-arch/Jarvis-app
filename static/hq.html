@@ -48,7 +48,19 @@
   .stat b{font:800 15px var(--display);color:var(--ink);font-variant-numeric:tabular-nums}
   .stat.hot{border-color:var(--warn)} .stat.hot b{color:var(--warn)}
   .panel{display:flex;flex-direction:column;min-width:0;min-height:0;background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden}
-  .tabs{display:flex;gap:2px;padding:6px;border-bottom:1px solid var(--line);flex:none}
+  .tabs{display:flex;flex-wrap:wrap;gap:2px;padding:6px;border-bottom:1px solid var(--line);flex:none}
+  .fsearch{width:100%;background:var(--surface2);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:8px 10px;font:14px var(--body)}
+  .flist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+  .frow{display:flex;gap:10px;align-items:center;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+  .frow.new{border-color:var(--accent)}
+  .frow .ic{width:34px;height:34px;border-radius:8px;flex:none;display:grid;place-items:center;font:800 10.5px var(--body);letter-spacing:.04em;color:#fff}
+  .frow span{flex:1;min-width:0;font-size:13.5px;line-height:1.35}
+  .frow span b{display:block;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .frow span a{display:block;font-weight:600;color:var(--ink);text-decoration:underline;text-decoration-color:var(--line);text-underline-offset:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .frow small{display:block;color:var(--muted);font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .frow button{background:transparent;border:1px solid var(--line);color:var(--ink);border-radius:99px;padding:5px 10px;font:600 12.5px var(--body);cursor:pointer;flex:none}
+  .cz-attach{display:flex;flex-direction:column;gap:6px}
+  .cz-attach h5{margin:6px 0 0;font:600 11px var(--body);text-transform:uppercase;letter-spacing:.12em;color:var(--muted)}
   .tabs button{flex:1 1 auto;position:relative;background:transparent;border:0;border-radius:9px;padding:8px 6px;font:600 12.5px var(--body);color:var(--muted);cursor:pointer;white-space:nowrap}
   .tabs button[aria-selected="true"]{background:var(--surface2);color:var(--ink)}
   .tabs button b{display:inline-block;min-width:18px;height:18px;margin-left:4px;padding:0 5px;border-radius:99px;background:var(--warn);color:#fff;font:700 11px/18px var(--body);text-align:center}
@@ -253,6 +265,7 @@
       <button role="tab" data-tab="day" aria-selected="false">Journée</button>
       <button role="tab" data-tab="team" aria-selected="false">Équipe</button>
       <button role="tab" data-tab="chat" aria-selected="false">Discussions<b id="tabChat" hidden>0</b></button>
+      <button role="tab" data-tab="files" aria-selected="false">Fichiers<b id="tabFiles" hidden>0</b></button>
       <button role="tab" data-tab="log" aria-selected="false">Activité</button>
     </nav>
 
@@ -288,6 +301,12 @@
         <button class="btn" type="submit">Envoyer et discuter</button>
       </form>
       <div class="threads" id="threads"></div>
+    </div>
+
+    <div class="tabpane" id="tab-files" role="tabpanel" hidden>
+      <input class="fsearch" id="fSearch" type="search" placeholder="Chercher un fichier, un lien, un agent…" aria-label="Chercher dans les fichiers et les liens">
+      <div class="sec"><h2>Fichiers <em id="fCount"></em></h2><ul class="flist" id="fFiles"></ul></div>
+      <div class="sec"><h2>Liens <em id="lCount"></em></h2><ul class="flist" id="fLinks"></ul></div>
     </div>
 
     <div class="tabpane" id="tab-log" role="tabpanel" hidden>
@@ -961,10 +980,13 @@ function completeTask(a) {
     log(a, `${a.name} a traité le mail « ${m.subject} »`, true);
   } else {
     d = { title: t.title, pole: p.id, agent: a.name, time: stamp(), status: 'ai', spec, content: job.text, requested: !!t.requested };
+    d.links = buildLinks(job.text, job);
+    if (job.hotels && job.hotels.length) d.tables = [{ name: 'hebergements-' + slug(t.title) + '.csv', rows: job.hotels }];
     log(a, `${a.name} a livré : ${t.title}`, true);
   }
   addDeliv(d); renderPlan();
-  if (t.requested) agentSays(a, `C’est prêt : « ${t.title} ». Je l’ai déposé dans ton casier. Dis-moi si tu veux que je l’ajuste.`, { delivId: d.id });
+  const nf = filesOf(d).length, nl = linksOf(d).length;
+  if (t.requested) agentSays(a, `C’est prêt : « ${t.title} ». Je t’ai envoyé ${nf} fichier${nf > 1 ? 's' : ''}${nl ? ` et ${nl} lien${nl > 1 ? 's' : ''}` : ''} (onglet Fichiers). Dis-moi si tu veux que j’ajuste.`, { delivId: d.id });
 }
 const stamp = () => new Date().toLocaleString('fr-CH', { day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' });
 
@@ -1060,8 +1082,72 @@ function recentWork(a) {
   return mine.length ? '\nTes derniers livrables pour Yosh (à reprendre si sa demande s’y rapporte) :\n' + mine.map(d => `« ${d.title} » :\n${String(d.content).slice(0, 2500)}`).join('\n\n') + '\n' : '';
 }
 /* Recherche approfondie : Claude cherche, lit et recoupe avec de vrais outils (Firecrawl, Booking.com) */
+/* ---------- Fichiers et liens envoyés par les agents ---------- */
+const URL_RE = /https?:\/\/[^\s<>"'()\[\]{}]+/g;
+const cleanUrl = u => u.replace(/[.,;:!?»…]+$/, '');
+const host = u => { try { return new URL(u).hostname.replace(/^www\./, ''); } catch (e) { return u; } };
+function buildLinks(text, job = {}) {
+  const out = [], seen = new Set();
+  const add = (url, title) => { url = cleanUrl(url); if (!/^https?:\/\//.test(url) || seen.has(url)) return; seen.add(url); out.push({ url, title: String(title || '').trim().slice(0, 140) || host(url) }); };
+  String(text || '').split('\n').forEach(line => {
+    (line.match(URL_RE) || []).forEach(u => {
+      const before = line.slice(0, line.indexOf(u)).replace(/^[\s\-•*\d.)]+/, '').replace(/[\s:–—(\[]+$/, '').trim();
+      add(u, (job.titles && job.titles[cleanUrl(u)]) || (before.length > 2 && before.length < 120 ? before : ''));
+    });
+  });
+  (job.hotels || []).forEach(h => add(h.url, `${h.nom} · Booking.com`));
+  (job.read || []).forEach(u => add(u, (job.titles && job.titles[u]) || ''));
+  return out.slice(0, 40);
+}
+const csvOf = rows => {
+  const cols = Object.keys(rows[0] || {});
+  const cell = v => { const x = String(v == null ? '' : v); return /[";\n]/.test(x) ? '"' + x.replace(/"/g, '""') + '"' : x; };
+  return '﻿' + [cols.join(';'), ...rows.map(r => cols.map(c => cell(r[c])).join(';'))].join('\n') + '\n';
+};
+function filesOf(d) {
+  if (d.status === 'err') return [];
+  const f = [{ key: d.id + ':doc', name: slug(d.title) + '.md', type: 'md', label: 'Document', make: () => `# ${d.title}\n\n${d.agent} · ${poleById(d.pole).full} · ${d.time}\n\n${d.content}\n` }];
+  (d.tables || []).forEach((tb, i) => f.push({ key: d.id + ':csv' + i, name: tb.name, type: 'csv', label: 'Tableau (Excel)', make: () => csvOf(tb.rows) }));
+  if (d.reply) f.push({ key: d.id + ':reply', name: 'brouillon-' + slug(d.mail ? d.mail.subject : d.title) + '.txt', type: 'txt', label: 'Brouillon de réponse', make: () => d.reply + '\n' });
+  return f.map(x => ({ ...x, d }));
+}
+const linksOf = d => d.status === 'err' ? [] : (d.links || buildLinks(d.content)).map(l => ({ ...l, d }));
+const FT = { md: ['DOC', '#2563eb'], csv: ['CSV', '#15803d'], txt: ['TXT', '#64748b'] };
+async function saveFile(name, text, onMsg) {
+  if (STORE.dl) { try { await STORE.dl.save({ filename: name, data: text }); onMsg && onMsg('Fichier enregistré.'); } catch (err) { onMsg && onMsg(err.code === 'declined' ? '' : 'Téléchargement impossible ici.'); } return; }
+  if (window.claude && window.claude.use) { onMsg && onMsg('Téléchargement indisponible dans cette vue.'); return; }
+  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([text], { type: name.endsWith('.csv') ? 'text/csv' : 'text/plain' })); a.download = name;
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 3000); onMsg && onMsg('Fichier enregistré.');
+}
+function markFilesSeen() {
+  HQ.deliverables.forEach(d => { if (!d.filesSeen) { d.filesSeen = true; save(d); } });
+  renderFiles();
+}
+let fKey = '';
+function renderFiles() {
+  const unseen = HQ.deliverables.filter(d => !d.filesSeen).reduce((n, d) => n + filesOf(d).length + linksOf(d).length, 0);
+  $('tabFiles').hidden = !unseen; $('tabFiles').textContent = unseen;
+  if ($('tab-files').hidden) return;
+  const q = $('fSearch').value.trim().toLowerCase();
+  const match = (...xs) => !q || xs.join(' ').toLowerCase().includes(q);
+  const files = HQ.deliverables.flatMap(filesOf).filter(f => match(f.name, f.d.title, f.d.agent, f.label));
+  const links = HQ.deliverables.flatMap(linksOf).filter(l => match(l.title, l.url, l.d.title, l.d.agent));
+  const key = q + '|' + files.map(f => f.key + (f.d.filesSeen ? 1 : 0)).join(',') + '|' + links.map(l => l.url).join(',');
+  if (key === fKey) return; fKey = key;
+  $('fCount').textContent = files.length ? `${files.length}` : '';
+  $('lCount').textContent = links.length ? `${links.length}` : '';
+  $('fFiles').innerHTML = files.length ? files.map(f => { const [lbl, col] = FT[f.type];
+    return `<li class="frow ${f.d.filesSeen ? '' : 'new'}"><span class="ic" style="background:${col}">${lbl}</span><span><b>${esc(f.name)}</b><small>${esc(f.label)} · ${esc(f.d.agent)} · ${esc(f.d.time)}</small></span>
+      <button type="button" data-file="${esc(f.key)}">Télécharger</button><button type="button" data-see="${esc(f.d.id)}">Voir</button></li>`; }).join('')
+    : `<li class="frow"><span><small>${q ? 'Aucun fichier ne correspond.' : 'Les fichiers que les agents t’envoient arrivent ici dès qu’un travail est terminé.'}</small></span></li>`;
+  $('fLinks').innerHTML = links.length ? links.slice(0, 120).map(l => `<li class="frow ${l.d.filesSeen ? '' : 'new'}"><span class="ic" style="background:${l.d.pole ? poleById(l.d.pole).color : '#64748b'}">URL</span>
+      <span><a href="${esc(l.url)}" target="_blank" rel="noopener noreferrer">${esc(l.title)}</a><small>${esc(host(l.url))} · ${esc(l.d.agent)} · ${esc(l.d.title)}</small></span>
+      <button type="button" data-copy="${esc(l.url)}">Copier</button></li>`).join('')
+    : `<li class="frow"><span><small>${q ? 'Aucun lien ne correspond.' : 'Les liens trouvés par les agents (sources, réservations…) arrivent ici.'}</small></span></li>`;
+}
+
 function researchJob(a, t) {
-  const job = { settled:false, ok:false, text:'', preview:'', trail:[] };
+  const job = { settled:false, ok:false, text:'', preview:'', trail:[], titles:{}, read:[], hotels:[] };
   const note = txt => { job.preview = txt; job.trail.push(txt); if (a.inside && Math.random() < .5) a.say(txt.slice(0, 60), 2.5); };
   (async () => {
     if (ENGINE.brain !== 'claude' || !ENGINE.web) throw { code:'no_web' };
@@ -1074,13 +1160,14 @@ function researchJob(a, t) {
           note('🔎 ' + q);
           const r = await ENGINE.mcp.callTool('Firecrawl', 'firecrawl_search', { query: q, limit: clamp(Number(inp.nombre) || 6, 3, 8), sources:['web'], domainTools:false, objective: t.title.slice(0, 900) }, { signal: ctx.signal });
           const web = (r.payload && r.payload.data && r.payload.data.web) || [];
+          web.forEach(w => { if (w.url && w.title) job.titles[w.url] = w.title; });
           return web.map(w => ({ titre: w.title, url: w.url, extrait: String(w.description || '').slice(0, 700) }));
         } },
       { name:'lire_page', description:'Lit le contenu d’une page web (texte, tronqué). Utilise-la sur les meilleurs résultats pour vérifier prix, dates, conditions et détails.',
         inputSchema:{ type:'object', properties:{ url:{ type:'string', description:'adresse complète https://…' } }, required:['url'] },
         execute: async (inp, ctx) => {
           const url = String(inp.url || ''); if (!/^https?:\/\//.test(url)) throw new Error('adresse invalide');
-          note('📄 ' + url.replace(/^https?:\/\/(www\.)?/, '').slice(0, 70));
+          note('📄 ' + url.replace(/^https?:\/\/(www\.)?/, '').slice(0, 70)); if (!job.read.includes(url)) job.read.push(url);
           const r = await ENGINE.mcp.callTool('Firecrawl', 'firecrawl_scrape', { url, formats:['markdown'], onlyMainContent:true, objective: t.title.slice(0, 900) }, { signal: ctx.signal });
           return String((r.payload && r.payload.markdown) || '').slice(0, 14000) || 'Page vide ou illisible.';
         } },
@@ -1094,7 +1181,11 @@ function researchJob(a, t) {
         if (inp.demande) input.user_query = String(inp.demande).slice(0, 2000);
         note('🏨 Booking.com : ' + input.destination);
         const r = await ENGINE.mcp.callTool('Booking.com', 'accommodations_search', input, { signal: ctx.signal });
-        return ((r.payload && r.payload.accommodations) || []).slice(0, 10).map(h => ({ nom: h.name, type: h.accommodationType,
+        const found = ((r.payload && r.payload.accommodations) || []).slice(0, 10);
+        found.forEach(h => { if (!job.hotels.some(x => x.url === h.url)) job.hotels.push({ nom: h.name, type: h.accommodationType || '', prix: h.price ? h.price.book : '', devise: h.price ? h.price.currency : '',
+          note: h.rating ? h.rating.review_score : '', avis: h.rating ? h.rating.number_of_reviews : '', etoiles: h.rating ? h.rating.stars : '',
+          quartier: h.location ? (h.location.district_name || h.location.city_name || '') : '', adresse: h.location ? h.location.address || '' : '', arrivee: input.checkin_date, depart: input.checkout_date, url: h.url }); });
+        return found.map(h => ({ nom: h.name, type: h.accommodationType,
           prix_du_sejour: h.price ? `${h.price.book} ${h.price.currency}` : null, note: h.rating ? h.rating.review_score : null, avis: h.rating ? h.rating.number_of_reviews : null,
           etoiles: h.rating ? h.rating.stars : null, quartier: h.location ? (h.location.district_name || h.location.city_name) : null, adresse: h.location ? h.location.address : null,
           lien: h.url, equipements: (h.facilities || []).slice(0, 8) }));
@@ -1590,26 +1681,36 @@ function renderRead() {
   el.innerHTML = `<h4>${esc(d.title)}</h4><div class="meta">${esc(d.agent)} · ${esc(poleById(d.pole).full)} · ${esc(d.time)}${d.requested ? ' · à ta demande' : ''}</div>
     <div class="cz-actions">
       <button class="btn ghost" data-act="copy">Copier</button>
-      ${canDl ? '<button class="btn ghost" data-act="dl">Télécharger (.md)</button>' : ''}
+
       ${agent && !agent.jarvis || agent && agent.jarvis ? `<button class="btn ghost" data-act="chat">Discuter avec ${esc(d.agent)}</button>` : ''}
       ${d.reply && !d.draftSaved && ENGINE.mail ? '<button class="btn" data-act="draft">Enregistrer le brouillon dans Gmail</button>' : ''}
       ${d.status === 'err' && d.spec ? '<button class="btn" data-act="retry">Relancer la tâche</button>' : ''}
       <span class="msg" id="czMsg">${d.draftSaved ? 'Brouillon enregistré dans Gmail. Rien n’a été envoyé.' : ''}</span>
     </div>
+    ${filesOf(d).length || linksOf(d).length ? `<div class="cz-attach">
+      ${filesOf(d).length ? '<h5>Fichiers envoyés</h5>' + filesOf(d).map(f => `<div class="frow"><span class="ic" style="background:${FT[f.type][1]}">${FT[f.type][0]}</span><span><b>${esc(f.name)}</b><small>${esc(f.label)}</small></span><button type="button" data-file="${esc(f.key)}">Télécharger</button></div>`).join('') : ''}
+      ${linksOf(d).length ? '<h5>Liens</h5>' + linksOf(d).slice(0, 12).map(l => `<div class="frow"><span><a href="${esc(l.url)}" target="_blank" rel="noopener noreferrer">${esc(l.title)}</a><small>${esc(host(l.url))}</small></span><button type="button" data-copy="${esc(l.url)}">Copier</button></div>`).join('') : ''}
+    </div>` : ''}
     <pre id="czText"></pre>`;
   $('czText').textContent = d.content;
 }
+async function fileOrCopyClick(e, onMsg) {
+  const fb = e.target.closest('[data-file]'), cb = e.target.closest('[data-copy]'), sb = e.target.closest('[data-see]');
+  if (fb) { const f = HQ.deliverables.flatMap(filesOf).find(x => x.key === fb.dataset.file); if (f) await saveFile(f.name, f.make(), onMsg); return true; }
+  if (cb) { try { await navigator.clipboard.writeText(cb.dataset.copy); cb.textContent = 'Copié ✓'; } catch (err) { cb.textContent = 'Copie impossible'; } setTimeout(() => { cb.textContent = 'Copier'; }, 1500); return true; }
+  if (sb) { openCasier(sb.dataset.see); return true; }
+  return false;
+}
+$('tab-files').addEventListener('click', e => { fileOrCopyClick(e, txt => { if (txt) log(AGENTS[0], txt); }); });
+$('fSearch').addEventListener('input', () => renderFiles());
 $('czRead').addEventListener('click', async e => {
+  if (await fileOrCopyClick(e, txt => { const m = $('czMsg'); if (m) m.textContent = txt; })) return;
   const b = e.target.closest('[data-act]'); if (!b) return;
   const d = HQ.deliverables.find(x => x.id === czSel); if (!d) return;
   const msg = txt => { const m = $('czMsg'); if (m) m.textContent = txt; };
   if (b.dataset.act === 'copy') {
     try { await navigator.clipboard.writeText(d.content); msg('Copié.'); }
     catch (err) { const r = document.createRange(); r.selectNodeContents($('czText')); getSelection().removeAllRanges(); getSelection().addRange(r); msg('Texte sélectionné : copie-le avec ton raccourci habituel.'); }
-  } else if (b.dataset.act === 'dl') {
-    const name = slug(d.title) + '.md', text = `# ${d.title}\n\n${d.agent} · ${poleById(d.pole).full} · ${d.time}\n\n${d.content}\n`;
-    if (STORE.dl) { try { await STORE.dl.save({ filename: name, data: text }); msg('Fichier enregistré.'); } catch (err) { msg(err.code === 'declined' ? '' : 'Téléchargement impossible ici.'); } }
-    else { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([text], { type:'text/markdown' })); a.download = name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 3000); msg('Fichier enregistré.'); }
   } else if (b.dataset.act === 'chat') {
     casier.close(); openChat(AGENTS.find(a => a.name === d.agent));
   } else if (b.dataset.act === 'draft') {
@@ -1736,7 +1837,7 @@ function renderUI() {
   $('clock').innerHTML = HQ.active || AGENTS.some(a => a.visible) ? `<b>${timeStr()}</b> · jour ${HQ.day}` : '<b>--:--</b> · veille';
   $('kDone').textContent = HQ.done; $('kRun').textContent = HQ.tasks.filter(t => t.status === 'encours').length;
   $('kMail').textContent = HQ.mailsDone; $('kDraft').textContent = HQ.drafts;
-  renderValidation();
+  renderValidation(); renderFiles();
   const unreadChats = Object.values(CHATS).reduce((n, c) => n + (c.unread || 0), 0);
   $('tabChat').hidden = !unreadChats; $('tabChat').textContent = unreadChats;
   renderTeam(); renderProfileLive();
@@ -1856,7 +1957,8 @@ canvas.addEventListener('click', e => { openProfile(agentAt(e)); });
 const TAB_KEY = 'jarvis-hq-onglet';
 function showTab(name) {
   [...$('tabs').children].forEach(b => b.setAttribute('aria-selected', b.dataset.tab === name));
-  ['valid', 'day', 'team', 'chat', 'log'].forEach(n => { $('tab-' + n).hidden = n !== name; });
+  ['valid', 'day', 'team', 'chat', 'files', 'log'].forEach(n => { $('tab-' + n).hidden = n !== name; });
+  if (name === 'files') markFilesSeen();
   try { localStorage.setItem(TAB_KEY, name); } catch (e) {}
 }
 $('tabs').onclick = e => { const b = e.target.closest('[data-tab]'); if (b) showTab(b.dataset.tab); };

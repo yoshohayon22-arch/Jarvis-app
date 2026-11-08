@@ -99,12 +99,11 @@ def revision():
 # ---------------------------------------------------------------------------
 
 HQ_POLES = {
-    "direction": "Tu es à la Direction du QG. Tu organises la journée et la semaine, tu fixes les priorités et tu fais le lien entre les pôles.",
-    "candidatures": "Tu es au Pôle Candidatures. Tu aides un jeune diplômé de la maturité fédérale, à Genève, à trouver un emploi d'étudiant à temps partiel : offres, CV, lettres de motivation, relances, entretiens.",
-    "admin": "Tu es au Pôle Administratif. Tu prépares les démarches administratives en Suisse (Genève) : état civil, attestations, pièces justificatives, courriers et relances aux services.",
-    "reseaux": "Tu es au Pôle Réseaux de MCI Sport, une agence de sport. LinkedIn d'abord, puis Instagram : posts, scripts de Reels, calendrier éditorial, analyse des statistiques.",
-    "mail": "Tu es au Pôle Boîte mail. Tu tries la boîte de réception, tu résumes les mails, tu repères ce qui est urgent et tu prépares des brouillons de réponse.",
-    "etudes": "Tu es au Pôle Études. Tu compares des écoles et universités (programmes, prix, admission, délais) et tu prépares des fiches de révision et des quiz.",
+    "dir": "Tu es à la Direction du QG, aux côtés de Jarvis. Tu organises la journée et la semaine, tu fixes les priorités et tu fais le lien entre les pôles.",
+    "edu": "Tu es au Pôle Produit Study Buddy. Tu fais avancer les applications de révision IA (Smart Study Buddy, Dossier Interactif, Study Companion, Repères Scolaires) : roadmap, textes, tests, retours des élèves.",
+    "soc": "Tu es au Pôle Réseaux & Contenu, notamment pour MCI Sport, une agence de sport. LinkedIn d'abord, puis Instagram : posts, scripts de Reels, calendrier éditorial, statistiques (Metricool, Typefully).",
+    "tech": "Tu es au Pôle Tech & Agents IA. Tu développes Jarvis (Flask, OpenAI), des agents vocaux ElevenLabs et des outils internes : specs, code, corrections, déploiements.",
+    "ops": "Tu es au Pôle Ops · Mail & Admin, à Genève. Tu tries la boîte mail, tu prépares des brouillons de réponse, tu gères les démarches administratives (état civil, pièces justificatives) et les candidatures à des emplois étudiants.",
 }
 
 
@@ -284,7 +283,7 @@ def hq_mail_process():
         body = _body_text(msg)[:6000]
 
         system = (
-            SYSTEM_PROMPT + " " + HQ_POLES["mail"]
+            SYSTEM_PROMPT + " " + HQ_POLES["ops"]
             + " Tu écris pour le compte de " + os.environ["GMAIL_ADDRESS"] + "."
             " Réponds uniquement en JSON avec les clés : resume (2-3 phrases), priorite (haute, moyenne ou basse),"
             " categorie (ex. administratif, emploi, études, MCI Sport, perso, pub/newsletter), action (ce que je dois faire),"

@@ -128,13 +128,57 @@
   .tag.err{color:var(--bad);background:color-mix(in srgb, var(--bad) 14%, transparent)}
   .seg.small button{padding:4px 10px;font-size:12px}
   dialog{background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:14px;width:min(680px,92vw);padding:0}
+  dialog.big{width:min(1040px,94vw);height:min(760px,90vh);display:flex;flex-direction:column;overflow:hidden}
+  dialog.big:not([open]){display:none}
+  .cz-head{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:14px 16px;border-bottom:1px solid var(--line)}
+  .cz-head h3{margin:0 auto 0 0;font:800 20px var(--display)}
+  .cz-head .who{display:flex;align-items:center;gap:10px;margin-right:auto;min-width:0}
+  .cz-head .who b{display:block;font:800 18px var(--display)}
+  .cz-head .who small{color:var(--muted)}
+  .cz-body{flex:1;min-height:0;display:grid;grid-template-columns:320px minmax(0,1fr)}
+  .cz-list{list-style:none;margin:0;padding:8px;overflow:auto;border-right:1px solid var(--line)}
+  .cz-list li{display:flex;gap:9px;align-items:flex-start;padding:9px 10px;border-radius:10px;cursor:pointer}
+  .cz-list li:hover,.cz-list li.sel{background:var(--surface2)}
+  .cz-list li i{width:8px;height:8px;border-radius:50%;flex:none;margin-top:6px;background:transparent}
+  .cz-list li.new i{background:var(--accent)}
+  .cz-list li span{flex:1;min-width:0;font-size:14px;line-height:1.35}
+  .cz-list li.new span b{font-weight:700}
+  .cz-list li span b{font-weight:500;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .cz-list li small{color:var(--muted);font-size:12px}
+  .cz-read{overflow:auto;padding:18px 22px;display:flex;flex-direction:column;gap:12px;min-width:0}
+  .cz-read h4{margin:0;font:800 22px/1.2 var(--display);text-wrap:balance}
+  .cz-read .meta{color:var(--muted);font-size:13px}
+  .cz-read pre{white-space:pre-wrap;margin:0;font:15px/1.65 var(--body);max-width:72ch}
+  .cz-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  .cz-actions .msg{font-size:13px;color:var(--muted)}
+  .inbox-btn{position:relative;border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:8px 14px;border-radius:999px;font:700 14px var(--body);cursor:pointer}
+  .inbox-btn b{position:absolute;top:-6px;right:-6px;min-width:20px;height:20px;padding:0 6px;border-radius:99px;background:var(--accent);color:var(--accent-ink);font:700 11.5px/20px var(--body);text-align:center}
+  .chat-log{flex:1;min-height:0;overflow:auto;padding:16px;display:flex;flex-direction:column;gap:10px;background:var(--bg)}
+  .bubble{max-width:min(620px,85%);padding:10px 13px;border-radius:14px;font-size:14.5px;line-height:1.5;white-space:pre-wrap;word-wrap:break-word}
+  .bubble.me{align-self:flex-end;background:var(--ink);color:var(--bg);border-bottom-right-radius:4px}
+  .bubble.agent{align-self:flex-start;background:var(--surface);border:1px solid var(--line);border-bottom-left-radius:4px}
+  .bubble.err{border-color:var(--bad);color:var(--bad)}
+  .bubble small{display:block;margin-top:4px;opacity:.6;font-size:11.5px}
+  .task-card{margin-top:8px;padding:8px 10px;border-radius:10px;background:var(--surface2);display:flex;gap:8px;align-items:center;font-size:13px;white-space:normal}
+  .task-card span{flex:1;min-width:0}
+  .task-card button,.open-deliv{background:transparent;border:1px solid var(--line);color:var(--ink);border-radius:99px;padding:4px 10px;font:600 12.5px var(--body);cursor:pointer}
+  .typing{align-self:flex-start;color:var(--muted);font-size:13px;padding:4px 6px}
+  .chat-form{display:flex;gap:8px;padding:12px 16px;border-top:1px solid var(--line);align-items:flex-end}
+  .chat-form textarea{flex:1;width:auto;min-width:0;min-height:44px;max-height:160px;resize:vertical}
+  .chips{display:flex;gap:6px;flex-wrap:wrap;padding:0 16px 10px}
+  .chips button{background:var(--surface2);border:1px solid var(--line);color:var(--ink);border-radius:99px;padding:4px 10px;font:500 12.5px var(--body);cursor:pointer}
+  .threads{display:flex;flex-direction:column;gap:4px;margin-top:10px}
+  .thread{display:flex;gap:9px;align-items:center;background:transparent;border:0;border-radius:10px;padding:7px 6px;color:var(--ink);cursor:pointer;text-align:left;font:14px var(--body);width:100%}
+  .thread:hover{background:var(--surface2)}
+  .thread .av{width:28px;height:28px;border-radius:50%;flex:none}
+  .thread span{flex:1;min-width:0}
+  .thread b{display:block;font-weight:700;font-size:13.5px}
+  .thread small{display:block;color:var(--muted);font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .thread em{font-style:normal;min-width:18px;height:18px;border-radius:99px;background:var(--accent);color:var(--accent-ink);font:700 11px/18px var(--body);text-align:center;padding:0 5px}
+  .pf-chat{width:100%}
+  #deliv li.new span{font-weight:700}
+  @media (max-width:760px){ .cz-body{grid-template-columns:1fr;grid-template-rows:minmax(140px,38%) 1fr} .cz-list{border-right:0;border-bottom:1px solid var(--line)} dialog.big{width:100vw;height:100dvh;max-width:100vw;max-height:100dvh;border-radius:0} }
   dialog::backdrop{background:rgba(0,0,0,.45)}
-  .dlg-h{padding:14px 16px;border-bottom:1px solid var(--line)}
-  .dlg-h b{display:block;font:700 18px var(--display)}
-  .dlg-h small{color:var(--muted)}
-  #dlgBody{white-space:pre-wrap;padding:14px 16px;max-height:60vh;overflow:auto;font:14px/1.6 var(--body);margin:0}
-  .dlg-f{display:flex;gap:8px;justify-content:flex-end;align-items:center;flex-wrap:wrap;padding:12px 16px;border-top:1px solid var(--line)}
-  .dlg-msg{margin-right:auto;font-size:13px;color:var(--muted)}
   .day-note{margin:0 0 10px;font-size:13.5px;line-height:1.5;color:var(--muted)}
   .day-note.brief{color:var(--ink)}
   .day-note.warn{color:var(--warn)}
@@ -159,6 +203,7 @@
   <div class="brand"><div class="dot"></div><div><h1>QG Jarvis</h1><small>L’open space de tes agents IA</small></div></div>
   <div class="clock" id="clock"><b>--:--</b> · veille</div>
   <div class="seg" id="speed"><button data-s="1" class="sel">×1</button><button data-s="2">×2</button><button data-s="4">×4</button></div>
+  <button class="inbox-btn" id="inboxBtn" type="button">Casier<b id="inboxCount" hidden>0</b></button>
   <button id="power">Activer le QG</button>
 </header>
 
@@ -187,12 +232,13 @@
     </div>
 
     <div class="card">
-      <h2>Confier une tâche</h2>
-      <form id="assign">
-        <select id="aPole" aria-label="Pôle"></select>
-        <textarea id="aTask" placeholder="Ex. : Écris le post LinkedIn sur le match de samedi" required></textarea>
-        <button class="btn" type="submit">Confier au pôle</button>
+      <h2>Demander à un agent</h2>
+      <form id="ask">
+        <select id="askAgent" aria-label="Agent"></select>
+        <textarea id="askText" placeholder="Ex. : Écris-moi le post LinkedIn sur le match de samedi" required></textarea>
+        <button class="btn" type="submit">Envoyer et discuter</button>
       </form>
+      <div class="threads" id="threads"></div>
     </div>
 
     <div class="card">
@@ -201,17 +247,26 @@
     </div>
 
     <div class="card">
-      <h2>Livrables <span class="seg small" id="dFilter"><button data-f="all" class="sel">Tous</button><button data-f="mail">Mails</button></span></h2>
+      <h2>Mon casier <em id="casierSum"></em></h2>
       <ul id="deliv"></ul>
+      <button class="btn ghost" id="casierOpen" type="button" style="width:100%;margin-top:8px">Ouvrir le casier</button>
     </div>
     <div class="card"><h2>Fil d’activité</h2><ul id="log"></ul></div>
   </aside>
 </main>
 
-<dialog id="dlg">
-  <div class="dlg-h"><b id="dlgTitle"></b><small id="dlgMeta"></small></div>
-  <pre id="dlgBody"></pre>
-  <div class="dlg-f"><span class="dlg-msg" id="dlgMsg"></span><button class="btn ghost" id="dlgRetry" hidden>Relancer la tâche</button><button class="btn ghost" id="dlgDraft" hidden>Enregistrer le brouillon dans Gmail</button><button class="btn ghost" id="dlgCopy">Copier</button><button class="btn" id="dlgClose">Fermer</button></div>
+<dialog id="casier" class="big" aria-label="Mon casier">
+  <div class="cz-head"><h3>Mon casier</h3>
+    <span class="seg small" id="czTabs"><button data-f="mine" class="sel">Mes demandes</button><button data-f="all">Tout</button><button data-f="mail">Mails</button></span>
+    <button class="pf-close" id="czClose" aria-label="Fermer le casier">×</button></div>
+  <div class="cz-body"><ul class="cz-list" id="czList"></ul><article class="cz-read" id="czRead"></article></div>
+</dialog>
+
+<dialog id="chat" class="big" aria-label="Discussion avec un agent">
+  <div class="cz-head" id="chatHead"></div>
+  <div class="chat-log" id="chatLog" aria-live="polite"></div>
+  <div class="chips" id="chatChips"></div>
+  <form class="chat-form" id="chatForm"><textarea id="chatText" rows="2" placeholder="Écris ton message… (Entrée pour envoyer)"></textarea><button class="btn" type="submit" id="chatSend">Envoyer</button></form>
 </dialog>
 
 <script>
@@ -779,9 +834,56 @@ function leave() {
 /* ======================================================================
    Livrables, IA et Gmail
    ====================================================================== */
-const LS_KEY = 'jarvis-hq-livrables';
-try { HQ.deliverables = JSON.parse(localStorage.getItem(LS_KEY) || '[]'); } catch (e) { HQ.deliverables = []; }
-const save = () => { try { localStorage.setItem(LS_KEY, JSON.stringify(HQ.deliverables.slice(0, 60))); } catch (e) {} };
+/* Casier et discussions : base privée claude.ai (data/users/<toi>/...) ou, en local, le navigateur */
+const LS_KEY = 'jarvis-hq-livrables', CHAT_KEY = 'jarvis-hq-discussions';
+const STORE = { db:null, uid:null, dl:null, err:null };
+const CHATS = {};
+try { HQ.deliverables = JSON.parse(localStorage.getItem(LS_KEY) || '[]').filter(d => d && d.id && typeof d.id === 'string'); } catch (e) { HQ.deliverables = []; }
+try { Object.assign(CHATS, JSON.parse(localStorage.getItem(CHAT_KEY) || '{}')); } catch (e) {}
+const newId = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+const slug = t => String(t).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 60) || 'livrable';
+const chains = {};
+function dbWrite(path, data) {
+  if (!STORE.db) return;
+  chains[path] = (chains[path] || Promise.resolve()).then(() => STORE.db.doc(path).set(data)).catch(e => { STORE.err = e.code; });
+}
+function save(d) {
+  try { localStorage.setItem(LS_KEY, JSON.stringify(HQ.deliverables.slice(0, 80))); } catch (e) {}
+  if (d) dbWrite(`data/users/${STORE.uid}/l_${d.id}`, JSON.parse(JSON.stringify({ ...d, kind:'livrable' })));
+}
+function saveChat(name) {
+  try { localStorage.setItem(CHAT_KEY, JSON.stringify(CHATS)); } catch (e) {}
+  const c = CHATS[name]; if (c) dbWrite(`data/users/${STORE.uid}/c_${slug(name)}`, JSON.parse(JSON.stringify({ ...c, kind:'chat', agent: name })));
+}
+function addDeliv(d) {
+  d.id = newId(); d.created = Date.now(); d.read = false;
+  HQ.deliverables.unshift(d); save(d); renderDeliv(); renderCasier();
+  return d;
+}
+async function initStore() {
+  if (!(window.claude && typeof window.claude.use === 'function')) return;
+  const [db, user, dl] = await Promise.all(['db', 'user', 'downloads'].map(n => claude.use(n).catch(() => null)));
+  STORE.dl = dl;
+  const uid = user ? await user.id() : null;
+  if (!db || !uid) return;
+  STORE.db = db; STORE.uid = uid;
+  // ce qui n'existait que dans ce navigateur part dans ta base privée
+  HQ.deliverables.forEach(d => save(d)); Object.keys(CHATS).forEach(saveChat);
+  db.collection('data/users/' + uid).onSnapshot(snap => {
+    snap.docs.forEach(doc => {
+      const v = doc.data(); if (!v) return;
+      if (v.kind === 'livrable' && v.id) {
+        const cur = HQ.deliverables.find(x => x.id === v.id);
+        if (cur) Object.assign(cur, v); else HQ.deliverables.push({ ...v });
+      } else if (v.kind === 'chat' && v.agent) {
+        const cur = CHATS[v.agent];
+        if (!cur || (v.updatedAt || 0) > (cur.updatedAt || 0)) CHATS[v.agent] = JSON.parse(JSON.stringify(v));
+      }
+    });
+    HQ.deliverables.sort((a, b) => (b.created || 0) - (a.created || 0));
+    renderDeliv(); renderCasier(); renderThreads(); if (chatAgent) renderChat();
+  }, e => { STORE.err = e.code; });
+}
 
 function highFive(a) {
   const mate = a.pole.members.filter(b => b !== a && b.inside && b.seated).sort((p, q) => Math.hypot(p.x - a.x, p.y - a.y) - Math.hypot(q.x - a.x, q.y - a.y))[0];
@@ -794,13 +896,14 @@ function completeTask(a) {
   a.task = null;
   if (t.noJob) { t.status = 'livre'; a.say('✅ Fait', 2); renderPlan(); return; }
   const job = t.job || { ok:false, error:{ code:'no_brain' } };
-  const spec = { title: t.title, steps: t.steps, brief: t.brief || '', mail: t.mail || null, agent: a.name };
+  const spec = { title: t.title, steps: t.steps, brief: t.brief || '', mail: t.mail || null, agent: a.name, requested: !!t.requested };
   if (!job.ok) {
     t.status = 'erreur'; a.say('⚠️ Bloqué : ' + errText(job.error), 3.5);
-    const d = { id: Date.now() + Math.random(), title: t.title, pole: p.id, agent: a.name, time: stamp(), status: 'err', spec, isMail: !!t.mail,
-      content: `Cette tâche n’a pas pu être réalisée.\n\n${errText(job.error)}\n\nTu peux la relancer depuis ce livrable.` };
-    HQ.deliverables.unshift(d); log(a, `${a.name} est bloqué sur : ${t.title}`);
-    save(); renderDeliv(); renderPlan(); return;
+    const d = addDeliv({ title: t.title, pole: p.id, agent: a.name, time: stamp(), status: 'err', spec, isMail: !!t.mail, requested: !!t.requested,
+      content: `Cette tâche n’a pas pu être réalisée.\n\n${errText(job.error)}\n\nTu peux la relancer depuis le casier.` });
+    log(a, `${a.name} est bloqué sur : ${t.title}`);
+    if (t.requested) agentSays(a, `Je suis bloqué sur « ${t.title} » : ${errText(job.error)} Tu peux la relancer depuis ton casier.`, { delivId: d.id });
+    renderPlan(); return;
   }
   t.status = 'livre';
   a.done++; p.done++; HQ.done++;
@@ -810,7 +913,7 @@ function completeTask(a) {
   if (t.mail) {
     const m = t.mail, r = job.analysis || {};
     HQ.mailsDone++;
-    d = { id: Date.now() + Math.random(), pole: p.id, agent: a.name, time: stamp(), status: 'ai', isMail: true, spec, mail: m,
+    d = { pole: p.id, agent: a.name, time: stamp(), status: 'ai', isMail: true, spec, mail: m,
       title: `${r.priorite === 'haute' ? '🔴' : r.priorite === 'moyenne' ? '🟠' : '⚪'} ${m.subject}`,
       reply: r.besoin_reponse && r.reponse ? String(r.reponse) : '',
       content: [`De : ${m.from_name} <${m.from}>`, `Objet : ${m.subject}`, '', `Priorité : ${r.priorite || '?'} · Catégorie : ${r.categorie || '?'}`, '',
@@ -818,11 +921,11 @@ function completeTask(a) {
         ...(r.besoin_reponse && r.reponse ? ['', 'Brouillon de réponse proposé (rien n’est envoyé) :', '', String(r.reponse)] : ['', 'Pas de réponse nécessaire.'])].join('\n') };
     log(a, `${a.name} a traité le mail « ${m.subject} »`, true);
   } else {
-    d = { id: Date.now() + Math.random(), title: t.title, pole: p.id, agent: a.name, time: stamp(), status: 'ai', spec, content: job.text };
+    d = { title: t.title, pole: p.id, agent: a.name, time: stamp(), status: 'ai', spec, content: job.text, requested: !!t.requested };
     log(a, `${a.name} a livré : ${t.title}`, true);
   }
-  HQ.deliverables.unshift(d);
-  save(); renderDeliv(); renderPlan();
+  addDeliv(d); renderPlan();
+  if (t.requested) agentSays(a, `C’est prêt : « ${t.title} ». Je l’ai déposé dans ton casier. Dis-moi si tu veux que je l’ajuste.`, { delivId: d.id });
 }
 const stamp = () => new Date().toLocaleString('fr-CH', { day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' });
 
@@ -861,11 +964,11 @@ const brainAsk = (prompt, opts = {}) => new Promise((resolve, reject) => { JOBQ.
 function pump() {
   while (jobsRunning < 2 && JOBQ.length) {
     const j = JOBQ.shift(); jobsRunning++;
-    runBrain(j.prompt, j.opts).then(j.resolve, e => {
-      if (e && ['not_granted', 'sampling_disabled', 'not_declared', 'capability_disabled', 'session_expired'].includes(e.code)) { ENGINE.blocked = e.code; ENGINE.brain = null; renderEngine(); }
-      j.reject(e);
-    }).finally(() => { jobsRunning--; pump(); });
+    runBrain(j.prompt, j.opts).then(j.resolve, e => { brainFailed(e); j.reject(e); }).finally(() => { jobsRunning--; pump(); });
   }
+}
+function brainFailed(e) {
+  if (e && ['not_granted', 'sampling_disabled', 'not_declared', 'capability_disabled', 'session_expired'].includes(e.code)) { ENGINE.blocked = e.code; ENGINE.brain = null; renderEngine(); renderPlan(); }
 }
 async function runBrain(prompt, { asJson = false, onText } = {}) {
   if (ENGINE.brain === 'claude') {
@@ -897,13 +1000,17 @@ function taskJob(a, t) {
 Nous sommes le ${todayLabel()}.
 ${CTX.calendar.length ? 'Agenda de Yosh pour les prochains jours :\n' + CTX.calendar.join('\n') + '\n' : ''}
 Ta tâche : ${t.title}
-${t.brief ? 'Précisions de Jarvis : ' + t.brief + '\n' : ''}
+${t.brief ? (t.requested ? 'Ce que Yosh t’a demandé : ' : 'Précisions de Jarvis : ') + t.brief + '\n' : ''}${t.requested ? recentWork(a) : ''}
 Réalise cette tâche maintenant et rends directement le livrable final, prêt à être utilisé par Yosh : un texte, un brouillon, un plan, une liste ou un script selon la tâche.
 Règles : en français ; texte simple avec des titres courts et des listes à tirets (pas de tableau) ; 350 mots au maximum ; n’invente aucun fait sur Yosh, ses clients ou ses chiffres : écris [à compléter] quand une information te manque ; commence directement par le livrable, sans phrase d’introduction.`;
   brainAsk(prompt, { onText: txt => { job.preview = txt; } })
     .then(text => { job.ok = true; job.text = text; }, e => { job.error = e; })
     .finally(() => { job.settled = true; });
   return job;
+}
+function recentWork(a) {
+  const mine = HQ.deliverables.filter(d => d.agent === a.name && d.status === 'ai' && !d.isMail).slice(0, 2);
+  return mine.length ? '\nTes derniers livrables pour Yosh (à reprendre si sa demande s’y rapporte) :\n' + mine.map(d => `« ${d.title} » :\n${String(d.content).slice(0, 2500)}`).join('\n\n') + '\n' : '';
 }
 function mailJob(a, t) {
   const job = { settled:false, ok:false, analysis:null, preview:'' };
@@ -1054,15 +1161,14 @@ Réponds uniquement avec un objet JSON :
     items.forEach(x => {
       const a = AGENTS.find(y => y.name.toLowerCase() === String(x.agent || '').toLowerCase() && !y.jarvis);
       const title = String(x.titre || '').trim(); if (!title) return;
-      const t = { title, brief: String(x.precisions || ''), steps: KIND_STEPS[x.type] || guessSteps(title), custom: true, status: 'attente' };
+      const t = { id: newId(), title, brief: String(x.precisions || ''), steps: KIND_STEPS[x.type] || guessSteps(title), custom: true, status: 'attente' };
       (a ? a.custom : poleById('edu').custom).push(t); HQ.tasks.push(t);
     });
     const tour = { title: 'Faire le tour des équipes', steps: ['tour'], noJob: true, status: 'attente' };
     jarvis.custom.push(tour); HQ.tasks.push(tour);
     HQ.plannedOn = new Date().toDateString();
-    HQ.deliverables.unshift({ id: Date.now(), title: 'Brief du jour', pole: 'dir', agent: 'Jarvis', time: stamp(), status: 'ai', spec: null,
+    addDeliv({ title: 'Brief du jour', pole: 'dir', agent: 'Jarvis', time: stamp(), status: 'ai', spec: null,
       content: `${HQ.brief}\n\nPlan de la journée :\n${items.map(x => `- ${x.agent} : ${x.titre}`).join('\n')}` });
-    save(); renderDeliv();
     log(jarvis, `Jarvis a planifié ${items.length} tâches pour aujourd’hui`, true);
     jarvis.say(`📋 ${items.length} tâches au programme !`, 3.5);
   } catch (e) {
@@ -1273,47 +1379,185 @@ function log(a, text, done) {
 }
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' })[c]);
 
-let delivFilter = 'all';
+/* ---------- Mon casier ---------- */
+const casier = $('casier');
+let czFilter = 'mine', czSel = null;
+const TAGS = { ai:['livré','ai'], err:['bloqué','err'] };
 function renderDeliv() {
-  const list = HQ.deliverables.map((d, i) => [d, i]).filter(([d]) => delivFilter === 'all' || d.isMail || d.status === 'mail').slice(0, 40);
-  if (!list.length) { delivEl.innerHTML = `<li class="empty" style="cursor:default">${delivFilter === 'all' ? 'Les documents produits par les agents arrivent ici.' : 'Aucun mail traité pour l’instant.'}</li>`; return; }
-  const TAG = { run:['en cours','run'], ai:['livré','ai'], err:['bloqué','err'] };
-  delivEl.innerHTML = list.map(([d, i]) => { const [t, c] = d.draftSaved ? ['brouillon Gmail','ai'] : (TAG[d.status] || TAG.ai); return `<li data-i="${i}"><i style="background:${poleById(d.pole).color}"></i><span>${esc(d.title)}</span><em class="tag ${c}">${t}</em></li>`; }).join('');
+  const unread = HQ.deliverables.filter(d => !d.read).length;
+  $('inboxCount').hidden = !unread; $('inboxCount').textContent = unread;
+  $('casierSum').textContent = HQ.deliverables.length ? `${HQ.deliverables.length} élément${HQ.deliverables.length > 1 ? 's' : ''}${unread ? ' · ' + unread + ' nouveau' + (unread > 1 ? 'x' : '') : ''}` : '';
+  const list = HQ.deliverables.slice(0, 5);
+  delivEl.innerHTML = list.length ? list.map(d => { const [t, c] = d.draftSaved ? ['brouillon Gmail','ai'] : (TAGS[d.status] || TAGS.ai);
+    return `<li data-id="${esc(d.id)}" class="${d.read ? '' : 'new'}"><i style="background:${poleById(d.pole).color}"></i><span>${esc(d.title)}</span><em class="tag ${c}">${d.read ? t : 'nouveau'}</em></li>`; }).join('')
+    : '<li class="empty" style="cursor:default">Tout ce que les agents créent pour toi arrive ici.</li>';
 }
-delivEl.addEventListener('click', e => {
-  const li = e.target.closest('li[data-i]'); if (!li) return; const d = HQ.deliverables[+li.dataset.i];
-  openDeliv(d);
+delivEl.addEventListener('click', e => { const li = e.target.closest('li[data-id]'); if (li) openCasier(li.dataset.id); });
+$('casierOpen').onclick = () => openCasier();
+$('inboxBtn').onclick = () => openCasier();
+$('czClose').onclick = () => casier.close();
+$('czTabs').onclick = e => { const b = e.target.closest('button'); if (!b) return; czFilter = b.dataset.f; [...$('czTabs').children].forEach(x => x.classList.toggle('sel', x === b)); czSel = null; renderCasier(); };
+function openCasier(id) {
+  if (id) { const d = HQ.deliverables.find(x => x.id === id); if (d) { czFilter = d.requested ? 'mine' : d.isMail ? 'mail' : 'all'; czSel = id; } }
+  [...$('czTabs').children].forEach(x => x.classList.toggle('sel', x.dataset.f === czFilter));
+  if (!casier.open) casier.showModal();
+  renderCasier();
+}
+const czItems = () => HQ.deliverables.filter(d => czFilter === 'all' || (czFilter === 'mail' ? d.isMail : d.requested));
+function renderCasier() {
+  if (!casier.open) return;
+  const items = czItems();
+  if (czSel && !items.find(d => d.id === czSel)) czSel = null;
+  if (!czSel && items.length && innerWidth > 760) czSel = items[0].id;
+  $('czList').innerHTML = items.length ? items.map(d => `<li data-id="${esc(d.id)}" class="${d.read ? '' : 'new'} ${d.id === czSel ? 'sel' : ''}"><i></i><span><b>${esc(d.title)}</b><small>${esc(d.agent)} · ${esc(d.time)}${d.status === 'err' ? ' · bloqué' : d.draftSaved ? ' · brouillon Gmail' : ''}</small></span></li>`).join('')
+    : `<li style="cursor:default"><span><small>${czFilter === 'mine' ? 'Rien pour l’instant. Demande quelque chose à un agent : le résultat arrivera ici.' : czFilter === 'mail' ? 'Aucun mail traité pour l’instant.' : 'Le casier est vide.'}</small></span></li>`;
+  renderRead();
+}
+$('czList').addEventListener('click', e => { const li = e.target.closest('li[data-id]'); if (!li) return; czSel = li.dataset.id; renderCasier(); });
+function renderRead() {
+  const d = HQ.deliverables.find(x => x.id === czSel), el = $('czRead');
+  if (!d) { el.innerHTML = '<p class="meta">Choisis un élément à gauche pour le lire.</p>'; return; }
+  if (!d.read) { d.read = true; save(d); renderDeliv(); setTimeout(() => { const li = $('czList').querySelector(`li[data-id="${CSS.escape(d.id)}"]`); li && li.classList.remove('new'); }); }
+  const canDl = !!STORE.dl || !(window.claude && window.claude.use);
+  const agent = AGENTS.find(a => a.name === d.agent);
+  el.innerHTML = `<h4>${esc(d.title)}</h4><div class="meta">${esc(d.agent)} · ${esc(poleById(d.pole).full)} · ${esc(d.time)}${d.requested ? ' · à ta demande' : ''}</div>
+    <div class="cz-actions">
+      <button class="btn ghost" data-act="copy">Copier</button>
+      ${canDl ? '<button class="btn ghost" data-act="dl">Télécharger (.md)</button>' : ''}
+      ${agent && !agent.jarvis || agent && agent.jarvis ? `<button class="btn ghost" data-act="chat">Discuter avec ${esc(d.agent)}</button>` : ''}
+      ${d.reply && !d.draftSaved && ENGINE.mail ? '<button class="btn" data-act="draft">Enregistrer le brouillon dans Gmail</button>' : ''}
+      ${d.status === 'err' && d.spec ? '<button class="btn" data-act="retry">Relancer la tâche</button>' : ''}
+      <span class="msg" id="czMsg">${d.draftSaved ? 'Brouillon enregistré dans Gmail. Rien n’a été envoyé.' : ''}</span>
+    </div>
+    <pre id="czText"></pre>`;
+  $('czText').textContent = d.content;
+}
+$('czRead').addEventListener('click', async e => {
+  const b = e.target.closest('[data-act]'); if (!b) return;
+  const d = HQ.deliverables.find(x => x.id === czSel); if (!d) return;
+  const msg = txt => { const m = $('czMsg'); if (m) m.textContent = txt; };
+  if (b.dataset.act === 'copy') {
+    try { await navigator.clipboard.writeText(d.content); msg('Copié.'); }
+    catch (err) { const r = document.createRange(); r.selectNodeContents($('czText')); getSelection().removeAllRanges(); getSelection().addRange(r); msg('Texte sélectionné : copie-le avec ton raccourci habituel.'); }
+  } else if (b.dataset.act === 'dl') {
+    const name = slug(d.title) + '.md', text = `# ${d.title}\n\n${d.agent} · ${poleById(d.pole).full} · ${d.time}\n\n${d.content}\n`;
+    if (STORE.dl) { try { await STORE.dl.save({ filename: name, data: text }); msg('Fichier enregistré.'); } catch (err) { msg(err.code === 'declined' ? '' : 'Téléchargement impossible ici.'); } }
+    else { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([text], { type:'text/markdown' })); a.download = name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 3000); msg('Fichier enregistré.'); }
+  } else if (b.dataset.act === 'chat') {
+    casier.close(); openChat(AGENTS.find(a => a.name === d.agent));
+  } else if (b.dataset.act === 'draft') {
+    b.disabled = true; msg('Enregistrement dans Gmail…');
+    try { await saveDraft(d.mail, d.reply); d.draftSaved = true; HQ.drafts++; save(d); renderDeliv(); log(AGENTS.find(a => a.name === d.agent) || AGENTS[0], `Brouillon enregistré dans Gmail pour « ${d.mail.subject} »`, true); renderCasier(); }
+    catch (err) { msg(errText(err)); b.disabled = false; }
+  } else if (b.dataset.act === 'retry') {
+    const a = AGENTS.find(x => x.name === d.spec.agent) || AGENTS[0];
+    const t = { id: newId(), title: d.spec.title, steps: d.spec.steps, brief: d.spec.brief, mail: d.spec.mail, requested: d.spec.requested, custom: true, status: 'attente' };
+    a.custom.push(t); HQ.tasks.push(t);
+    HQ.deliverables.splice(HQ.deliverables.indexOf(d), 1); save(); if (STORE.db) STORE.db.doc(`data/users/${STORE.uid}/l_${d.id}`).delete().catch(() => {});
+    renderDeliv(); renderPlan(); log(a, `Tâche relancée : ${t.title}`); czSel = null; renderCasier();
+    setActive(true, { plan: false });
+  }
 });
-let dlgItem = null;
-function openDeliv(d) {
-  dlgItem = d;
-  $('dlgTitle').textContent = d.title; $('dlgMeta').textContent = `${d.agent} · ${poleById(d.pole).full} · ${d.time}`; $('dlgBody').textContent = d.content;
-  $('dlgMsg').textContent = d.draftSaved ? 'Brouillon enregistré dans Gmail. Rien n’a été envoyé.' : '';
-  $('dlgDraft').hidden = !(d.reply && !d.draftSaved && ENGINE.mail);
-  $('dlgRetry').hidden = !(d.status === 'err' && d.spec);
-  if (!$('dlg').open) $('dlg').showModal();
+
+/* ---------- Discussions avec les agents ---------- */
+const chatDlg = $('chat');
+let chatAgent = null, chatBusy = false;
+const chatOf = a => CHATS[a.name] || (CHATS[a.name] = { messages: [], unread: 0, updatedAt: 0 });
+function agentSays(a, text, extra = {}) {
+  const c = chatOf(a);
+  c.messages.push({ role:'agent', text, at: Date.now(), ...extra }); c.messages = c.messages.slice(-60);
+  c.updatedAt = Date.now(); if (chatAgent !== a || !chatDlg.open) c.unread = (c.unread || 0) + 1;
+  saveChat(a.name); renderThreads(); if (chatAgent === a) renderChat();
 }
-$('dlgDraft').onclick = async () => {
-  const d = dlgItem; if (!d || !d.mail || !d.reply) return;
-  const b = $('dlgDraft'); b.disabled = true; $('dlgMsg').textContent = 'Enregistrement dans Gmail…';
-  try { await saveDraft(d.mail, d.reply); d.draftSaved = true; HQ.drafts++; save(); renderDeliv(); log(AGENTS.find(a => a.name === d.agent) || AGENTS[0], `Brouillon enregistré dans Gmail pour « ${d.mail.subject} »`, true); }
-  catch (e) { $('dlgMsg').textContent = errText(e); b.disabled = false; return; }
-  b.disabled = false; openDeliv(d);
+function openChat(a) {
+  if (!a || a.courier) return;
+  chatAgent = a; const c = chatOf(a);
+  if (c.unread) { c.unread = 0; saveChat(a.name); }
+  if (!chatDlg.open) chatDlg.showModal();
+  renderChat(); renderThreads();
+  setTimeout(() => $('chatText').focus(), 50);
+}
+chatDlg.addEventListener('close', () => { chatAgent = null; renderThreads(); });
+const timeOf = at => at ? new Date(at).toLocaleString('fr-CH', { day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' }) : '';
+const TSTATUS = { attente:'en attente', encours:'en cours', livre:'livrée', erreur:'bloquée' };
+function renderChat() {
+  const a = chatAgent; if (!a) return;
+  const c = chatOf(a), [st, col] = STATE(a);
+  $('chatHead').innerHTML = `<div class="who"><span class="pf-av" style="--pc:${a.pole.color};width:40px;height:40px;background:${avatarBg(a)}"></span><div><b>${esc(a.name)}</b><small>${esc(a.role)} · ${esc(a.pole.full)} · <span style="color:${col}">${esc(st)}</span></small></div></div>
+    <button class="btn ghost" id="chatProfile" type="button">Voir sa fiche</button><button class="pf-close" id="chatClose" aria-label="Fermer la discussion">×</button>`;
+  $('chatClose').onclick = () => chatDlg.close();
+  $('chatProfile').onclick = () => { chatDlg.close(); openProfile(a); };
+  const log = $('chatLog');
+  const intro = `<div class="bubble agent">Salut Yosh, c’est ${esc(a.name)}. ${esc(a.mission || '')}\nDis-moi ce dont tu as besoin : si c’est clair, je m’en occupe et le résultat arrive dans ton casier.</div>`;
+  log.innerHTML = intro + c.messages.map(m => {
+    const task = m.taskId ? HQ.tasks.find(t => t.id === m.taskId) : null;
+    const tcard = m.taskTitle ? `<div class="task-card"><span>📌 Tâche : ${esc(m.taskTitle)}</span><em class="st ${task ? task.status : ''}">${task ? TSTATUS[task.status] : 'envoyée'}</em></div>` : '';
+    const dcard = m.delivId && HQ.deliverables.find(d => d.id === m.delivId) ? `<div class="task-card"><span>📥 Dans ton casier</span><button type="button" data-open="${esc(m.delivId)}">Ouvrir</button></div>` : '';
+    return `<div class="bubble ${m.role === 'user' ? 'me' : 'agent'} ${m.error ? 'err' : ''}">${esc(m.text)}${tcard}${dcard}<small>${timeOf(m.at)}</small></div>`;
+  }).join('') + (chatBusy ? `<div class="typing">${esc(a.name)} écrit…</div>` : '');
+  log.scrollTop = log.scrollHeight;
+  $('chatSend').disabled = chatBusy;
+  $('chatChips').innerHTML = c.messages.length ? '' : (a.resp || []).slice(0, 3).map(r => `<button type="button" data-chip="${esc(r)}">${esc(r)}</button>`).join('');
+}
+$('chatLog').addEventListener('click', e => { const b = e.target.closest('[data-open]'); if (b) { chatDlg.close(); openCasier(b.dataset.open); } });
+$('chatChips').addEventListener('click', e => { const b = e.target.closest('[data-chip]'); if (b) { $('chatText').value = 'Peux-tu t’occuper de ceci : ' + b.dataset.chip.toLowerCase() + ' ?'; $('chatText').focus(); } });
+$('chatText').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); $('chatForm').requestSubmit(); } });
+$('chatForm').onsubmit = e => { e.preventDefault(); const txt = $('chatText').value.trim(); if (!txt || chatBusy || !chatAgent) return; $('chatText').value = ''; sendChat(chatAgent, txt); };
+
+function chatPrompt(a, c) {
+  const mine = HQ.tasks.filter(t => (t.agent === a.name || a.custom.includes(t)) && (t.status === 'attente' || t.status === 'encours'));
+  const convo = c.messages.slice(-16).map(m => (m.role === 'user' ? 'Yosh : ' : a.name + ' : ') + m.text + (m.taskTitle ? ` [tâche créée : ${m.taskTitle}]` : '')).join('\n');
+  return `${persona(a)}
+
+Nous sommes le ${todayLabel()}.
+${recentWork(a)}
+Tes tâches en cours ou en attente : ${mine.length ? mine.map(t => '« ' + t.title + ' » (' + TSTATUS[t.status] + ')').join(', ') : 'aucune'}.
+
+Conversation avec Yosh (le dernier message est le sien) :
+${convo}
+
+Réponds à Yosh en tant que ${a.name}, en français, naturellement et brièvement (2 à 6 phrases), dans ton rôle.
+- S’il te demande de produire, refaire ou modifier quelque chose et que c’est assez clair, crée une tâche : tu la réaliseras ensuite et le résultat arrivera dans son casier. Dis-lui ce que tu vas livrer.
+- Si la demande est floue, pose une ou deux questions précises au lieu de créer une tâche.
+- S’il veut juste discuter ou une information rapide, réponds sans créer de tâche.
+- N’invente aucun fait sur Yosh.
+Réponds uniquement avec un objet JSON : {"reponse":"…","tache":null} ou {"reponse":"…","tache":{"titre":"…","precisions":"tout ce que Yosh a demandé, en détail","type":"redaction|recherche|appel|impression|reunion"}}`;
+}
+async function sendChat(a, text) {
+  const c = chatOf(a);
+  c.messages.push({ role:'user', text, at: Date.now() }); c.messages = c.messages.slice(-60); c.updatedAt = Date.now(); saveChat(a.name);
+  if (!ENGINE.brain) { agentSays(a, ENGINE.blocked ? errText({ code: ENGINE.blocked }) : 'Je ne peux pas te répondre : aucune IA n’est connectée. Ouvre le QG depuis claude.ai, ou lance server.py avec ta clé.', { error: true }); return; }
+  chatBusy = true; renderChat();
+  try {
+    const res = await runBrain(chatPrompt(a, c), { asJson: true });
+    const extra = {};
+    const x = res && res.tache;
+    if (x && String(x.titre || '').trim()) {
+      const t = { id: newId(), title: String(x.titre).trim(), brief: String(x.precisions || text), steps: KIND_STEPS[x.type] || guessSteps(String(x.titre)), custom: true, status: 'attente', requested: true };
+      a.custom.push(t); HQ.tasks.push(t); extra.taskId = t.id; extra.taskTitle = t.title;
+      log(a, `Nouvelle demande pour ${a.name} : ${t.title}`); if (a.inside) a.say('📥 Noté, je m’y mets !', 3);
+      setActive(true, { plan: false }); renderPlan();
+    }
+    chatBusy = false;
+    agentSays(a, String((res && res.reponse) || 'D’accord.').trim(), extra);
+  } catch (e) {
+    brainFailed(e); chatBusy = false;
+    agentSays(a, 'Je n’ai pas pu te répondre : ' + errText(e), { error: true });
+  }
+}
+
+function renderThreads() {
+  const list = Object.entries(CHATS).filter(([, c]) => c.messages && c.messages.length).sort((x, y) => (y[1].updatedAt || 0) - (x[1].updatedAt || 0)).slice(0, 6);
+  $('threads').innerHTML = list.map(([name, c]) => { const a = AGENTS.find(x => x.name === name); if (!a) return ''; const last = c.messages[c.messages.length - 1];
+    return `<button class="thread" type="button" data-agent="${esc(name)}"><span class="av" style="background:${avatarBg(a)}"></span><span><b>${esc(name)}</b><small>${last.role === 'user' ? 'Toi : ' : ''}${esc(last.text)}</small></span>${c.unread ? `<em>${c.unread}</em>` : ''}</button>`; }).join('');
+}
+$('threads').addEventListener('click', e => { const b = e.target.closest('[data-agent]'); if (b) openChat(AGENTS.find(a => a.name === b.dataset.agent)); });
+$('askAgent').innerHTML = POLES.map(p => `<optgroup label="${esc(p.full)}">${p.members.map(a => `<option value="${esc(a.name)}">${esc(a.name)} · ${esc(a.role)}</option>`).join('')}</optgroup>`).join('');
+$('ask').onsubmit = e => {
+  e.preventDefault(); const txt = $('askText').value.trim(); if (!txt) return;
+  const a = AGENTS.find(x => x.name === $('askAgent').value); $('askText').value = '';
+  openChat(a); sendChat(a, txt);
 };
-$('dlgRetry').onclick = () => {
-  const d = dlgItem; if (!d || !d.spec) return;
-  const a = AGENTS.find(x => x.name === d.spec.agent) || AGENTS[0];
-  const t = { title: d.spec.title, steps: d.spec.steps, brief: d.spec.brief, mail: d.spec.mail, custom: true, status: 'attente' };
-  a.custom.push(t); HQ.tasks.push(t);
-  HQ.deliverables.splice(HQ.deliverables.indexOf(d), 1); save(); renderDeliv(); renderPlan();
-  log(a, `Tâche relancée : ${t.title}`); $('dlg').close();
-  if (!HQ.active) $('power').click();
-};
-$('dFilter').onclick = e => { const b = e.target.closest('button'); if (!b) return; delivFilter = b.dataset.f; [...$('dFilter').children].forEach(x => x.classList.toggle('sel', x === b)); renderDeliv(); };
-$('dlgClose').onclick = () => $('dlg').close();
-$('dlgCopy').onclick = () => { const t = $('dlgBody').textContent; const ok = () => { $('dlgCopy').textContent = 'Copié ✓'; setTimeout(() => $('dlgCopy').textContent = 'Copier', 1500); };
-  const sel = () => { const r = document.createRange(); r.selectNodeContents($('dlgBody')); getSelection().removeAllRanges(); getSelection().addRange(r); };
-  if (navigator.clipboard) navigator.clipboard.writeText(t).then(ok, sel); else sel(); };
 
 function renderUI() {
   $('clock').innerHTML = HQ.active || AGENTS.some(a => a.visible) ? `<b>${timeStr()}</b> · jour ${HQ.day}` : '<b>--:--</b> · veille';
@@ -1355,7 +1599,7 @@ function renderPlan() {
   $('plan').innerHTML = items.slice(0, 14).map(t => `<li><i style="background:${color(t)}"></i><span>${esc(t.title)}<small>${esc(who(t))}</small></span><em class="st ${t.status}">${LBL[t.status]}</em></li>`).join('')
     + (items.length > 14 ? `<li><span><small>et ${items.length - 14} autres</small></span></li>` : '');
 }
-$('planBtn').onclick = () => { if (!HQ.active) $('power').click(); else planDay(); };
+$('planBtn').onclick = () => { if (!HQ.active) setActive(true); else planDay(); };
 
 /* ---------- L'équipe et les fiches profil ---------- */
 const avatarBg = a => `radial-gradient(circle at 50% 40%, ${a.skin} 0 36%, ${a.hair} 37% 50%, ${a.courier ? a.shirt : a.pole.color} 51%)`;
@@ -1397,18 +1641,10 @@ function openProfile(a) {
     ${a.tools && a.tools.length ? `<div class="pf-sec"><h4>Outils</h4>${list(a.tools)}</div>` : ''}
     <div class="pf-sec"><h4>Sa manie</h4><p>${esc(a.habit || '')}</p></div>
     ${a.courier ? '' : `<div class="pf-sec"><h4>Aujourd’hui</h4><div class="pf-stats" id="pfStats"></div><ul class="pf-hist" id="pfHist"></ul></div>
-    <form class="pf-form" id="pfForm"><input id="pfTask" placeholder="Lui confier une tâche…" aria-label="Tâche à confier à ${esc(a.name)}"><button class="btn" type="submit">Confier</button></form>`}`;
+    <button class="btn pf-chat" id="pfChat" type="button">💬 Discuter avec ${esc(a.name)} ou lui demander une tâche</button>`}`;
   pf.hidden = false;
   $('pfClose').onclick = () => openProfile(null);
-  const form = $('pfForm');
-  if (form) form.onsubmit = e => {
-    e.preventDefault(); const text = $('pfTask').value.trim(); if (!text) return;
-    const t = { title: text, steps: guessSteps(text), custom: true, status: 'attente' }; a.custom.push(t); HQ.tasks.push(t); $('pfTask').value = ''; renderPlan();
-    log(a, `Nouvelle tâche confiée à ${a.name} : ${text}`);
-    if (a.inside) a.say('📥 Bien reçu, je m’en occupe !', 3);
-    if (!HQ.active) $('power').click();
-    renderProfileLive();
-  };
+  if ($('pfChat')) $('pfChat').onclick = () => openChat(a);
   renderTeam(); renderProfileLive();
   if (matchMedia('(max-width:760px)').matches) pf.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
@@ -1429,7 +1665,7 @@ function renderProfileLive() {
   $('pfNow').innerHTML = now;
   if ($('pfStats')) { $('pfStats').innerHTML = stats; $('pfHist').innerHTML = hist; }
 }
-addEventListener('keydown', e => { if (e.key === 'Escape' && HQ.selected) openProfile(null); });
+addEventListener('keydown', e => { if (e.key === 'Escape' && HQ.selected && !casier.open && !chatDlg.open) openProfile(null); });
 
 function agentAt(ev) {
   const r = canvas.getBoundingClientRect(), x = (ev.clientX - r.left) / cssScale, y = (ev.clientY - r.top) / cssScale;
@@ -1441,30 +1677,21 @@ canvas.addEventListener('mousemove', e => { HQ.hover = agentAt(e); canvas.style.
 canvas.addEventListener('mouseleave', () => HQ.hover = null);
 canvas.addEventListener('click', e => { openProfile(agentAt(e)); });
 
-$('power').onclick = () => {
-  HQ.active = !HQ.active; document.body.classList.toggle('on', HQ.active);
-  $('power').textContent = HQ.active ? 'Mettre en veille' : 'Activer le QG';
-  if (HQ.active) {
+function setActive(on, { plan = true } = {}) {
+  if (on === HQ.active) return;
+  HQ.active = on; document.body.classList.toggle('on', on);
+  $('power').textContent = on ? 'Mettre en veille' : 'Activer le QG';
+  if (on) {
     if (HQ.minutes > MIN(18)) HQ.minutes = MIN(9);
     arrive(); startMailWatch();
-    if (HQ.plannedOn !== new Date().toDateString()) planDay();
+    if (plan && HQ.plannedOn !== new Date().toDateString()) planDay();
   } else leave();
-};
+}
+$('power').onclick = () => setActive(!HQ.active);
 $('speed').onclick = e => { const b = e.target.closest('button'); if (!b) return; HQ.speed = +b.dataset.s; [...$('speed').children].forEach(x => x.classList.toggle('sel', x === b)); };
 
-$('aPole').innerHTML = POLES.map(p => `<option value="${p.id}">${esc(p.full)}</option>`).join('');
-$('assign').onsubmit = e => {
-  e.preventDefault();
-  const p = poleById($('aPole').value), text = $('aTask').value.trim(); if (!text) return;
-  const t = { title: text, steps: guessSteps(text), custom: true, status: 'attente' }; p.custom.push(t); HQ.tasks.push(t);
-  $('aTask').value = ''; renderPlan();
-  const lead = p.members[0]; log(lead, `Nouvelle tâche confiée à ${p.full} : ${text}`);
-  if (lead.inside) lead.say('📥 Bien reçu, on s’en occupe !', 3);
-  if (!HQ.active) $('power').click();
-};
-
-initEngine();
-renderDeliv(); renderUI();
+initEngine(); initStore();
+renderDeliv(); renderThreads(); renderUI();
 requestAnimationFrame(frame);
 window.HQ = HQ; window.AGENTS = AGENTS; window.AMEN = AMEN;
 })();

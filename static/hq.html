@@ -53,7 +53,7 @@
   .flist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
   .frow{display:flex;gap:10px;align-items:center;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
   .frow.new{border-color:var(--accent)}
-  .frow .ic{width:34px;height:34px;border-radius:8px;flex:none;display:grid;place-items:center;font:800 10.5px var(--body);letter-spacing:.04em;color:#fff}
+  .frow .ic{width:40px;height:34px;border-radius:8px;flex:none;display:grid;place-items:center;font:800 9.5px var(--body);letter-spacing:.04em;color:#fff}
   .frow span{flex:1;min-width:0;font-size:13.5px;line-height:1.35}
   .frow span b{display:block;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .frow span a{display:block;font-weight:600;color:var(--ink);text-decoration:underline;text-decoration-color:var(--line);text-underline-offset:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -61,9 +61,9 @@
   .frow button{background:transparent;border:1px solid var(--line);color:var(--ink);border-radius:99px;padding:5px 10px;font:600 12.5px var(--body);cursor:pointer;flex:none}
   .cz-attach{display:flex;flex-direction:column;gap:6px}
   .cz-attach h5{margin:6px 0 0;font:600 11px var(--body);text-transform:uppercase;letter-spacing:.12em;color:var(--muted)}
-  .tabs button{flex:1 1 auto;position:relative;background:transparent;border:0;border-radius:9px;padding:8px 6px;font:600 12.5px var(--body);color:var(--muted);cursor:pointer;white-space:nowrap}
+  .tabs button{flex:1 1 auto;position:relative;background:transparent;border:0;border-radius:9px;padding:8px 4px;font:600 12px var(--body);color:var(--muted);cursor:pointer;white-space:nowrap}
   .tabs button[aria-selected="true"]{background:var(--surface2);color:var(--ink)}
-  .tabs button b{display:inline-block;min-width:18px;height:18px;margin-left:4px;padding:0 5px;border-radius:99px;background:var(--warn);color:#fff;font:700 11px/18px var(--body);text-align:center}
+  .tabs button b{display:inline-block;min-width:16px;height:16px;margin-left:3px;padding:0 4px;line-height:16px;border-radius:99px;background:var(--warn);color:#fff;font:700 11px/18px var(--body);text-align:center}
   .tabpane{flex:1;min-height:0;overflow:auto;padding:12px 14px;display:flex;flex-direction:column;gap:12px}
   .tabpane[hidden]{display:none}
   .sec h2{font:600 11.5px var(--body);text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin:0 0 8px;display:flex;justify-content:space-between;gap:8px}
@@ -195,6 +195,7 @@
   .bubble small{display:block;margin-top:4px;opacity:.6;font-size:11.5px}
   .task-card{margin-top:8px;padding:8px 10px;border-radius:10px;background:var(--surface2);display:flex;gap:8px;align-items:center;font-size:13px;white-space:normal}
   .task-card span{flex:1;min-width:0}
+  a.open-deliv{text-decoration:none;display:inline-block;flex:none}
   .task-card button,.open-deliv{background:transparent;border:1px solid var(--line);color:var(--ink);border-radius:99px;padding:4px 10px;font:600 12.5px var(--body);cursor:pointer}
   .typing{align-self:flex-start;color:var(--muted);font-size:13px;padding:4px 6px}
   .chat-form{display:flex;gap:8px;padding:12px 16px;border-top:1px solid var(--line);align-items:flex-end}
@@ -266,7 +267,6 @@
       <button role="tab" data-tab="team" aria-selected="false">Équipe</button>
       <button role="tab" data-tab="chat" aria-selected="false">Discussions<b id="tabChat" hidden>0</b></button>
       <button role="tab" data-tab="files" aria-selected="false">Fichiers<b id="tabFiles" hidden>0</b></button>
-      <button role="tab" data-tab="log" aria-selected="false">Activité</button>
     </nav>
 
     <div class="tabpane" id="tab-valid" role="tabpanel">
@@ -278,7 +278,7 @@
     <div class="tabpane" id="tab-day" role="tabpanel" hidden>
       <div class="sec">
         <h2>Journée <em id="dayDate"></em></h2>
-        <div class="states"><span class="pill" id="aiState">IA : recherche…</span><span class="pill" id="mailState">Gmail : recherche…</span><span class="pill" id="calState">Agenda : recherche…</span><span class="pill" id="webState">Recherche web : recherche…</span></div>
+        <div class="states"><span class="pill" id="aiState">IA : recherche…</span><span class="pill" id="mailState">Gmail : recherche…</span><span class="pill" id="calState">Agenda : recherche…</span><span class="pill" id="webState">Recherche web : recherche…</span><span class="pill" id="driveState">Drive : recherche…</span></div>
         <p class="day-note" id="dayNote">Active le QG : Jarvis lit ton agenda et tes mails non lus, puis te propose le travail de la journée.</p>
         <ol class="plan" id="plan"></ol>
         <button class="btn" id="planBtn" type="button">Planifier la journée</button>
@@ -288,6 +288,7 @@
         <ul id="deliv"></ul>
         <button class="btn ghost" id="casierOpen" type="button" style="width:100%;margin-top:8px">Ouvrir le casier</button>
       </div>
+      <div class="sec"><h2>Activité</h2><ul id="log"></ul></div>
     </div>
 
     <div class="tabpane" id="tab-team" role="tabpanel" hidden>
@@ -309,9 +310,6 @@
       <div class="sec"><h2>Liens <em id="lCount"></em></h2><ul class="flist" id="fLinks"></ul></div>
     </div>
 
-    <div class="tabpane" id="tab-log" role="tabpanel" hidden>
-      <ul id="log"></ul>
-    </div>
   </aside>
 </main>
 
@@ -954,7 +952,7 @@ function completeTask(a) {
   a.task = null;
   if (t.noJob) { t.status = 'livre'; a.say('✅ Fait', 2); renderPlan(); return; }
   const job = t.job || { ok:false, error:{ code:'no_brain' } };
-  const spec = { title: t.title, steps: t.steps, brief: t.brief || '', mail: t.mail || null, agent: a.name, requested: !!t.requested };
+  const spec = { title: t.title, steps: t.steps, brief: t.brief || '', mail: t.mail || null, agent: a.name, requested: !!t.requested, format: t.format || '' };
   if (!job.ok) {
     t.status = 'erreur'; a.say('⚠️ Bloqué : ' + errText(job.error), 3.5);
     const d = addDeliv({ title: t.title, pole: p.id, agent: a.name, time: stamp(), status: 'err', spec, isMail: !!t.mail, requested: !!t.requested,
@@ -979,21 +977,27 @@ function completeTask(a) {
         ...(r.besoin_reponse && r.reponse ? ['', 'Brouillon de réponse proposé (rien n’est envoyé) :', '', String(r.reponse)] : ['', 'Pas de réponse nécessaire.'])].join('\n') };
     log(a, `${a.name} a traité le mail « ${m.subject} »`, true);
   } else {
-    d = { title: t.title, pole: p.id, agent: a.name, time: stamp(), status: 'ai', spec, content: job.text, requested: !!t.requested };
+    d = { title: t.title, pole: p.id, agent: a.name, time: stamp(), status: 'ai', spec, content: job.text, requested: !!t.requested, format: t.format || 'document' };
     d.links = buildLinks(job.text, job);
     if (job.hotels && job.hotels.length) d.tables = [{ name: 'hebergements-' + slug(t.title) + '.csv', rows: job.hotels }];
     log(a, `${a.name} a livré : ${t.title}`, true);
   }
   addDeliv(d); renderPlan();
-  const nf = filesOf(d).length, nl = linksOf(d).length;
-  if (t.requested) agentSays(a, `C’est prêt : « ${t.title} ». Je t’ai envoyé ${nf} fichier${nf > 1 ? 's' : ''}${nl ? ` et ${nl} lien${nl > 1 ? 's' : ''}` : ''} (onglet Fichiers). Dis-moi si tu veux que j’ajuste.`, { delivId: d.id });
+  if (!t.requested || d.isMail) return;
+  if (ENGINE.drive) exportToDrive(d).then(() => announce(a, d));
+  else announce(a, d);
+}
+function announce(a, d) {
+  const files = filesOf(d), ok = files.filter(f => f.url).length, nl = linksOf(d).length;
+  const where = ok ? `${ok > 1 ? 'Tes fichiers sont' : 'Ton fichier est'} dans ton Google Drive : ${files.filter(f => f.url).map(f => '« ' + f.name + ' »').join(' et ')}.` : ENGINE.drive ? 'Je n’ai pas pu créer le fichier dans ton Drive : tu peux réessayer depuis l’onglet Fichiers.' : 'Le fichier est prêt à télécharger.';
+  agentSays(a, `C’est prêt : « ${d.title} ». ${where}${nl ? ` J’ai aussi mis ${nl} lien${nl > 1 ? 's' : ''} dans l’onglet Fichiers.` : ''} Dis-moi si tu veux que j’ajuste.`, { delivId: d.id });
 }
 const stamp = () => new Date().toLocaleString('fr-CH', { day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' });
 
 /* ======================================================================
    Moteur réel : Claude (sur claude.ai) ou le serveur Jarvis, Gmail, agenda
    ====================================================================== */
-const ENGINE = { brain:null, mail:null, cal:false, web:false, booking:false, tools:false, sample:null, mcp:null, blocked:null };
+const ENGINE = { brain:null, mail:null, cal:false, web:false, booking:false, drive:false, tools:false, sample:null, mcp:null, blocked:null };
 const KIND_STEPS = { redaction:['type','type'], recherche:['web','type'], appel:['call','type'], impression:['type','print'], reunion:['meeting','type'] };
 const ERR = { not_granted:'Tu n’as pas autorisé Claude pour cette page.', sampling_disabled:'Claude n’est pas disponible sur ce compte.', rate_limited:'Trop de demandes à Claude pour le moment : réessaie un peu plus tard.',
   session_expired:'Ta session claude.ai a expiré : reconnecte-toi.', refused:'Claude a refusé cette demande.', no_brain:'Aucune IA connectée.', no_mail:'Boîte mail non connectée.',
@@ -1012,7 +1016,7 @@ async function initEngine() {
     if (mcp) {
       ENGINE.mcp = mcp;
       try { const names = (await mcp.listTools()).servers.map(x => x.server); if (names.includes('Gmail')) ENGINE.mail = 'gmail'; if (names.includes('Google Calendar')) ENGINE.cal = true;
-        if (names.includes('Firecrawl')) ENGINE.web = true; if (names.includes('Booking.com')) ENGINE.booking = true; } catch (e) {}
+        if (names.includes('Firecrawl')) ENGINE.web = true; if (names.includes('Booking.com')) ENGINE.booking = true; if (names.includes('Google Drive')) ENGINE.drive = true; } catch (e) {}
       if (sample) { try { ENGINE.tools = !!(await sample.limits()).tools; } catch (e) {} }
     }
   }
@@ -1071,7 +1075,7 @@ ${CTX.calendar.length ? 'Agenda de Yosh pour les prochains jours :\n' + CTX.cale
 Ta tâche : ${t.title}
 ${t.brief ? (t.requested ? 'Ce que Yosh t’a demandé : ' : 'Précisions de Jarvis : ') + t.brief + '\n' : ''}${t.requested ? recentWork(a) : ''}
 Réalise cette tâche maintenant et rends directement le livrable final, prêt à être utilisé par Yosh : un texte, un brouillon, un plan, une liste ou un script selon la tâche.
-Règles : en français ; texte simple avec des titres courts et des listes à tirets (pas de tableau) ; 350 mots au maximum ; n’invente aucun fait sur Yosh, ses clients ou ses chiffres : écris [à compléter] quand une information te manque ; commence directement par le livrable, sans phrase d’introduction.`;
+Règles : en français ; texte simple avec des titres courts et des listes à tirets${(t.format || '').includes('tableur') ? ' ; mets les données principales dans UN tableau Markdown (| colonne | colonne |, une ligne d’en-tête puis une ligne |---|), il deviendra une feuille Google Sheets' : ' (pas de tableau)'} ; 350 mots au maximum ; n’invente aucun fait sur Yosh, ses clients ou ses chiffres : écris [à compléter] quand une information te manque ; commence directement par le livrable, sans phrase d’introduction.`;
   brainAsk(prompt, { onText: txt => { job.preview = txt; } })
     .then(text => { job.ok = true; job.text = text; }, e => { job.error = e; })
     .finally(() => { job.settled = true; });
@@ -1082,16 +1086,16 @@ function recentWork(a) {
   return mine.length ? '\nTes derniers livrables pour Yosh (à reprendre si sa demande s’y rapporte) :\n' + mine.map(d => `« ${d.title} » :\n${String(d.content).slice(0, 2500)}`).join('\n\n') + '\n' : '';
 }
 /* Recherche approfondie : Claude cherche, lit et recoupe avec de vrais outils (Firecrawl, Booking.com) */
-/* ---------- Fichiers et liens envoyés par les agents ---------- */
-const URL_RE = /https?:\/\/[^\s<>"'()\[\]{}]+/g;
-const cleanUrl = u => u.replace(/[.,;:!?»…]+$/, '');
+/* ---------- Fichiers et liens : seulement ce que tu as demandé ---------- */
+const URL_RE = /https?:\/\/[^\s<>"'()\[\]{}|]+/g;
+const cleanUrl = u => u.replace(/[.,;:!?»…*_]+$/, '');
 const host = u => { try { return new URL(u).hostname.replace(/^www\./, ''); } catch (e) { return u; } };
 function buildLinks(text, job = {}) {
   const out = [], seen = new Set();
   const add = (url, title) => { url = cleanUrl(url); if (!/^https?:\/\//.test(url) || seen.has(url)) return; seen.add(url); out.push({ url, title: String(title || '').trim().slice(0, 140) || host(url) }); };
   String(text || '').split('\n').forEach(line => {
     (line.match(URL_RE) || []).forEach(u => {
-      const before = line.slice(0, line.indexOf(u)).replace(/^[\s\-•*\d.)]+/, '').replace(/[\s:–—(\[]+$/, '').trim();
+      const before = line.slice(0, line.indexOf(u)).replace(/^[\s\-•*\d.)|]+/, '').replace(/[\s:–—(\[|]+$/, '').trim();
       add(u, (job.titles && job.titles[cleanUrl(u)]) || (before.length > 2 && before.length < 120 ? before : ''));
     });
   });
@@ -1099,20 +1103,68 @@ function buildLinks(text, job = {}) {
   (job.read || []).forEach(u => add(u, (job.titles && job.titles[u]) || ''));
   return out.slice(0, 40);
 }
-const csvOf = rows => {
-  const cols = Object.keys(rows[0] || {});
-  const cell = v => { const x = String(v == null ? '' : v); return /[";\n]/.test(x) ? '"' + x.replace(/"/g, '""') + '"' : x; };
-  return '﻿' + [cols.join(';'), ...rows.map(r => cols.map(c => cell(r[c])).join(';'))].join('\n') + '\n';
-};
-function filesOf(d) {
-  if (d.status === 'err') return [];
-  const f = [{ key: d.id + ':doc', name: slug(d.title) + '.md', type: 'md', label: 'Document', make: () => `# ${d.title}\n\n${d.agent} · ${poleById(d.pole).full} · ${d.time}\n\n${d.content}\n` }];
-  (d.tables || []).forEach((tb, i) => f.push({ key: d.id + ':csv' + i, name: tb.name, type: 'csv', label: 'Tableau (Excel)', make: () => csvOf(tb.rows) }));
-  if (d.reply) f.push({ key: d.id + ':reply', name: 'brouillon-' + slug(d.mail ? d.mail.subject : d.title) + '.txt', type: 'txt', label: 'Brouillon de réponse', make: () => d.reply + '\n' });
-  return f.map(x => ({ ...x, d }));
+// premier tableau Markdown du texte -> lignes
+function mdTable(text) {
+  const lines = String(text || '').split('\n'); let i = 0;
+  while (i < lines.length) {
+    if (/^\s*\|.*\|\s*$/.test(lines[i]) && i + 1 < lines.length && /^\s*\|?\s*:?-{2,}/.test(lines[i + 1])) {
+      const cells = l => l.trim().replace(/^\||\|$/g, '').split('|').map(c => c.trim().replace(/\*\*/g, ''));
+      const head = cells(lines[i]); const rows = [];
+      for (let j = i + 2; j < lines.length && /^\s*\|.*\|\s*$/.test(lines[j]); j++) { const c = cells(lines[j]); rows.push(Object.fromEntries(head.map((h, k) => [h || 'Colonne ' + (k + 1), c[k] || '']))); }
+      return rows.length ? rows : null;
+    }
+    i++;
+  }
+  return null;
 }
-const linksOf = d => d.status === 'err' ? [] : (d.links || buildLinks(d.content)).map(l => ({ ...l, d }));
-const FT = { md: ['DOC', '#2563eb'], csv: ['CSV', '#15803d'], txt: ['TXT', '#64748b'] };
+const csvOf = (rows, sep = ';') => {
+  const cols = Object.keys(rows[0] || {});
+  const cell = v => { const x = String(v == null ? '' : v); return /[";,\n]/.test(x) ? '"' + x.replace(/"/g, '""') + '"' : x; };
+  return [cols.join(sep), ...rows.map(r => cols.map(c => cell(r[c])).join(sep))].join('\n') + '\n';
+};
+const docText = d => `# ${d.title}\n\n${d.agent} · ${poleById(d.pole).full} · ${d.time}\n\n${d.content}\n`;
+const tableOf = d => (d.tables && d.tables[0] && d.tables[0].rows) || mdTable(d.content);
+// les fichiers que l'agent doit te livrer pour ce livrable
+function wantedFiles(d) {
+  const fmt = d.format || 'document', table = tableOf(d), out = [];
+  if (fmt.includes('document') || !table) out.push({ kind:'doc', name:`${d.title}` });
+  if (table && (fmt.includes('tableur') || d.tables)) out.push({ kind:'sheet', name:`${d.title} (tableau)` });
+  return out;
+}
+async function exportToDrive(d, only) {
+  if (!d.drive) d.drive = wantedFiles(d).map(w => ({ ...w, status:'creating' }));
+  renderFiles(); if (casier.open) renderCasier();
+  for (const f of d.drive) {
+    if (f.status === 'ok' || (only && f !== only)) continue;
+    f.status = 'creating'; f.error = '';
+    const title = 'QG Jarvis · ' + f.name;
+    try {
+      let r;
+      if (f.kind === 'sheet') r = await ENGINE.mcp.callTool('Google Drive', 'create_file', { title, textContent: csvOf(tableOf(d), ','), contentMimeType:'text/csv' });
+      else {
+        try { r = await ENGINE.mcp.callTool('Google Drive', 'create_file', { title, textContent: docText(d), contentMimeType:'text/markdown' }); }
+        catch (e) { if (e && e.code === 'tool_error') r = await ENGINE.mcp.callTool('Google Drive', 'create_file', { title, textContent: docText(d), contentMimeType:'text/plain' }); else throw e; }
+      }
+      const x = (r && r.payload) || {};
+      f.id = x.id || ''; f.url = x.viewUrl || x.webViewLink || x.alternateLink || (x.id ? (f.kind === 'sheet' ? `https://docs.google.com/spreadsheets/d/${x.id}/edit` : `https://docs.google.com/document/d/${x.id}/edit`) : '');
+      f.status = f.url ? 'ok' : 'err'; if (!f.url) f.error = 'Drive n’a pas renvoyé de lien.';
+    } catch (e) { f.status = 'err'; f.error = errText(e); }
+    save(d); renderFiles(); if (casier.open) renderCasier();
+  }
+  d.filesSeen = false; save(d); renderFiles();
+}
+// fichiers affichés : seulement pour tes demandes
+function filesOf(d) {
+  if (!d.requested || d.isMail || d.status === 'err') return [];
+  if (d.drive) return d.drive.map((f, i) => ({ key: d.id + ':drive' + i, name: f.name, type: f.kind === 'sheet' ? 'sheet' : 'gdoc', label: f.kind === 'sheet' ? 'Google Sheets' : 'Google Docs', url: f.url, status: f.status, error: f.error, ref: f, d }));
+  if (ENGINE.drive) return wantedFiles(d).map((w, i) => ({ key: d.id + ':todo' + i, name: w.name, type: w.kind === 'sheet' ? 'sheet' : 'gdoc', label: 'À créer dans Drive', status: 'todo', d }));
+  // sans Drive (en local) : fichiers à télécharger
+  const f = [{ key: d.id + ':doc', name: slug(d.title) + '.md', type: 'md', label: 'Document', make: () => docText(d), d }];
+  const table = tableOf(d); if (table) f.push({ key: d.id + ':csv', name: slug(d.title) + '.csv', type: 'csv', label: 'Tableau (Excel)', make: () => '﻿' + csvOf(table), d });
+  return f;
+}
+const linksOf = d => (!d.requested || d.isMail || d.status === 'err') ? [] : (d.links || buildLinks(d.content)).map(l => ({ ...l, d }));
+const FT = { gdoc: ['DOC', '#2563eb'], sheet: ['SHEET', '#15803d'], md: ['DOC', '#2563eb'], csv: ['CSV', '#15803d'] };
 async function saveFile(name, text, onMsg) {
   if (STORE.dl) { try { await STORE.dl.save({ filename: name, data: text }); onMsg && onMsg('Fichier enregistré.'); } catch (err) { onMsg && onMsg(err.code === 'declined' ? '' : 'Téléchargement impossible ici.'); } return; }
   if (window.claude && window.claude.use) { onMsg && onMsg('Téléchargement indisponible dans cette vue.'); return; }
@@ -1120,8 +1172,17 @@ async function saveFile(name, text, onMsg) {
   document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 3000); onMsg && onMsg('Fichier enregistré.');
 }
 function markFilesSeen() {
-  HQ.deliverables.forEach(d => { if (!d.filesSeen) { d.filesSeen = true; save(d); } });
+  HQ.deliverables.forEach(d => { if (!d.filesSeen && (filesOf(d).length || linksOf(d).length)) { d.filesSeen = true; save(d); } });
   renderFiles();
+}
+function fileRow(f) {
+  const [lbl, col] = FT[f.type] || FT.gdoc;
+  const name = f.url ? `<a href="${esc(f.url)}" target="_blank" rel="noopener noreferrer">${esc(f.name)}</a>` : `<b>${esc(f.name)}</b>`;
+  const state = f.status === 'creating' ? 'Création dans ton Drive…' : f.status === 'err' ? 'Échec : ' + (f.error || 'erreur') : f.status === 'todo' ? 'Pas encore dans ton Drive' : f.label;
+  const act = f.url ? `<a class="open-deliv" href="${esc(f.url)}" target="_blank" rel="noopener noreferrer">Ouvrir</a>`
+    : (f.status === 'err' || f.status === 'todo') ? `<button type="button" data-redrive="${esc(f.d.id)}">${f.status === 'todo' ? 'Créer le fichier' : 'Réessayer'}</button>`
+    : f.make ? `<button type="button" data-file="${esc(f.key)}">Télécharger</button>` : '';
+  return `<li class="frow ${f.d.filesSeen ? '' : 'new'}"><span class="ic" style="background:${col}">${lbl}</span><span>${name}<small>${esc(state)} · ${esc(f.d.agent)} · ${esc(f.d.time)}</small></span>${act}<button type="button" data-see="${esc(f.d.id)}">Voir</button></li>`;
 }
 let fKey = '';
 function renderFiles() {
@@ -1132,18 +1193,16 @@ function renderFiles() {
   const match = (...xs) => !q || xs.join(' ').toLowerCase().includes(q);
   const files = HQ.deliverables.flatMap(filesOf).filter(f => match(f.name, f.d.title, f.d.agent, f.label));
   const links = HQ.deliverables.flatMap(linksOf).filter(l => match(l.title, l.url, l.d.title, l.d.agent));
-  const key = q + '|' + files.map(f => f.key + (f.d.filesSeen ? 1 : 0)).join(',') + '|' + links.map(l => l.url).join(',');
+  const key = q + '|' + files.map(f => f.key + f.status + (f.url || '') + (f.d.filesSeen ? 1 : 0)).join(',') + '|' + links.map(l => l.url).join(',');
   if (key === fKey) return; fKey = key;
   $('fCount').textContent = files.length ? `${files.length}` : '';
   $('lCount').textContent = links.length ? `${links.length}` : '';
-  $('fFiles').innerHTML = files.length ? files.map(f => { const [lbl, col] = FT[f.type];
-    return `<li class="frow ${f.d.filesSeen ? '' : 'new'}"><span class="ic" style="background:${col}">${lbl}</span><span><b>${esc(f.name)}</b><small>${esc(f.label)} · ${esc(f.d.agent)} · ${esc(f.d.time)}</small></span>
-      <button type="button" data-file="${esc(f.key)}">Télécharger</button><button type="button" data-see="${esc(f.d.id)}">Voir</button></li>`; }).join('')
-    : `<li class="frow"><span><small>${q ? 'Aucun fichier ne correspond.' : 'Les fichiers que les agents t’envoient arrivent ici dès qu’un travail est terminé.'}</small></span></li>`;
-  $('fLinks').innerHTML = links.length ? links.slice(0, 120).map(l => `<li class="frow ${l.d.filesSeen ? '' : 'new'}"><span class="ic" style="background:${l.d.pole ? poleById(l.d.pole).color : '#64748b'}">URL</span>
+  $('fFiles').innerHTML = files.length ? files.map(fileRow).join('')
+    : `<li class="frow"><span><small>${q ? 'Aucun fichier ne correspond.' : 'Ici n’arrivent que les fichiers de ce que tu demandes aux agents. Demande-leur quelque chose dans l’onglet Discussions.'}</small></span></li>`;
+  $('fLinks').innerHTML = links.length ? links.slice(0, 120).map(l => `<li class="frow ${l.d.filesSeen ? '' : 'new'}"><span class="ic" style="background:${poleById(l.d.pole).color}">URL</span>
       <span><a href="${esc(l.url)}" target="_blank" rel="noopener noreferrer">${esc(l.title)}</a><small>${esc(host(l.url))} · ${esc(l.d.agent)} · ${esc(l.d.title)}</small></span>
       <button type="button" data-copy="${esc(l.url)}">Copier</button></li>`).join('')
-    : `<li class="frow"><span><small>${q ? 'Aucun lien ne correspond.' : 'Les liens trouvés par les agents (sources, réservations…) arrivent ici.'}</small></span></li>`;
+    : `<li class="frow"><span><small>${q ? 'Aucun lien ne correspond.' : 'Les liens trouvés pour tes demandes (sources, réservations…) arrivent ici.'}</small></span></li>`;
 }
 
 function researchJob(a, t) {
@@ -1200,7 +1259,7 @@ Mène une vraie recherche approfondie avec tes outils avant de répondre :
 1. Lance plusieurs recherches (au moins trois requêtes différentes).
 2. Lis les pages les plus utiles pour vérifier prix, dates, conditions et adresses.
 ${ENGINE.booking ? '3. Pour un hôtel ou un hébergement, utilise chercher_hebergements pour obtenir les prix et disponibilités réels.\n' : ''}4. Recoupe les sources et signale ce que tu n’as pas pu vérifier.
-Rends ensuite un rapport en français, en texte simple : un résumé en deux phrases ; tes recommandations classées (nom, pourquoi, chiffres et prix avec leur source, lien) ; les points de vigilance ; puis « Sources » avec la liste des liens consultés. 500 mots au maximum.
+Rends ensuite un rapport en français, en texte simple : un résumé en deux phrases ; tes recommandations classées (nom, pourquoi, chiffres et prix avec leur source, lien) ; les points de vigilance ; puis « Sources » avec la liste des liens consultés. 500 mots au maximum.${(t.format || '').includes('tableur') ? '\nAjoute UN tableau Markdown comparatif des options (| colonne | colonne |, ligne d’en-tête puis |---|) : il deviendra une feuille Google Sheets.' : ''}
 N’invente rien : chaque fait doit venir de tes outils. Si une information manque (dates, budget…), fais l’hypothèse la plus raisonnable et indique-la clairement en tête du rapport.`;
     job.text = await brainAsk(prompt, { tools, onText: txt => { job.preview = txt; } });
     job.ok = true;
@@ -1688,13 +1747,15 @@ function renderRead() {
       <span class="msg" id="czMsg">${d.draftSaved ? 'Brouillon enregistré dans Gmail. Rien n’a été envoyé.' : ''}</span>
     </div>
     ${filesOf(d).length || linksOf(d).length ? `<div class="cz-attach">
-      ${filesOf(d).length ? '<h5>Fichiers envoyés</h5>' + filesOf(d).map(f => `<div class="frow"><span class="ic" style="background:${FT[f.type][1]}">${FT[f.type][0]}</span><span><b>${esc(f.name)}</b><small>${esc(f.label)}</small></span><button type="button" data-file="${esc(f.key)}">Télécharger</button></div>`).join('') : ''}
+      ${filesOf(d).length ? '<h5>Fichiers envoyés</h5><ul class="flist">' + filesOf(d).map(fileRow).join('') + '</ul>' : ''}
       ${linksOf(d).length ? '<h5>Liens</h5>' + linksOf(d).slice(0, 12).map(l => `<div class="frow"><span><a href="${esc(l.url)}" target="_blank" rel="noopener noreferrer">${esc(l.title)}</a><small>${esc(host(l.url))}</small></span><button type="button" data-copy="${esc(l.url)}">Copier</button></div>`).join('') : ''}
     </div>` : ''}
     <pre id="czText"></pre>`;
   $('czText').textContent = d.content;
 }
 async function fileOrCopyClick(e, onMsg) {
+  const rb = e.target.closest('[data-redrive]');
+  if (rb) { const d = HQ.deliverables.find(x => x.id === rb.dataset.redrive); if (d && ENGINE.drive) { rb.disabled = true; exportToDrive(d); } return true; }
   const fb = e.target.closest('[data-file]'), cb = e.target.closest('[data-copy]'), sb = e.target.closest('[data-see]');
   if (fb) { const f = HQ.deliverables.flatMap(filesOf).find(x => x.key === fb.dataset.file); if (f) await saveFile(f.name, f.make(), onMsg); return true; }
   if (cb) { try { await navigator.clipboard.writeText(cb.dataset.copy); cb.textContent = 'Copié ✓'; } catch (err) { cb.textContent = 'Copie impossible'; } setTimeout(() => { cb.textContent = 'Copier'; }, 1500); return true; }
@@ -1796,7 +1857,8 @@ Réponds à Yosh en tant que ${a.name}, en français, naturellement et brièveme
 - Si la demande est floue, pose une ou deux questions précises au lieu de créer une tâche.${a.pole.research ? '\n- Tu fais des recherches réelles sur internet. Pour un hôtel il te faut au minimum la ville ou le lieu, les dates et le nombre de personnes ; demande le budget s’il compte. Mets toutes ces informations dans "precisions".' : ''}
 - S’il veut juste discuter ou une information rapide, réponds sans créer de tâche.
 - N’invente aucun fait sur Yosh.
-Réponds uniquement avec un objet JSON : {"reponse":"…","tache":null} ou {"reponse":"…","tache":{"titre":"…","precisions":"tout ce que Yosh a demandé, en détail","type":"redaction|recherche|appel|impression|reunion"}}`;
+- Le résultat sera livré à Yosh sous forme de fichier dans son Google Drive : "document" (Google Docs) par défaut, "tableur" (Google Sheets) s’il veut un tableau, une liste chiffrée ou un comparatif à trier, "document+tableur" s’il veut les deux. S’il précise un format, respecte-le.
+Réponds uniquement avec un objet JSON : {"reponse":"…","tache":null} ou {"reponse":"…","tache":{"titre":"…","precisions":"tout ce que Yosh a demandé, en détail","type":"redaction|recherche|appel|impression|reunion","fichier":"document|tableur|document+tableur"}}`;
 }
 async function sendChat(a, text) {
   const c = chatOf(a);
@@ -1808,7 +1870,8 @@ async function sendChat(a, text) {
     const extra = {};
     const x = res && res.tache;
     if (x && String(x.titre || '').trim()) {
-      const t = propose({ title: String(x.titre).trim(), brief: String(x.precisions || text), steps: KIND_STEPS[x.type] || guessSteps(String(x.titre)), requested: true }, a.name, 'chat');
+      const fmt = ['document', 'tableur', 'document+tableur'].includes(x.fichier) ? x.fichier : 'document';
+      const t = propose({ title: String(x.titre).trim(), brief: String(x.precisions || text), steps: KIND_STEPS[x.type] || guessSteps(String(x.titre)), requested: true, format: fmt }, a.name, 'chat');
       extra.taskId = t.id; extra.taskTitle = t.title;
       log(a, `${a.name} propose une tâche : ${t.title}`); if (a.inside) a.say('📝 Je te soumets la tâche', 3);
     }
@@ -1851,6 +1914,7 @@ function renderEngine() {
   set('calState', ENGINE.cal ? (CTX.calErr ? 'Agenda : à autoriser' : 'Agenda : connecté') : 'Agenda : non connecté', ENGINE.cal && !CTX.calErr ? 'ok' : 'off');
   const webOk = ENGINE.brain === 'claude' && ENGINE.tools && ENGINE.web;
   set('webState', webOk ? 'Recherche web : connectée' + (ENGINE.booking ? ' + Booking.com' : '') : 'Recherche web : non connectée', webOk ? 'ok' : 'off');
+  set('driveState', ENGINE.drive ? 'Drive : tes fichiers y sont créés' : 'Drive : non connecté', ENGINE.drive ? 'ok' : 'off');
 }
 let planKey = '';
 function renderPlan() {
@@ -1957,7 +2021,7 @@ canvas.addEventListener('click', e => { openProfile(agentAt(e)); });
 const TAB_KEY = 'jarvis-hq-onglet';
 function showTab(name) {
   [...$('tabs').children].forEach(b => b.setAttribute('aria-selected', b.dataset.tab === name));
-  ['valid', 'day', 'team', 'chat', 'files', 'log'].forEach(n => { $('tab-' + n).hidden = n !== name; });
+  ['valid', 'day', 'team', 'chat', 'files'].forEach(n => { $('tab-' + n).hidden = n !== name; });
   if (name === 'files') markFilesSeen();
   try { localStorage.setItem(TAB_KEY, name); } catch (e) {}
 }

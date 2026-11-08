@@ -2523,8 +2523,11 @@ async function sendChat(a, text) {
     try { mem = (await recall(text, { by: a, deep: !!a.memory })).text; } catch (e) {}
     let res;
     if (ENGINE.brain === 'claude' && ENGINE.tools) {
-      const raw = await runBrain(chatPrompt(a, c, mem) + '\nSi tu as besoin d’une info qu’un collègue détient (un mail, un fichier, un livrable), demande-la-lui avec l’outil demander_a_un_collegue AVANT de répondre, puis donne la réponse à Yosh. Termine toujours par l’objet JSON demandé, seul.', { tools: teamTools(a) });
-      try { const m = String(raw).match(/\{[\s\S]*\}\s*$/) || String(raw).match(/\{[\s\S]*\}/); res = JSON.parse(m[0]); } catch (e) { res = { reponse: String(raw).trim(), tache: null }; }
+      let raw = null;
+      try { raw = await runBrain(chatPrompt(a, c, mem) + '\nSi tu as besoin d’une info qu’un collègue détient (un mail, un fichier, un livrable), demande-la-lui avec l’outil demander_a_un_collegue AVANT de répondre, puis donne la réponse à Yosh. Termine toujours par l’objet JSON demandé, seul.', { tools: teamTools(a) }); }
+      catch (e) { if (['not_granted', 'sampling_disabled', 'session_expired'].includes(e && e.code)) throw e; }
+      if (raw == null) res = await runBrain(chatPrompt(a, c, mem), { asJson: true });
+      else { try { const m = String(raw).match(/\{[\s\S]*\}\s*$/) || String(raw).match(/\{[\s\S]*\}/); res = JSON.parse(m[0]); } catch (e) { res = { reponse: String(raw).trim(), tache: null }; } }
     } else res = await runBrain(chatPrompt(a, c, mem), { asJson: true });
     (Array.isArray(res && res.a_retenir) ? res.a_retenir : []).map(x => String(x).trim()).filter(x => x.length > 8).slice(0, 4)
       .forEach(x => { if (!MEM.some(e => e.src === 'retenu' && e.text === x)) addMem({ src:'retenu', title: x.slice(0, 90), text: x, by: a.name }, { quiet: true }); });

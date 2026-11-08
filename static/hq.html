@@ -265,7 +265,7 @@
     <div class="tabpane" id="tab-day" role="tabpanel" hidden>
       <div class="sec">
         <h2>Journée <em id="dayDate"></em></h2>
-        <div class="states"><span class="pill" id="aiState">IA : recherche…</span><span class="pill" id="mailState">Gmail : recherche…</span><span class="pill" id="calState">Agenda : recherche…</span></div>
+        <div class="states"><span class="pill" id="aiState">IA : recherche…</span><span class="pill" id="mailState">Gmail : recherche…</span><span class="pill" id="calState">Agenda : recherche…</span><span class="pill" id="webState">Recherche web : recherche…</span></div>
         <p class="day-note" id="dayNote">Active le QG : Jarvis lit ton agenda et tes mails non lus, puis te propose le travail de la journée.</p>
         <ol class="plan" id="plan"></ol>
         <button class="btn" id="planBtn" type="button">Planifier la journée</button>
@@ -333,15 +333,13 @@ const POLES = [
     calls:['On cale les priorités du jour ?', 'Je te mets ça dans l’agenda', 'Point rapide à 14h ?'],
     tasks:[ { t:'Préparer le brief de la journée', s:['type','print'] }, { t:'Faire le tour des pôles', s:['tour'] },
       { t:'Planifier la semaine : priorités par pôle', s:['type','meeting'] }, { t:'Faire le bilan de fin de journée', s:['type'] } ] },
-  { id:'edu', name:'Study Buddy', full:'Produit Study Buddy', color:'#7c3aed', bench:0, half:0,
-    agents:[ { name:'Inès', role:'Product manager' }, { name:'Yanis', role:'Développeur front' }, { name:'Chloé', role:'Tests et retours élèves' } ],
-    calls:['Le quiz t’a aidé à réviser ?', 'Qu’est-ce qui t’a bloqué dans l’appli ?', 'Tu utiliserais les flashcards ?'],
-    tasks:[ { t:'Prioriser la roadmap de Smart Study Buddy', s:['meeting','type'] },
-      { t:'Fusionner les doublons : Study Buddy, Study Companion, Repères Scolaires', s:['web','meeting'] },
-      { t:'Tester le quiz auto-corrigé de Dossier Interactif', s:['web','type'] },
-      { t:'Rédiger les textes de l’écran d’accueil en français et en anglais', s:['type'] },
-      { t:'Appeler deux élèves testeurs pour leurs retours', s:['call','type'] },
-      { t:'Préparer la mise en ligne de Smart Study Buddy', s:['type','print'] } ] },
+  { id:'web', name:'Recherche web', full:'Recherche web', color:'#7c3aed', bench:0, half:0, research:true,
+    agents:[ { name:'Sacha', role:'Chercheur principal' }, { name:'Maya', role:'Voyages et hébergements' }, { name:'Théo', role:'Comparatifs et achats' } ],
+    calls:['Je recoupe avec une deuxième source', 'Le prix affiché a changé depuis hier', 'Trois sites disent la même chose'],
+    tasks:[ { t:'Veille : les nouveautés des outils IA utiles pour Jarvis', s:['web','web','type'] },
+      { t:'Trouver un hébergement pour un déplacement prévu à l’agenda', s:['web','web','type'] },
+      { t:'Repérer les offres d’emploi étudiant publiées cette semaine à Genève', s:['web','web','type'] },
+      { t:'Comparer les prix d’un achat prévu (3 boutiques, livraison comprise)', s:['web','web','type'] } ] },
   { id:'soc', name:'Réseaux & Contenu', full:'Réseaux & Contenu', color:'#f97316', bench:0, half:1,
     agents:[ { name:'Léa', role:'Rédactrice LinkedIn' }, { name:'Noah', role:'Créateur de Reels' }, { name:'Emma', role:'Analyste des stats' } ],
     calls:['On valide le post avec MCI Sport ?', 'Tu peux m’envoyer les photos du match ?', 'Le Reel sort demain 18h', 'On tague qui sur LinkedIn ?'],
@@ -377,18 +375,18 @@ const PROFILES = {
     mission:'Transforme les décisions de Jarvis en tâches claires pour chaque pôle.',
     resp:['Prépare les réunions et note les décisions', 'Planifie la semaine avec Jarvis', 'Rédige le bilan de fin de journée'],
     tools:['Google Agenda', 'Docs'], projects:['Organisation du QG'], habit:'Arrive avec un carnet, repart avec trois listes.' },
-  Inès: { who:'Elle a galéré avant ses examens et veut construire l’appli qu’elle aurait aimé avoir.',
-    mission:'Décide quoi construire en premier dans tes apps de révision.',
-    resp:['Tient la roadmap de Smart Study Buddy', 'Regroupe les doublons : Study Buddy, Study Companion, Repères Scolaires', 'Valide chaque mise en ligne'],
-    tools:['Lovable', 'Mur de post-its'], projects:['Smart Study Buddy', 'Study Companion', 'Repères Scolaires'], habit:'Dessine les écrans au feutre avant tout le monde.' },
-  Yanis: { who:'Rapide et minutieux, fan des interfaces mobiles.',
-    mission:'Construit les écrans des apps de révision.',
-    resp:['Développe les quiz et les flashcards', 'Corrige les bugs remontés par Chloé', 'Rend les apps agréables sur téléphone'],
-    tools:['Lovable', 'TanStack Start'], projects:['Dossier Interactif', 'Your Study Buddy'], habit:'Casque sur les oreilles dès 9h31.' },
-  Chloé: { who:'La voix des élèves au QG.',
-    mission:'Vérifie que les apps aident vraiment à réviser.',
-    resp:['Teste chaque nouvelle version', 'Appelle des élèves testeurs', 'Fait remonter les bugs et les idées'],
-    tools:['Téléphone', 'Fiches de test'], projects:['Dossier Interactif', 'Smart Study Buddy'], habit:'Passe plus de temps dans les box qu’à son bureau.' },
+  Sacha: { who:'Curieux et méthodique : il ne croit une information qu’après l’avoir vue dans deux sources.',
+    mission:'Mène les recherches approfondies sur internet : il fouille, lit les pages, recoupe et te rend un rapport sourcé.',
+    resp:['Lance plusieurs recherches sous des angles différents', 'Lit les pages clés pour vérifier les faits', 'Cite chaque source avec son lien'],
+    tools:['Recherche web (Firecrawl)', 'Lecture de pages'], projects:['Veille', 'Questions de Yosh'], habit:'Ouvre toujours un onglet de trop.' },
+  Maya: { who:'Elle a l’œil pour le bon plan : bien placé, bien noté, au bon prix.',
+    mission:'Trouve hôtels, hébergements et activités avec les prix et disponibilités réels.',
+    resp:['Cherche les hébergements sur Booking.com aux dates demandées', 'Compare prix, notes, quartier et conditions', 'Donne le lien de réservation de chaque option'],
+    tools:['Booking.com', 'Recherche web (Firecrawl)'], projects:['Déplacements', 'Sorties'], habit:'Vérifie toujours la distance à pied jusqu’à la gare.' },
+  Théo: { who:'Le comparateur du QG : il épluche les fiches produit et les frais cachés.',
+    mission:'Compare des offres, des prix et des produits pour t’aider à choisir.',
+    resp:['Trouve les meilleures offres en ligne', 'Compare prix, livraison et avis', 'Recommande un choix clair avec ses raisons'],
+    tools:['Recherche web (Firecrawl)', 'Lecture de pages'], projects:['Achats', 'Emplois étudiants'], habit:'Calcule le prix au kilo de tout, même du café.' },
   Léa: { who:'La plume du QG : elle raconte une victoire en trois lignes.',
     mission:'Écrit les posts LinkedIn, en priorité pour MCI Sport.',
     resp:['Rédige le post de la semaine', 'Adapte le ton à chaque club', 'Fait valider avant publication'],
@@ -687,7 +685,7 @@ function startTask(a) {
   if (!t) return;
   t.started = timeStr(); t.status = 'encours'; t.agent = a.name;
   a.task = t; a.stepIdx = 0; a.stepFrac = 0; a.stats = { calls:0, prints:0 };
-  if (!t.noJob) t.job = t.mail ? mailJob(a, t) : taskJob(a, t);
+  if (!t.noJob) t.job = t.mail ? mailJob(a, t) : a.pole.research ? researchJob(a, t) : taskJob(a, t);
   log(a, `${a.name} commence : ${t.title}`);
   renderPlan();
 }
@@ -973,11 +971,12 @@ const stamp = () => new Date().toLocaleString('fr-CH', { day:'2-digit', month:'2
 /* ======================================================================
    Moteur réel : Claude (sur claude.ai) ou le serveur Jarvis, Gmail, agenda
    ====================================================================== */
-const ENGINE = { brain:null, mail:null, cal:false, sample:null, mcp:null, blocked:null };
+const ENGINE = { brain:null, mail:null, cal:false, web:false, booking:false, tools:false, sample:null, mcp:null, blocked:null };
 const KIND_STEPS = { redaction:['type','type'], recherche:['web','type'], appel:['call','type'], impression:['type','print'], reunion:['meeting','type'] };
 const ERR = { not_granted:'Tu n’as pas autorisé Claude pour cette page.', sampling_disabled:'Claude n’est pas disponible sur ce compte.', rate_limited:'Trop de demandes à Claude pour le moment : réessaie un peu plus tard.',
   session_expired:'Ta session claude.ai a expiré : reconnecte-toi.', refused:'Claude a refusé cette demande.', no_brain:'Aucune IA connectée.', no_mail:'Boîte mail non connectée.',
-  invalid_json:'La réponse de l’IA était illisible.', needs_reauth:'Reconnecte le connecteur dans les réglages de claude.ai.', server_not_connected:'Ajoute le connecteur dans les réglages de claude.ai.',
+  invalid_json:'La réponse de l’IA était illisible.', no_web:'Recherche web indisponible : ouvre le QG depuis claude.ai avec le connecteur Firecrawl (et Booking.com pour les hôtels).',
+  tools_unavailable:'Cette version de claude.ai ne permet pas encore à Claude d’utiliser des outils depuis la page.', needs_reauth:'Reconnecte le connecteur dans les réglages de claude.ai.', server_not_connected:'Ajoute le connecteur dans les réglages de claude.ai.',
   not_in_manifest:'Tu n’as pas autorisé ce connecteur pour cette page.', approval_required:'Cette action attend ton accord.' };
 const errText = e => ERR[e && e.code] || ('Erreur : ' + ((e && e.message) || 'inconnue'));
 const json = (url, body) => fetch(API + url, body ? { method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify(body) } : undefined)
@@ -990,7 +989,9 @@ async function initEngine() {
     if (sample) { ENGINE.sample = sample; ENGINE.brain = 'claude'; }
     if (mcp) {
       ENGINE.mcp = mcp;
-      try { const names = (await mcp.listTools()).servers.map(x => x.server); if (names.includes('Gmail')) ENGINE.mail = 'gmail'; if (names.includes('Google Calendar')) ENGINE.cal = true; } catch (e) {}
+      try { const names = (await mcp.listTools()).servers.map(x => x.server); if (names.includes('Gmail')) ENGINE.mail = 'gmail'; if (names.includes('Google Calendar')) ENGINE.cal = true;
+        if (names.includes('Firecrawl')) ENGINE.web = true; if (names.includes('Booking.com')) ENGINE.booking = true; } catch (e) {}
+      if (sample) { try { ENGINE.tools = !!(await sample.limits()).tools; } catch (e) {} }
     }
   }
   if (!ENGINE.brain || !ENGINE.mail) {
@@ -1011,7 +1012,12 @@ function pump() {
 function brainFailed(e) {
   if (e && ['not_granted', 'sampling_disabled', 'not_declared', 'capability_disabled', 'session_expired'].includes(e.code)) { ENGINE.blocked = e.code; ENGINE.brain = null; renderEngine(); renderPlan(); }
 }
-async function runBrain(prompt, { asJson = false, onText } = {}) {
+async function runBrain(prompt, { asJson = false, onText, tools } = {}) {
+  if (tools) {
+    if (ENGINE.brain !== 'claude') throw { code:'no_web' };
+    const r = await ENGINE.sample(prompt, { tools, onText: onText ? (u => onText(u.text)) : undefined });
+    return r.text;
+  }
   if (ENGINE.brain === 'claude') {
     if (asJson) return ENGINE.sample.json(prompt, { cache: false });
     const r = await ENGINE.sample(prompt, { cache: false, onText: onText ? (u => onText(u.text)) : undefined });
@@ -1053,6 +1059,64 @@ function recentWork(a) {
   const mine = HQ.deliverables.filter(d => d.agent === a.name && d.status === 'ai' && !d.isMail).slice(0, 2);
   return mine.length ? '\nTes derniers livrables pour Yosh (à reprendre si sa demande s’y rapporte) :\n' + mine.map(d => `« ${d.title} » :\n${String(d.content).slice(0, 2500)}`).join('\n\n') + '\n' : '';
 }
+/* Recherche approfondie : Claude cherche, lit et recoupe avec de vrais outils (Firecrawl, Booking.com) */
+function researchJob(a, t) {
+  const job = { settled:false, ok:false, text:'', preview:'', trail:[] };
+  const note = txt => { job.preview = txt; job.trail.push(txt); if (a.inside && Math.random() < .5) a.say(txt.slice(0, 60), 2.5); };
+  (async () => {
+    if (ENGINE.brain !== 'claude' || !ENGINE.web) throw { code:'no_web' };
+    if (!ENGINE.tools) throw { code:'tools_unavailable' };
+    const tools = [
+      { name:'recherche_web', description:'Cherche sur internet et renvoie jusqu’à 8 résultats {titre, url, extrait}. Lance plusieurs recherches avec des requêtes différentes (français et anglais si utile).',
+        inputSchema:{ type:'object', properties:{ requete:{ type:'string', description:'la requête de recherche' }, nombre:{ type:'integer', description:'nombre de résultats, 3 à 8' } }, required:['requete'] },
+        execute: async (inp, ctx) => {
+          const q = String(inp.requete || '').slice(0, 300); if (!q) throw new Error('requête vide');
+          note('🔎 ' + q);
+          const r = await ENGINE.mcp.callTool('Firecrawl', 'firecrawl_search', { query: q, limit: clamp(Number(inp.nombre) || 6, 3, 8), sources:['web'], domainTools:false, objective: t.title.slice(0, 900) }, { signal: ctx.signal });
+          const web = (r.payload && r.payload.data && r.payload.data.web) || [];
+          return web.map(w => ({ titre: w.title, url: w.url, extrait: String(w.description || '').slice(0, 700) }));
+        } },
+      { name:'lire_page', description:'Lit le contenu d’une page web (texte, tronqué). Utilise-la sur les meilleurs résultats pour vérifier prix, dates, conditions et détails.',
+        inputSchema:{ type:'object', properties:{ url:{ type:'string', description:'adresse complète https://…' } }, required:['url'] },
+        execute: async (inp, ctx) => {
+          const url = String(inp.url || ''); if (!/^https?:\/\//.test(url)) throw new Error('adresse invalide');
+          note('📄 ' + url.replace(/^https?:\/\/(www\.)?/, '').slice(0, 70));
+          const r = await ENGINE.mcp.callTool('Firecrawl', 'firecrawl_scrape', { url, formats:['markdown'], onlyMainContent:true, objective: t.title.slice(0, 900) }, { signal: ctx.signal });
+          return String((r.payload && r.payload.markdown) || '').slice(0, 14000) || 'Page vide ou illisible.';
+        } },
+    ];
+    if (ENGINE.booking) tools.push({ name:'chercher_hebergements', description:'Cherche des hébergements disponibles sur Booking.com : prix réels du séjour, notes, quartier et lien de réservation. destination en anglais ("Lyon, France"), dates AAAA-MM-JJ dans le futur.',
+      inputSchema:{ type:'object', properties:{ destination:{ type:'string' }, arrivee:{ type:'string' }, depart:{ type:'string' }, adultes:{ type:'integer' }, prix_max_par_nuit:{ type:'integer' }, note_minimale:{ type:'integer', description:'7, 8 ou 9' }, demande:{ type:'string', description:'la demande résumée en anglais' } }, required:['destination', 'arrivee', 'depart'] },
+      execute: async (inp, ctx) => {
+        const input = { destination: String(inp.destination).slice(0, 100), checkin_date: String(inp.arrivee), checkout_date: String(inp.depart), number_of_adults: clamp(Number(inp.adultes) || 1, 1, 20), user_country_code:'ch', user_locale:'fr' };
+        if (Number(inp.prix_max_par_nuit) > 0) input.price = { maximum: Math.round(Number(inp.prix_max_par_nuit)) };
+        if ([7, 8, 9].includes(Number(inp.note_minimale))) input.minimum_review_score = Number(inp.note_minimale);
+        if (inp.demande) input.user_query = String(inp.demande).slice(0, 2000);
+        note('🏨 Booking.com : ' + input.destination);
+        const r = await ENGINE.mcp.callTool('Booking.com', 'accommodations_search', input, { signal: ctx.signal });
+        return ((r.payload && r.payload.accommodations) || []).slice(0, 10).map(h => ({ nom: h.name, type: h.accommodationType,
+          prix_du_sejour: h.price ? `${h.price.book} ${h.price.currency}` : null, note: h.rating ? h.rating.review_score : null, avis: h.rating ? h.rating.number_of_reviews : null,
+          etoiles: h.rating ? h.rating.stars : null, quartier: h.location ? (h.location.district_name || h.location.city_name) : null, adresse: h.location ? h.location.address : null,
+          lien: h.url, equipements: (h.facilities || []).slice(0, 8) }));
+      } });
+    const prompt = `${persona(a)}
+
+Nous sommes le ${todayLabel()} (aujourd’hui : ${new Date().toISOString().slice(0, 10)}). Yosh vit à Genève.
+${CTX.calendar.length ? 'Agenda de Yosh pour les prochains jours :\n' + CTX.calendar.join('\n') + '\n' : ''}
+Ta mission : ${t.title}
+${t.brief ? 'Détails : ' + t.brief + '\n' : ''}${t.requested ? recentWork(a) : ''}
+Mène une vraie recherche approfondie avec tes outils avant de répondre :
+1. Lance plusieurs recherches (au moins trois requêtes différentes).
+2. Lis les pages les plus utiles pour vérifier prix, dates, conditions et adresses.
+${ENGINE.booking ? '3. Pour un hôtel ou un hébergement, utilise chercher_hebergements pour obtenir les prix et disponibilités réels.\n' : ''}4. Recoupe les sources et signale ce que tu n’as pas pu vérifier.
+Rends ensuite un rapport en français, en texte simple : un résumé en deux phrases ; tes recommandations classées (nom, pourquoi, chiffres et prix avec leur source, lien) ; les points de vigilance ; puis « Sources » avec la liste des liens consultés. 500 mots au maximum.
+N’invente rien : chaque fait doit venir de tes outils. Si une information manque (dates, budget…), fais l’hypothèse la plus raisonnable et indique-la clairement en tête du rapport.`;
+    job.text = await brainAsk(prompt, { tools, onText: txt => { job.preview = txt; } });
+    job.ok = true;
+  })().catch(e => { job.error = e; }).finally(() => { job.settled = true; });
+  return job;
+}
+
 function mailJob(a, t) {
   const job = { settled:false, ok:false, analysis:null, preview:'' };
   (async () => {
@@ -1261,7 +1325,7 @@ Réponds uniquement avec un objet JSON :
     items.forEach(x => {
       const a = AGENTS.find(y => y.name.toLowerCase() === String(x.agent || '').toLowerCase() && !y.jarvis);
       const title = String(x.titre || '').trim(); if (!title) return;
-      propose({ title, brief: String(x.precisions || ''), steps: KIND_STEPS[x.type] || guessSteps(title) }, a ? a.name : 'Inès', 'plan');
+      propose({ title, brief: String(x.precisions || ''), steps: KIND_STEPS[x.type] || guessSteps(title) }, a ? a.name : 'Sacha', 'plan');
     });
     const tour = { title: 'Faire le tour des équipes', steps: ['tour'], noJob: true, status: 'attente' };
     jarvis.custom.push(tour); HQ.tasks.push(tour);
@@ -1628,7 +1692,7 @@ ${convo}
 
 Réponds à Yosh en tant que ${a.name}, en français, naturellement et brièvement (2 à 6 phrases), dans ton rôle.
 - S’il te demande de produire, refaire ou modifier quelque chose et que c’est assez clair, propose une tâche : elle partira dès que Yosh l’aura validée, et le résultat arrivera dans son casier. Dis-lui ce que tu livreras et qu’il n’a plus qu’à valider.
-- Si la demande est floue, pose une ou deux questions précises au lieu de créer une tâche.
+- Si la demande est floue, pose une ou deux questions précises au lieu de créer une tâche.${a.pole.research ? '\n- Tu fais des recherches réelles sur internet. Pour un hôtel il te faut au minimum la ville ou le lieu, les dates et le nombre de personnes ; demande le budget s’il compte. Mets toutes ces informations dans "precisions".' : ''}
 - S’il veut juste discuter ou une information rapide, réponds sans créer de tâche.
 - N’invente aucun fait sur Yosh.
 Réponds uniquement avec un objet JSON : {"reponse":"…","tache":null} ou {"reponse":"…","tache":{"titre":"…","precisions":"tout ce que Yosh a demandé, en détail","type":"redaction|recherche|appel|impression|reunion"}}`;
@@ -1684,6 +1748,8 @@ function renderEngine() {
   set('aiState', ENGINE.brain === 'claude' ? 'IA : Claude' : ENGINE.brain === 'server' ? 'IA : serveur Jarvis' : 'IA : non connectée', ENGINE.brain ? 'ok' : 'off');
   set('mailState', ENGINE.mail === 'gmail' ? (CTX.mailErr ? 'Gmail : ' + (ERR[CTX.mailErr] ? 'à autoriser' : 'erreur') : 'Gmail : connecté') : ENGINE.mail === 'server' ? 'Gmail : ' + (HQ.mailAddr || 'serveur') : 'Gmail : non connecté', ENGINE.mail && !CTX.mailErr ? 'ok' : 'off');
   set('calState', ENGINE.cal ? (CTX.calErr ? 'Agenda : à autoriser' : 'Agenda : connecté') : 'Agenda : non connecté', ENGINE.cal && !CTX.calErr ? 'ok' : 'off');
+  const webOk = ENGINE.brain === 'claude' && ENGINE.tools && ENGINE.web;
+  set('webState', webOk ? 'Recherche web : connectée' + (ENGINE.booking ? ' + Booking.com' : '') : 'Recherche web : non connectée', webOk ? 'ok' : 'off');
 }
 let planKey = '';
 function renderPlan() {
@@ -1703,7 +1769,7 @@ function renderPlan() {
   const items = HQ.tasks.filter(t => !t.noJob && t.status !== 'refusee').slice().sort((a, b) => order[a.status] - order[b.status]);
   const key = items.map(t => t.title + t.status + (t.agent || '')).join('|');
   if (key === planKey) return; planKey = key;
-  const color = t => { const a = AGENTS.find(x => x.name === (t.agent || t.target)) || AGENTS.find(x => x.custom.includes(t)); return a ? a.pole.color : poleById(t.mail ? 'ops' : 'edu').color; };
+  const color = t => { const a = AGENTS.find(x => x.name === (t.agent || t.target)) || AGENTS.find(x => x.custom.includes(t)); return a ? a.pole.color : poleById(t.mail ? 'ops' : 'web').color; };
   const who = t => t.agent || t.target || (AGENTS.find(x => x.custom.includes(t)) || {}).name || (t.mail ? 'Ops' : 'Pôle');
   $('plan').innerHTML = items.slice(0, 14).map(t => `<li><i style="background:${color(t)}"></i><span>${esc(t.title)}<small>${esc(who(t))}</small></span><em class="st ${t.status}">${LBL[t.status]}</em></li>`).join('')
     + (items.length > 14 ? `<li><span><small>et ${items.length - 14} autres</small></span></li>` : '');
@@ -1765,6 +1831,7 @@ function renderProfileLive() {
     <b>${a.task ? esc(a.task.title) : (a.courier ? 'Livraison d’un colis' : 'Aucune tâche en cours')}</b>
     <small>${esc(a.doing)}${a.task ? ` · étape ${Math.min(a.stepIdx + 1, a.task.steps.length)}/${a.task.steps.length}` : ''}</small>
     ${a.task ? `<div class="bar"><i style="width:${Math.round(a.progress * 100)}%"></i></div>` : ''}
+    ${a.task && a.task.job && a.task.job.trail && a.task.job.trail.length ? `<small>${a.task.job.trail.length} étape${a.task.job.trail.length > 1 ? 's' : ''} de recherche : ${esc(a.task.job.trail.slice(-3).join(' · '))}</small>` : ''}
     ${a.task && a.task.job && !a.task.job.settled ? (a.task.job.preview ? `<small>${ENGINE.brain === 'claude' ? 'Claude' : 'L’IA'} écrit en ce moment :</small><div class="pf-live">${esc(a.task.job.preview.slice(-320))}</div>` : `<small>${ENGINE.brain === 'claude' ? 'Claude' : 'L’IA'} réfléchit au livrable…</small>`) : ''}
     ${queued ? `<small>${queued} tâche${queued > 1 ? 's' : ''} que tu lui as confiée${queued > 1 ? 's' : ''} en attente</small>` : ''}`;
   const mine = HQ.tasks.filter(t => t.agent === a.name || a.custom.includes(t));

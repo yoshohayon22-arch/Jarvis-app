@@ -278,7 +278,7 @@
     <div class="tabpane" id="tab-day" role="tabpanel" hidden>
       <div class="sec">
         <h2>Journée <em id="dayDate"></em></h2>
-        <div class="states"><span class="pill" id="aiState">IA : recherche…</span><span class="pill" id="mailState">Gmail : recherche…</span><span class="pill" id="calState">Agenda : recherche…</span><span class="pill" id="webState">Recherche web : recherche…</span><span class="pill" id="driveState">Drive : recherche…</span></div>
+        <div class="states"><span class="pill" id="aiState">IA : recherche…</span><span class="pill" id="mailState">Gmail : recherche…</span><span class="pill" id="calState">Agenda : recherche…</span><span class="pill" id="webState">Recherche web : recherche…</span><span class="pill" id="driveState">Drive : recherche…</span><span class="pill" id="studioState">Studio : recherche…</span></div>
         <p class="day-note" id="dayNote">Active le QG : Jarvis lit ton agenda et tes mails non lus, puis te propose le travail de la journée.</p>
         <ol class="plan" id="plan"></ol>
         <button class="btn" id="planBtn" type="button">Planifier la journée</button>
@@ -358,7 +358,7 @@ const POLES = [
       { t:'Repérer les offres d’emploi étudiant publiées cette semaine à Genève', s:['web','web','type'] },
       { t:'Comparer les prix d’un achat prévu (3 boutiques, livraison comprise)', s:['web','web','type'] } ] },
   { id:'soc', name:'Réseaux & Contenu', full:'Réseaux & Contenu', color:'#f97316', bench:0, half:1,
-    agents:[ { name:'Léa', role:'Rédactrice LinkedIn' }, { name:'Noah', role:'Créateur de Reels' }, { name:'Emma', role:'Analyste des stats' } ],
+    agents:[ { name:'Léa', role:'Rédactrice LinkedIn' }, { name:'Noah', role:'Créateur de Reels' }, { name:'Emma', role:'Analyste des stats' }, { name:'Zoé', role:'Directrice artistique · visuels et vidéos', studio:true } ],
     calls:['On valide le post avec MCI Sport ?', 'Tu peux m’envoyer les photos du match ?', 'Le Reel sort demain 18h', 'On tague qui sur LinkedIn ?'],
     tasks:[ { t:'Rédiger le post LinkedIn de la semaine pour MCI Sport', s:['type','meeting'] },
       { t:'Écrire le script d’un Reel Instagram', s:['type','web'] },
@@ -404,6 +404,10 @@ const PROFILES = {
     mission:'Compare des offres, des prix et des produits pour t’aider à choisir.',
     resp:['Trouve les meilleures offres en ligne', 'Compare prix, livraison et avis', 'Recommande un choix clair avec ses raisons'],
     tools:['Recherche web (Firecrawl)', 'Lecture de pages'], projects:['Achats', 'Emplois étudiants'], habit:'Calcule le prix au kilo de tout, même du café.' },
+  Zoé: { who:'L’œil du QG : elle pense en images, en couleurs et en rythme de montage.',
+    mission:'Crée tes posts en image et monte tes vidéos courtes, prêts à publier.',
+    resp:['Conçoit les visuels de posts et de stories dans Canva', 'Monte des vidéos courtes sous-titrées (jusqu’à 90 secondes)', 'Écrit la légende et les hashtags qui vont avec'],
+    tools:['Canva', 'HyperFrames (HeyGen)'], projects:['MCI Sport', 'Réseaux de Yosh'], habit:'Refait toujours une version « plus audacieuse » au cas où.' },
   Léa: { who:'La plume du QG : elle raconte une victoire en trois lignes.',
     mission:'Écrit les posts LinkedIn, en priorité pour MCI Sport.',
     resp:['Rédige le post de la semaine', 'Adapte le ton à chaque club', 'Fait valider avant publication'],
@@ -452,7 +456,7 @@ const BX = 320, BW = 500, BH = 56;
 const seatPos = (bi, half, i, top) => ({ x: BX + half * 250 + 45 + i * 80, y: top ? BENCHES[bi].y - 18 : BENCHES[bi].y + BH + 18, up: !top });
 POLES.forEach(p => {
   if (p.id === 'dir') p.seats = [ { x:1005, y:282, up:false }, { x:1005, y:364, up:true } ];
-  else p.seats = [ seatPos(p.bench, p.half, 0, true), seatPos(p.bench, p.half, 2, false), seatPos(p.bench, p.half, 1, true) ];
+  else p.seats = [ seatPos(p.bench, p.half, 0, true), seatPos(p.bench, p.half, 2, false), seatPos(p.bench, p.half, 1, true), seatPos(p.bench, p.half, 0, false) ];
   p.custom = []; p.done = 0; p.last = null;
 });
 
@@ -702,7 +706,7 @@ function startTask(a) {
   if (!t) return;
   t.started = timeStr(); t.status = 'encours'; t.agent = a.name;
   a.task = t; a.stepIdx = 0; a.stepFrac = 0; a.stats = { calls:0, prints:0 };
-  if (!t.noJob) t.job = t.mail ? mailJob(a, t) : a.pole.research ? researchJob(a, t) : taskJob(a, t);
+  if (!t.noJob) t.job = t.mail ? mailJob(a, t) : a.studio ? studioJob(a, t) : a.pole.research ? researchJob(a, t) : taskJob(a, t);
   log(a, `${a.name} commence : ${t.title}`);
   renderPlan();
 }
@@ -979,17 +983,18 @@ function completeTask(a) {
   } else {
     d = { title: t.title, pole: p.id, agent: a.name, time: stamp(), status: 'ai', spec, content: job.text, requested: !!t.requested, format: t.format || 'document' };
     d.links = buildLinks(job.text, job);
+    if (job.media && job.media.length) { d.media = job.media; d.links = []; }
     if (job.hotels && job.hotels.length) d.tables = [{ name: 'hebergements-' + slug(t.title) + '.csv', rows: job.hotels }];
     log(a, `${a.name} a livré : ${t.title}`, true);
   }
   addDeliv(d); renderPlan();
   if (!t.requested || d.isMail) return;
-  if (ENGINE.drive) exportToDrive(d).then(() => announce(a, d));
+  if (ENGINE.drive && !d.media) exportToDrive(d).then(() => announce(a, d));
   else announce(a, d);
 }
 function announce(a, d) {
   const files = filesOf(d), ok = files.filter(f => f.url).length, nl = linksOf(d).length;
-  const where = ok ? `${ok > 1 ? 'Tes fichiers sont' : 'Ton fichier est'} dans ton Google Drive : ${files.filter(f => f.url).map(f => '« ' + f.name + ' »').join(' et ')}.` : ENGINE.drive ? 'Je n’ai pas pu créer le fichier dans ton Drive : tu peux réessayer depuis l’onglet Fichiers.' : 'Le fichier est prêt à télécharger.';
+  const where = d.media ? `${d.media[0].kind === 'image' ? 'Ton visuel est dans ton Canva : ouvre-le' : 'Ta vidéo est dans ton espace HeyGen : ouvre-la'} depuis l’onglet Fichiers, avec la légende prête à publier dans le casier.` : ok ? `${ok > 1 ? 'Tes fichiers sont' : 'Ton fichier est'} dans ton Google Drive : ${files.filter(f => f.url).map(f => '« ' + f.name + ' »').join(' et ')}.` : ENGINE.drive ? 'Je n’ai pas pu créer le fichier dans ton Drive : tu peux réessayer depuis l’onglet Fichiers.' : 'Le fichier est prêt à télécharger.';
   agentSays(a, `C’est prêt : « ${d.title} ». ${where}${nl ? ` J’ai aussi mis ${nl} lien${nl > 1 ? 's' : ''} dans l’onglet Fichiers.` : ''} Dis-moi si tu veux que j’ajuste.`, { delivId: d.id });
 }
 const stamp = () => new Date().toLocaleString('fr-CH', { day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' });
@@ -997,11 +1002,11 @@ const stamp = () => new Date().toLocaleString('fr-CH', { day:'2-digit', month:'2
 /* ======================================================================
    Moteur réel : Claude (sur claude.ai) ou le serveur Jarvis, Gmail, agenda
    ====================================================================== */
-const ENGINE = { brain:null, mail:null, cal:false, web:false, booking:false, drive:false, tools:false, sample:null, mcp:null, blocked:null };
+const ENGINE = { brain:null, mail:null, cal:false, web:false, booking:false, drive:false, canva:false, video:false, tools:false, sample:null, mcp:null, blocked:null };
 const KIND_STEPS = { redaction:['type','type'], recherche:['web','type'], appel:['call','type'], impression:['type','print'], reunion:['meeting','type'] };
 const ERR = { not_granted:'Tu n’as pas autorisé Claude pour cette page.', sampling_disabled:'Claude n’est pas disponible sur ce compte.', rate_limited:'Trop de demandes à Claude pour le moment : réessaie un peu plus tard.',
   session_expired:'Ta session claude.ai a expiré : reconnecte-toi.', refused:'Claude a refusé cette demande.', no_brain:'Aucune IA connectée.', no_mail:'Boîte mail non connectée.',
-  invalid_json:'La réponse de l’IA était illisible.', no_web:'Recherche web indisponible : ouvre le QG depuis claude.ai avec le connecteur Firecrawl (et Booking.com pour les hôtels).',
+  invalid_json:'La réponse de l’IA était illisible.', no_studio:'Aucun outil de création connecté : ajoute Canva (visuels) ou HyperFrames by HeyGen (vidéos) dans les connecteurs de claude.ai.', no_web:'Recherche web indisponible : ouvre le QG depuis claude.ai avec le connecteur Firecrawl (et Booking.com pour les hôtels).',
   tools_unavailable:'Cette version de claude.ai ne permet pas encore à Claude d’utiliser des outils depuis la page.', needs_reauth:'Reconnecte le connecteur dans les réglages de claude.ai.', server_not_connected:'Ajoute le connecteur dans les réglages de claude.ai.',
   not_in_manifest:'Tu n’as pas autorisé ce connecteur pour cette page.', approval_required:'Cette action attend ton accord.' };
 const errText = e => ERR[e && e.code] || ('Erreur : ' + ((e && e.message) || 'inconnue'));
@@ -1016,7 +1021,8 @@ async function initEngine() {
     if (mcp) {
       ENGINE.mcp = mcp;
       try { const names = (await mcp.listTools()).servers.map(x => x.server); if (names.includes('Gmail')) ENGINE.mail = 'gmail'; if (names.includes('Google Calendar')) ENGINE.cal = true;
-        if (names.includes('Firecrawl')) ENGINE.web = true; if (names.includes('Booking.com')) ENGINE.booking = true; if (names.includes('Google Drive')) ENGINE.drive = true; } catch (e) {}
+        if (names.includes('Firecrawl')) ENGINE.web = true; if (names.includes('Booking.com')) ENGINE.booking = true; if (names.includes('Google Drive')) ENGINE.drive = true;
+        if (names.includes('Canva')) ENGINE.canva = true; if (names.includes('HyperFrames by HeyGen')) ENGINE.video = true; } catch (e) {}
       if (sample) { try { ENGINE.tools = !!(await sample.limits()).tools; } catch (e) {} }
     }
   }
@@ -1156,6 +1162,7 @@ async function exportToDrive(d, only) {
 // fichiers affichés : seulement pour tes demandes
 function filesOf(d) {
   if (!d.requested || d.isMail || d.status === 'err') return [];
+  if (d.media) return d.media.map((m, i) => ({ key: d.id + ':media' + i, name: m.title, type: m.kind, label: m.kind === 'image' ? 'Visuel Canva · ' + m.format : 'Vidéo HeyGen · ' + m.format, url: m.url, file: m.file, status: 'ok', d }));
   if (d.drive) return d.drive.map((f, i) => ({ key: d.id + ':drive' + i, name: f.name, type: f.kind === 'sheet' ? 'sheet' : 'gdoc', label: f.kind === 'sheet' ? 'Google Sheets' : 'Google Docs', url: f.url, status: f.status, error: f.error, ref: f, d }));
   if (ENGINE.drive) return wantedFiles(d).map((w, i) => ({ key: d.id + ':todo' + i, name: w.name, type: w.kind === 'sheet' ? 'sheet' : 'gdoc', label: 'À créer dans Drive', status: 'todo', d }));
   // sans Drive (en local) : fichiers à télécharger
@@ -1164,7 +1171,7 @@ function filesOf(d) {
   return f;
 }
 const linksOf = d => (!d.requested || d.isMail || d.status === 'err') ? [] : (d.links || buildLinks(d.content)).map(l => ({ ...l, d }));
-const FT = { gdoc: ['DOC', '#2563eb'], sheet: ['SHEET', '#15803d'], md: ['DOC', '#2563eb'], csv: ['CSV', '#15803d'] };
+const FT = { gdoc: ['DOC', '#2563eb'], sheet: ['SHEET', '#15803d'], md: ['DOC', '#2563eb'], csv: ['CSV', '#15803d'], image: ['IMAGE', '#db2777'], video: ['VIDÉO', '#7c3aed'] };
 async function saveFile(name, text, onMsg) {
   if (STORE.dl) { try { await STORE.dl.save({ filename: name, data: text }); onMsg && onMsg('Fichier enregistré.'); } catch (err) { onMsg && onMsg(err.code === 'declined' ? '' : 'Téléchargement impossible ici.'); } return; }
   if (window.claude && window.claude.use) { onMsg && onMsg('Téléchargement indisponible dans cette vue.'); return; }
@@ -1179,7 +1186,7 @@ function fileRow(f) {
   const [lbl, col] = FT[f.type] || FT.gdoc;
   const name = f.url ? `<a href="${esc(f.url)}" target="_blank" rel="noopener noreferrer">${esc(f.name)}</a>` : `<b>${esc(f.name)}</b>`;
   const state = f.status === 'creating' ? 'Création dans ton Drive…' : f.status === 'err' ? 'Échec : ' + (f.error || 'erreur') : f.status === 'todo' ? 'Pas encore dans ton Drive' : f.label;
-  const act = f.url ? `<a class="open-deliv" href="${esc(f.url)}" target="_blank" rel="noopener noreferrer">Ouvrir</a>`
+  const act = f.url ? `<a class="open-deliv" href="${esc(f.url)}" target="_blank" rel="noopener noreferrer">Ouvrir</a>${f.file ? `<a class="open-deliv" href="${esc(f.file)}" target="_blank" rel="noopener noreferrer">${f.type === 'video' ? 'MP4' : 'PNG'}</a>` : ''}`
     : (f.status === 'err' || f.status === 'todo') ? `<button type="button" data-redrive="${esc(f.d.id)}">${f.status === 'todo' ? 'Créer le fichier' : 'Réessayer'}</button>`
     : f.make ? `<button type="button" data-file="${esc(f.key)}">Télécharger</button>` : '';
   return `<li class="frow ${f.d.filesSeen ? '' : 'new'}"><span class="ic" style="background:${col}">${lbl}</span><span>${name}<small>${esc(state)} · ${esc(f.d.agent)} · ${esc(f.d.time)}</small></span>${act}<button type="button" data-see="${esc(f.d.id)}">Voir</button></li>`;
@@ -1203,6 +1210,90 @@ function renderFiles() {
       <span><a href="${esc(l.url)}" target="_blank" rel="noopener noreferrer">${esc(l.title)}</a><small>${esc(host(l.url))} · ${esc(l.d.agent)} · ${esc(l.d.title)}</small></span>
       <button type="button" data-copy="${esc(l.url)}">Copier</button></li>`).join('')
     : `<li class="frow"><span><small>${q ? 'Aucun lien ne correspond.' : 'Les liens trouvés pour tes demandes (sources, réservations…) arrivent ici.'}</small></span></li>`;
+}
+
+/* ---------- Studio de Zoé : vrais visuels (Canva) et vraies vidéos (HyperFrames) ---------- */
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+function deepWalk(o, f, k = '') { if (o && typeof o === 'object') Object.entries(o).forEach(([kk, v]) => deepWalk(v, f, kk)); else f(k, o); }
+const urlsIn = o => { const out = []; deepWalk(o, (k, v) => { if (typeof v === 'string' && /^https?:\/\//.test(v)) out.push({ k, v }); }); return out; };
+const valIn = (o, keys) => { let r = null; deepWalk(o, (k, v) => { if (r == null && keys.includes(k) && (typeof v === 'string' || typeof v === 'number') && v !== '') r = v; }); return r; };
+const designIdIn = o => { let r = null; deepWalk(o, (k, v) => { if (!r && typeof v === 'string' && /^D[A-Za-z0-9_-]{10}$/.test(v)) r = v; }); return r; };
+function studioJob(a, t) {
+  const job = { settled:false, ok:false, text:'', preview:'', trail:[], media:[] };
+  const note = txt => { job.preview = txt; if (job.trail[job.trail.length - 1] !== txt) job.trail.push(txt); };
+  const intent = 'QG Jarvis : création demandée par Yosh pour ses réseaux';
+  (async () => {
+    if (!ENGINE.brain) throw { code:'no_brain' };
+    if (!ENGINE.canva && !ENGINE.video) throw { code:'no_studio' };
+    note('✏️ Zoé prépare le brief créatif');
+    const plan = await brainAsk(`${persona(a)}
+
+Nous sommes le ${todayLabel()}.
+Demande de Yosh : ${t.title}
+${t.brief ? 'Détails : ' + t.brief + '\n' : ''}
+Outils disponibles : ${[ENGINE.canva && 'Canva pour les visuels (posts, stories, affiches)', ENGINE.video && 'HyperFrames pour les vidéos courtes animées et sous-titrées (90 secondes au plus)'].filter(Boolean).join(' ; ')}.
+Prépare la production. Choisis "image" pour un post, une story, une affiche ou une miniature, "video" pour une vidéo, un Reel ou un montage.
+Réponds uniquement avec un objet JSON :
+{"media":"image|video","format":"Instagram Post|Instagram Story|LinkedIn Post|Facebook Post|YouTube Thumbnail|Poster","brief":"brief détaillé pour l’outil : sujet, textes exacts à afficher, style, couleurs, ambiance, et pour une vidéo le déroulé scène par scène","legende":"légende prête à publier, avec hashtags","duree":30}`, { asJson: true });
+    const want = plan && plan.media === 'video' ? 'video' : 'image';
+    const media = want === 'video' ? (ENGINE.video ? 'video' : 'image') : (ENGINE.canva ? 'image' : 'video');
+    const brief = String((plan && plan.brief) || t.brief || t.title).slice(0, 3000);
+    const format = String((plan && plan.format) || (media === 'video' ? 'Instagram Story' : 'Instagram Post'));
+    if (media === 'image') {
+      note('🎨 Canva crée le visuel…');
+      let r = await ENGINE.mcp.callTool('Canva', 'create-design', { brief, format, user_intent: intent });
+      let pl = (r && r.payload) || {};
+      const jobId = valIn(pl, ['job_id', 'jobId']); let token = valIn(pl, ['continuation_token', 'continuationToken']);
+      const t0 = Date.now();
+      while (!designIdIn(pl) && Date.now() - t0 < 5 * 60e3) {
+        const st = String(valIn(pl, ['status', 'state']) || '').toLowerCase();
+        if (/fail|error|cancel/.test(st)) throw { code:'studio', message:'Canva n’a pas pu créer le visuel' + (valIn(pl, ['message', 'error_message']) ? ' : ' + valIn(pl, ['message', 'error_message']) : '') };
+        if (!jobId || !token) break;
+        await sleep(clamp(Number(valIn(pl, ['wait_seconds'])) || 5, 2, 30) * 1000);
+        note('🎨 Canva peaufine le visuel…');
+        r = await ENGINE.mcp.callTool('Canva', 'get-create-design-async-job', { job_id: String(jobId), continuation_token: String(token), user_intent: intent });
+        pl = (r && r.payload) || {}; token = valIn(pl, ['continuation_token', 'continuationToken']) || token;
+      }
+      const designId = designIdIn(pl);
+      if (!designId) throw { code:'studio', message:'Canva n’a pas terminé le visuel à temps. Il est peut-être dans tes designs récents.' };
+      const urls = urlsIn(pl).map(x => x.v);
+      const edit = urls.find(u => /canva\.com\/design\/.*edit/.test(u)) || urls.find(u => /canva\.com\/design\//.test(u)) || `https://www.canva.com/design/${designId}/edit`;
+      let png = '';
+      try {
+        note('🖼️ Export en PNG');
+        const ex = await ENGINE.mcp.callTool('Canva', 'export-design', { design_id: designId, format: { type: 'png' }, user_intent: intent });
+        png = urlsIn(ex && ex.payload).map(x => x.v).find(u => !/canva\.com\/design\//.test(u)) || '';
+      } catch (e) {}
+      job.media.push({ kind:'image', title: t.title, url: edit, file: png, format });
+    } else {
+      note('🎬 HyperFrames monte la vidéo…');
+      const r = await ENGINE.mcp.callTool('HyperFrames by HeyGen', 'compose', { prompt: `${brief}\n\nDurée cible : ${clamp(Number(plan && plan.duree) || 30, 10, 90)} secondes. Format : ${format} (vertical si story ou Reel). Textes et voix en français.` });
+      const pid = valIn(r && r.payload, ['project_id', 'projectId']) || valIn(r && r.payload, ['id']);
+      if (!pid) throw { code:'studio', message:'HyperFrames n’a pas renvoyé de projet.' };
+      let pl = {}, st = '';
+      const t0 = Date.now();
+      while (Date.now() - t0 < 15 * 60e3) {
+        const s2 = await ENGINE.mcp.callTool('HyperFrames by HeyGen', 'get_project_status', { projectId: String(pid) });
+        pl = (s2 && s2.payload) || {}; st = String(valIn(pl, ['session_status']) || '').toLowerCase();
+        note('🎬 Montage en cours' + (st ? ' (' + st + ')' : '') + '…');
+        if (st === 'draft' || st === 'completed') break;
+        if (['error', 'failed', 'deleted'].includes(st)) throw { code:'studio', message:'HyperFrames n’a pas pu monter la vidéo.' };
+        if (st === 'waiting') throw { code:'studio', message:'HyperFrames attend une précision : ' + String(valIn(pl, ['latest_agent_message']) || '').slice(0, 240) };
+        await sleep(clamp(Number(valIn(pl, ['retry_after_seconds'])) || 15, 5, 60) * 1000);
+      }
+      if (st !== 'draft' && st !== 'completed') throw { code:'studio', message:'Le montage prend plus de 15 minutes : retrouve-le dans HeyGen.' };
+      let urls = urlsIn(pl).map(x => x.v);
+      if (!urls.some(u => /\.mp4(\?|$)/i.test(u))) { try { const g = await ENGINE.mcp.callTool('HyperFrames by HeyGen', 'get_project', { projectId: String(pid) }); urls = urls.concat(urlsIn(g && g.payload).map(x => x.v)); } catch (e) {} }
+      const mp4 = urls.find(u => /\.mp4(\?|$)/i.test(u)) || '';
+      job.media.push({ kind:'video', title: t.title, url: `https://app.heygen.com/projects/${pid}`, file: mp4, format });
+    }
+    const m = job.media[0];
+    job.text = [`${m.kind === 'image' ? 'Visuel' : 'Vidéo'} au format ${m.format}.`, '',
+      'Ouvrir et modifier : ' + m.url, m.file ? (m.kind === 'image' ? 'Image PNG : ' : 'Vidéo MP4 : ') + m.file : '', '',
+      'Légende proposée :', String((plan && plan.legende) || '[à compléter]'), '', 'Brief de création :', brief].filter((x, i, arr) => x !== '' || arr[i - 1] !== '').join('\n');
+    job.ok = true;
+  })().catch(e => { job.error = e; }).finally(() => { job.settled = true; });
+  return job;
 }
 
 function researchJob(a, t) {
@@ -1854,7 +1945,7 @@ ${convo}
 
 Réponds à Yosh en tant que ${a.name}, en français, naturellement et brièvement (2 à 6 phrases), dans ton rôle.
 - S’il te demande de produire, refaire ou modifier quelque chose et que c’est assez clair, propose une tâche : elle partira dès que Yosh l’aura validée, et le résultat arrivera dans son casier. Dis-lui ce que tu livreras et qu’il n’a plus qu’à valider.
-- Si la demande est floue, pose une ou deux questions précises au lieu de créer une tâche.${a.pole.research ? '\n- Tu fais des recherches réelles sur internet. Pour un hôtel il te faut au minimum la ville ou le lieu, les dates et le nombre de personnes ; demande le budget s’il compte. Mets toutes ces informations dans "precisions".' : ''}
+- Si la demande est floue, pose une ou deux questions précises au lieu de créer une tâche.${a.studio ? '\n- Tu crées de vrais visuels (Canva) et de vraies vidéos courtes (HyperFrames, 90 secondes au plus). Avant de proposer la tâche, assure-toi de connaître : le réseau ou le format (post Instagram, story, LinkedIn…), le message ou les textes à afficher, et pour une vidéo la durée et le ton. Mets tout dans "precisions".' : ''}${a.pole.research ? '\n- Tu fais des recherches réelles sur internet. Pour un hôtel il te faut au minimum la ville ou le lieu, les dates et le nombre de personnes ; demande le budget s’il compte. Mets toutes ces informations dans "precisions".' : ''}
 - S’il veut juste discuter ou une information rapide, réponds sans créer de tâche.
 - N’invente aucun fait sur Yosh.
 - Le résultat sera livré à Yosh sous forme de fichier dans son Google Drive : "document" (Google Docs) par défaut, "tableur" (Google Sheets) s’il veut un tableau, une liste chiffrée ou un comparatif à trier, "document+tableur" s’il veut les deux. S’il précise un format, respecte-le.
@@ -1915,6 +2006,7 @@ function renderEngine() {
   const webOk = ENGINE.brain === 'claude' && ENGINE.tools && ENGINE.web;
   set('webState', webOk ? 'Recherche web : connectée' + (ENGINE.booking ? ' + Booking.com' : '') : 'Recherche web : non connectée', webOk ? 'ok' : 'off');
   set('driveState', ENGINE.drive ? 'Drive : tes fichiers y sont créés' : 'Drive : non connecté', ENGINE.drive ? 'ok' : 'off');
+  set('studioState', ENGINE.canva || ENGINE.video ? 'Studio : ' + [ENGINE.canva && 'Canva', ENGINE.video && 'vidéo HeyGen'].filter(Boolean).join(' + ') : 'Studio : non connecté', ENGINE.canva || ENGINE.video ? 'ok' : 'off');
 }
 let planKey = '';
 function renderPlan() {

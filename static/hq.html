@@ -41,7 +41,44 @@
 
   main{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:16px;align-items:start;padding-block:16px 40px;
     padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px))}
-  .stage{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--surface)}
+  .stage{position:relative;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--surface)}
+  .profile{position:absolute;top:12px;width:330px;max-height:calc(100% - 24px);overflow:auto;background:var(--surface);color:var(--ink);
+    border:1px solid var(--line);border-radius:14px;box-shadow:0 14px 36px rgba(20,18,16,.22);padding:16px;display:flex;flex-direction:column;gap:14px}
+  .profile.l{left:12px} .profile.r{right:12px}
+  .pf-head{display:flex;gap:12px;align-items:center}
+  .pf-av{width:54px;height:54px;border-radius:50%;flex:none;box-shadow:0 0 0 3px var(--surface), 0 0 0 5px var(--pc)}
+  .pf-head h3{margin:0;font:800 22px/1.1 var(--display)}
+  .pf-head p{margin:2px 0 0;color:var(--muted);font-size:13.5px}
+  .pf-chip{display:inline-block;margin-top:5px;font:700 11.5px var(--body);color:#fff;background:var(--pc);border-radius:99px;padding:2px 9px}
+  .pf-close{margin-left:auto;align-self:flex-start;background:transparent;border:1px solid var(--line);color:var(--ink);border-radius:50%;width:30px;height:30px;font:600 16px var(--body);cursor:pointer;flex:none}
+  .pf-sec{display:flex;flex-direction:column;gap:6px}
+  .pf-sec h4{margin:0;font:600 11px var(--body);text-transform:uppercase;letter-spacing:.12em;color:var(--muted)}
+  .pf-sec p{margin:0;font-size:14px;line-height:1.5}
+  .pf-sec ul{margin:0;padding-left:18px;font-size:14px;line-height:1.5;display:flex;flex-direction:column;gap:2px}
+  .pf-tags{display:flex;flex-wrap:wrap;gap:6px}
+  .pf-tags span{font-size:12.5px;background:var(--surface2);border:1px solid var(--line);border-radius:99px;padding:2px 9px}
+  .pf-now{background:var(--surface2);border-radius:10px;padding:10px 12px;display:flex;flex-direction:column;gap:4px;font-size:14px}
+  .pf-now small{color:var(--muted)}
+  .pf-status{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600}
+  .pf-status i{width:8px;height:8px;border-radius:50%;background:var(--pc)}
+  .pf-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+  .pf-stats div{background:var(--surface2);border-radius:8px;padding:6px 8px;min-width:0}
+  .pf-stats b{display:block;font:800 17px var(--display);font-variant-numeric:tabular-nums}
+  .pf-stats span{font-size:11px;color:var(--muted)}
+  .pf-hist{list-style:none;padding:0 !important;font-size:13px !important}
+  .pf-hist li{display:flex;gap:8px}
+  .pf-hist time{color:var(--muted);font-variant-numeric:tabular-nums;flex:none}
+  .pf-form{display:flex;gap:6px}
+  .pf-form input{flex:1;min-width:0;background:var(--surface2);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:8px 10px;font:14px var(--body)}
+  .team{display:flex;flex-direction:column;gap:10px}
+  .team-pole{display:flex;flex-direction:column;gap:4px}
+  .team-pole > span{font-size:12px;font-weight:700;display:flex;align-items:center;gap:6px}
+  .team-pole > span i{width:9px;height:9px;border-radius:3px}
+  .team-row{display:flex;flex-wrap:wrap;gap:6px}
+  .mate{display:inline-flex;align-items:center;gap:6px;background:var(--surface2);border:1px solid var(--line);border-radius:99px;padding:3px 10px 3px 4px;font:600 13px var(--body);color:var(--ink);cursor:pointer}
+  .mate .av{width:20px;height:20px;border-radius:50%}
+  .mate em{font-style:normal;font-weight:500;color:var(--muted);font-size:12px;max-width:120px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .mate[aria-pressed="true"]{border-color:var(--accent);box-shadow:0 0 0 2px color-mix(in srgb, var(--accent) 30%, transparent)}
   canvas{display:block;width:100%}
   .kpis{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;margin-top:10px}
   .kpi{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:8px 12px;min-width:0}
@@ -97,6 +134,7 @@
   #dlgBody{white-space:pre-wrap;padding:14px 16px;max-height:60vh;overflow:auto;font:14px/1.6 var(--body);margin:0}
   .dlg-f{display:flex;gap:8px;justify-content:flex-end;padding:12px 16px;border-top:1px solid var(--line)}
   @media (max-width:1020px){ main{grid-template-columns:1fr} .kpis{grid-template-columns:repeat(3,minmax(0,1fr))} }
+  @media (max-width:760px){ .profile{position:static;width:auto;max-height:none;box-shadow:none;border:0;border-top:1px solid var(--line);border-radius:0} }
   @media (max-width:520px){ .brand small{display:none} .clock{min-width:0} }
 </style>
 </head>
@@ -110,7 +148,7 @@
 
 <main>
   <section>
-    <div class="stage"><canvas id="office" aria-label="Open space du QG"></canvas></div>
+    <div class="stage"><canvas id="office" aria-label="Open space du QG"></canvas><div class="profile" id="profile" role="dialog" aria-label="Profil de l’agent" hidden></div></div>
     <div class="kpis">
       <div class="kpi"><b id="kAgents">0</b><span>présents</span></div>
       <div class="kpi"><b id="kDone">0</b><span>tâches finies</span></div>
@@ -122,7 +160,7 @@
   </section>
 
   <aside>
-    <div class="card" id="agentCard"><h2>Agent</h2><div class="empty">Clique sur un agent dans l’open space pour voir ce qu’il fait.</div></div>
+    <div class="card"><h2>L’équipe <em>clique sur un agent</em></h2><div class="team" id="team"></div></div>
 
     <div class="card">
       <h2>Confier une tâche</h2>
@@ -213,6 +251,68 @@ const POLES = [
       { t:'Surveiller la boîte de réception', s:['read'], watch:true, needMail:true } ] },
 ];
 const poleById = id => POLES.find(p => p.id === id) || POLES[0];
+
+/* Qui est chaque agent, et quel est son job au QG */
+const PROFILES = {
+  Jarvis: { who:'L’IA qui dirige le QG. Inspiré de l’assistant de Tony Stark : poli, efficace, avec une pointe d’humour britannique.',
+    mission:'Chef d’orchestre : il répartit le travail entre les pôles et veille à ce que tes priorités avancent.',
+    resp:['Anime le stand-up de 9h30 devant les post-its', 'Fait le tour des équipes et débloque les sujets', 'Prépare ton brief du matin et le bilan du soir'],
+    tools:['Agenda', 'Brief quotidien', 'Tous les pôles'], projects:['Jarvis-app'], habit:'Ne boit jamais de café, mais en propose toujours.' },
+  Clara: { who:'Organisée et discrète, elle est la mémoire du QG.',
+    mission:'Transforme les décisions de Jarvis en tâches claires pour chaque pôle.',
+    resp:['Prépare les réunions et note les décisions', 'Planifie la semaine avec Jarvis', 'Rédige le bilan de fin de journée'],
+    tools:['Google Agenda', 'Docs'], projects:['Organisation du QG'], habit:'Arrive avec un carnet, repart avec trois listes.' },
+  Inès: { who:'Elle a galéré avant ses examens et veut construire l’appli qu’elle aurait aimé avoir.',
+    mission:'Décide quoi construire en premier dans tes apps de révision.',
+    resp:['Tient la roadmap de Smart Study Buddy', 'Regroupe les doublons : Study Buddy, Study Companion, Repères Scolaires', 'Valide chaque mise en ligne'],
+    tools:['Lovable', 'Mur de post-its'], projects:['Smart Study Buddy', 'Study Companion', 'Repères Scolaires'], habit:'Dessine les écrans au feutre avant tout le monde.' },
+  Yanis: { who:'Rapide et minutieux, fan des interfaces mobiles.',
+    mission:'Construit les écrans des apps de révision.',
+    resp:['Développe les quiz et les flashcards', 'Corrige les bugs remontés par Chloé', 'Rend les apps agréables sur téléphone'],
+    tools:['Lovable', 'TanStack Start'], projects:['Dossier Interactif', 'Your Study Buddy'], habit:'Casque sur les oreilles dès 9h31.' },
+  Chloé: { who:'La voix des élèves au QG.',
+    mission:'Vérifie que les apps aident vraiment à réviser.',
+    resp:['Teste chaque nouvelle version', 'Appelle des élèves testeurs', 'Fait remonter les bugs et les idées'],
+    tools:['Téléphone', 'Fiches de test'], projects:['Dossier Interactif', 'Smart Study Buddy'], habit:'Passe plus de temps dans les box qu’à son bureau.' },
+  Léa: { who:'La plume du QG : elle raconte une victoire en trois lignes.',
+    mission:'Écrit les posts LinkedIn, en priorité pour MCI Sport.',
+    resp:['Rédige le post de la semaine', 'Adapte le ton à chaque club', 'Fait valider avant publication'],
+    tools:['LinkedIn', 'Typefully'], projects:['MCI Sport'], habit:'Relit chaque post à voix haute.' },
+  Noah: { who:'Le plus créatif du pôle, toujours un téléphone à la main.',
+    mission:'Imagine et scénarise les Reels Instagram.',
+    resp:['Écrit les scripts de Reels', 'Trouve les accroches des trois premières secondes', 'Prépare les plans à tourner'],
+    tools:['Instagram', 'Notes de tournage'], projects:['MCI Sport'], habit:'Champion officieux du ping-pong.' },
+  Emma: { who:'Elle croit aux chiffres plus qu’aux impressions.',
+    mission:'Mesure ce qui marche sur les réseaux et le dit à l’équipe.',
+    resp:['Analyse les stats Metricool', 'Imprime le rapport de la semaine', 'Propose quoi refaire et quoi arrêter'],
+    tools:['Metricool', 'Tableurs'], projects:['MCI Sport'], habit:'Toujours une gourde pleine sur le bureau.' },
+  Hugo: { who:'Il connaît chaque ligne de Jarvis.',
+    mission:'Fait évoluer Jarvis et ce QG.',
+    resp:['Ajoute de nouvelles fonctions à Jarvis', 'Branche le QG sur Gmail et l’agenda', 'Fait la revue de code'],
+    tools:['Flask', 'OpenAI', 'GitHub'], projects:['Jarvis-app'], habit:'Se lève pour s’étirer toutes les heures.' },
+  Malik: { who:'Passionné de voix et de téléphonie.',
+    mission:'Donne une voix aux agents du QG.',
+    resp:['Configure les agents vocaux ElevenLabs', 'Teste les conversations au téléphone', 'Connecte les agents à tes outils'],
+    tools:['ElevenLabs'], projects:['Agents vocaux'], habit:'Teste ses agents en appelant depuis un box.' },
+  Sofia: { who:'Calme même quand un serveur tombe.',
+    mission:'Relie les outils entre eux et met les projets en ligne.',
+    resp:['Corrige les bugs de Send Me Files', 'Déploie les nouvelles versions', 'Surveille que tout tourne'],
+    tools:['Lovable', 'GitHub'], projects:['Send Me Files', 'Clear Path Organizer'], habit:'Premier café à 9h01 précises.' },
+  Max: { who:'Rien ne lui échappe dans une boîte de réception.',
+    mission:'Lit tes mails, repère l’urgent et prépare les réponses.',
+    resp:['Relève tes mails non lus toutes les 90 secondes', 'Classe chaque mail par priorité', 'Enregistre des brouillons dans Gmail, sans jamais rien envoyer'],
+    tools:['Gmail'], projects:['Ta boîte mail'], habit:'Dit « rien de neuf » plus souvent qu’il ne le voudrait.' },
+  Jade: { who:'Patiente avec les guichets, tenace avec les relances.',
+    mission:'Mène tes démarches administratives à Genève.',
+    resp:['Demandes à l’état civil', 'Relance les services sans réponse', 'Monte le dossier de pièces justificatives'],
+    tools:['Téléphone', 'Scanner'], projects:['Attestation et acte de naissance'], habit:'Classe tout, même les post-its.' },
+  Lucas: { who:'Optimiste, il voit une opportunité dans chaque vitrine.',
+    mission:'Te trouve un emploi étudiant à temps partiel.',
+    resp:['Repère les offres à Genève', 'Rédige les candidatures spontanées', 'Relance les commerces sans réponse'],
+    tools:['CV', 'Lettres de motivation'], projects:['Candidatures aux Eaux-Vives'], habit:'Imprime ses lettres pour les relire au stylo.' },
+  Livreur: { who:'Livreur de passage, il ne fait pas partie de l’équipe.',
+    mission:'Dépose les colis à l’accueil du QG.', resp:['Passe vers 10h40 et 15h10'], tools:[], projects:[], habit:'Ne reste jamais pour le café.' },
+};
 
 /* ----------------------------------------------------------------------
    Plan
@@ -407,6 +507,8 @@ class Agent {
     this.energy = rnd(50, 100); this.bladder = rnd(0, 60); this.hold = null; this.holdT = 0; this.headset = false;
     this.anim = 'idle'; this.bubble = null; this.face = Math.PI / 2; this.walkT = 0; this.stretchT = 0;
     this.doing = 'Pas encore arrivé'; this.speed = rnd(62, 76); this.done = 0; this.papers = 0; this.ate = false;
+    this.coffeesN = 0; this.callsN = 0; this.printsN = 0; this.history = []; this.custom = [];
+    Object.assign(this, PROFILES[def.name] || {});
   }
   goTo(x, y) { this.path = findPath(this.x, this.y, x, y); this.moving = this.path.length > 0; }
   say(text, dur = 3.2) { this.bubble = { text, t: dur, max: dur }; }
@@ -457,7 +559,8 @@ function plan(a) {
 
 function startTask(a) {
   const p = a.pole; let t;
-  if (p.custom.length) t = p.custom.shift();
+  if (a.custom.length) t = a.custom.shift();
+  else if (p.custom.length) t = p.custom.shift();
   else {
     const pool = p.tasks.filter(x => x.t !== p.last && !(x.needMail && !HQ.mail) && !(x.noMail && HQ.mail));
     const tpl = pick(pool.length ? pool : p.tasks); p.last = tpl.t;
@@ -485,7 +588,7 @@ function planStep(a) {
     case 'read': L.push(back, sit(rnd(6, 9), 'mail', a.task.mail ? `Lit le mail de ${a.task.mail.from_name}` : 'Lit les mails', [0, 1], { onStart: x => x.say(x.task && x.task.mail ? '📧 ' + x.task.mail.subject : '📧 Je lis les mails…', 3.5) })); break;
     case 'reply': L.push(back, sit(rnd(8, 12), 'type', 'Rédige le brouillon de réponse', [0, 1], { onStart: x => x.say('✉️ Je prépare la réponse…') })); break;
     case 'call': {
-      const line = pick(p.calls), go = x => { HQ.calls++; x.stats.calls++; };
+      const line = pick(p.calls), go = x => { HQ.calls++; x.stats.calls++; x.callsN++; };
       const r = Math.random();
       if (r < .45 && AMEN.booth.users.includes(null)) {
         L.push(Act.amenity('booth', rnd(9, 13), { label:'Au téléphone dans un box', work:[0,1], onStart: x => { go(x); x.say('📞 ' + line, 4); },
@@ -499,7 +602,7 @@ function planStep(a) {
     }
     case 'print':
       L.push(back, sit(rnd(4, 6), 'type', 'Prépare le document à imprimer', [0, 2], { onEnd: x => x.say('🖨 J’imprime !', 2) }),
-        Act.amenity('printer', 3.2, { label:'À l’imprimante', work:[1,2], onEnd: x => { x.hold = 'paper'; x.holdT = 60; HQ.prints += 2; x.stats.prints += 2; } }),
+        Act.amenity('printer', 3.2, { label:'À l’imprimante', work:[1,2], onEnd: x => { x.hold = 'paper'; x.holdT = 60; HQ.prints += 2; x.stats.prints += 2; x.printsN += 2; } }),
         back, Act.fn(x => { x.hold = null; x.papers = Math.min(4, x.papers + 1); }));
       break;
     case 'meeting':
@@ -525,7 +628,7 @@ function planBreak(a) {
   const back = Act.walk(a.seat.x, a.seat.y, { label:'Retourne à son bureau' });
   const waitingPing = AMEN.pingpong.users.filter(Boolean).length === 1;
   const r = waitingPing ? (Math.random() < .7 ? .99 : Math.random()) : Math.random();
-  if (r < .34) return [Act.amenity('coffee', 4, { label:'Pause café', onStart: x => { x.say('☕ Un petit café…'); HQ.coffees++; }, onEnd: x => { x.hold = 'coffee'; x.holdT = 40; x.energy = 100; } }),
+  if (r < .34) return [Act.amenity('coffee', 4, { label:'Pause café', onStart: x => { x.say('☕ Un petit café…'); HQ.coffees++; x.coffeesN++; }, onEnd: x => { x.hold = 'coffee'; x.holdT = 40; x.energy = 100; } }),
       ...(Math.random() < .45 ? [Act.amenity('bar', 4, { label:'Discute au mange-debout', onStart: x => x.say(pick(['Tu as vu le dernier post ?', 'Grosse journée aujourd’hui', 'Il est bon ce café', 'Le ping-pong à 16h ?'])) })] : []), back];
   if (r < .5) return [Act.amenity('water', 3, { label:'Remplit sa gourde', onStart: x => x.say('💧 Je remplis ma gourde'), onEnd: x => { x.hold = 'bottle'; x.holdT = 50; x.energy = Math.max(x.energy, 80); } }), back];
   if (r < .62) return [Act.amenity('fridge', 3, { label:'Ouvre le frigo', onStart: x => x.say(pick(['🧊 Un yaourt…', '🥤 Une boisson fraîche'])), onEnd: x => { x.energy = Math.max(x.energy, 85); } }), back];
@@ -652,6 +755,7 @@ function completeTask(a) {
   a.task = null;
   if (t.watch) { a.say(pick(['📭 Rien de neuf', 'Boîte à jour ✓', 'J’attends le prochain mail']), 2.2); return; }
   a.done++; p.done++; HQ.done++;
+  a.history.unshift({ t: t.title, time: timeStr() }); a.history.length = Math.min(a.history.length, 5);
   highFive(a);
   if (t.mail) return completeMail(a, t);
   const d = { id: Date.now() + Math.random(), title: t.title, pole: p.id, agent: a.name, time: `J${HQ.day} ${timeStr()}`, status: 'sim', content: simulated(a, t) };
@@ -949,23 +1053,86 @@ $('dlgCopy').onclick = () => { const t = $('dlgBody').textContent; const ok = ()
   const sel = () => { const r = document.createRange(); r.selectNodeContents($('dlgBody')); getSelection().removeAllRanges(); getSelection().addRange(r); };
   if (navigator.clipboard) navigator.clipboard.writeText(t).then(ok, sel); else sel(); };
 
-let lastCard = '';
 function renderUI() {
   $('clock').innerHTML = HQ.active || AGENTS.some(a => a.visible) ? `<b>${timeStr()}</b> · jour ${HQ.day}` : '<b>--:--</b> · veille';
   $('kAgents').textContent = AGENTS.filter(a => a.inside).length; $('kDone').textContent = HQ.done; $('kCalls').textContent = HQ.calls;
   $('kPrints').textContent = HQ.prints; $('kCoffee').textContent = HQ.coffees; $('kPing').textContent = HQ.pings;
   $('poles').innerHTML = POLES.map(p => `<div class="pole"><i style="background:${p.color}"></i><span>${esc(p.full)}</span><b>${p.done}</b></div>`).join('');
   $('poleSum').textContent = `${POLES.length} pôles · ${AGENTS.length} agents`;
-  const a = HQ.selected, card = $('agentCard');
-  if (!a) { if (lastCard !== 'none') { card.innerHTML = '<h2>Agent</h2><div class="empty">Clique sur un agent dans l’open space pour voir ce qu’il fait.</div>'; lastCard = 'none'; } return; }
-  const html = `<h2>Agent <em>${esc(a.courier ? 'Visiteur' : a.pole.full)}</em></h2>
-    <div class="ag-head"><div class="ag-av" style="background:radial-gradient(circle at 50% 38%, ${a.skin} 0 38%, ${a.hair} 39% 52%, ${a.courier ? a.shirt : a.pole.color} 53%)"></div>
-    <div><b>${esc(a.name)}</b><small>${esc(a.role)}</small></div></div>
-    <div class="ag-now"><b>${a.task ? esc(a.task.title) : 'Aucune tâche en cours'}</b><div style="color:var(--muted);margin-top:3px">${esc(a.doing)}</div>
-    <div class="bar"><i style="width:${Math.round(a.progress * 100)}%"></i></div></div>
-    <div class="ag-meta"><span>Énergie ${Math.round(clamp(a.energy, 0, 100))} %</span><span>${a.done} tâche(s) finie(s)</span>${a.task ? `<span>Étape ${Math.min(a.stepIdx + 1, a.task.steps.length)}/${a.task.steps.length}</span>` : ''}</div>`;
-  if (html !== lastCard) { card.innerHTML = html; lastCard = html; }
+  renderTeam(); renderProfileLive();
 }
+
+/* ---------- L'équipe et les fiches profil ---------- */
+const avatarBg = a => `radial-gradient(circle at 50% 40%, ${a.skin} 0 36%, ${a.hair} 37% 50%, ${a.courier ? a.shirt : a.pole.color} 51%)`;
+const STATE = a => !a.inside && !a.courier ? ['Hors du bureau', '#9ca3af'] : a.moving ? ['En déplacement', '#f59e0b']
+  : ['type','web','mail','visio','call','meeting'].includes(a.anim) ? ['Au travail', '#16a34a'] : ['coffee','drink','fridge','relax','pingpong','eat','micro','chat'].includes(a.anim) ? ['En pause', '#0ea5e9'] : ['Disponible', '#64748b'];
+function zoneOf(a) {
+  if (!a.visible) return 'Pas dans les locaux';
+  if (a.seated) return a.pole.id === 'dir' ? 'Dans le bureau de Jarvis' : `À son poste, tablée ${a.pole.full}`;
+  const z = ZONES.find(z => a.x >= z.x && a.x <= z.x + z.w && a.y >= z.y && a.y <= z.y + z.h);
+  if (z) return z.label === 'Box' ? 'Dans un box téléphonique' : z.label;
+  if (a.y < 80) return 'Devant le mur de post-its';
+  return 'Dans l’open space';
+}
+let teamKey = '';
+function renderTeam() {
+  const key = AGENTS.map(a => a.name + STATE(a)[0] + (HQ.selected === a)).join('|');
+  if (key === teamKey) return; teamKey = key;
+  $('team').innerHTML = POLES.map(p => `<div class="team-pole"><span><i style="background:${p.color}"></i>${esc(p.full)}</span><div class="team-row">${
+    p.members.map(a => { const [st, c] = STATE(a); return `<button class="mate" data-agent="${esc(a.name)}" aria-pressed="${HQ.selected === a}" title="${esc(a.role)} · ${st}"><span class="av" style="background:${avatarBg(a)};box-shadow:0 0 0 2px ${c}"></span>${esc(a.name)}<em>${esc(st)}</em></button>`; }).join('')}</div></div>`).join('');
+}
+$('team').addEventListener('click', e => { const b = e.target.closest('[data-agent]'); if (b) openProfile(AGENTS.find(a => a.name === b.dataset.agent)); });
+
+const pf = $('profile');
+function openProfile(a) {
+  HQ.selected = a || null; teamKey = '';
+  if (!a) { pf.hidden = true; renderTeam(); return; }
+  const p = a.pole, color = a.courier ? a.shirt : p.color;
+  pf.style.setProperty('--pc', color);
+  pf.className = 'profile ' + (a.x > W / 2 ? 'l' : 'r');
+  const list = arr => arr && arr.length ? `<div class="pf-tags">${arr.map(t => `<span>${esc(t)}</span>`).join('')}</div>` : '';
+  pf.innerHTML = `
+    <div class="pf-head"><div class="pf-av" style="background:${avatarBg(a)}"></div>
+      <div><h3>${esc(a.name)}</h3><p>${esc(a.role)}</p><span class="pf-chip">${esc(a.courier ? 'Visiteur' : p.full)}</span></div>
+      <button class="pf-close" id="pfClose" aria-label="Fermer la fiche">×</button></div>
+    <div class="pf-sec"><h4>En ce moment</h4><div class="pf-now" id="pfNow"></div></div>
+    <div class="pf-sec"><h4>Qui c’est</h4><p>${esc(a.who || '')}</p></div>
+    <div class="pf-sec"><h4>Son job au QG</h4><p>${esc(a.mission || '')}</p>${a.resp ? `<ul>${a.resp.map(r => `<li>${esc(r)}</li>`).join('')}</ul>` : ''}</div>
+    ${a.projects && a.projects.length ? `<div class="pf-sec"><h4>Projets suivis</h4>${list(a.projects)}</div>` : ''}
+    ${a.tools && a.tools.length ? `<div class="pf-sec"><h4>Outils</h4>${list(a.tools)}</div>` : ''}
+    <div class="pf-sec"><h4>Sa manie</h4><p>${esc(a.habit || '')}</p></div>
+    ${a.courier ? '' : `<div class="pf-sec"><h4>Aujourd’hui</h4><div class="pf-stats" id="pfStats"></div><ul class="pf-hist" id="pfHist"></ul></div>
+    <form class="pf-form" id="pfForm"><input id="pfTask" placeholder="Lui confier une tâche…" aria-label="Tâche à confier à ${esc(a.name)}"><button class="btn" type="submit">Confier</button></form>`}`;
+  pf.hidden = false;
+  $('pfClose').onclick = () => openProfile(null);
+  const form = $('pfForm');
+  if (form) form.onsubmit = e => {
+    e.preventDefault(); const text = $('pfTask').value.trim(); if (!text) return;
+    a.custom.push({ title: text, steps: guessSteps(text), custom: true }); $('pfTask').value = '';
+    log(a, `Nouvelle tâche confiée à ${a.name} : ${text}`);
+    if (a.inside) a.say('📥 Bien reçu, je m’en occupe !', 3);
+    if (!HQ.active) $('power').click();
+    renderProfileLive();
+  };
+  renderTeam(); renderProfileLive();
+  if (matchMedia('(max-width:760px)').matches) pf.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+let liveKey = '';
+function renderProfileLive() {
+  const a = HQ.selected; if (!a || pf.hidden) return;
+  const [st, c] = STATE(a), queued = a.custom.length;
+  const now = `<span class="pf-status"><i style="background:${c}"></i>${esc(st)} · ${esc(zoneOf(a))}</span>
+    <b>${a.task ? esc(a.task.title) : (a.courier ? 'Livraison d’un colis' : 'Aucune tâche en cours')}</b>
+    <small>${esc(a.doing)}${a.task ? ` · étape ${Math.min(a.stepIdx + 1, a.task.steps.length)}/${a.task.steps.length}` : ''}</small>
+    ${a.task ? `<div class="bar"><i style="width:${Math.round(a.progress * 100)}%"></i></div>` : ''}
+    ${queued ? `<small>${queued} tâche${queued > 1 ? 's' : ''} que tu lui as confiée${queued > 1 ? 's' : ''} en attente</small>` : ''}`;
+  const stats = `<div><b>${a.done}</b><span>tâches</span></div><div><b>${a.callsN}</b><span>appels</span></div><div><b>${a.printsN}</b><span>pages</span></div><div><b>${Math.round(clamp(a.energy, 0, 100))}%</b><span>énergie</span></div>`;
+  const hist = a.history.length ? a.history.map(h => `<li><time>${h.time}</time><span>${esc(h.t)}</span></li>`).join('') : '<li><span style="color:var(--muted)">Pas encore de tâche terminée.</span></li>';
+  const key = now + stats + hist; if (key === liveKey) return; liveKey = key;
+  $('pfNow').innerHTML = now;
+  if ($('pfStats')) { $('pfStats').innerHTML = stats; $('pfHist').innerHTML = hist; }
+}
+addEventListener('keydown', e => { if (e.key === 'Escape' && HQ.selected) openProfile(null); });
 
 function agentAt(ev) {
   const r = canvas.getBoundingClientRect(), x = (ev.clientX - r.left) / cssScale, y = (ev.clientY - r.top) / cssScale;
@@ -975,7 +1142,7 @@ function agentAt(ev) {
 }
 canvas.addEventListener('mousemove', e => { HQ.hover = agentAt(e); canvas.style.cursor = HQ.hover ? 'pointer' : 'default'; });
 canvas.addEventListener('mouseleave', () => HQ.hover = null);
-canvas.addEventListener('click', e => { HQ.selected = agentAt(e); lastCard = ''; renderUI(); });
+canvas.addEventListener('click', e => { openProfile(agentAt(e)); });
 
 $('power').onclick = () => {
   HQ.active = !HQ.active; document.body.classList.toggle('on', HQ.active);

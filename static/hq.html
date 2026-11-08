@@ -47,8 +47,6 @@
   .stat{display:flex;align-items:baseline;gap:5px;background:var(--surface);border:1px solid var(--line);border-radius:99px;padding:5px 11px;font-size:12.5px;color:var(--muted);white-space:nowrap}
   .stat b{font:800 15px var(--display);color:var(--ink);font-variant-numeric:tabular-nums}
   .stat.hot{border-color:var(--warn)} .stat.hot b{color:var(--warn)}
-  .panel{display:flex;flex-direction:column;min-width:0;min-height:0;background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden}
-  .tabs{display:flex;flex-wrap:wrap;gap:2px;padding:6px;border-bottom:1px solid var(--line);flex:none}
   .fsearch{width:100%;background:var(--surface2);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:8px 10px;font:14px var(--body)}
   .flist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
   .frow{display:flex;gap:10px;align-items:center;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
@@ -61,25 +59,6 @@
   .frow button{background:transparent;border:1px solid var(--line);color:var(--ink);border-radius:99px;padding:5px 10px;font:600 12.5px var(--body);cursor:pointer;flex:none}
   .cz-attach{display:flex;flex-direction:column;gap:6px}
   .cz-attach h5{margin:6px 0 0;font:600 11px var(--body);text-transform:uppercase;letter-spacing:.12em;color:var(--muted)}
-  .tabs button{flex:1 1 auto;position:relative;background:transparent;border:0;border-radius:9px;padding:8px 4px;font:600 12px var(--body);color:var(--muted);cursor:pointer;white-space:nowrap}
-  .tabs button[aria-selected="true"]{background:var(--surface2);color:var(--ink)}
-  .tabs button b{display:inline-block;min-width:16px;height:16px;margin-left:3px;padding:0 4px;line-height:16px;border-radius:99px;background:var(--warn);color:#fff;font:700 11px/18px var(--body);text-align:center}
-  .tabpane{flex:1;min-height:0;overflow:auto;padding:12px 14px;display:flex;flex-direction:column;gap:12px}
-  .tabpane[hidden]{display:none}
-  .sec h2{font:600 11.5px var(--body);text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin:0 0 8px;display:flex;justify-content:space-between;gap:8px}
-  .sec h2 em{font-style:normal;text-transform:none;letter-spacing:0;color:var(--ink);font-weight:600}
-  .vhead{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-  .vhead p{margin:0 auto 0 0;font-size:13.5px;color:var(--muted);flex:1 1 180px}
-  .vcard{border:1px solid var(--line);border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:7px;background:var(--surface)}
-  .vcard .src{font-size:11.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);display:flex;gap:6px;align-items:center}
-  .vcard .src i{width:8px;height:8px;border-radius:2px}
-  .vcard input,.vcard select{width:100%;background:var(--surface2);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:7px 9px;font:600 14px var(--body)}
-  .vcard select{font-weight:500;font-size:13px}
-  .vcard details{font-size:13px;color:var(--muted)} .vcard details p{margin:4px 0 0;white-space:pre-wrap;color:var(--ink)}
-  .vrow{display:flex;gap:6px;align-items:center}
-  .vrow select{flex:1;min-width:0}
-  .btn.sm{padding:6px 12px;font-size:13px}
-  .btn.no{background:transparent;color:var(--bad);border:1px solid var(--line)}
   .stage{position:relative;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--surface)}
   .profile{position:absolute;top:12px;width:330px;max-height:calc(100% - 24px);overflow:auto;background:var(--surface);color:var(--ink);
     border:1px solid var(--line);border-radius:14px;box-shadow:0 14px 36px rgba(20,18,16,.22);padding:16px;display:flex;flex-direction:column;gap:14px}
@@ -109,19 +88,8 @@
   .pf-hist time{color:var(--muted);font-variant-numeric:tabular-nums;flex:none}
   .pf-form{display:flex;gap:6px}
   .pf-form input{flex:1;min-width:0;background:var(--surface2);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:8px 10px;font:14px var(--body)}
-  .team{display:flex;flex-direction:column;gap:10px}
-  .team-pole{display:flex;flex-direction:column;gap:4px}
-  .team-pole > span{font-size:12px;font-weight:700;display:flex;align-items:center;gap:6px}
-  .team-pole > span i{width:9px;height:9px;border-radius:3px}
-  .team-row{display:flex;flex-wrap:wrap;gap:6px}
-  .mate{display:inline-flex;align-items:center;gap:6px;background:var(--surface2);border:1px solid var(--line);border-radius:99px;padding:3px 10px 3px 4px;font:600 13px var(--body);color:var(--ink);cursor:pointer}
-  .mate .av{width:20px;height:20px;border-radius:50%}
-  .mate em{font-style:normal;font-weight:500;color:var(--muted);font-size:12px;max-width:120px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .mate[aria-pressed="true"]{border-color:var(--accent);box-shadow:0 0 0 2px color-mix(in srgb, var(--accent) 30%, transparent)}
   canvas{display:block;width:100%}
 
-  .card h2{font:600 11.5px var(--body);text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin:0 0 10px;display:flex;justify-content:space-between;align-items:center;gap:8px}
-  .card h2 em{font-style:normal;text-transform:none;letter-spacing:0;color:var(--ink);font-weight:600}
   .empty{color:var(--muted);font-size:13.5px}
   .ag-head{display:flex;gap:10px;align-items:center}
   .ag-av{width:36px;height:36px;border-radius:50%;flex:none}
@@ -151,42 +119,17 @@
   #log li{padding:5px 0;border-bottom:1px dashed var(--line)}
   #log time{color:var(--muted);margin-right:6px;font-variant-numeric:tabular-nums}
   #log li i{display:inline-block;width:7px;height:7px;border-radius:2px;margin-right:6px;vertical-align:1px}
-  #deliv{list-style:none;margin:0;padding:0;max-height:260px;overflow:auto}
-  #deliv li{display:flex;gap:8px;align-items:center;padding:7px 8px;border-radius:8px;cursor:pointer;font-size:13.5px}
-  #deliv li:hover{background:var(--surface2)}
-  #deliv li i{width:8px;height:8px;border-radius:2px;flex:none}
-  #deliv li span{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .tag{font-size:11px;padding:2px 7px;border-radius:99px;background:var(--surface2);color:var(--muted);flex:none;font-style:normal}
   .tag.ai{color:var(--accent);background:color-mix(in srgb, var(--accent) 14%, transparent)}
   .tag.run{color:var(--warn);background:color-mix(in srgb, var(--warn) 14%, transparent)}
   .tag.err{color:var(--bad);background:color-mix(in srgb, var(--bad) 14%, transparent)}
   .seg.small button{padding:4px 10px;font-size:12px}
-  dialog{background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:14px;width:min(680px,92vw);padding:0}
-  dialog.big{width:min(1040px,94vw);height:min(760px,90vh);display:flex;flex-direction:column;overflow:hidden}
-  dialog.big:not([open]){display:none}
-  .cz-head{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:14px 16px;border-bottom:1px solid var(--line)}
-  .cz-head h3{margin:0 auto 0 0;font:800 20px var(--display)}
-  .cz-head .who{display:flex;align-items:center;gap:10px;margin-right:auto;min-width:0}
-  .cz-head .who b{display:block;font:800 18px var(--display)}
-  .cz-head .who small{color:var(--muted)}
-  .cz-body{flex:1;min-height:0;display:grid;grid-template-columns:320px minmax(0,1fr)}
-  .cz-list{list-style:none;margin:0;padding:8px;overflow:auto;border-right:1px solid var(--line)}
-  .cz-list li{display:flex;gap:9px;align-items:flex-start;padding:9px 10px;border-radius:10px;cursor:pointer}
-  .cz-list li:hover,.cz-list li.sel{background:var(--surface2)}
-  .cz-list li i{width:8px;height:8px;border-radius:50%;flex:none;margin-top:6px;background:transparent}
-  .cz-list li.new i{background:var(--accent)}
-  .cz-list li span{flex:1;min-width:0;font-size:14px;line-height:1.35}
-  .cz-list li.new span b{font-weight:700}
-  .cz-list li span b{font-weight:500;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .cz-list li small{color:var(--muted);font-size:12px}
   .cz-read{overflow:auto;padding:18px 22px;display:flex;flex-direction:column;gap:12px;min-width:0}
   .cz-read h4{margin:0;font:800 22px/1.2 var(--display);text-wrap:balance}
   .cz-read .meta{color:var(--muted);font-size:13px}
   .cz-read pre{white-space:pre-wrap;margin:0;font:15px/1.65 var(--body);max-width:72ch}
   .cz-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
   .cz-actions .msg{font-size:13px;color:var(--muted)}
-  .inbox-btn{position:relative;border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:8px 14px;border-radius:999px;font:700 14px var(--body);cursor:pointer}
-  .inbox-btn b{position:absolute;top:-6px;right:-6px;min-width:20px;height:20px;padding:0 6px;border-radius:99px;background:var(--accent);color:var(--accent-ink);font:700 11.5px/20px var(--body);text-align:center}
   .chat-log{flex:1;min-height:0;overflow:auto;padding:16px;display:flex;flex-direction:column;gap:10px;background:var(--bg)}
   .bubble{max-width:min(620px,85%);padding:10px 13px;border-radius:14px;font-size:14.5px;line-height:1.5;white-space:pre-wrap;word-wrap:break-word}
   .bubble.me{align-self:flex-end;background:var(--ink);color:var(--bg);border-bottom-right-radius:4px}
@@ -202,18 +145,6 @@
   .chat-form textarea{flex:1;width:auto;min-width:0;min-height:44px;max-height:160px;resize:vertical}
   .chips{display:flex;gap:6px;flex-wrap:wrap;padding:0 16px 10px}
   .chips button{background:var(--surface2);border:1px solid var(--line);color:var(--ink);border-radius:99px;padding:4px 10px;font:500 12.5px var(--body);cursor:pointer}
-  .threads{display:flex;flex-direction:column;gap:4px;margin-top:10px}
-  .thread{display:flex;gap:9px;align-items:center;background:transparent;border:0;border-radius:10px;padding:7px 6px;color:var(--ink);cursor:pointer;text-align:left;font:14px var(--body);width:100%}
-  .thread:hover{background:var(--surface2)}
-  .thread .av{width:28px;height:28px;border-radius:50%;flex:none}
-  .thread span{flex:1;min-width:0}
-  .thread b{display:block;font-weight:700;font-size:13.5px}
-  .thread small{display:block;color:var(--muted);font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .thread em{font-style:normal;min-width:18px;height:18px;border-radius:99px;background:var(--accent);color:var(--accent-ink);font:700 11px/18px var(--body);text-align:center;padding:0 5px}
-  .pf-chat{width:100%}
-  #deliv li.new span{font-weight:700}
-  @media (max-width:760px){ .cz-body{grid-template-columns:1fr;grid-template-rows:minmax(140px,38%) 1fr} .cz-list{border-right:0;border-bottom:1px solid var(--line)} dialog.big{width:100vw;height:100dvh;max-width:100vw;max-height:100dvh;border-radius:0} }
-  dialog::backdrop{background:rgba(0,0,0,.45)}
   .day-note{margin:0 0 10px;font-size:13.5px;line-height:1.5;color:var(--muted)}
   .day-note.brief{color:var(--ink)}
   .day-note.warn{color:var(--warn)}
@@ -234,24 +165,143 @@
     body{display:flex;flex-direction:column;overflow:hidden}
     main{flex:1;min-height:0}
   }
-  @media (max-width:1100px){ main{grid-template-columns:1fr} .panel{max-height:none} .tabpane{max-height:70vh} }
+  @media (max-width:1100px){ main{grid-template-columns:1fr} .home{grid-template-rows:none} .t-sm{min-height:96px} }
   @media (max-width:760px){ .profile{position:static;width:auto;max-height:none;box-shadow:none;border:0;border-top:1px solid var(--line);border-radius:0} }
   @media (max-width:520px){ .brand small{display:none} .clock{min-width:0} }
+  /* Accueil : de grandes tuiles, chacune ouvre son espace en plein écran */
+  .home{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));grid-template-rows:minmax(0,1.3fr) minmax(0,1.3fr) minmax(0,.75fr) auto;gap:10px;min-width:0;min-height:0}
+  .tile{position:relative;display:flex;flex-direction:column;gap:10px;min-width:0;min-height:0;overflow:hidden;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px 16px;color:var(--ink);font:inherit;cursor:pointer;transition:border-color .15s, box-shadow .15s}
+  .tile:hover{border-color:color-mix(in srgb, var(--ink) 28%, var(--line));box-shadow:0 6px 18px rgba(20,18,16,.07)}
+  .t-valid,.t-msgs,.t-ask{grid-column:span 6} .t-sm{grid-column:span 2;gap:4px;justify-content:space-between}
+  .t-top{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
+  .t-name{font:600 12px var(--body);text-transform:uppercase;letter-spacing:.12em;color:var(--muted)}
+  .t-n{font:800 34px/1 var(--display);font-variant-numeric:tabular-nums}
+  .t-sm .t-n{font-size:25px}
+  .t-sm small{color:var(--muted);font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .t-lines{display:flex;flex-direction:column;gap:7px;min-height:0;overflow:hidden}
+  .t-line{display:flex;gap:9px;align-items:center;font-size:14px;line-height:1.3;min-width:0}
+  .t-line i{width:8px;height:8px;border-radius:50%;flex:none;background:var(--line)}
+  .t-line span{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .t-line.new span{font-weight:600} .t-line.new i{background:var(--accent)}
+  .t-line.dim{color:var(--muted);font-size:13.5px} .t-line.dim span{white-space:normal}
+  .t-valid.hot{border-color:var(--warn);background:color-mix(in srgb, var(--warn) 7%, var(--surface))}
+  .t-valid.hot .t-n{color:var(--warn)} .t-msgs.hot .t-n{color:var(--accent)}
+  .t-ask{cursor:default;gap:8px} .t-ask:hover{box-shadow:none;border-color:var(--line)}
+  .ask-row,.composer,.chat-form{display:flex;gap:6px;flex-direction:row}
+  .ask-row select,.composer select{width:118px;flex:none;padding:8px}
+  .ask-row input,.composer input{flex:1;min-width:0;background:var(--surface2);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:8px 10px;font:14px var(--body)}
+  button.stat{cursor:pointer;font:inherit;font-size:12.5px}
+
+  /* Espaces plein écran */
+  .space{position:fixed;inset:0;z-index:40;background:var(--bg);display:flex;flex-direction:column}
+  .sp-bar{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding-block:12px;padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px));border-bottom:1px solid var(--line);background:var(--surface)}
+  .sp-bar h2{margin:0;font:800 26px/1.1 var(--display);letter-spacing:-.01em;min-width:0}
+  .sp-nav{display:flex;gap:4px;margin-left:auto;flex-wrap:wrap}
+  .sp-nav button{display:inline-flex;align-items:center;gap:6px;background:transparent;border:1px solid var(--line);border-radius:99px;padding:7px 13px;font:600 13.5px var(--body);color:var(--muted);cursor:pointer}
+  .sp-nav button[aria-current="true"]{background:var(--ink);border-color:var(--ink);color:var(--bg)}
+  .sp-nav b{min-width:18px;height:18px;padding:0 5px;border-radius:99px;background:var(--warn);color:#fff;font:700 11px/18px var(--body);text-align:center}
+  .sp-body{flex:1;min-height:0;overflow:auto;padding-block:22px;padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px))}
+  .sp-pane{max-width:1180px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+  .sp-h{margin:0;font:600 12px var(--body);text-transform:uppercase;letter-spacing:.12em;color:var(--muted);display:flex;gap:8px;align-items:center}
+  .sp-h em{font-style:normal;text-transform:none;letter-spacing:0;color:var(--ink)}
+  .sp-h i{width:10px;height:10px;border-radius:3px}
+  .sp-head{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .sp-head p{margin:0 auto 0 0;font-size:15px;color:var(--muted);flex:1 1 260px}
+  .card2{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px 20px;display:flex;flex-direction:column;gap:12px;min-width:0}
+
+  /* À valider : une ligne par tâche */
+  .vlist{display:flex;flex-direction:column;gap:20px}
+  .vgroup{display:flex;flex-direction:column;gap:8px}
+  .vrow2{display:grid;grid-template-columns:10px minmax(0,1fr) 230px auto;gap:10px;align-items:center;padding:10px 14px;background:var(--surface);border:1px solid var(--line);border-radius:12px}
+  .vrow2 > i{width:10px;height:10px;border-radius:3px}
+  .vrow2 input{width:100%;background:transparent;border:1px solid transparent;border-radius:8px;padding:7px 9px;color:var(--ink);font:600 15px var(--body)}
+  .vrow2 input:hover,.vrow2 input:focus{border-color:var(--line);background:var(--surface2)}
+  .vrow2 select{padding:7px 9px;font-size:13.5px}
+  .vbtns{display:flex;gap:6px}
+  .vrow2 details{grid-column:2 / -1;font-size:13.5px;color:var(--muted);padding-left:9px}
+  .vrow2 details p{margin:6px 0 0;white-space:pre-wrap;color:var(--ink);line-height:1.5;max-width:90ch}
+  .btn.sm{padding:7px 14px;font-size:13.5px}
+  .btn.no{background:transparent;color:var(--bad);border:1px solid var(--line)}
+  .btn.ok{background:var(--accent);color:var(--accent-ink)}
+
+  /* Fil de messages : une ligne + l'action */
+  .feed{display:flex;flex-direction:column;gap:6px}
+  .fd-h{font:600 12px var(--body);text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin:10px 0 2px}
+  .fd-h:first-child{margin-top:0}
+  .frow2{display:grid;grid-template-columns:34px minmax(0,1fr) auto auto;align-items:center;gap:12px;padding:10px 14px;background:var(--surface);border:1px solid var(--line);border-radius:12px;cursor:pointer}
+  .frow2:hover{border-color:color-mix(in srgb, var(--ink) 25%, var(--line))}
+  .frow2.new{border-color:var(--accent);box-shadow:inset 3px 0 0 var(--accent)}
+  .frow2 .av{width:34px;height:34px;border-radius:50%}
+  .frow2 p{margin:0;font-size:15px;line-height:1.35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .frow2 .att{color:var(--muted)}
+  .frow2.k-erreur p b{color:var(--bad)}
+  .frow2 time{color:var(--muted);font-size:12.5px;font-variant-numeric:tabular-nums}
+  .acts{display:flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+  .acts button,.acts a{background:transparent;border:1px solid var(--line);color:var(--ink);border-radius:99px;padding:6px 12px;font:600 13px var(--body);cursor:pointer;text-decoration:none;white-space:nowrap}
+  .acts .primary{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+  .acts .ok{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+  .acts .no{color:var(--bad)}
+  .acts .fchip{color:#fff;border:0;font-size:11px;letter-spacing:.04em;padding:6px 10px}
+  .empty-big{padding:28px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:14px;font-size:15px}
+
+  /* Fichiers, équipe, journée */
+  .files-grid,.day-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;align-items:start}
+  .files-grid section{display:flex;flex-direction:column;gap:10px;min-width:0}
+  .flist .frow{padding:11px 12px}
+  .team{display:flex;flex-direction:column;gap:20px}
+  .tpole{display:flex;flex-direction:column;gap:8px}
+  .tcards{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:10px}
+  .tcard{display:flex;gap:12px;align-items:center;padding:12px 14px;background:var(--surface);border:1px solid var(--line);border-radius:12px;min-width:0}
+  .tcard .av{width:44px;height:44px;border-radius:50%;flex:none}
+  .tcard > div{flex:1;min-width:0}
+  .tcard b{display:block;font:800 17px var(--display)}
+  .tcard small{display:block;color:var(--muted);font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .tc-acts{display:flex;flex-direction:column;gap:6px;flex:none}
+  .tc-acts button{background:transparent;border:1px solid var(--line);color:var(--ink);border-radius:99px;padding:5px 11px;font:600 12.5px var(--body);cursor:pointer}
+  .tc-acts button:first-child{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+
+  /* Conversation : le livrable à gauche, la discussion à droite */
+  .space.is-thread .sp-body{overflow:hidden;padding-block:16px}
+  .sp-pane.thread{max-width:none;height:100%;display:grid;grid-template-columns:minmax(0,1.2fr) minmax(360px,.8fr);gap:16px}
+  .th-doc{background:var(--surface);border:1px solid var(--line);border-radius:14px;min-height:0}
+  .th-chat{display:flex;flex-direction:column;min-height:0;background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+  .th-head{display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .th-head .who{display:flex;align-items:center;gap:10px;margin-right:auto;min-width:0}
+  .th-head .who b{display:block;font:800 18px var(--display)}
+  .th-head .who small{color:var(--muted)}
+  .drow{display:flex;gap:10px;align-items:center;padding:11px 12px;border:1px solid var(--line);border-radius:10px;cursor:pointer;background:var(--surface)}
+  .drow:hover{background:var(--surface2)}
+  .drow.new{border-color:var(--accent)}
+  .drow span{flex:1;min-width:0} .drow b{display:block;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .drow small{color:var(--muted);font-size:12.5px}
+  .link-btn{background:none;border:0;color:var(--muted);font:600 13px var(--body);cursor:pointer;padding:0;align-self:flex-start}
+  @media (max-width:900px){
+    .sp-pane.thread{grid-template-columns:1fr;height:auto}
+    .space.is-thread .sp-body{overflow:auto}
+    .th-chat{min-height:70dvh}
+    .files-grid,.day-grid{grid-template-columns:1fr}
+  }
+  @media (max-width:760px){
+    .sp-bar h2{font-size:21px;flex:1}
+    .sp-nav{margin-left:0;width:100%;flex-wrap:nowrap;overflow-x:auto}
+    .sp-nav button{flex:none}
+    .vrow2{grid-template-columns:10px minmax(0,1fr)} .vrow2 select,.vrow2 .vbtns{grid-column:2}
+    .frow2{grid-template-columns:34px minmax(0,1fr) auto} .frow2 .acts{grid-column:1 / -1;justify-content:flex-start} .frow2 p{white-space:normal}
+  }
+  .pf-chat{width:100%}
+  #log{max-height:52vh;overflow:auto}
 </style>
 </head>
 <body>
 <header>
   <div class="brand"><div class="dot"></div><div><h1>QG Jarvis</h1><small>L’open space de tes agents IA</small></div></div>
   <div class="stats" aria-label="Chiffres du jour">
-    <span class="stat" id="sValid"><b id="kValid">0</b>à valider</span>
+    <button class="stat" id="sValid" type="button" data-space="valid"><b id="kValid">0</b>à valider</button>
     <span class="stat"><b id="kRun">0</b>en cours</span>
     <span class="stat"><b id="kDone">0</b>livrés</span>
-    <span class="stat"><b id="kMail">0</b>mails</span>
-    <span class="stat"><b id="kDraft">0</b>brouillons</span>
   </div>
   <div class="clock" id="clock"><b>--:--</b> · veille</div>
   <div class="seg" id="speed"><button data-s="1" class="sel">×1</button><button data-s="2">×2</button><button data-s="4">×4</button></div>
-  <button class="inbox-btn" id="inboxBtn" type="button">Casier<b id="inboxCount" hidden>0</b></button>
   <button id="power">Activer le QG</button>
 </header>
 
@@ -260,72 +310,82 @@
     <div class="stage" id="stage"><canvas id="office" aria-label="Open space du QG"></canvas><div class="profile" id="profile" role="dialog" aria-label="Profil de l’agent" hidden></div></div>
   </section>
 
-  <aside class="panel">
-    <nav class="tabs" role="tablist" id="tabs">
-      <button role="tab" data-tab="valid" aria-selected="true">À valider<b id="tabValid" hidden>0</b></button>
-      <button role="tab" data-tab="day" aria-selected="false">Journée</button>
-      <button role="tab" data-tab="team" aria-selected="false">Équipe</button>
-      <button role="tab" data-tab="chat" aria-selected="false">Discussions<b id="tabChat" hidden>0</b></button>
-      <button role="tab" data-tab="files" aria-selected="false">Fichiers<b id="tabFiles" hidden>0</b></button>
-    </nav>
-
-    <div class="tabpane" id="tab-valid" role="tabpanel">
-      <div class="vhead"><p id="vNote">Jarvis te soumet ici chaque tâche avant de la lancer : le plan du jour, les mails à traiter et ce que tu demandes aux agents.</p>
-        <button class="btn sm" id="vAll" type="button" hidden>Tout valider</button><button class="btn sm no" id="vNone" type="button" hidden>Tout refuser</button></div>
-      <div id="vList" style="display:flex;flex-direction:column;gap:10px"></div>
-    </div>
-
-    <div class="tabpane" id="tab-day" role="tabpanel" hidden>
-      <div class="sec">
-        <h2>Journée <em id="dayDate"></em></h2>
-        <div class="states"><span class="pill" id="aiState">IA : recherche…</span><span class="pill" id="mailState">Gmail : recherche…</span><span class="pill" id="calState">Agenda : recherche…</span><span class="pill" id="webState">Recherche web : recherche…</span><span class="pill" id="driveState">Drive : recherche…</span><span class="pill" id="studioState">Studio : recherche…</span></div>
-        <p class="day-note" id="dayNote">Active le QG : Jarvis lit ton agenda et tes mails non lus, puis te propose le travail de la journée.</p>
-        <ol class="plan" id="plan"></ol>
-        <button class="btn" id="planBtn" type="button">Planifier la journée</button>
-      </div>
-      <div class="sec">
-        <h2>Mon casier <em id="casierSum"></em></h2>
-        <ul id="deliv"></ul>
-        <button class="btn ghost" id="casierOpen" type="button" style="width:100%;margin-top:8px">Ouvrir le casier</button>
-      </div>
-      <div class="sec"><h2>Activité</h2><ul id="log"></ul></div>
-    </div>
-
-    <div class="tabpane" id="tab-team" role="tabpanel" hidden>
-      <div class="team" id="team"></div>
-    </div>
-
-    <div class="tabpane" id="tab-chat" role="tabpanel" hidden>
-      <form id="ask">
-        <select id="askAgent" aria-label="Agent"></select>
-        <textarea id="askText" placeholder="Ex. : Écris-moi le post LinkedIn sur le match de samedi" required></textarea>
-        <button class="btn" type="submit">Envoyer et discuter</button>
-      </form>
-      <div class="threads" id="threads"></div>
-    </div>
-
-    <div class="tabpane" id="tab-files" role="tabpanel" hidden>
-      <input class="fsearch" id="fSearch" type="search" placeholder="Chercher un fichier, un lien, un agent…" aria-label="Chercher dans les fichiers et les liens">
-      <div class="sec"><h2>Fichiers <em id="fCount"></em></h2><ul class="flist" id="fFiles"></ul></div>
-      <div class="sec"><h2>Liens <em id="lCount"></em></h2><ul class="flist" id="fLinks"></ul></div>
-    </div>
-
+  <aside class="home" id="home" aria-label="Tes espaces">
+    <button class="tile t-valid" type="button" data-space="valid">
+      <span class="t-top"><span class="t-name">À valider</span><b class="t-n" id="tValidN">0</b></span>
+      <span class="t-lines" id="tValidL"></span>
+    </button>
+    <button class="tile t-msgs" type="button" data-space="msgs">
+      <span class="t-top"><span class="t-name">Messages</span><b class="t-n" id="tMsgN">0</b></span>
+      <span class="t-lines" id="tMsgL"></span>
+    </button>
+    <button class="tile t-sm" type="button" data-space="files"><span class="t-name">Fichiers</span><b class="t-n" id="tFileN">0</b><small id="tFileS">Docs et tableaux</small></button>
+    <button class="tile t-sm" type="button" data-space="team"><span class="t-name">Équipe</span><b class="t-n" id="tTeamN">0</b><small id="tTeamS">au bureau</small></button>
+    <button class="tile t-sm" type="button" data-space="day"><span class="t-name">Journée</span><b class="t-n" id="tDayN">--:--</b><small id="tDayS">Plan du jour</small></button>
+    <form class="tile t-ask" id="ask">
+      <label class="t-name" for="askText">Demander à un agent</label>
+      <div class="ask-row"><select id="askAgent" aria-label="Agent"></select><input id="askText" placeholder="Ex. : trouve-moi un hôtel à Lyon samedi" required autocomplete="off"><button class="btn" type="submit">Envoyer</button></div>
+    </form>
   </aside>
 </main>
 
-<dialog id="casier" class="big" aria-label="Mon casier">
-  <div class="cz-head"><h3>Mon casier</h3>
-    <span class="seg small" id="czTabs"><button data-f="mine" class="sel">Mes demandes</button><button data-f="all">Tout</button><button data-f="mail">Mails</button></span>
-    <button class="pf-close" id="czClose" aria-label="Fermer le casier">×</button></div>
-  <div class="cz-body"><ul class="cz-list" id="czList"></ul><article class="cz-read" id="czRead"></article></div>
-</dialog>
-
-<dialog id="chat" class="big" aria-label="Discussion avec un agent">
-  <div class="cz-head" id="chatHead"></div>
-  <div class="chat-log" id="chatLog" aria-live="polite"></div>
-  <div class="chips" id="chatChips"></div>
-  <form class="chat-form" id="chatForm"><textarea id="chatText" rows="2" placeholder="Écris ton message… (Entrée pour envoyer)"></textarea><button class="btn" type="submit" id="chatSend">Envoyer</button></form>
-</dialog>
+<section class="space" id="space" role="dialog" aria-modal="true" aria-labelledby="spTitle" hidden>
+  <div class="sp-bar">
+    <button class="btn ghost" id="spBack" type="button">← Open space</button>
+    <h2 id="spTitle">À valider</h2>
+    <nav class="sp-nav" id="spNav" aria-label="Espaces">
+      <button type="button" data-space="valid">À valider<b id="nValid" hidden></b></button>
+      <button type="button" data-space="msgs">Messages<b id="nMsgs" hidden></b></button>
+      <button type="button" data-space="files">Fichiers<b id="nFiles" hidden></b></button>
+      <button type="button" data-space="team">Équipe</button>
+      <button type="button" data-space="day">Journée</button>
+    </nav>
+  </div>
+  <div class="sp-body" id="spBody">
+    <div class="sp-pane" id="sp-valid" hidden>
+      <div class="sp-head"><p id="vNote"></p><button class="btn" id="vAll" type="button" hidden>Tout valider</button><button class="btn no" id="vNone" type="button" hidden>Tout refuser</button></div>
+      <div class="vlist" id="vList"></div>
+      <div id="vAskWrap" hidden><h3 class="sp-h">Les agents attendent ta réponse</h3><div class="feed" id="vAsk"></div></div>
+    </div>
+    <div class="sp-pane" id="sp-msgs" hidden>
+      <form class="composer" id="msgForm"><select id="msgAgent" aria-label="Agent"></select><input id="msgText" placeholder="Écris à un agent…" required autocomplete="off"><button class="btn" type="submit">Envoyer</button></form>
+      <div class="feed" id="feed"></div>
+    </div>
+    <div class="sp-pane" id="sp-files" hidden>
+      <input class="fsearch" id="fSearch" type="search" placeholder="Chercher un fichier, un lien, un agent…" aria-label="Chercher dans les fichiers et les liens">
+      <div class="files-grid">
+        <section><h3 class="sp-h">Fichiers <em id="fCount"></em></h3><ul class="flist" id="fFiles"></ul></section>
+        <section><h3 class="sp-h">Liens <em id="lCount"></em></h3><ul class="flist" id="fLinks"></ul></section>
+      </div>
+    </div>
+    <div class="sp-pane" id="sp-team" hidden><div class="team" id="team"></div></div>
+    <div class="sp-pane" id="sp-day" hidden>
+      <div class="day-grid">
+        <section class="card2">
+          <h3 class="sp-h">Plan du jour <em id="dayDate"></em></h3>
+          <p class="day-note" id="dayNote">Active le QG : Jarvis lit ton agenda et tes mails non lus, puis te propose le travail de la journée.</p>
+          <ol class="plan" id="plan"></ol>
+          <button class="btn" id="planBtn" type="button">Planifier la journée</button>
+        </section>
+        <section class="card2">
+          <h3 class="sp-h">Connexions</h3>
+          <div class="states"><span class="pill" id="aiState">IA : recherche…</span><span class="pill" id="mailState">Gmail : recherche…</span><span class="pill" id="calState">Agenda : recherche…</span><span class="pill" id="webState">Recherche web : recherche…</span><span class="pill" id="driveState">Drive : recherche…</span><span class="pill" id="studioState">Studio : recherche…</span></div>
+          <h3 class="sp-h">Activité</h3>
+          <ul id="log"></ul>
+        </section>
+      </div>
+    </div>
+    <div class="sp-pane thread" id="sp-thread" hidden>
+      <article class="cz-read th-doc" id="thDoc"></article>
+      <section class="th-chat">
+        <div class="th-head" id="thHead"></div>
+        <div class="chat-log" id="chatLog" aria-live="polite"></div>
+        <div class="chips" id="chatChips"></div>
+        <form class="chat-form" id="chatForm"><textarea id="chatText" rows="2" placeholder="Écris ton message… (Entrée pour envoyer)"></textarea><button class="btn" type="submit" id="chatSend">Envoyer</button></form>
+      </section>
+    </div>
+  </div>
+</section>
 
 <script>
 (() => {
@@ -895,7 +955,9 @@ function leave() {
    Livrables, IA et Gmail
    ====================================================================== */
 /* Casier et discussions : base privée claude.ai (data/users/<toi>/...) ou, en local, le navigateur */
-const LS_KEY = 'jarvis-hq-livrables', CHAT_KEY = 'jarvis-hq-discussions';
+// v2 : casier repris de zéro (les fichiers déjà créés dans Drive, Canva ou HeyGen restent chez toi)
+const LS_KEY = 'jarvis-hq-livrables-v2', CHAT_KEY = 'jarvis-hq-discussions-v2', STORE_VERSION = 2;
+try { ['jarvis-hq-livrables', 'jarvis-hq-discussions', 'jarvis-hq-onglet'].forEach(k => localStorage.removeItem(k)); } catch (e) {}
 const STORE = { db:null, uid:null, dl:null, err:null };
 const CHATS = {};
 try { HQ.deliverables = JSON.parse(localStorage.getItem(LS_KEY) || '[]').filter(d => d && d.id && typeof d.id === 'string'); } catch (e) { HQ.deliverables = []; }
@@ -917,7 +979,7 @@ function saveChat(name) {
 }
 function addDeliv(d) {
   d.id = newId(); d.created = Date.now(); d.read = false;
-  HQ.deliverables.unshift(d); save(d); renderDeliv(); renderCasier();
+  HQ.deliverables.unshift(d); save(d); refresh();
   return d;
 }
 async function initStore() {
@@ -926,6 +988,16 @@ async function initStore() {
   STORE.dl = dl;
   const uid = user ? await user.id() : null;
   if (!db || !uid) return;
+  // remise à zéro unique de l'ancien casier dans ta base privée
+  try {
+    const meta = await db.doc(`data/users/${uid}/meta`).get();
+    const v = meta && meta.exists ? meta.data() : null;
+    if (!v || v.version !== STORE_VERSION) {
+      const snap = await db.collection('data/users/' + uid).get();
+      await Promise.all(snap.docs.filter(x => x.id !== 'meta').map(x => db.doc(`data/users/${uid}/${x.id}`).delete().catch(() => {})));
+      await db.doc(`data/users/${uid}/meta`).set({ kind:'meta', version: STORE_VERSION, resetAt: Date.now() });
+    }
+  } catch (e) { STORE.err = e.code; }
   STORE.db = db; STORE.uid = uid;
   // ce qui n'existait que dans ce navigateur part dans ta base privée
   HQ.deliverables.forEach(d => save(d)); Object.keys(CHATS).forEach(saveChat);
@@ -941,7 +1013,7 @@ async function initStore() {
       }
     });
     HQ.deliverables.sort((a, b) => (b.created || 0) - (a.created || 0));
-    renderDeliv(); renderCasier(); renderThreads(); if (chatAgent) renderChat();
+    refresh();
   }, e => { STORE.err = e.code; });
 }
 
@@ -960,9 +1032,9 @@ function completeTask(a) {
   if (!job.ok) {
     t.status = 'erreur'; a.say('⚠️ Bloqué : ' + errText(job.error), 3.5);
     const d = addDeliv({ title: t.title, pole: p.id, agent: a.name, time: stamp(), status: 'err', spec, isMail: !!t.mail, requested: !!t.requested,
-      content: `Cette tâche n’a pas pu être réalisée.\n\n${errText(job.error)}\n\nTu peux la relancer depuis le casier.` });
+      content: `Cette tâche n’a pas pu être réalisée.\n\n${errText(job.error)}\n\nTu peux la relancer d’un clic.` });
     log(a, `${a.name} est bloqué sur : ${t.title}`);
-    if (t.requested) agentSays(a, `Je suis bloqué sur « ${t.title} » : ${errText(job.error)} Tu peux la relancer depuis ton casier.`, { delivId: d.id });
+    agentSays(a, `Je suis bloqué sur « ${t.title} » : ${errText(job.error)}`, { delivId: d.id, kind: 'erreur', line: `Bloqué · ${t.title}` });
     renderPlan(); return;
   }
   t.status = 'livre';
@@ -988,14 +1060,21 @@ function completeTask(a) {
     log(a, `${a.name} a livré : ${t.title}`, true);
   }
   addDeliv(d); renderPlan();
-  if (!t.requested || d.isMail) return;
+  if (d.isMail) {
+    const who = d.mail.from_name || d.mail.from;
+    agentSays(a, d.reply ? `J’ai lu le mail de ${who} et préparé une réponse. Rien n’est envoyé : enregistre-la en brouillon Gmail si elle te va.` : `J’ai lu le mail de ${who} : pas de réponse nécessaire.`,
+      { delivId: d.id, kind: 'livre', line: `Mail de ${who} traité` });
+    return;
+  }
+  if (!t.requested) { agentSays(a, `C’est fait : « ${t.title} ».`, { delivId: d.id, kind: 'livre', line: `Livré · ${t.title}` }); return; }
   if (ENGINE.drive && !d.media) exportToDrive(d).then(() => announce(a, d));
   else announce(a, d);
 }
 function announce(a, d) {
-  const files = filesOf(d), ok = files.filter(f => f.url).length, nl = linksOf(d).length;
-  const where = d.media ? `${d.media[0].kind === 'image' ? 'Ton visuel est dans ton Canva : ouvre-le' : 'Ta vidéo est dans ton espace HeyGen : ouvre-la'} depuis l’onglet Fichiers, avec la légende prête à publier dans le casier.` : ok ? `${ok > 1 ? 'Tes fichiers sont' : 'Ton fichier est'} dans ton Google Drive : ${files.filter(f => f.url).map(f => '« ' + f.name + ' »').join(' et ')}.` : ENGINE.drive ? 'Je n’ai pas pu créer le fichier dans ton Drive : tu peux réessayer depuis l’onglet Fichiers.' : 'Le fichier est prêt à télécharger.';
-  agentSays(a, `C’est prêt : « ${d.title} ». ${where}${nl ? ` J’ai aussi mis ${nl} lien${nl > 1 ? 's' : ''} dans l’onglet Fichiers.` : ''} Dis-moi si tu veux que j’ajuste.`, { delivId: d.id });
+  const files = filesOf(d), ok = files.filter(f => f.url).length, fail = files.some(f => f.status === 'err');
+  const text = d.media ? (d.media[0].kind === 'image' ? 'Ton visuel est prêt dans ton Canva, avec la légende à publier.' : 'Ta vidéo est prête dans ton espace HeyGen, avec la légende à publier.')
+    : ok ? `C’est prêt : ${ok > 1 ? 'tes fichiers sont' : 'ton fichier est'} dans ton Google Drive.` : fail ? 'C’est prêt, mais le fichier n’a pas pu être créé dans ton Drive : réessaie d’un clic.' : 'C’est prêt.';
+  agentSays(a, text + ' Dis-moi si tu veux que j’ajuste.', { delivId: d.id, kind: 'livre', line: `Prêt · ${d.title}` });
 }
 const stamp = () => new Date().toLocaleString('fr-CH', { day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' });
 
@@ -1139,7 +1218,7 @@ function wantedFiles(d) {
 }
 async function exportToDrive(d, only) {
   if (!d.drive) d.drive = wantedFiles(d).map(w => ({ ...w, status:'creating' }));
-  renderFiles(); if (casier.open) renderCasier();
+  refresh();
   for (const f of d.drive) {
     if (f.status === 'ok' || (only && f !== only)) continue;
     f.status = 'creating'; f.error = '';
@@ -1155,9 +1234,9 @@ async function exportToDrive(d, only) {
       f.id = x.id || ''; f.url = x.viewUrl || x.webViewLink || x.alternateLink || (x.id ? (f.kind === 'sheet' ? `https://docs.google.com/spreadsheets/d/${x.id}/edit` : `https://docs.google.com/document/d/${x.id}/edit`) : '');
       f.status = f.url ? 'ok' : 'err'; if (!f.url) f.error = 'Drive n’a pas renvoyé de lien.';
     } catch (e) { f.status = 'err'; f.error = errText(e); }
-    save(d); renderFiles(); if (casier.open) renderCasier();
+    save(d); refresh();
   }
-  d.filesSeen = false; save(d); renderFiles();
+  d.filesSeen = SP.view === 'files'; save(d); refresh();
 }
 // fichiers affichés : seulement pour tes demandes
 function filesOf(d) {
@@ -1193,9 +1272,7 @@ function fileRow(f) {
 }
 let fKey = '';
 function renderFiles() {
-  const unseen = HQ.deliverables.filter(d => !d.filesSeen).reduce((n, d) => n + filesOf(d).length + linksOf(d).length, 0);
-  $('tabFiles').hidden = !unseen; $('tabFiles').textContent = unseen;
-  if ($('tab-files').hidden) return;
+  if (SP.view !== 'files') return;
   const q = $('fSearch').value.trim().toLowerCase();
   const match = (...xs) => !q || xs.join(' ').toLowerCase().includes(q);
   const files = HQ.deliverables.flatMap(filesOf).filter(f => match(f.name, f.d.title, f.d.agent, f.label));
@@ -1205,7 +1282,7 @@ function renderFiles() {
   $('fCount').textContent = files.length ? `${files.length}` : '';
   $('lCount').textContent = links.length ? `${links.length}` : '';
   $('fFiles').innerHTML = files.length ? files.map(fileRow).join('')
-    : `<li class="frow"><span><small>${q ? 'Aucun fichier ne correspond.' : 'Ici n’arrivent que les fichiers de ce que tu demandes aux agents. Demande-leur quelque chose dans l’onglet Discussions.'}</small></span></li>`;
+    : `<li class="frow"><span><small>${q ? 'Aucun fichier ne correspond.' : 'Ici n’arrivent que les fichiers de ce que tu demandes aux agents. Demande-leur quelque chose depuis l’accueil ou l’espace Messages.'}</small></span></li>`;
   $('fLinks').innerHTML = links.length ? links.slice(0, 120).map(l => `<li class="frow ${l.d.filesSeen ? '' : 'new'}"><span class="ic" style="background:${poleById(l.d.pole).color}">URL</span>
       <span><a href="${esc(l.url)}" target="_blank" rel="noopener noreferrer">${esc(l.title)}</a><small>${esc(host(l.url))} · ${esc(l.d.agent)} · ${esc(l.d.title)}</small></span>
       <button type="button" data-copy="${esc(l.url)}">Copier</button></li>`).join('')
@@ -1425,6 +1502,7 @@ function enqueueMails(mails) {
     propose({ title: `Traiter le mail « ${m.subject} » de ${m.from_name}`, steps: ['read', 'reply'], mail: m, brief: m.snippet }, 'Max', 'mail');
     log(p.members[0], `📬 Nouveau mail de ${m.from_name} : ${m.subject}`);
   });
+  if (fresh.length) agentSays(p.members[0], `${fresh.length} nouveau${fresh.length > 1 ? 'x' : ''} mail${fresh.length > 1 ? 's' : ''} : je te propose de ${fresh.length > 1 ? 'les' : 'le'} traiter.`, { kind: 'val', line: `${fresh.length} mail${fresh.length > 1 ? 's' : ''} à valider` });
   if (fresh.length) { const lead = p.members.find(x => x.inside); lead && lead.say(`📬 ${fresh.length} nouveau${fresh.length > 1 ? 'x' : ''} mail${fresh.length > 1 ? 's' : ''} à te faire valider`, 3); }
 }
 const markSeen = key => { if (!key || seenMails.includes(key)) return; seenMails.push(key); try { localStorage.setItem(SEEN_KEY, JSON.stringify(seenMails.slice(-500))); } catch (e) {} };
@@ -1432,7 +1510,7 @@ const markSeen = key => { if (!key || seenMails.includes(key)) return; seenMails
 /* ---------- Validation : Jarvis ne lance rien sans ton accord ---------- */
 function propose(spec, agentName, source) {
   const t = { id: newId(), custom: true, status: 'proposee', source, target: agentName, brief: '', ...spec };
-  HQ.tasks.push(t); renderValidation(); renderPlan();
+  HQ.tasks.push(t); renderPlan(); refresh();
   return t;
 }
 function approve(t) {
@@ -1442,53 +1520,20 @@ function approve(t) {
   a.custom.push(t);
   if (t.mail) markSeen(t.mail.key);
   log(a, `Validé : ${t.title} (${a.name})`);
-  if (t.source === 'chat') agentSays(a, `Merci pour ta validation, je lance « ${t.title} ».`);
+  if (t.source === 'chat') agentSays(a, `Merci, je lance « ${t.title} ». Je t’écris dès que c’est prêt.`, { kind: 'info', line: `Validé · je lance « ${t.title} »` });
   if (a.inside) a.say('👍 C’est validé, j’y vais !', 2.5);
   setActive(true, { plan: false });
-  renderValidation(); renderPlan(); if (chatAgent) renderChat();
+  renderPlan(); refresh();
 }
 function refuse(t) {
   if (!t || t.status !== 'proposee') return;
   t.status = 'refusee';
   if (t.mail) markSeen(t.mail.key);
   const a = AGENTS.find(x => x.name === t.target);
-  if (a && t.source === 'chat') agentSays(a, `D’accord, je ne lance pas « ${t.title} ». Dis-moi si tu veux autre chose.`);
+  if (a && t.source === 'chat') agentSays(a, `D’accord, je ne lance pas « ${t.title} ». Dis-moi si tu veux autre chose.`, { kind: 'info', line: `Refusé · ${t.title}` });
   log(a || AGENTS[0], `Refusé : ${t.title}`);
-  renderValidation(); renderPlan(); if (chatAgent) renderChat();
+  renderPlan(); refresh();
 }
-const SRC = { plan:'Plan de Jarvis', mail:'Mail à traiter', chat:'Demande en discussion', toi:'Ta demande' };
-let vKey = '';
-function renderValidation() {
-  const list = HQ.tasks.filter(t => t.status === 'proposee');
-  const n = list.length;
-  $('tabValid').hidden = !n; $('tabValid').textContent = n; $('kValid').textContent = n; $('sValid').classList.toggle('hot', n > 0);
-  $('vAll').hidden = $('vNone').hidden = n < 2;
-  $('vNote').textContent = n ? `Jarvis attend ta validation pour ${n} tâche${n > 1 ? 's' : ''}. Tu peux corriger le titre ou changer d’agent avant de valider.`
-    : 'Rien à valider. Jarvis te soumet ici chaque tâche avant de la lancer : le plan du jour, les mails à traiter et ce que tu demandes aux agents.';
-  const key = list.map(t => t.id).join('|'); if (key === vKey) return; vKey = key;
-  const opts = sel => POLES.map(p => `<optgroup label="${esc(p.full)}">${p.members.filter(a => !a.jarvis).map(a => `<option value="${esc(a.name)}" ${a.name === sel ? 'selected' : ''}>${esc(a.name)} · ${esc(a.role)}</option>`).join('')}</optgroup>`).join('');
-  $('vList').innerHTML = list.map(t => { const a = AGENTS.find(x => x.name === t.target); return `<div class="vcard" data-id="${esc(t.id)}">
-    <div class="src"><i style="background:${a ? a.pole.color : '#64748b'}"></i>${esc(SRC[t.source] || 'Tâche')}</div>
-    <input value="${esc(t.title)}" aria-label="Titre de la tâche" data-f="title">
-    ${t.brief ? `<details><summary>Ce que l’agent devra faire</summary><p>${esc(String(t.brief).slice(0, 600))}</p></details>` : ''}
-    <div class="vrow"><select aria-label="Agent" data-f="agent">${opts(t.target)}</select>
-      <button class="btn sm" data-v="ok" type="button">Valider</button><button class="btn sm no" data-v="no" type="button">Refuser</button></div>
-  </div>`; }).join('');
-}
-document.getElementById('vList').addEventListener('change', e => {
-  const card = e.target.closest('.vcard'); const t = card && HQ.tasks.find(x => x.id === card.dataset.id); if (!t) return;
-  if (e.target.dataset.f === 'title' && e.target.value.trim()) t.title = e.target.value.trim();
-  if (e.target.dataset.f === 'agent') t.target = e.target.value;
-});
-document.getElementById('vList').addEventListener('click', e => {
-  const b = e.target.closest('[data-v]'); if (!b) return;
-  const card = b.closest('.vcard'), t = HQ.tasks.find(x => x.id === card.dataset.id); if (!t) return;
-  const inp = card.querySelector('[data-f="title"]'); if (inp.value.trim()) t.title = inp.value.trim();
-  t.target = card.querySelector('[data-f="agent"]').value;
-  b.dataset.v === 'ok' ? approve(t) : refuse(t);
-});
-document.getElementById('vAll').onclick = () => HQ.tasks.filter(t => t.status === 'proposee').forEach(approve);
-document.getElementById('vNone').onclick = () => HQ.tasks.filter(t => t.status === 'proposee').forEach(refuse);
 let mailWatch = null;
 function startMailWatch() {
   if (mailWatch || !ENGINE.mail) return;
@@ -1571,11 +1616,11 @@ Réponds uniquement avec un objet JSON :
     const tour = { title: 'Faire le tour des équipes', steps: ['tour'], noJob: true, status: 'attente' };
     jarvis.custom.push(tour); HQ.tasks.push(tour);
     HQ.plannedOn = new Date().toDateString();
-    addDeliv({ title: 'Brief du jour', pole: 'dir', agent: 'Jarvis', time: stamp(), status: 'ai', spec: null,
+    const bd = addDeliv({ title: 'Brief du jour', pole: 'dir', agent: 'Jarvis', time: stamp(), status: 'ai', spec: null,
       content: `${HQ.brief}\n\nPlan de la journée :\n${items.map(x => `- ${x.agent} : ${x.titre}`).join('\n')}` });
     log(jarvis, `Jarvis propose ${items.length} tâches pour aujourd’hui : à toi de valider`, true);
     jarvis.say(`📋 ${items.length} tâches à te faire valider`, 3.5);
-    showTab('valid');
+    agentSays(jarvis, HQ.brief || 'Voici le plan du jour.', { kind: 'val', delivId: bd.id, line: `Plan du jour · ${items.length} tâche${items.length > 1 ? 's' : ''} à valider` });
   } catch (e) {
     HQ.planError = errText(e); log(jarvis, 'Planification impossible : ' + errText(e));
   } finally { HQ.planning = false; renderPlan(); }
@@ -1778,7 +1823,7 @@ function frame(now) {
    Interface
    ====================================================================== */
 const $ = id => document.getElementById(id);
-const logEl = $('log'), delivEl = $('deliv');
+const logEl = $('log');
 function log(a, text, done) {
   const li = document.createElement('li');
   li.innerHTML = `<time>${timeStr()}</time><i style="background:${a.pole.color}"></i>`;
@@ -1786,150 +1831,304 @@ function log(a, text, done) {
   logEl.prepend(li); while (logEl.children.length > 80) logEl.lastChild.remove();
 }
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' })[c]);
+const agentNamed = n => AGENTS.find(a => a.name === n);
+const delivById = id => HQ.deliverables.find(d => d.id === id);
+const taskById = id => HQ.tasks.find(t => t.id === id);
+const hhmm = at => { if (!at) return ''; const d = new Date(at), today = d.toDateString() === new Date().toDateString();
+  return d.toLocaleString('fr-CH', today ? { hour:'2-digit', minute:'2-digit' } : { day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' }); };
+const TSTATUS = { proposee:'à valider', attente:'en attente', encours:'en cours', livre:'livrée', erreur:'bloquée', refusee:'refusée' };
 
-/* ---------- Mon casier ---------- */
-const casier = $('casier');
-let czFilter = 'mine', czSel = null;
-const TAGS = { ai:['livré','ai'], err:['bloqué','err'] };
-function renderDeliv() {
-  const unread = HQ.deliverables.filter(d => !d.read).length;
-  $('inboxCount').hidden = !unread; $('inboxCount').textContent = unread;
-  $('casierSum').textContent = HQ.deliverables.length ? `${HQ.deliverables.length} élément${HQ.deliverables.length > 1 ? 's' : ''}${unread ? ' · ' + unread + ' nouveau' + (unread > 1 ? 'x' : '') : ''}` : '';
-  const list = HQ.deliverables.slice(0, 5);
-  delivEl.innerHTML = list.length ? list.map(d => { const [t, c] = d.draftSaved ? ['brouillon Gmail','ai'] : (TAGS[d.status] || TAGS.ai);
-    return `<li data-id="${esc(d.id)}" class="${d.read ? '' : 'new'}"><i style="background:${poleById(d.pole).color}"></i><span>${esc(d.title)}</span><em class="tag ${c}">${d.read ? t : 'nouveau'}</em></li>`; }).join('')
-    : '<li class="empty" style="cursor:default">Tout ce que les agents créent pour toi arrive ici.</li>';
+/* ---------- Espaces plein écran ---------- */
+const SP = { view:null, prev:'msgs', agent:null, deliv:null, fresh:new Set() };
+const spEl = $('space');
+const TITLES = { valid:'À valider', msgs:'Messages', files:'Fichiers', team:'Équipe', day:'Journée' };
+const PANES = ['valid', 'msgs', 'files', 'team', 'day', 'thread'];
+function openSpace(view) {
+  const wasClosed = spEl.hidden;
+  if (view !== 'thread') SP.prev = view;
+  SP.view = view;
+  if (view === 'msgs') {
+    // ce qui n'était pas lu reste en évidence pendant que tu regardes le fil
+    SP.fresh = new Set(allMsgs().filter(x => !x.m.seen).map(x => x.a.name + ':' + x.m.at));
+    markMsgsSeen(() => true);
+  }
+  PANES.forEach(p => { $('sp-' + p).hidden = p !== view; });
+  spEl.classList.toggle('is-thread', view === 'thread');
+  [...$('spNav').children].forEach(b => b.setAttribute('aria-current', b.dataset.space === (view === 'thread' ? 'msgs' : view)));
+  $('spTitle').textContent = view === 'thread' ? (SP.agent ? 'Avec ' + SP.agent.name : 'Conversation') : TITLES[view];
+  spEl.hidden = false; document.body.classList.add('in-space');
+  vKey = fKey = teamKey = chatKey = docKey = feedKey = '';
+  refresh();
+  if (view === 'files') markFilesSeen();
+  if (view === 'thread') setTimeout(() => $('chatText').focus(), 30);
+  else if (wasClosed) $('spBack').focus();
+  $('spBody').scrollTop = 0;
 }
-delivEl.addEventListener('click', e => { const li = e.target.closest('li[data-id]'); if (li) openCasier(li.dataset.id); });
-$('casierOpen').onclick = () => openCasier();
-$('inboxBtn').onclick = () => openCasier();
-$('czClose').onclick = () => casier.close();
-$('czTabs').onclick = e => { const b = e.target.closest('button'); if (!b) return; czFilter = b.dataset.f; [...$('czTabs').children].forEach(x => x.classList.toggle('sel', x === b)); czSel = null; renderCasier(); };
-function openCasier(id) {
-  if (id) { const d = HQ.deliverables.find(x => x.id === id); if (d) { czFilter = d.requested ? 'mine' : d.isMail ? 'mail' : 'all'; czSel = id; } }
-  [...$('czTabs').children].forEach(x => x.classList.toggle('sel', x.dataset.f === czFilter));
-  if (!casier.open) casier.showModal();
-  renderCasier();
+function closeSpace() {
+  spEl.hidden = true; SP.view = null; SP.agent = null; SP.deliv = null; SP.fresh.clear();
+  document.body.classList.remove('in-space'); refresh();
 }
-const czItems = () => HQ.deliverables.filter(d => czFilter === 'all' || (czFilter === 'mail' ? d.isMail : d.requested));
-function renderCasier() {
-  if (!casier.open) return;
-  const items = czItems();
-  if (czSel && !items.find(d => d.id === czSel)) czSel = null;
-  if (!czSel && items.length && innerWidth > 760) czSel = items[0].id;
-  $('czList').innerHTML = items.length ? items.map(d => `<li data-id="${esc(d.id)}" class="${d.read ? '' : 'new'} ${d.id === czSel ? 'sel' : ''}"><i></i><span><b>${esc(d.title)}</b><small>${esc(d.agent)} · ${esc(d.time)}${d.status === 'err' ? ' · bloqué' : d.draftSaved ? ' · brouillon Gmail' : ''}</small></span></li>`).join('')
-    : `<li style="cursor:default"><span><small>${czFilter === 'mine' ? 'Rien pour l’instant. Demande quelque chose à un agent : le résultat arrivera ici.' : czFilter === 'mail' ? 'Aucun mail traité pour l’instant.' : 'Le casier est vide.'}</small></span></li>`;
-  renderRead();
+function openThread(a, delivId) {
+  if (!a || a.courier) return;
+  SP.agent = a; SP.deliv = delivId || null;
+  markMsgsSeen(x => x === a);
+  if (delivId) { const d = delivById(delivId); if (d && !d.read) { d.read = true; save(d); } }
+  openSpace('thread');
 }
-$('czList').addEventListener('click', e => { const li = e.target.closest('li[data-id]'); if (!li) return; czSel = li.dataset.id; renderCasier(); });
-function renderRead() {
-  const d = HQ.deliverables.find(x => x.id === czSel), el = $('czRead');
-  if (!d) { el.innerHTML = '<p class="meta">Choisis un élément à gauche pour le lire.</p>'; return; }
-  if (!d.read) { d.read = true; save(d); renderDeliv(); setTimeout(() => { const li = $('czList').querySelector(`li[data-id="${CSS.escape(d.id)}"]`); li && li.classList.remove('new'); }); }
-  const canDl = !!STORE.dl || !(window.claude && window.claude.use);
-  const agent = AGENTS.find(a => a.name === d.agent);
-  el.innerHTML = `<h4>${esc(d.title)}</h4><div class="meta">${esc(d.agent)} · ${esc(poleById(d.pole).full)} · ${esc(d.time)}${d.requested ? ' · à ta demande' : ''}</div>
-    <div class="cz-actions">
-      <button class="btn ghost" data-act="copy">Copier</button>
+$('spBack').onclick = closeSpace;
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-space]'); if (!b || b.closest('#space .acts')) return;
+  openSpace(b.dataset.space);
+});
 
-      ${agent && !agent.jarvis || agent && agent.jarvis ? `<button class="btn ghost" data-act="chat">Discuter avec ${esc(d.agent)}</button>` : ''}
-      ${d.reply && !d.draftSaved && ENGINE.mail ? '<button class="btn" data-act="draft">Enregistrer le brouillon dans Gmail</button>' : ''}
-      ${d.status === 'err' && d.spec ? '<button class="btn" data-act="retry">Relancer la tâche</button>' : ''}
-      <span class="msg" id="czMsg">${d.draftSaved ? 'Brouillon enregistré dans Gmail. Rien n’a été envoyé.' : ''}</span>
-    </div>
-    ${filesOf(d).length || linksOf(d).length ? `<div class="cz-attach">
-      ${filesOf(d).length ? '<h5>Fichiers envoyés</h5><ul class="flist">' + filesOf(d).map(fileRow).join('') + '</ul>' : ''}
-      ${linksOf(d).length ? '<h5>Liens</h5>' + linksOf(d).slice(0, 12).map(l => `<div class="frow"><span><a href="${esc(l.url)}" target="_blank" rel="noopener noreferrer">${esc(l.title)}</a><small>${esc(host(l.url))}</small></span><button type="button" data-copy="${esc(l.url)}">Copier</button></div>`).join('') : ''}
-    </div>` : ''}
-    <pre id="czText"></pre>`;
-  $('czText').textContent = d.content;
+function refresh() {
+  renderTiles(); renderValidation(); renderFiles();
+  if (SP.view === 'msgs') renderFeed();
+  if (SP.view === 'team') renderTeam();
+  if (SP.view === 'thread') { renderChat(); renderDoc(); }
 }
+
+/* ---------- Messages courts des agents ---------- */
+const chatOf = a => CHATS[a.name] || (CHATS[a.name] = { messages: [], updatedAt: 0 });
+const shortLine = t => { const s = String(t).replace(/\s+/g, ' ').trim(), f = s.split(/(?<=[.!?])\s/)[0] || s; return f.length > 90 ? f.slice(0, 88).trimEnd() + '…' : f; };
+function agentSays(a, text, extra = {}) {
+  const c = chatOf(a), at = Date.now();
+  const inThread = SP.view === 'thread' && SP.agent === a;
+  c.messages.push({ role:'agent', text, at, ...extra, line: String(extra.line || shortLine(text)).slice(0, 120), kind: extra.kind || 'info', seen: inThread || SP.view === 'msgs' });
+  if (SP.view === 'msgs') SP.fresh.add(a.name + ':' + at);
+  c.messages = c.messages.slice(-60); c.updatedAt = at; saveChat(a.name); refresh();
+}
+function markMsgsSeen(who) {
+  Object.entries(CHATS).forEach(([name, c]) => {
+    const a = agentNamed(name); if (!a || !who(a)) return;
+    let ch = false; (c.messages || []).forEach(m => { if (m.role === 'agent' && !m.seen) { m.seen = true; ch = true; } });
+    if (ch) saveChat(name);
+  });
+}
+const allMsgs = () => Object.entries(CHATS).flatMap(([name, c]) => { const a = agentNamed(name); return a ? (c.messages || []).filter(m => m.role === 'agent').map(m => ({ m, a })) : []; })
+  .sort((x, y) => y.m.at - x.m.at);
+function attachSummary(d) {
+  if (d.isMail) return d.draftSaved ? 'brouillon dans Gmail' : d.reply ? 'réponse prête' : 'rien à répondre';
+  if (d.status === 'err') return '';
+  const n = { doc:0, tableau:0, visuel:0, vidéo:0 };
+  filesOf(d).forEach(f => { n[f.type === 'sheet' || f.type === 'csv' ? 'tableau' : f.type === 'image' ? 'visuel' : f.type === 'video' ? 'vidéo' : 'doc']++; });
+  const PL = { doc:'docs', tableau:'tableaux', visuel:'visuels', vidéo:'vidéos' };
+  const nl = linksOf(d).length, out = Object.entries(n).filter(([, v]) => v).map(([k, v]) => `${v} ${v > 1 ? PL[k] : k}`);
+  if (filesOf(d).some(f => f.status === 'creating')) out.push('création dans Drive…');
+  if (nl) out.push(`${nl} lien${nl > 1 ? 's' : ''}`);
+  return out.join(', ');
+}
+function msgActs(m, a, d, t) {
+  let h = '';
+  if (t && t.status === 'proposee') h += `<button class="ok" type="button" data-ok="${esc(t.id)}">Valider</button><button class="no" type="button" data-no="${esc(t.id)}">Refuser</button>`;
+  else if (t) h += `<em class="st ${t.status}">${TSTATUS[t.status] || ''}</em>`;
+  if (m.kind === 'val' && !t) { const n = HQ.tasks.filter(x => x.status === 'proposee').length; h += n ? `<button class="ok" type="button" data-go="valid">Voir (${n})</button>` : ''; }
+  if (d && d.reply && !d.draftSaved && ENGINE.mail) h += `<button type="button" data-draft="${esc(d.id)}">Brouillon Gmail</button>`;
+  if (d && d.status === 'err' && d.spec) h += `<button type="button" data-retry="${esc(d.id)}">Relancer</button>`;
+  if (d) filesOf(d).filter(f => f.url).slice(0, 3).forEach(f => { const [lbl, col] = FT[f.type] || FT.gdoc; h += `<a class="fchip" style="background:${col}" href="${esc(f.url)}" target="_blank" rel="noopener noreferrer" title="${esc(f.name)}">${lbl}</a>`; });
+  if (d) h += `<button class="primary" type="button" data-open="${esc(d.id)}">Ouvrir</button>`;
+  else if (m.kind === 'question') h += `<button class="primary" type="button" data-reply>Répondre</button>`;
+  return h;
+}
+function feedRow({ m, a }) {
+  const d = m.delivId ? delivById(m.delivId) : null, t = m.taskId ? taskById(m.taskId) : null;
+  const att = d ? attachSummary(d) : '', isNew = SP.fresh.has(a.name + ':' + m.at) || !m.seen;
+  return `<div class="frow2 ${isNew ? 'new' : ''} k-${esc(m.kind || 'info')}" data-agent="${esc(a.name)}" ${d ? `data-deliv="${esc(d.id)}"` : ''}>
+    <span class="av" style="background:${avatarBg(a)}"></span>
+    <p title="${esc(m.line || '')}"><b>${esc(a.name)}</b> · ${esc(m.line || shortLine(m.text))}${att ? ` <span class="att">· ${esc(att)}</span>` : ''}</p>
+    <time>${hhmm(m.at)}</time><span class="acts">${msgActs(m, a, d, t)}</span></div>`;
+}
+let feedKey = '';
+function renderFeed() {
+  const list = allMsgs().slice(0, 80);
+  const key = list.map(x => x.a.name + x.m.at + (SP.fresh.has(x.a.name + ':' + x.m.at) ? 1 : 0)).join('|') + '#' + HQ.tasks.map(t => t.id + t.status).join(',') + '#' + HQ.deliverables.map(d => d.id + (d.draftSaved ? 1 : 0) + d.status + JSON.stringify(d.drive || '')).join(',');
+  if (key === feedKey) return; feedKey = key;
+  const fresh = list.filter(x => SP.fresh.has(x.a.name + ':' + x.m.at)), old = list.filter(x => !SP.fresh.has(x.a.name + ':' + x.m.at));
+  $('feed').innerHTML = !list.length ? '<div class="empty-big">Les agents t’écrivent ici en une ligne : « Maya · 3 hôtels à Lyon trouvés · 1 doc, 1 tableau ». Clique sur une ligne pour voir le détail en grand.</div>'
+    : (fresh.length ? '<div class="fd-h">Nouveau</div>' + fresh.map(feedRow).join('') : '') + (old.length ? `<div class="fd-h">${fresh.length ? 'Plus tôt' : 'Tous les messages'}</div>` + old.map(feedRow).join('') : '');
+}
+async function doDraft(d, b) {
+  if (!d || !d.reply) return;
+  if (b) { b.disabled = true; b.textContent = 'Enregistrement…'; }
+  try { await saveDraft(d.mail, d.reply); d.draftSaved = true; HQ.drafts++; save(d); log(agentNamed(d.agent) || AGENTS[0], `Brouillon enregistré dans Gmail pour « ${d.mail.subject} »`, true); }
+  catch (err) { if (b) { b.disabled = false; b.textContent = 'Échec : réessayer'; b.title = errText(err); } return; }
+  feedKey = docKey = ''; refresh();
+}
+function retryDeliv(d) {
+  if (!d || !d.spec) return;
+  const a = agentNamed(d.spec.agent) || AGENTS[0];
+  const t = { id: newId(), title: d.spec.title, steps: d.spec.steps, brief: d.spec.brief, mail: d.spec.mail, requested: d.spec.requested, format: d.spec.format, custom: true, status: 'attente' };
+  a.custom.push(t); HQ.tasks.push(t);
+  HQ.deliverables.splice(HQ.deliverables.indexOf(d), 1); save(); if (STORE.db) STORE.db.doc(`data/users/${STORE.uid}/l_${d.id}`).delete().catch(() => {});
+  if (SP.deliv === d.id) SP.deliv = null;
+  log(a, `Tâche relancée : ${t.title}`); renderPlan(); setActive(true, { plan: false }); refresh();
+}
+// un seul gestionnaire pour toutes les lignes d'action (fil, questions, conversation, livrable)
+async function actClick(e) {
+  if (e.target.closest('a')) return;
+  const b = e.target.closest('button'), row = e.target.closest('.frow2');
+  if (b) {
+    const ds = b.dataset;
+    if (ds.ok) { approve(taskById(ds.ok)); return; }
+    if (ds.no) { refuse(taskById(ds.no)); return; }
+    if (ds.go) { openSpace(ds.go); return; }
+    if (ds.draft) { doDraft(delivById(ds.draft), b); return; }
+    if (ds.retry) { retryDeliv(delivById(ds.retry)); return; }
+    if (ds.open) { if (row) openThread(agentNamed(row.dataset.agent), ds.open); else { SP.deliv = ds.open; docKey = ''; renderDoc(); } return; }
+    if ('reply' in ds && row) { openThread(agentNamed(row.dataset.agent)); return; }
+    if (b.closest('.frow2') == null) return;
+  }
+  if (row && !b) openThread(agentNamed(row.dataset.agent), row.dataset.deliv || null);
+}
+['feed', 'vAsk', 'chatLog'].forEach(id => $(id).addEventListener('click', actClick));
+
+/* ---------- Accueil : les tuiles ---------- */
+let tileKey = '';
+function renderTiles() {
+  const props = HQ.tasks.filter(t => t.status === 'proposee'), msgs = allMsgs(), unseen = msgs.filter(x => !x.m.seen).length;
+  const files = HQ.deliverables.flatMap(filesOf), links = HQ.deliverables.flatMap(linksOf);
+  const fNew = HQ.deliverables.filter(d => !d.filesSeen).reduce((n, d) => n + filesOf(d).length + linksOf(d).length, 0);
+  const inside = AGENTS.filter(a => a.inside).length, working = AGENTS.filter(a => a.task).length;
+  const plan = HQ.tasks.filter(t => !t.noJob && t.status !== 'refusee' && t.status !== 'proposee'), done = plan.filter(t => t.status === 'livre').length;
+  const clock = HQ.active || AGENTS.some(a => a.visible) ? timeStr() : '--:--';
+  const key = [props.map(t => t.id + t.title + t.target).join(','), msgs.slice(0, 6).map(x => x.m.at + (x.m.seen ? 1 : 0)).join(','), unseen, files.length, links.length, fNew, inside, working, done, plan.length, clock, HQ.active].join('|');
+  if (key === tileKey) return; tileKey = key;
+  const n = props.length;
+  $('tValidN').textContent = n; $('kValid').textContent = n; $('sValid').classList.toggle('hot', n > 0);
+  document.querySelector('.t-valid').classList.toggle('hot', n > 0);
+  $('tValidL').innerHTML = n ? props.slice(0, 6).map(t => { const a = agentNamed(t.target); return `<span class="t-line"><i style="background:${a ? a.pole.color : '#64748b'}"></i><span><b>${esc(t.target || '')}</b> · ${esc(t.title)}</span></span>`; }).join('')
+      + (n > 6 ? `<span class="t-line dim"><span>et ${n - 6} autre${n > 7 ? 's' : ''}…</span></span>` : '')
+    : '<span class="t-line dim"><span>Rien à valider. Jarvis te soumet ici chaque tâche avant de la lancer : plan du jour, mails, tes demandes.</span></span>';
+  $('tMsgN').textContent = unseen; document.querySelector('.t-msgs').classList.toggle('hot', unseen > 0);
+  $('tMsgL').innerHTML = msgs.length ? msgs.slice(0, 6).map(({ m, a }) => `<span class="t-line ${m.seen ? '' : 'new'}"><i></i><span><b>${esc(a.name)}</b> · ${esc(m.line || shortLine(m.text))}</span></span>`).join('')
+    : '<span class="t-line dim"><span>Les agents t’écrivent ici en une ligne, avec le bouton pour agir.</span></span>';
+  $('tFileN').textContent = files.length + links.length;
+  $('tFileS').textContent = fNew ? `${fNew} nouveau${fNew > 1 ? 'x' : ''}` : files.length ? `${files.length} fichier${files.length > 1 ? 's' : ''}, ${links.length} lien${links.length > 1 ? 's' : ''}` : 'Docs et tableaux';
+  $('tTeamN').textContent = `${inside}/${AGENTS.length}`; $('tTeamS').textContent = working ? `${working} au travail` : 'au bureau';
+  $('tDayN').textContent = clock; $('tDayS').textContent = plan.length ? `${done}/${plan.length} livrées` : 'Plan du jour';
+  const badge = (id, v) => { $(id).hidden = !v; $(id).textContent = v; };
+  badge('nValid', n); badge('nMsgs', unseen); badge('nFiles', fNew);
+}
+
+/* ---------- À valider ---------- */
+const SRC = { plan:'Plan de Jarvis', mail:'Mails à traiter', chat:'Tes demandes', toi:'Tes demandes' };
+let vKey = '';
+function renderValidation() {
+  const list = HQ.tasks.filter(t => t.status === 'proposee'), n = list.length;
+  if (SP.view !== 'valid') return;
+  const qs = Object.entries(CHATS).map(([name, c]) => { const ms = c.messages || [], last = ms[ms.length - 1]; const a = agentNamed(name);
+    return a && last && last.role === 'agent' && last.kind === 'question' ? { m: last, a } : null; }).filter(Boolean);
+  const key = list.map(t => t.id).join('|') + '#' + qs.map(x => x.a.name + x.m.at).join('|');
+  if (key === vKey) return; vKey = key;
+  $('vAll').hidden = $('vNone').hidden = n < 2;
+  $('vNote').textContent = n ? `${n} tâche${n > 1 ? 's attendent' : ' attend'} ton feu vert. Corrige le titre ou change d’agent si besoin, puis valide : rien ne part sans toi.`
+    : 'Rien à valider pour l’instant. Jarvis te soumet ici chaque tâche avant de la lancer.';
+  const opts = sel => POLES.map(p => `<optgroup label="${esc(p.full)}">${p.members.filter(a => !a.jarvis).map(a => `<option value="${esc(a.name)}" ${a.name === sel ? 'selected' : ''}>${esc(a.name)} · ${esc(a.role)}</option>`).join('')}</optgroup>`).join('');
+  const groups = ['plan', 'mail', 'chat'].map(s => [s, list.filter(t => (SRC[t.source] || SRC.toi) === SRC[s])]).filter(([, l]) => l.length);
+  $('vList').innerHTML = !n ? '<div class="empty-big">Tout est validé. ✓</div>' : groups.map(([s, l]) => `<section class="vgroup"><h3 class="sp-h">${esc(SRC[s])} <em>${l.length}</em></h3>${l.map(t => {
+    const a = agentNamed(t.target); return `<div class="vrow2" data-id="${esc(t.id)}">
+      <i style="background:${a ? a.pole.color : '#64748b'}"></i>
+      <input value="${esc(t.title)}" aria-label="Titre de la tâche (modifiable)" data-f="title">
+      <select aria-label="Agent" data-f="agent">${opts(t.target)}</select>
+      <span class="vbtns"><button class="btn sm ok" data-v="ok" type="button">Valider</button><button class="btn sm no" data-v="no" type="button">Refuser</button></span>
+      ${t.brief ? `<details><summary>Détail</summary><p>${esc(String(t.brief).slice(0, 900))}</p></details>` : ''}
+    </div>`; }).join('')}</section>`).join('');
+  $('vAskWrap').hidden = !qs.length;
+  $('vAsk').innerHTML = qs.map(feedRow).join('');
+}
+$('vList').addEventListener('change', e => {
+  const row = e.target.closest('.vrow2'); const t = row && taskById(row.dataset.id); if (!t) return;
+  if (e.target.dataset.f === 'title' && e.target.value.trim()) t.title = e.target.value.trim();
+  if (e.target.dataset.f === 'agent') t.target = e.target.value;
+});
+$('vList').addEventListener('click', e => {
+  const b = e.target.closest('[data-v]'); if (!b) return;
+  const row = b.closest('.vrow2'), t = taskById(row.dataset.id); if (!t) return;
+  const inp = row.querySelector('[data-f="title"]'); if (inp.value.trim()) t.title = inp.value.trim();
+  t.target = row.querySelector('[data-f="agent"]').value;
+  b.dataset.v === 'ok' ? approve(t) : refuse(t);
+});
+$('vAll').onclick = () => HQ.tasks.filter(t => t.status === 'proposee').forEach(approve);
+$('vNone').onclick = () => HQ.tasks.filter(t => t.status === 'proposee').forEach(refuse);
+
+/* ---------- Fichiers ---------- */
 async function fileOrCopyClick(e, onMsg) {
   const rb = e.target.closest('[data-redrive]');
-  if (rb) { const d = HQ.deliverables.find(x => x.id === rb.dataset.redrive); if (d && ENGINE.drive) { rb.disabled = true; exportToDrive(d); } return true; }
+  if (rb) { const d = delivById(rb.dataset.redrive); if (d && ENGINE.drive) { rb.disabled = true; exportToDrive(d); } return true; }
   const fb = e.target.closest('[data-file]'), cb = e.target.closest('[data-copy]'), sb = e.target.closest('[data-see]');
   if (fb) { const f = HQ.deliverables.flatMap(filesOf).find(x => x.key === fb.dataset.file); if (f) await saveFile(f.name, f.make(), onMsg); return true; }
   if (cb) { try { await navigator.clipboard.writeText(cb.dataset.copy); cb.textContent = 'Copié ✓'; } catch (err) { cb.textContent = 'Copie impossible'; } setTimeout(() => { cb.textContent = 'Copier'; }, 1500); return true; }
-  if (sb) { openCasier(sb.dataset.see); return true; }
+  if (sb) { const d = delivById(sb.dataset.see); if (d) openThread(agentNamed(d.agent), d.id); return true; }
   return false;
 }
-$('tab-files').addEventListener('click', e => { fileOrCopyClick(e, txt => { if (txt) log(AGENTS[0], txt); }); });
+$('sp-files').addEventListener('click', e => { fileOrCopyClick(e, txt => { if (txt) log(AGENTS[0], txt); }); });
 $('fSearch').addEventListener('input', () => renderFiles());
-$('czRead').addEventListener('click', async e => {
-  if (await fileOrCopyClick(e, txt => { const m = $('czMsg'); if (m) m.textContent = txt; })) return;
-  const b = e.target.closest('[data-act]'); if (!b) return;
-  const d = HQ.deliverables.find(x => x.id === czSel); if (!d) return;
+
+/* ---------- Conversation : livrable en grand + discussion ---------- */
+let chatBusy = null, chatKey = '', docKey = '';
+function renderChat() {
+  const a = SP.agent; if (!a) return;
+  const c = chatOf(a), [st, col] = STATE(a);
+  const key = st + c.messages.length + (c.messages.length ? c.messages[c.messages.length - 1].at : 0) + (chatBusy === a) + HQ.tasks.filter(t => c.messages.some(m => m.taskId === t.id)).map(t => t.status).join(',') + HQ.deliverables.length;
+  if (key === chatKey) return; chatKey = key;
+  $('thHead').innerHTML = `<div class="who"><span class="pf-av" style="--pc:${a.pole.color};width:40px;height:40px;background:${avatarBg(a)}"></span><div><b>${esc(a.name)}</b><small>${esc(a.role)} · <span style="color:${col}">${esc(st)}</span></small></div></div>
+    <button class="btn ghost sm" id="chatProfile" type="button">Sa fiche</button><button class="btn ghost sm" id="chatBack" type="button">← ${esc(TITLES[SP.prev] || 'Messages')}</button>`;
+  $('chatBack').onclick = () => openSpace(SP.prev || 'msgs');
+  $('chatProfile').onclick = () => { closeSpace(); openProfile(a); };
+  const el = $('chatLog');
+  const intro = `<div class="bubble agent">Salut Yosh, c’est ${esc(a.name)}. ${esc(a.mission || '')}\nDis-moi ce dont tu as besoin : je te propose la tâche, tu la valides en un clic, et je t’écris quand c’est prêt.</div>`;
+  el.innerHTML = intro + c.messages.map(m => {
+    const t = m.taskId ? taskById(m.taskId) : null, d = m.delivId ? delivById(m.delivId) : null;
+    const card = t || d ? `<div class="task-card"><span>${t ? '📌 ' + esc(t.title) : '📥 ' + esc(d.title)}</span><span class="acts">${msgActs({ ...m, kind: 'info' }, a, d, t).replace(/<button class="primary" type="button" data-reply>[^<]*<\/button>/, '')}</span></div>` : '';
+    return `<div class="bubble ${m.role === 'user' ? 'me' : 'agent'} ${m.error ? 'err' : ''}">${esc(m.text)}${card}<small>${hhmm(m.at)}</small></div>`;
+  }).join('') + (chatBusy === a ? `<div class="typing">${esc(a.name)} écrit…</div>` : '');
+  el.scrollTop = el.scrollHeight;
+  $('chatSend').disabled = chatBusy === a;
+  $('chatChips').innerHTML = c.messages.length ? '' : (a.resp || []).slice(0, 3).map(r => `<button type="button" data-chip="${esc(r)}">${esc(r)}</button>`).join('');
+}
+function renderDoc() {
+  const a = SP.agent; if (!a) return;
+  const mine = HQ.deliverables.filter(d => d.agent === a.name), d = SP.deliv ? delivById(SP.deliv) : null;
+  const key = (d ? d.id + d.status + (d.draftSaved ? 1 : 0) + JSON.stringify(d.drive || '') + (d.content || '').length : 'list' + mine.map(x => x.id + (x.read ? 1 : 0)).join(',')) + ENGINE.mail + ENGINE.drive;
+  if (key === docKey) return; docKey = key;
+  const el = $('thDoc');
+  if (!d) {
+    el.innerHTML = `<h4>Ce que ${esc(a.name)} t’a livré</h4>` + (mine.length ? `<div class="feed">${mine.map(x => `<div class="drow ${x.read ? '' : 'new'}" data-pick="${esc(x.id)}"><span><b>${esc(x.title)}</b><small>${esc(x.time)}${x.status === 'err' ? ' · bloqué' : ''}${attachSummary(x) ? ' · ' + esc(attachSummary(x)) : ''}</small></span></div>`).join('')}</div>`
+      : `<p class="meta">Rien pour l’instant. Écris-lui à droite : il te propose la tâche, tu la valides, et le résultat s’affiche ici en grand.</p>`);
+    return;
+  }
+  if (!d.read) { d.read = true; save(d); }
+  el.innerHTML = `${mine.length > 1 ? `<button class="link-btn" type="button" data-pick="">← Tous ses livrables (${mine.length})</button>` : ''}
+    <h4>${esc(d.title)}</h4><div class="meta">${esc(d.agent)} · ${esc(poleById(d.pole).full)} · ${esc(d.time)}${d.requested ? ' · à ta demande' : ''}</div>
+    <div class="cz-actions">
+      <button class="btn ghost sm" data-act="copy" type="button">Copier le texte</button>
+      ${d.reply && !d.draftSaved && ENGINE.mail ? '<button class="btn sm" data-act="draft" type="button">Enregistrer le brouillon dans Gmail</button>' : ''}
+      ${d.status === 'err' && d.spec ? '<button class="btn sm" data-act="retry" type="button">Relancer la tâche</button>' : ''}
+      <span class="msg" id="czMsg">${d.draftSaved ? 'Brouillon enregistré dans Gmail. Rien n’a été envoyé.' : ''}</span>
+    </div>
+    ${filesOf(d).length || linksOf(d).length ? `<div class="cz-attach">
+      ${filesOf(d).length ? '<h5>Fichiers</h5><ul class="flist">' + filesOf(d).map(f => fileRow(f).replace(/<button type="button" data-see="[^"]*">Voir<\/button>/, '')).join('') + '</ul>' : ''}
+      ${linksOf(d).length ? '<h5>Liens</h5><ul class="flist">' + linksOf(d).slice(0, 12).map(l => `<li class="frow"><span><a href="${esc(l.url)}" target="_blank" rel="noopener noreferrer">${esc(l.title)}</a><small>${esc(host(l.url))}</small></span><button type="button" data-copy="${esc(l.url)}">Copier</button></li>`).join('') + '</ul>' : ''}
+    </div>` : ''}
+    <pre id="czText"></pre>`;
+  $('czText').textContent = d.content;
+  el.scrollTop = 0;
+}
+$('thDoc').addEventListener('click', async e => {
+  const pk = e.target.closest('[data-pick]'); if (pk) { SP.deliv = pk.dataset.pick || null; renderDoc(); return; }
   const msg = txt => { const m = $('czMsg'); if (m) m.textContent = txt; };
+  if (await fileOrCopyClick(e, msg)) return;
+  const b = e.target.closest('[data-act]'); if (!b) return;
+  const d = delivById(SP.deliv); if (!d) return;
   if (b.dataset.act === 'copy') {
     try { await navigator.clipboard.writeText(d.content); msg('Copié.'); }
     catch (err) { const r = document.createRange(); r.selectNodeContents($('czText')); getSelection().removeAllRanges(); getSelection().addRange(r); msg('Texte sélectionné : copie-le avec ton raccourci habituel.'); }
-  } else if (b.dataset.act === 'chat') {
-    casier.close(); openChat(AGENTS.find(a => a.name === d.agent));
-  } else if (b.dataset.act === 'draft') {
-    b.disabled = true; msg('Enregistrement dans Gmail…');
-    try { await saveDraft(d.mail, d.reply); d.draftSaved = true; HQ.drafts++; save(d); renderDeliv(); log(AGENTS.find(a => a.name === d.agent) || AGENTS[0], `Brouillon enregistré dans Gmail pour « ${d.mail.subject} »`, true); renderCasier(); }
-    catch (err) { msg(errText(err)); b.disabled = false; }
-  } else if (b.dataset.act === 'retry') {
-    const a = AGENTS.find(x => x.name === d.spec.agent) || AGENTS[0];
-    const t = { id: newId(), title: d.spec.title, steps: d.spec.steps, brief: d.spec.brief, mail: d.spec.mail, requested: d.spec.requested, custom: true, status: 'attente' };
-    a.custom.push(t); HQ.tasks.push(t);
-    HQ.deliverables.splice(HQ.deliverables.indexOf(d), 1); save(); if (STORE.db) STORE.db.doc(`data/users/${STORE.uid}/l_${d.id}`).delete().catch(() => {});
-    renderDeliv(); renderPlan(); log(a, `Tâche relancée : ${t.title}`); czSel = null; renderCasier();
-    setActive(true, { plan: false });
-  }
-});
-
-/* ---------- Discussions avec les agents ---------- */
-const chatDlg = $('chat');
-let chatAgent = null, chatBusy = false;
-const chatOf = a => CHATS[a.name] || (CHATS[a.name] = { messages: [], unread: 0, updatedAt: 0 });
-function agentSays(a, text, extra = {}) {
-  const c = chatOf(a);
-  c.messages.push({ role:'agent', text, at: Date.now(), ...extra }); c.messages = c.messages.slice(-60);
-  c.updatedAt = Date.now(); if (chatAgent !== a || !chatDlg.open) c.unread = (c.unread || 0) + 1;
-  saveChat(a.name); renderThreads(); if (chatAgent === a) renderChat();
-}
-function openChat(a) {
-  if (!a || a.courier) return;
-  chatAgent = a; const c = chatOf(a);
-  if (c.unread) { c.unread = 0; saveChat(a.name); }
-  if (!chatDlg.open) chatDlg.showModal();
-  renderChat(); renderThreads();
-  setTimeout(() => $('chatText').focus(), 50);
-}
-chatDlg.addEventListener('close', () => { chatAgent = null; renderThreads(); });
-const timeOf = at => at ? new Date(at).toLocaleString('fr-CH', { day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' }) : '';
-const TSTATUS = { proposee:'à valider', attente:'en attente', encours:'en cours', livre:'livrée', erreur:'bloquée', refusee:'refusée' };
-function renderChat() {
-  const a = chatAgent; if (!a) return;
-  const c = chatOf(a), [st, col] = STATE(a);
-  $('chatHead').innerHTML = `<div class="who"><span class="pf-av" style="--pc:${a.pole.color};width:40px;height:40px;background:${avatarBg(a)}"></span><div><b>${esc(a.name)}</b><small>${esc(a.role)} · ${esc(a.pole.full)} · <span style="color:${col}">${esc(st)}</span></small></div></div>
-    <button class="btn ghost" id="chatProfile" type="button">Voir sa fiche</button><button class="pf-close" id="chatClose" aria-label="Fermer la discussion">×</button>`;
-  $('chatClose').onclick = () => chatDlg.close();
-  $('chatProfile').onclick = () => { chatDlg.close(); openProfile(a); };
-  const log = $('chatLog');
-  const intro = `<div class="bubble agent">Salut Yosh, c’est ${esc(a.name)}. ${esc(a.mission || '')}\nDis-moi ce dont tu as besoin : je te propose la tâche, tu la valides, et le résultat arrive dans ton casier.</div>`;
-  log.innerHTML = intro + c.messages.map(m => {
-    const task = m.taskId ? HQ.tasks.find(t => t.id === m.taskId) : null;
-    const tcard = m.taskTitle ? `<div class="task-card"><span>📌 Tâche : ${esc(task ? task.title : m.taskTitle)}</span>${task && task.status === 'proposee'
-      ? `<button type="button" data-ok="${esc(task.id)}">Valider</button><button type="button" data-no="${esc(task.id)}">Refuser</button>`
-      : `<em class="st ${task ? task.status : ''}">${task ? TSTATUS[task.status] : 'envoyée'}</em>`}</div>` : '';
-    const dcard = m.delivId && HQ.deliverables.find(d => d.id === m.delivId) ? `<div class="task-card"><span>📥 Dans ton casier</span><button type="button" data-open="${esc(m.delivId)}">Ouvrir</button></div>` : '';
-    return `<div class="bubble ${m.role === 'user' ? 'me' : 'agent'} ${m.error ? 'err' : ''}">${esc(m.text)}${tcard}${dcard}<small>${timeOf(m.at)}</small></div>`;
-  }).join('') + (chatBusy ? `<div class="typing">${esc(a.name)} écrit…</div>` : '');
-  log.scrollTop = log.scrollHeight;
-  $('chatSend').disabled = chatBusy;
-  $('chatChips').innerHTML = c.messages.length ? '' : (a.resp || []).slice(0, 3).map(r => `<button type="button" data-chip="${esc(r)}">${esc(r)}</button>`).join('');
-}
-$('chatLog').addEventListener('click', e => {
-  const b = e.target.closest('[data-open]'); if (b) { chatDlg.close(); openCasier(b.dataset.open); return; }
-  const ok = e.target.closest('[data-ok]'), no = e.target.closest('[data-no]');
-  if (ok) approve(HQ.tasks.find(t => t.id === ok.dataset.ok));
-  if (no) refuse(HQ.tasks.find(t => t.id === no.dataset.no));
+  } else if (b.dataset.act === 'draft') { msg('Enregistrement dans Gmail…'); await doDraft(d, b); }
+  else if (b.dataset.act === 'retry') retryDeliv(d);
 });
 $('chatChips').addEventListener('click', e => { const b = e.target.closest('[data-chip]'); if (b) { $('chatText').value = 'Peux-tu t’occuper de ceci : ' + b.dataset.chip.toLowerCase() + ' ?'; $('chatText').focus(); } });
 $('chatText').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); $('chatForm').requestSubmit(); } });
-$('chatForm').onsubmit = e => { e.preventDefault(); const txt = $('chatText').value.trim(); if (!txt || chatBusy || !chatAgent) return; $('chatText').value = ''; sendChat(chatAgent, txt); };
+$('chatForm').onsubmit = e => { e.preventDefault(); const txt = $('chatText').value.trim(); if (!txt || chatBusy || !SP.agent) return; $('chatText').value = ''; sendChat(SP.agent, txt); };
 
 function chatPrompt(a, c) {
   const mine = HQ.tasks.filter(t => (t.agent === a.name || a.custom.includes(t)) && (t.status === 'attente' || t.status === 'encours'));
@@ -1943,58 +2142,53 @@ Tes tâches en cours ou en attente : ${mine.length ? mine.map(t => '« ' + t.tit
 Conversation avec Yosh (le dernier message est le sien) :
 ${convo}
 
-Réponds à Yosh en tant que ${a.name}, en français, naturellement et brièvement (2 à 6 phrases), dans ton rôle.
-- S’il te demande de produire, refaire ou modifier quelque chose et que c’est assez clair, propose une tâche : elle partira dès que Yosh l’aura validée, et le résultat arrivera dans son casier. Dis-lui ce que tu livreras et qu’il n’a plus qu’à valider.
+Réponds à Yosh en tant que ${a.name}, en français, naturellement et brièvement (1 à 4 phrases courtes), dans ton rôle.
+- S’il te demande de produire, refaire ou modifier quelque chose et que c’est assez clair, propose une tâche : elle partira dès que Yosh l’aura validée d’un clic. Dis-lui en une phrase ce que tu livreras.
 - Si la demande est floue, pose une ou deux questions précises au lieu de créer une tâche.${a.studio ? '\n- Tu crées de vrais visuels (Canva) et de vraies vidéos courtes (HyperFrames, 90 secondes au plus). Avant de proposer la tâche, assure-toi de connaître : le réseau ou le format (post Instagram, story, LinkedIn…), le message ou les textes à afficher, et pour une vidéo la durée et le ton. Mets tout dans "precisions".' : ''}${a.pole.research ? '\n- Tu fais des recherches réelles sur internet. Pour un hôtel il te faut au minimum la ville ou le lieu, les dates et le nombre de personnes ; demande le budget s’il compte. Mets toutes ces informations dans "precisions".' : ''}
 - S’il veut juste discuter ou une information rapide, réponds sans créer de tâche.
 - N’invente aucun fait sur Yosh.
 - Le résultat sera livré à Yosh sous forme de fichier dans son Google Drive : "document" (Google Docs) par défaut, "tableur" (Google Sheets) s’il veut un tableau, une liste chiffrée ou un comparatif à trier, "document+tableur" s’il veut les deux. S’il précise un format, respecte-le.
-Réponds uniquement avec un objet JSON : {"reponse":"…","tache":null} ou {"reponse":"…","tache":{"titre":"…","precisions":"tout ce que Yosh a demandé, en détail","type":"redaction|recherche|appel|impression|reunion","fichier":"document|tableur|document+tableur"}}`;
+- "ligne" résume ta réponse en 10 mots au plus, comme une notification (ex. « Propose : post LinkedIn du match », « Question : pour quelles dates ? »).
+Réponds uniquement avec un objet JSON : {"reponse":"…","ligne":"…","tache":null} ou {"reponse":"…","ligne":"…","tache":{"titre":"…","precisions":"tout ce que Yosh a demandé, en détail","type":"redaction|recherche|appel|impression|reunion","fichier":"document|tableur|document+tableur"}}`;
 }
 async function sendChat(a, text) {
   const c = chatOf(a);
   c.messages.push({ role:'user', text, at: Date.now() }); c.messages = c.messages.slice(-60); c.updatedAt = Date.now(); saveChat(a.name);
-  if (!ENGINE.brain) { agentSays(a, ENGINE.blocked ? errText({ code: ENGINE.blocked }) : 'Je ne peux pas te répondre : aucune IA n’est connectée. Ouvre le QG depuis claude.ai, ou lance server.py avec ta clé.', { error: true }); return; }
-  chatBusy = true; renderChat();
+  if (!ENGINE.brain) { agentSays(a, ENGINE.blocked ? errText({ code: ENGINE.blocked }) : 'Je ne peux pas te répondre : aucune IA n’est connectée. Ouvre le QG depuis claude.ai, ou lance server.py avec ta clé.', { error: true, kind: 'erreur', line: 'Aucune IA connectée' }); return; }
+  chatBusy = a; refresh();
   try {
     const res = await runBrain(chatPrompt(a, c), { asJson: true });
-    const extra = {};
-    const x = res && res.tache;
+    const extra = {}, x = res && res.tache, rep = String((res && res.reponse) || 'D’accord.').trim();
     if (x && String(x.titre || '').trim()) {
       const fmt = ['document', 'tableur', 'document+tableur'].includes(x.fichier) ? x.fichier : 'document';
       const t = propose({ title: String(x.titre).trim(), brief: String(x.precisions || text), steps: KIND_STEPS[x.type] || guessSteps(String(x.titre)), requested: true, format: fmt }, a.name, 'chat');
-      extra.taskId = t.id; extra.taskTitle = t.title;
+      extra.taskId = t.id; extra.taskTitle = t.title; extra.kind = 'val'; extra.line = 'Propose : ' + t.title;
       log(a, `${a.name} propose une tâche : ${t.title}`); if (a.inside) a.say('📝 Je te soumets la tâche', 3);
-    }
-    chatBusy = false;
-    agentSays(a, String((res && res.reponse) || 'D’accord.').trim(), extra);
+    } else { extra.kind = /\?\s*$/.test(rep) ? 'question' : 'info'; extra.line = String((res && res.ligne) || '').trim() || (extra.kind === 'question' ? 'Question : ' : '') + shortLine(rep); }
+    chatBusy = null;
+    agentSays(a, rep, extra);
   } catch (e) {
-    brainFailed(e); chatBusy = false;
-    agentSays(a, 'Je n’ai pas pu te répondre : ' + errText(e), { error: true });
+    brainFailed(e); chatBusy = null;
+    agentSays(a, 'Je n’ai pas pu te répondre : ' + errText(e), { error: true, kind: 'erreur', line: 'Réponse impossible' });
   }
 }
-
-function renderThreads() {
-  const list = Object.entries(CHATS).filter(([, c]) => c.messages && c.messages.length).sort((x, y) => (y[1].updatedAt || 0) - (x[1].updatedAt || 0)).slice(0, 6);
-  $('threads').innerHTML = list.map(([name, c]) => { const a = AGENTS.find(x => x.name === name); if (!a) return ''; const last = c.messages[c.messages.length - 1];
-    return `<button class="thread" type="button" data-agent="${esc(name)}"><span class="av" style="background:${avatarBg(a)}"></span><span><b>${esc(name)}</b><small>${last.role === 'user' ? 'Toi : ' : ''}${esc(last.text)}</small></span>${c.unread ? `<em>${c.unread}</em>` : ''}</button>`; }).join('');
-}
-$('threads').addEventListener('click', e => { const b = e.target.closest('[data-agent]'); if (b) openChat(AGENTS.find(a => a.name === b.dataset.agent)); });
-$('askAgent').innerHTML = POLES.map(p => `<optgroup label="${esc(p.full)}">${p.members.map(a => `<option value="${esc(a.name)}">${esc(a.name)} · ${esc(a.role)}</option>`).join('')}</optgroup>`).join('');
-$('ask').onsubmit = e => {
-  e.preventDefault(); const txt = $('askText').value.trim(); if (!txt) return;
-  const a = AGENTS.find(x => x.name === $('askAgent').value); $('askText').value = '';
-  openChat(a); sendChat(a, txt);
-};
+const agentOpts = POLES.map(p => `<optgroup label="${esc(p.full)}">${p.members.map(a => `<option value="${esc(a.name)}">${esc(a.name)} · ${esc(a.role)}</option>`).join('')}</optgroup>`).join('');
+$('askAgent').innerHTML = $('msgAgent').innerHTML = agentOpts;
+[['ask', 'askAgent', 'askText'], ['msgForm', 'msgAgent', 'msgText']].forEach(([f, s, i]) => {
+  $(f).onsubmit = e => {
+    e.preventDefault(); const txt = $(i).value.trim(); if (!txt) return;
+    const a = agentNamed($(s).value); $(i).value = '';
+    openThread(a); sendChat(a, txt);
+  };
+});
 
 function renderUI() {
   $('clock').innerHTML = HQ.active || AGENTS.some(a => a.visible) ? `<b>${timeStr()}</b> · jour ${HQ.day}` : '<b>--:--</b> · veille';
   $('kDone').textContent = HQ.done; $('kRun').textContent = HQ.tasks.filter(t => t.status === 'encours').length;
-  $('kMail').textContent = HQ.mailsDone; $('kDraft').textContent = HQ.drafts;
-  renderValidation(); renderFiles();
-  const unreadChats = Object.values(CHATS).reduce((n, c) => n + (c.unread || 0), 0);
-  $('tabChat').hidden = !unreadChats; $('tabChat').textContent = unreadChats;
-  renderTeam(); renderProfileLive();
+  renderTiles(); renderValidation(); renderFiles();
+  if (SP.view === 'team') renderTeam();
+  if (SP.view === 'thread') renderChat();
+  renderProfileLive();
 }
 
 /* ---------- Journée : état des connexions et plan ---------- */
@@ -2047,17 +2241,23 @@ function zoneOf(a) {
 }
 let teamKey = '';
 function renderTeam() {
-  const key = AGENTS.map(a => a.name + STATE(a)[0] + (HQ.selected === a)).join('|') + POLES.map(p => p.done).join(',');
+  const key = AGENTS.map(a => a.name + STATE(a)[0] + (a.task ? a.task.title : '')).join('|') + POLES.map(p => p.done).join(',');
   if (key === teamKey) return; teamKey = key;
-  $('team').innerHTML = POLES.map(p => `<div class="team-pole"><span><i style="background:${p.color}"></i>${esc(p.full)}<small style="color:var(--muted);font-weight:500;margin-left:auto">${p.done} livré${p.done > 1 ? 's' : ''}</small></span><div class="team-row">${
-    p.members.map(a => { const [st, c] = STATE(a); return `<button class="mate" data-agent="${esc(a.name)}" aria-pressed="${HQ.selected === a}" title="${esc(a.role)} · ${st}"><span class="av" style="background:${avatarBg(a)};box-shadow:0 0 0 2px ${c}"></span>${esc(a.name)}<em>${esc(st)}</em></button>`; }).join('')}</div></div>`).join('');
+  $('team').innerHTML = POLES.map(p => `<section class="tpole"><h3 class="sp-h"><i style="background:${p.color}"></i>${esc(p.full)} <em>${p.done} livré${p.done > 1 ? 's' : ''}</em></h3><div class="tcards">${
+    p.members.map(a => { const [st, c] = STATE(a); return `<div class="tcard"><span class="av" style="background:${avatarBg(a)};box-shadow:0 0 0 2px ${c}"></span>
+      <div><b>${esc(a.name)}</b><small>${esc(a.role)}</small><small style="color:${c}">${esc(st)}${a.task ? ' · ' + esc(a.task.title) : ''}</small></div>
+      <span class="tc-acts"><button type="button" data-chat="${esc(a.name)}">Discuter</button><button type="button" data-see="${esc(a.name)}">Sur le plan</button></span></div>`; }).join('')}</div></section>`).join('');
 }
-$('team').addEventListener('click', e => { const b = e.target.closest('[data-agent]'); if (b) openProfile(AGENTS.find(a => a.name === b.dataset.agent)); });
+$('team').addEventListener('click', e => {
+  const c = e.target.closest('[data-chat]'), s = e.target.closest('[data-see]');
+  if (c) openThread(agentNamed(c.dataset.chat));
+  if (s) { closeSpace(); openProfile(agentNamed(s.dataset.see)); }
+});
 
 const pf = $('profile');
 function openProfile(a) {
-  HQ.selected = a || null; teamKey = '';
-  if (!a) { pf.hidden = true; renderTeam(); return; }
+  HQ.selected = a || null;
+  if (!a) { pf.hidden = true; return; }
   const p = a.pole, color = a.courier ? a.shirt : p.color;
   pf.style.setProperty('--pc', color);
   pf.className = 'profile ' + (a.x > W / 2 ? 'l' : 'r');
@@ -2076,8 +2276,8 @@ function openProfile(a) {
     <button class="btn pf-chat" id="pfChat" type="button">💬 Discuter avec ${esc(a.name)} ou lui demander une tâche</button>`}`;
   pf.hidden = false;
   $('pfClose').onclick = () => openProfile(null);
-  if ($('pfChat')) $('pfChat').onclick = () => openChat(a);
-  renderTeam(); renderProfileLive();
+  if ($('pfChat')) $('pfChat').onclick = () => openThread(a);
+  renderProfileLive();
   if (matchMedia('(max-width:760px)').matches) pf.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 let liveKey = '';
@@ -2098,7 +2298,7 @@ function renderProfileLive() {
   $('pfNow').innerHTML = now;
   if ($('pfStats')) { $('pfStats').innerHTML = stats; $('pfHist').innerHTML = hist; }
 }
-addEventListener('keydown', e => { if (e.key === 'Escape' && HQ.selected && !casier.open && !chatDlg.open) openProfile(null); });
+addEventListener('keydown', e => { if (e.key !== 'Escape') return; if (!spEl.hidden) closeSpace(); else if (HQ.selected) openProfile(null); });
 
 function agentAt(ev) {
   const r = canvas.getBoundingClientRect(), x = (ev.clientX - r.left) / cssScale, y = (ev.clientY - r.top) / cssScale;
@@ -2109,16 +2309,6 @@ function agentAt(ev) {
 canvas.addEventListener('mousemove', e => { HQ.hover = agentAt(e); canvas.style.cursor = HQ.hover ? 'pointer' : 'default'; });
 canvas.addEventListener('mouseleave', () => HQ.hover = null);
 canvas.addEventListener('click', e => { openProfile(agentAt(e)); });
-
-const TAB_KEY = 'jarvis-hq-onglet';
-function showTab(name) {
-  [...$('tabs').children].forEach(b => b.setAttribute('aria-selected', b.dataset.tab === name));
-  ['valid', 'day', 'team', 'chat', 'files'].forEach(n => { $('tab-' + n).hidden = n !== name; });
-  if (name === 'files') markFilesSeen();
-  try { localStorage.setItem(TAB_KEY, name); } catch (e) {}
-}
-$('tabs').onclick = e => { const b = e.target.closest('[data-tab]'); if (b) showTab(b.dataset.tab); };
-try { const t = localStorage.getItem(TAB_KEY); if (t && $('tab-' + t)) showTab(t); } catch (e) {}
 
 function setActive(on, { plan = true } = {}) {
   if (on === HQ.active) return;
@@ -2134,7 +2324,7 @@ $('power').onclick = () => setActive(!HQ.active);
 $('speed').onclick = e => { const b = e.target.closest('button'); if (!b) return; HQ.speed = +b.dataset.s; [...$('speed').children].forEach(x => x.classList.toggle('sel', x === b)); };
 
 initEngine(); initStore();
-renderDeliv(); renderThreads(); renderValidation(); renderUI(); resize();
+refresh(); renderUI(); resize();
 requestAnimationFrame(frame);
 window.HQ = HQ; window.AGENTS = AGENTS; window.AMEN = AMEN;
 })();

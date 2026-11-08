@@ -169,14 +169,15 @@
   @media (max-width:760px){ .profile{position:static;width:auto;max-height:none;box-shadow:none;border:0;border-top:1px solid var(--line);border-radius:0} }
   @media (max-width:520px){ .brand small{display:none} .clock{min-width:0} }
   /* Accueil : de grandes tuiles, chacune ouvre son espace en plein écran */
-  .home{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));grid-template-rows:minmax(0,1.3fr) minmax(0,1.3fr) minmax(0,.75fr) auto;gap:10px;min-width:0;min-height:0}
+  .home{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));grid-template-rows:minmax(0,1.3fr) minmax(0,1.3fr) minmax(0,.75fr) auto;gap:10px;min-width:0;min-height:0}
   .tile{position:relative;display:flex;flex-direction:column;gap:10px;min-width:0;min-height:0;overflow:hidden;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px 16px;color:var(--ink);font:inherit;cursor:pointer;transition:border-color .15s, box-shadow .15s}
   .tile:hover{border-color:color-mix(in srgb, var(--ink) 28%, var(--line));box-shadow:0 6px 18px rgba(20,18,16,.07)}
-  .t-valid,.t-msgs,.t-ask{grid-column:span 6} .t-sm{grid-column:span 2;gap:4px;justify-content:space-between}
+  .t-valid,.t-msgs,.t-ask{grid-column:span 12} .t-sm{grid-column:span 3;gap:4px;justify-content:space-between;padding:12px 13px}
   .t-top{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
   .t-name{font:600 12px var(--body);text-transform:uppercase;letter-spacing:.12em;color:var(--muted)}
   .t-n{font:800 34px/1 var(--display);font-variant-numeric:tabular-nums}
-  .t-sm .t-n{font-size:25px}
+  .t-sm .t-n{font-size:23px}
+  .t-sm .t-name{font-size:11px;letter-spacing:.08em}
   .t-sm small{color:var(--muted);font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .t-lines{display:flex;flex-direction:column;gap:7px;min-height:0;overflow:hidden}
   .t-line{display:flex;gap:9px;align-items:center;font-size:14px;line-height:1.3;min-width:0}
@@ -289,6 +290,32 @@
   .wa-empty b{font:800 24px var(--display);color:var(--ink)}
   .wa-empty p{max-width:420px;margin:0;line-height:1.5}
   .wa-back{display:none}
+  .mem-grid{display:grid;grid-template-columns:320px minmax(0,1fr);gap:16px;align-items:start}
+  .mem-side{display:flex;flex-direction:column;gap:12px}
+  .mem-add{display:flex;flex-direction:column;gap:6px} .mem-add .btn{text-align:left}
+  .mem-src{display:flex;flex-wrap:wrap;gap:6px}
+  .mem-src button{background:var(--surface2);border:1px solid var(--line);color:var(--ink);border-radius:99px;padding:5px 11px;font:600 12.5px var(--body);cursor:pointer}
+  .mem-src button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+  .mem-log{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px;font-size:13px}
+  .mem-log li{line-height:1.4} .mem-log small{display:block;color:var(--muted)}
+  .mem-main{display:flex;flex-direction:column;gap:12px;min-width:0}
+  .mem-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px}
+  .mcard{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:6px;min-width:0}
+  .mcard h4{margin:0;font:700 15px/1.3 var(--body);display:flex;gap:7px}
+  .mcard .meta{font-size:12px}
+  .mcard p{margin:0;font-size:13.5px;line-height:1.45;color:var(--muted);display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden;white-space:pre-wrap}
+  .mcard.open p{display:block;-webkit-line-clamp:unset;color:var(--ink);max-height:420px;overflow:auto}
+  .mcard img{width:100%;max-height:180px;object-fit:cover;border-radius:8px}
+  .mcard .acts{justify-content:flex-start}
+  .mem-answer{gap:10px} .mem-answer pre{white-space:pre-wrap;margin:0;font:15px/1.6 var(--body)}
+  .mem-hits{display:flex;flex-wrap:wrap;gap:6px}
+  .mem-hits a,.mem-hits span{font-size:12.5px;background:var(--surface2);border:1px solid var(--line);border-radius:99px;padding:3px 10px;color:var(--ink);text-decoration:none}
+  .mem-form{display:flex;flex-direction:column;gap:8px}
+  .mem-form input{background:var(--surface2);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:9px 10px;font:14px var(--body)}
+  .mem-form textarea{min-height:140px}
+  .mem-form .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  .drive-hit{display:flex;gap:10px;align-items:center;padding:8px 10px;border:1px solid var(--line);border-radius:10px}
+  .drive-hit span{flex:1;min-width:0} .drive-hit b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis} .drive-hit small{color:var(--muted)}
   .sp-pane.wa .th-head{flex-wrap:nowrap}
   .th-head .who > div{min-width:0}
   .th-head .who small{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -314,7 +341,7 @@
     .sp-pane.wa .th-doc{border-left:0}
     .wa-back{display:inline-flex}
     .th-chat{min-height:70dvh}
-    .files-grid,.day-grid{grid-template-columns:1fr}
+    .files-grid,.day-grid,.mem-grid{grid-template-columns:1fr}
   }
   @media (max-width:760px){
     .sp-bar h2{font-size:21px;flex:1}
@@ -354,9 +381,10 @@
       <span class="t-top"><span class="t-name">Messages</span><b class="t-n" id="tMsgN">0</b></span>
       <span class="t-lines" id="tMsgL"></span>
     </button>
-    <button class="tile t-sm" type="button" data-space="files"><span class="t-name">Fichiers</span><b class="t-n" id="tFileN">0</b><small id="tFileS">Docs et tableaux</small></button>
+    <button class="tile t-sm" type="button" data-space="files"><span class="t-name">Fichiers</span><b class="t-n" id="tFileN">0</b><small id="tFileS">docs</small></button>
     <button class="tile t-sm" type="button" data-space="team"><span class="t-name">Équipe</span><b class="t-n" id="tTeamN">0</b><small id="tTeamS">au bureau</small></button>
-    <button class="tile t-sm" type="button" data-space="day"><span class="t-name">Journée</span><b class="t-n" id="tDayN">--:--</b><small id="tDayS">Plan du jour</small></button>
+    <button class="tile t-sm" type="button" data-space="mem"><span class="t-name">Mémoire</span><b class="t-n" id="tMemN">0</b><small id="tMemS">souvenirs</small></button>
+    <button class="tile t-sm" type="button" data-space="day"><span class="t-name">Journée</span><b class="t-n" id="tDayN">--:--</b><small id="tDayS">plan</small></button>
     <form class="tile t-ask" id="ask">
       <label class="t-name" for="askText">Demander à un agent</label>
       <div class="ask-row"><select id="askAgent" aria-label="Agent"></select><input id="askText" placeholder="Ex. : trouve-moi un hôtel à Lyon samedi" required autocomplete="off"><button class="btn" type="submit">Envoyer</button></div>
@@ -372,6 +400,7 @@
       <button type="button" data-space="valid">À valider<b id="nValid" hidden></b></button>
       <button type="button" data-space="msgs">Messages<b id="nMsgs" hidden></b></button>
       <button type="button" data-space="files">Fichiers<b id="nFiles" hidden></b></button>
+      <button type="button" data-space="mem">Mémoire</button>
       <button type="button" data-space="team">Équipe</button>
       <button type="button" data-space="day">Journée</button>
     </nav>
@@ -401,6 +430,33 @@
       <div class="files-grid">
         <section><h3 class="sp-h">Fichiers <em id="fCount"></em></h3><ul class="flist" id="fFiles"></ul></section>
         <section><h3 class="sp-h">Liens <em id="lCount"></em></h3><ul class="flist" id="fLinks"></ul></section>
+      </div>
+    </div>
+    <div class="sp-pane" id="sp-mem" hidden>
+      <form class="composer" id="memAsk"><input id="memQ" placeholder="Que sait Nora sur… ? (ex. MCI Sport, Clément, mes études)" required autocomplete="off"><button class="btn" type="submit">Demander à Nora</button></form>
+      <div class="card2 mem-answer" id="memAnswer" hidden></div>
+      <div class="mem-grid">
+        <aside class="mem-side">
+          <section class="card2">
+            <h3 class="sp-h">Confier à Nora</h3>
+            <div class="mem-add">
+              <button class="btn ghost" type="button" data-madd="note">✏️ Une note</button>
+              <button class="btn ghost" type="button" data-madd="files">📎 Fichiers et photos</button>
+              <button class="btn ghost" type="button" data-madd="export">💬 Mes discussions claude.ai</button>
+              <button class="btn ghost" type="button" data-madd="profil">🧠 Ce que Claude sait de moi</button>
+              <button class="btn ghost" type="button" data-madd="drive">📁 Un document Drive</button>
+            </div>
+            <input type="file" id="memFiles" multiple hidden accept="image/*,.pdf,.txt,.md,.csv,.json,.docx,.html,.htm">
+            <input type="file" id="memExport" hidden accept=".zip,.json">
+          </section>
+          <section class="card2"><h3 class="sp-h">Rangement</h3><div class="mem-src" id="memSrc"></div></section>
+          <section class="card2"><h3 class="sp-h">Les agents ont demandé</h3><ul class="mem-log" id="memLog"></ul></section>
+        </aside>
+        <section class="mem-main">
+          <div class="card2" id="memForm" hidden></div>
+          <p class="meta" id="memStatus" aria-live="polite"></p>
+          <div class="mem-list" id="memList"></div>
+        </section>
       </div>
     </div>
     <div class="sp-pane" id="sp-team" hidden><div class="team" id="team"></div></div>
@@ -473,6 +529,10 @@ const POLES = [
     tasks:[ { t:'Demander l’attestation et l’acte de naissance', s:['type','call'] },
       { t:'Relancer le service administratif sans réponse', s:['call','type'] },
       { t:'Scanner et classer les documents reçus', s:['print','type'] } ] },
+  { id:'mem', name:'Mémoire', full:'Mémoire · Archives', color:'#a16207', memory:true,
+    agents:[ { name:'Nora', role:'Mémoire du QG', memory:true } ],
+    calls:['Je te retrouve ça dans les archives', 'C’est noté, je le range', 'J’ai un document là-dessus'],
+    tasks:[ { t:'Faire la fiche de tout ce que je sais sur un sujet', s:['web','type'] } ] },
 ];
 const poleById = id => POLES.find(p => p.id === id) || POLES[0];
 
@@ -530,6 +590,10 @@ const PROFILES = {
     mission:'Lit tes mails, repère l’urgent et prépare les réponses.',
     resp:['Relève tes mails non lus toutes les 90 secondes', 'Classe chaque mail par priorité', 'Enregistre des brouillons dans Gmail, sans jamais rien envoyer'],
     tools:['Gmail'], projects:['Ta boîte mail'], habit:'Dit « rien de neuf » plus souvent qu’il ne le voudrait.' },
+  Nora: { who:'Elle n’oublie rien et sait où tout est rangé.',
+    mission:'Tient la mémoire du QG : ce que tu lui confies, tes fichiers et photos, tes discussions avec Claude, et elle fouille ton Drive et tes mails quand un agent a besoin d’une info.',
+    resp:['Range tes notes, fichiers, photos et l’export de tes discussions claude.ai', 'Répond aux autres agents avant chaque tâche : ce qu’on sait déjà sur le sujet', 'Cherche dans Google Drive et Gmail les documents utiles', 'Retient ce que tu dis de toi dans les discussions'],
+    tools:['Mémoire du QG', 'Google Drive', 'Gmail', 'Export claude.ai'], projects:['Tout ce que tu fais'], habit:'Colle une étiquette sur chaque boîte d’archives.' },
   Jade: { who:'Patiente avec les guichets, tenace avec les relances.',
     mission:'Mène tes démarches administratives à Genève.',
     resp:['Demandes à l’état civil', 'Relance les services sans réponse', 'Monte le dossier de pièces justificatives'],
@@ -546,6 +610,7 @@ const BX = 320, BW = 500, BH = 56;
 const seatPos = (bi, half, i, top) => ({ x: BX + half * 250 + 45 + i * 80, y: top ? BENCHES[bi].y - 18 : BENCHES[bi].y + BH + 18, up: !top });
 POLES.forEach(p => {
   if (p.id === 'dir') p.seats = [ { x:1005, y:282, up:false }, { x:1005, y:364, up:true } ];
+  else if (p.id === 'mem') p.seats = [ { x:190, y:248, up:true } ];
   else p.seats = [ seatPos(p.bench, p.half, 0, true), seatPos(p.bench, p.half, 2, false), seatPos(p.bench, p.half, 1, true), seatPos(p.bench, p.half, 0, false) ];
   p.custom = []; p.done = 0; p.last = null;
 });
@@ -558,7 +623,7 @@ const ZONES = [
   { x:900, y:220, w:190, h:250, f:'carpet', label:'Bureau Jarvis' },
   { x:890, y:510, w:310, h:250, f:'carpet', label:'Salle de réunion' },
   { x:280, y:600, w:560, h:160, f:'rug',    label:'Détente' },
-  { x:0,   y:180, w:250, h:130, f:null,     label:'Impression' },
+  { x:0,   y:180, w:250, h:130, f:null,     label:'Archives' },
   { x:1100,y:205, w:100, h:270, f:null,     label:'Box' },
 ];
 // murs : x1,y1,x2,y2, vitré ?
@@ -576,7 +641,7 @@ const ITEMS = [];
 const item = (x,y,w,h,m,icon,id) => { const o = {x,y,w,h,m,icon,id}; ITEMS.push(o); return o; };
 BENCHES.forEach(b => item(BX, b.y, BW, BH, 'wood'));
 item(10,8,44,30,'ceramic','🚽'); item(100,8,44,30,'ceramic','🚽'); item(190,15,52,30,'ceramic',null,'sink');
-item(30,200,64,40,'white','🖨','printer'); item(160,200,60,30,'wood');
+item(30,200,64,40,'white','🖨','printer'); item(160,200,60,30,'wood'); item(118,270,124,14,'dark',null,'shelf');
 item(8,330,30,120,'white',null,'micro');
 const CAF_TABLES = [[110,395],[190,395],[110,495],[190,495]];
 CAF_TABLES.forEach(([x,y]) => item(x-24,y-20,48,40,'wood'));
@@ -992,6 +1057,8 @@ const STORE = { db:null, uid:null, dl:null, err:null };
 const CHATS = {};
 try { HQ.deliverables = JSON.parse(localStorage.getItem(LS_KEY) || '[]').filter(d => d && d.id && typeof d.id === 'string'); } catch (e) { HQ.deliverables = []; }
 try { Object.assign(CHATS, JSON.parse(localStorage.getItem(CHAT_KEY) || '{}')); } catch (e) {}
+const MEM = [], MEMLOG = [], MEM_KEY = 'jarvis-hq-memoire-v1';
+try { MEM.push(...JSON.parse(localStorage.getItem(MEM_KEY) || '[]').filter(e => e && e.id)); } catch (e) {}
 const newId = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
 const slug = t => String(t).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 60) || 'livrable';
 const chains = {};
@@ -1007,6 +1074,21 @@ function saveChat(name) {
   try { localStorage.setItem(CHAT_KEY, JSON.stringify(CHATS)); } catch (e) {}
   const c = CHATS[name]; if (c) dbWrite(`data/users/${STORE.uid}/c_${slug(name)}`, JSON.parse(JSON.stringify({ ...c, kind:'chat', agent: name })));
 }
+function saveMem(e, del) {
+  if (!STORE.db) { try { localStorage.setItem(MEM_KEY, JSON.stringify(MEM.slice(0, 300))); } catch (x) {} }
+  if (!e || !STORE.db) return Promise.resolve();
+  const path = `data/users/${STORE.uid}/m_${e.id}`;
+  if (del) return STORE.db.doc(path).delete().catch(() => {});
+  dbWrite(path, JSON.parse(JSON.stringify({ ...e, kind:'memoire' })));
+  return chains[path];
+}
+function addMem(e, { quiet } = {}) {
+  const cur = e.id && MEM.find(x => x.id === e.id);
+  const m = Object.assign(cur || { id: newId(), at: Date.now() }, e, { text: String(e.text || '').slice(0, 8000), title: String(e.title || 'Sans titre').slice(0, 160) });
+  if (!cur) MEM.unshift(m);
+  const p = saveMem(m); if (!quiet) refresh();
+  return p.then(() => m);
+}
 function addDeliv(d) {
   d.id = newId(); d.created = Date.now(); d.read = false;
   HQ.deliverables.unshift(d); save(d); refresh();
@@ -1014,8 +1096,8 @@ function addDeliv(d) {
 }
 async function initStore() {
   if (!(window.claude && typeof window.claude.use === 'function')) return;
-  const [db, user, dl] = await Promise.all(['db', 'user', 'downloads'].map(n => claude.use(n).catch(() => null)));
-  STORE.dl = dl;
+  const [db, user, dl, assets] = await Promise.all(['db', 'user', 'downloads', 'assets'].map(n => claude.use(n).catch(() => null)));
+  STORE.dl = dl; STORE.assets = assets;
   const uid = user ? await user.id() : null;
   if (!db || !uid) return;
   // remise à zéro unique de l'ancien casier dans ta base privée
@@ -1030,19 +1112,22 @@ async function initStore() {
   } catch (e) { STORE.err = e.code; }
   STORE.db = db; STORE.uid = uid;
   // ce qui n'existait que dans ce navigateur part dans ta base privée
-  HQ.deliverables.forEach(d => save(d)); Object.keys(CHATS).forEach(saveChat);
+  HQ.deliverables.forEach(d => save(d)); Object.keys(CHATS).forEach(saveChat); MEM.forEach(e => saveMem(e));
   db.collection('data/users/' + uid).onSnapshot(snap => {
     snap.docs.forEach(doc => {
       const v = doc.data(); if (!v) return;
       if (v.kind === 'livrable' && v.id) {
         const cur = HQ.deliverables.find(x => x.id === v.id);
         if (cur) Object.assign(cur, v); else HQ.deliverables.push({ ...v });
+      } else if (v.kind === 'memoire' && v.id) {
+        const cur = MEM.find(x => x.id === v.id);
+        if (cur) Object.assign(cur, v); else MEM.push({ ...v });
       } else if (v.kind === 'chat' && v.agent) {
         const cur = CHATS[v.agent];
         if (!cur || (v.updatedAt || 0) > (cur.updatedAt || 0)) CHATS[v.agent] = JSON.parse(JSON.stringify(v));
       }
     });
-    HQ.deliverables.sort((a, b) => (b.created || 0) - (a.created || 0));
+    HQ.deliverables.sort((a, b) => (b.created || 0) - (a.created || 0)); MEM.sort((a, b) => (b.at || 0) - (a.at || 0));
     refresh();
   }, e => { STORE.err = e.code; });
 }
@@ -1181,19 +1266,99 @@ Ton job au QG : ${a.mission}
 Tes responsabilités : ${(a.resp || []).join(' ; ')}.
 Projets que tu suis : ${(a.projects || []).join(', ') || 'aucun en particulier'}.`;
 }
+/* ---------- Mémoire : Nora pioche dans tes archives pour les autres agents ---------- */
+const MEM_SRC = { profil:['Profil Claude','🧠'], note:['Note','✏️'], fichier:['Fichier','📎'], photo:['Photo','🖼️'], claude:['Discussion claude.ai','💬'], retenu:['Retenu en discussion','📌'],
+  drive:['Google Drive','📁'], gmail:['Gmail','✉️'], livrable:['Livrable du QG','📥'], discussion:['Discussion au QG','🗨️'] };
+const STOP = new Set('les des une pour avec dans sur que qui est pas plus par aux ces son ses mon mes ton tes leur nous vous elle ils elles mais donc car cette tout tous faire fais moi peux peut veux etre avoir comme quoi quel quelle dont the and for you sur entre bien tres aussi alors faut peux merci stp svp'.split(' '));
+const normT = s => String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+const keyWords = s => [...new Set(normT(s).split(/[^a-z0-9]+/).filter(w => w.length > 2 && !STOP.has(w)))];
+function around(text, ws, n = 900) {
+  const t = String(text || ''), nt = normT(t); let i = -1;
+  for (const w of ws) { i = nt.indexOf(w); if (i >= 0) break; }
+  const st = Math.max(0, i - Math.floor(n / 3));
+  return (st > 0 ? '…' : '') + t.slice(st, st + n).trim() + (st + n < t.length ? '…' : '');
+}
+function localRecall(q, limit = 6) {
+  const ws = keyWords(q); if (!ws.length) return [];
+  const pool = [
+    ...MEM.filter(e => e.src !== 'profil').map(e => ({ src: e.src, title: e.title, text: e.text, url: e.url, id: e.id, w: 1 })),
+    ...HQ.deliverables.filter(d => d.status === 'ai' && !d.isMail).map(d => ({ src:'livrable', title: `${d.title} (${d.agent})`, text: d.content, w: .45 })),
+    ...Object.entries(CHATS).flatMap(([n, c]) => (c.messages || []).filter(m => m.role === 'user' && m.text.length > 25).map(m => ({ src:'discussion', title: `Tu as écrit à ${n}`, text: m.text, w: .8 }))),
+  ];
+  return pool.map(x => { const tt = normT(x.title), all = tt + ' ' + normT(x.text); let sc = 0;
+      ws.forEach(w => { const k = all.split(w).length - 1; if (k) sc += 1 + Math.min(k, 6) * .25 + (tt.includes(w) ? 1.5 : 0); });
+      return { ...x, score: sc * x.w }; })
+    .filter(x => x.score >= 1).sort((a, b) => b.score - a.score).slice(0, limit);
+}
+const payloadOf = r => (r && r.payload) || {};
+async function recall(q, { by = null, deep = true } = {}) {
+  const nora = AGENTS.find(x => x.memory), ws = keyWords(q);
+  if (by && by !== nora && by.inside) by.say('🧠 Je demande à Nora', 2.2);
+  if (nora && nora.inside) nora.say(`📚 Je cherche${by && by !== nora ? ' pour ' + by.name : ''}…`, 2.5);
+  const prof = MEM.filter(e => e.src === 'profil');
+  const found = localRecall(q, deep ? 6 : 4);
+  if (deep && ENGINE.brain && (ENGINE.drive || ENGINE.mail === 'gmail')) {
+    let plan = null;
+    try { plan = await brainAsk(`Tu prépares une recherche dans les archives de Yosh (Google Drive et Gmail) pour cette demande :
+« ${String(q).slice(0, 1500)} »
+Donne les mots-clés les plus utiles : noms propres, organisations, personnes, projets, sujets. Réponds uniquement en JSON : {"drive":["1 à 3 expressions de 1 à 3 mots"],"gmail":"2 à 4 mots-clés sans opérateurs"}`, { asJson: true }); } catch (e) {}
+    const terms = (plan && Array.isArray(plan.drive) && plan.drive.length ? plan.drive : ws.slice(0, 2)).map(x => String(x).trim()).filter(Boolean).slice(0, 3);
+    if (ENGINE.drive && terms.length) {
+      try {
+        const query = '(' + terms.map(x => `fullText contains '${x.replace(/[\\']/g, ' ')}'`).join(' or ') + ") and trashed = false and not title contains 'QG Jarvis'";
+        const files = (payloadOf(await ENGINE.mcp.callTool('Google Drive', 'search_files', { query, pageSize: 5, snippetVerbosity:'MEDIUM' })).files || [])
+          .filter(f => !/^QG Jarvis/.test(f.title || '')).slice(0, 4);
+        const known = new Set(found.map(x => normT(x.url || x.title)));
+        for (const [i, f] of files.filter(f => !known.has(normT(f.viewUrl || '')) && !known.has(normT(f.title || ''))).entries()) {
+          let text = String(f.contentSnippet || '');
+          if (i < 2 && f.id) { try { text = String(payloadOf(await ENGINE.mcp.callTool('Google Drive', 'read_file_content', { fileId: f.id })).fileContent || '') || text; } catch (e) {} }
+          found.push({ src:'drive', title: f.title || 'Fichier Drive', text: text.slice(0, 5000), url: f.viewUrl || '' });
+        }
+      } catch (e) {}
+    }
+    const gq = String((plan && plan.gmail) || ws.slice(0, 3).join(' ')).replace(/[^\p{L}\p{N} @.'-]/gu, ' ').trim().slice(0, 120);
+    if (ENGINE.mail === 'gmail' && gq) {
+      try {
+        const th = (payloadOf(await ENGINE.mcp.callTool('Gmail', 'search_threads', { query: gq, pageSize: 3, view:'THREAD_VIEW_SUMMARY' })).threads || []).slice(0, 3);
+        for (const [i, x] of th.entries()) {
+          const m = (x.messages || [])[0] || {}; let text = decode(m.snippet || '');
+          if (i < 2) { try { const ms = payloadOf(await ENGINE.mcp.callTool('Gmail', 'get_thread', { threadId: x.id, messageFormat:'PLAIN_TEXT' })).messages || [];
+            text = ms.slice(-3).map(y => `De : ${y.sender} · ${y.date}\n${String(y.plaintextBody || decode(y.snippet || '')).slice(0, 3500)}`).join('\n---\n') || text; } catch (e) {} }
+          found.push({ src:'gmail', title: `Mail « ${m.subject || '(sans objet)'} » de ${m.sender || '?'}`, text: text.slice(0, 6000), url: x.viewUrl || m.viewUrl || '' });
+        }
+      } catch (e) {}
+    }
+  }
+  const text = [prof.length ? 'Profil de Yosh (ce que Claude sait de lui) :\n' + prof.map(e => e.text.slice(0, 2500)).join('\n') : '',
+    ...found.map(x => `[${(MEM_SRC[x.src] || ['Archive'])[0]}] ${x.title}${x.url ? ' — ' + x.url : ''}\n${x.src === 'drive' || x.src === 'gmail' ? x.text : around(x.text, ws)}`)]
+    .filter(Boolean).join('\n\n---\n\n').slice(0, 18000);
+  MEMLOG.unshift({ at: Date.now(), by: by ? by.name : 'Toi', q: String(q).split('\n')[0].slice(0, 90), hits: found.map(x => ({ src: x.src, title: x.title, url: x.url })) }); MEMLOG.length = Math.min(MEMLOG.length, 30);
+  if (nora && nora.inside) nora.say(found.length ? `✅ ${found.length} trouvaille${found.length > 1 ? 's' : ''}${by && by !== nora ? ' pour ' + by.name : ''}` : '🤷 Rien dans les archives', 2.5);
+  if (typeof refresh === 'function') refresh();
+  return { text, hits: found, profile: prof.length };
+}
+async function memContext(a, t) {
+  try {
+    const r = await recall(t.title + '\n' + (t.brief || ''), { by: a });
+    return r.text ? `\nCe que Nora (la mémoire du QG) a trouvé dans les archives de Yosh. Sers-t’en en priorité pour remplir les informations (noms, dates, lieux, chiffres) et ne mets [à compléter] que pour ce qui n’y est vraiment pas :\n${r.text}\n` : '';
+  } catch (e) { return ''; }
+}
 function taskJob(a, t) {
   const job = { settled:false, ok:false, text:'', preview:'' };
+  (async () => {
+  job.preview = '🧠 Nora cherche dans tes archives…';
+  const mem = await memContext(a, t);
   const prompt = `${persona(a)}
 
 Nous sommes le ${todayLabel()}.
 ${CTX.calendar.length ? 'Agenda de Yosh pour les prochains jours :\n' + CTX.calendar.join('\n') + '\n' : ''}
 Ta tâche : ${t.title}
-${t.brief ? (t.requested ? 'Ce que Yosh t’a demandé : ' : 'Précisions de Jarvis : ') + t.brief + '\n' : ''}${t.requested ? recentWork(a) : ''}
+${t.brief ? (t.requested ? 'Ce que Yosh t’a demandé : ' : 'Précisions de Jarvis : ') + t.brief + '\n' : ''}${t.requested ? recentWork(a) : ''}${mem}
 Réalise cette tâche maintenant et rends directement le livrable final, prêt à être utilisé par Yosh : un texte, un brouillon, un plan, une liste ou un script selon la tâche.
 Règles : en français ; texte simple avec des titres courts et des listes à tirets${(t.format || '').includes('tableur') ? ' ; mets les données principales dans UN tableau Markdown (| colonne | colonne |, une ligne d’en-tête puis une ligne |---|), il deviendra une feuille Google Sheets' : ' (pas de tableau)'} ; 350 mots au maximum ; n’invente aucun fait sur Yosh, ses clients ou ses chiffres : écris [à compléter] quand une information te manque ; commence directement par le livrable, sans phrase d’introduction.`;
-  brainAsk(prompt, { onText: txt => { job.preview = txt; } })
-    .then(text => { job.ok = true; job.text = text; }, e => { job.error = e; })
-    .finally(() => { job.settled = true; });
+  job.text = await brainAsk(prompt, { onText: txt => { job.preview = txt; } });
+  job.ok = true;
+  })().catch(e => { job.error = e; }).finally(() => { job.settled = true; });
   return job;
 }
 function recentWork(a) {
@@ -1332,12 +1497,14 @@ function studioJob(a, t) {
   (async () => {
     if (!ENGINE.brain) throw { code:'no_brain' };
     if (!ENGINE.canva && !ENGINE.video) throw { code:'no_studio' };
+    note('🧠 Zoé demande à Nora ce qu’on sait déjà');
+    const mem = await memContext(a, t);
     note('✏️ Zoé prépare le brief créatif');
     const plan = await brainAsk(`${persona(a)}
 
 Nous sommes le ${todayLabel()}.
 Demande de Yosh : ${t.title}
-${t.brief ? 'Détails : ' + t.brief + '\n' : ''}
+${t.brief ? 'Détails : ' + t.brief + '\n' : ''}${mem}
 Outils disponibles : ${[ENGINE.canva && 'Canva pour les visuels (posts, stories, affiches)', ENGINE.video && 'HyperFrames pour les vidéos courtes animées et sous-titrées (90 secondes au plus)'].filter(Boolean).join(' ; ')}.
 Prépare la production. Choisis "image" pour un post, une story, une affiche ou une miniature, "video" pour une vidéo, un Reel ou un montage.
 Réponds uniquement avec un objet JSON :
@@ -1447,9 +1614,11 @@ function researchJob(a, t) {
           etoiles: h.rating ? h.rating.stars : null, quartier: h.location ? (h.location.district_name || h.location.city_name) : null, adresse: h.location ? h.location.address : null,
           lien: h.url, equipements: (h.facilities || []).slice(0, 8) }));
       } });
+    note('🧠 Je demande à Nora ce qu’on sait déjà');
+    const mem = await memContext(a, t);
     const prompt = `${persona(a)}
 
-Nous sommes le ${todayLabel()} (aujourd’hui : ${new Date().toISOString().slice(0, 10)}). Yosh vit à Genève.
+Nous sommes le ${todayLabel()} (aujourd’hui : ${new Date().toISOString().slice(0, 10)}). Yosh vit à Genève.${mem}
 ${CTX.calendar.length ? 'Agenda de Yosh pour les prochains jours :\n' + CTX.calendar.join('\n') + '\n' : ''}
 Ta mission : ${t.title}
 ${t.brief ? 'Détails : ' + t.brief + '\n' : ''}${t.requested ? recentWork(a) : ''}
@@ -1610,8 +1779,8 @@ async function planDay() {
   enqueueMails(mails);
   renderEngine();
   const pending = HQ.tasks.filter(t => ['proposee', 'attente', 'encours'].includes(t.status)).map(t => '- ' + t.title).join('\n');
-  const team = AGENTS.filter(a => !a.jarvis && a.name !== 'Max').map(a => `- ${a.name} (${a.role}, ${a.pole.full}) : ${a.mission} Projets : ${(a.projects || []).join(', ')}`).join('\n');
-  const ideas = POLES.filter(p => p.id !== 'dir').map(p => `- ${p.full} : ${p.tasks.map(t => t.t).join(' ; ')}`).join('\n');
+  const team = AGENTS.filter(a => !a.jarvis && !a.memory && a.name !== 'Max').map(a => `- ${a.name} (${a.role}, ${a.pole.full}) : ${a.mission} Projets : ${(a.projects || []).join(', ')}`).join('\n');
+  const ideas = POLES.filter(p => p.id !== 'dir' && p.id !== 'mem').map(p => `- ${p.full} : ${p.tasks.map(t => t.t).join(' ; ')}`).join('\n');
   const prompt = `Tu es Jarvis, le chef d’orchestre du QG d’agents IA de Yosh (étudiant à Genève, maturité fédérale en poche, stagiaire chez MCI Sport, il développe des applis de révision et des agents IA).
 Nous sommes le ${todayLabel()}.
 
@@ -1871,8 +2040,8 @@ const TSTATUS = { proposee:'à valider', attente:'en attente', encours:'en cours
 /* ---------- Espaces plein écran ---------- */
 const SP = { view:null, agent:null, doc:null };
 const spEl = $('space');
-const TITLES = { valid:'À valider', msgs:'Messages', files:'Fichiers', team:'Équipe', day:'Journée' };
-const PANES = ['valid', 'msgs', 'files', 'team', 'day'];
+const TITLES = { valid:'À valider', msgs:'Messages', files:'Fichiers', mem:'Mémoire', team:'Équipe', day:'Journée' };
+const PANES = ['valid', 'msgs', 'files', 'mem', 'team', 'day'];
 function openSpace(view) {
   const wasClosed = spEl.hidden;
   SP.view = view;
@@ -1881,7 +2050,7 @@ function openSpace(view) {
   [...$('spNav').children].forEach(b => b.setAttribute('aria-current', b.dataset.space === view));
   $('spTitle').textContent = TITLES[view];
   spEl.hidden = false; document.body.classList.add('in-space');
-  vKey = fKey = teamKey = chatKey = docKey = contactsKey = '';
+  vKey = fKey = teamKey = chatKey = docKey = contactsKey = memKey = '';
   if (view === 'msgs' && SP.agent) markMsgsSeen(x => x === SP.agent);
   refresh();
   if (view === 'files') markFilesSeen();
@@ -1911,6 +2080,7 @@ function refresh() {
   renderTiles(); renderValidation(); renderFiles();
   if (SP.view === 'msgs') { renderContacts(); renderChat(); renderDoc(); }
   if (SP.view === 'team') renderTeam();
+  if (SP.view === 'mem') renderMem();
 }
 
 /* ---------- Messages courts des agents ---------- */
@@ -2033,7 +2203,7 @@ function renderTiles() {
   const inside = AGENTS.filter(a => a.inside).length, working = AGENTS.filter(a => a.task).length;
   const plan = HQ.tasks.filter(t => !t.noJob && t.status !== 'refusee' && t.status !== 'proposee'), done = plan.filter(t => t.status === 'livre').length;
   const clock = HQ.active || AGENTS.some(a => a.visible) ? timeStr() : '--:--';
-  const key = [props.map(t => t.id + t.title + t.target).join(','), msgs.slice(0, 6).map(x => x.m.at + (x.m.seen ? 1 : 0)).join(','), unseen, files.length, links.length, fNew, inside, working, done, plan.length, clock, HQ.active].join('|');
+  const key = [MEM.length, MEMLOG.length, props.map(t => t.id + t.title + t.target).join(','), msgs.slice(0, 6).map(x => x.m.at + (x.m.seen ? 1 : 0)).join(','), unseen, files.length, links.length, fNew, inside, working, done, plan.length, clock, HQ.active].join('|');
   if (key === tileKey) return; tileKey = key;
   const n = props.length;
   $('tValidN').textContent = n; $('kValid').textContent = n; $('sValid').classList.toggle('hot', n > 0);
@@ -2045,9 +2215,10 @@ function renderTiles() {
   $('tMsgL').innerHTML = msgs.length ? msgs.slice(0, 6).map(({ m, a }) => `<span class="t-line ${m.seen ? '' : 'new'}"><i></i><span><b>${esc(a.name)}</b> · ${esc(m.line || shortLine(m.text))}</span></span>`).join('')
     : '<span class="t-line dim"><span>Les agents t’écrivent ici en une ligne, avec le bouton pour agir.</span></span>';
   $('tFileN').textContent = files.length + links.length;
-  $('tFileS').textContent = fNew ? `${fNew} nouveau${fNew > 1 ? 'x' : ''}` : files.length ? `${files.length} fichier${files.length > 1 ? 's' : ''}, ${links.length} lien${links.length > 1 ? 's' : ''}` : 'Docs et tableaux';
+  $('tFileS').textContent = fNew ? `${fNew} nouveau${fNew > 1 ? 'x' : ''}` : 'docs';
   $('tTeamN').textContent = `${inside}/${AGENTS.length}`; $('tTeamS').textContent = working ? `${working} au travail` : 'au bureau';
-  $('tDayN').textContent = clock; $('tDayS').textContent = plan.length ? `${done}/${plan.length} livrées` : 'Plan du jour';
+  $('tMemN').textContent = MEM.length; $('tMemS').textContent = MEMLOG.length ? `${MEMLOG.length} demande${MEMLOG.length > 1 ? 's' : ''}` : 'souvenirs';
+  $('tDayN').textContent = clock; $('tDayS').textContent = plan.length ? `${done}/${plan.length} livrées` : 'plan';
   const badge = (id, v) => { $(id).hidden = !v; $(id).textContent = v; };
   badge('nValid', n); badge('nMsgs', unseen); badge('nFiles', fNew);
 }
@@ -2182,7 +2353,7 @@ $('chatChips').addEventListener('click', e => { const b = e.target.closest('[dat
 $('chatText').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); $('chatForm').requestSubmit(); } });
 $('chatForm').onsubmit = e => { e.preventDefault(); const txt = $('chatText').value.trim(); if (!txt || chatBusy || !SP.agent) return; $('chatText').value = ''; sendChat(SP.agent, txt); };
 
-function chatPrompt(a, c) {
+function chatPrompt(a, c, mem = '') {
   const mine = HQ.tasks.filter(t => (t.agent === a.name || a.custom.includes(t)) && (t.status === 'attente' || t.status === 'encours'));
   const convo = c.messages.slice(-16).map(m => (m.role === 'user' ? 'Yosh : ' : a.name + ' : ') + m.text + (m.taskTitle ? ` [tâche créée : ${m.taskTitle}]` : '')).join('\n');
   return `${persona(a)}
@@ -2191,6 +2362,7 @@ Nous sommes le ${todayLabel()}.
 ${recentWork(a)}
 Tes tâches en cours ou en attente : ${mine.length ? mine.map(t => '« ' + t.title + ' » (' + TSTATUS[t.status] + ')').join(', ') : 'aucune'}.
 
+${mem ? `\nCe que Nora (la mémoire du QG) a trouvé pour ce message :\n${mem}\n` : ''}
 Conversation avec Yosh (le dernier message est le sien) :
 ${convo}
 
@@ -2200,8 +2372,9 @@ Réponds à Yosh en tant que ${a.name}, en français, naturellement et brièveme
 - S’il veut juste discuter ou une information rapide, réponds sans créer de tâche.
 - N’invente aucun fait sur Yosh.
 - Le résultat sera livré à Yosh sous forme de fichier dans son Google Drive : "document" (Google Docs) par défaut, "tableur" (Google Sheets) s’il veut un tableau, une liste chiffrée ou un comparatif à trier, "document+tableur" s’il veut les deux. S’il précise un format, respecte-le.
+${a.memory ? '- Tu es la mémoire du QG : réponds à partir de ce que tu as trouvé ci-dessus et cite tes sources (Drive, Gmail, note, discussion…). Si tu ne trouves rien, dis-le et propose à Yosh de t’ajouter l’info (note, fichier, export claude.ai). Tu ne vois pas directement l’historique claude.ai ni la mémoire de Claude : seulement ce qu’il t’a confié.\n' : ''}- "a_retenir" : la liste des faits durables que Yosh vient de dire sur lui, ses projets, ses contacts ou ses préférences (ex. « Clément Michon est son responsable chez MCI Sport »), sinon [].
 - "ligne" résume ta réponse en 10 mots au plus, comme une notification (ex. « Propose : post LinkedIn du match », « Question : pour quelles dates ? »).
-Réponds uniquement avec un objet JSON : {"reponse":"…","ligne":"…","tache":null} ou {"reponse":"…","ligne":"…","tache":{"titre":"…","precisions":"tout ce que Yosh a demandé, en détail","type":"redaction|recherche|appel|impression|reunion","fichier":"document|tableur|document+tableur"}}`;
+Réponds uniquement avec un objet JSON : {"reponse":"…","ligne":"…","a_retenir":[],"tache":null} ou {"reponse":"…","ligne":"…","a_retenir":[],"tache":{"titre":"…","precisions":"tout ce que Yosh a demandé, en détail","type":"redaction|recherche|appel|impression|reunion","fichier":"document|tableur|document+tableur"}}`;
 }
 async function sendChat(a, text) {
   const c = chatOf(a);
@@ -2209,7 +2382,11 @@ async function sendChat(a, text) {
   if (!ENGINE.brain) { agentSays(a, ENGINE.blocked ? errText({ code: ENGINE.blocked }) : 'Je ne peux pas te répondre : aucune IA n’est connectée. Ouvre le QG depuis claude.ai, ou lance server.py avec ta clé.', { error: true, kind: 'erreur', line: 'Aucune IA connectée' }); return; }
   chatBusy = a; refresh();
   try {
-    const res = await runBrain(chatPrompt(a, c), { asJson: true });
+    let mem = '';
+    try { mem = (await recall(text, { by: a, deep: !!a.memory })).text; } catch (e) {}
+    const res = await runBrain(chatPrompt(a, c, mem), { asJson: true });
+    (Array.isArray(res && res.a_retenir) ? res.a_retenir : []).map(x => String(x).trim()).filter(x => x.length > 8).slice(0, 4)
+      .forEach(x => { if (!MEM.some(e => e.src === 'retenu' && e.text === x)) addMem({ src:'retenu', title: x.slice(0, 90), text: x, by: a.name }, { quiet: true }); });
     const extra = {}, x = res && res.tache, rep = String((res && res.reponse) || 'D’accord.').trim();
     if (x && String(x.titre || '').trim()) {
       const fmt = ['document', 'tableur', 'document+tableur'].includes(x.fichier) ? x.fichier : 'document';
@@ -2224,6 +2401,184 @@ async function sendChat(a, text) {
     agentSays(a, 'Je n’ai pas pu te répondre : ' + errText(e), { error: true, kind: 'erreur', line: 'Réponse impossible' });
   }
 }
+/* ---------- Mémoire : l'espace de Nora ---------- */
+let memFilter = 'all', memKey = '', memOpen = null;
+const memStatus = txt => { $('memStatus').textContent = txt || ''; };
+function renderMem() {
+  if (SP.view !== 'mem') return;
+  const counts = {}; MEM.forEach(e => { counts[e.src] = (counts[e.src] || 0) + 1; });
+  const list = MEM.filter(e => memFilter === 'all' || e.src === memFilter);
+  const key = memFilter + '|' + memOpen + '|' + MEM.map(e => e.id + (e.at || 0) + (e.title || '').length).join(',') + '|' + MEMLOG.map(x => x.at).join(',');
+  if (key === memKey) return; memKey = key;
+  $('memSrc').innerHTML = `<button type="button" data-mf="all" aria-pressed="${memFilter === 'all'}">Tout · ${MEM.length}</button>` +
+    Object.entries(MEM_SRC).filter(([k]) => counts[k]).map(([k, [l, ic]]) => `<button type="button" data-mf="${k}" aria-pressed="${memFilter === k}">${ic} ${esc(l)} · ${counts[k]}</button>`).join('');
+  $('memLog').innerHTML = MEMLOG.length ? MEMLOG.slice(0, 12).map(x => `<li><b>${esc(x.by)}</b> · ${esc(x.q)}<small>${hhmm(x.at)} · ${x.hits.length ? x.hits.length + ' trouvaille' + (x.hits.length > 1 ? 's' : '') + ' : ' + esc([...new Set(x.hits.map(h => (MEM_SRC[h.src] || ['?'])[0]))].join(', ')) : 'rien trouvé'}</small></li>`).join('')
+    : '<li class="meta">Avant chaque tâche, l’agent demande à Nora ce qu’on sait déjà. Leurs demandes s’affichent ici.</li>';
+  $('memList').innerHTML = list.length ? list.slice(0, 120).map(e => { const [l, ic] = MEM_SRC[e.src] || ['Archive', '🗂️'];
+    return `<article class="mcard ${memOpen === e.id ? 'open' : ''}" data-mid="${esc(e.id)}">
+      ${e.img ? `<img src="${esc(e.img)}" alt="${esc(e.title)}" loading="lazy">` : ''}
+      <h4><span>${ic}</span><span>${esc(e.title)}</span></h4>
+      <div class="meta">${esc(l)}${e.by ? ' · par ' + esc(e.by) : ''} · ${hhmm(e.at)}</div>
+      <p>${esc(memOpen === e.id ? e.text : String(e.text).slice(0, 400))}</p>
+      <span class="acts"><button type="button" data-mv>${memOpen === e.id ? 'Réduire' : 'Lire'}</button>${e.url ? `<a href="${esc(e.url)}" target="_blank" rel="noopener noreferrer">Ouvrir</a>` : ''}<button type="button" class="no" data-mdel>Oublier</button></span>
+    </article>`; }).join('')
+    : `<div class="empty-big">${MEM.length ? 'Rien dans ce rangement.' : 'La mémoire est vide. Confie à Nora une note, tes fichiers et photos, l’export de tes discussions claude.ai ou ce que Claude sait de toi : les agents s’en serviront avant chaque tâche. Elle fouille aussi ton Drive et tes mails à leur demande.'}</div>`;
+}
+$('memSrc').addEventListener('click', e => { const b = e.target.closest('[data-mf]'); if (b) { memFilter = b.dataset.mf; renderMem(); } });
+$('memList').addEventListener('click', e => {
+  const c = e.target.closest('[data-mid]'); if (!c) return;
+  const m = MEM.find(x => x.id === c.dataset.mid); if (!m) return;
+  if (e.target.closest('[data-mv]')) { memOpen = memOpen === m.id ? null : m.id; renderMem(); }
+  if (e.target.closest('[data-mdel]')) {
+    MEM.splice(MEM.indexOf(m), 1); saveMem(m, true); saveMem();
+    if (m.asset && STORE.assets) STORE.assets.delete(m.asset).catch(() => {});
+    refresh();
+  }
+});
+// Demander à Nora
+$('memAsk').onsubmit = async e => {
+  e.preventDefault(); const q = $('memQ').value.trim(); if (!q) return;
+  const box = $('memAnswer'); box.hidden = false; box.innerHTML = '<p class="meta">Nora cherche dans la mémoire, ton Drive et tes mails…</p>';
+  try {
+    const r = await recall(q, { deep: true });
+    const hits = `<div class="mem-hits">${r.hits.map(h => h.url ? `<a href="${esc(h.url)}" target="_blank" rel="noopener noreferrer">${(MEM_SRC[h.src] || ['', '🗂️'])[1]} ${esc(h.title.slice(0, 70))}</a>` : `<span>${(MEM_SRC[h.src] || ['', '🗂️'])[1]} ${esc(h.title.slice(0, 70))}</span>`).join('')}</div>`;
+    if (!r.text) { box.innerHTML = `<h3 class="sp-h">Nora</h3><p>Je n’ai rien trouvé sur « ${esc(q)} ». Confie-moi l’info (note, fichier, export claude.ai) et je la donnerai aux agents.</p>`; return; }
+    box.innerHTML = `<h3 class="sp-h">Nora · ${r.hits.length + r.profile} source${r.hits.length + r.profile > 1 ? 's' : ''}</h3>${hits}<pre id="memAnsText">${ENGINE.brain ? 'Je résume…' : ''}</pre>`;
+    if (ENGINE.brain) {
+      const txt = await brainAsk(`${persona(agentNamed('Nora'))}
+
+Yosh te demande : « ${q} »
+Voici ce que tu as trouvé dans ses archives :
+${r.text}
+
+Réponds-lui en français, en 120 mots au plus : ce que tu sais, avec la source entre parenthèses (Drive, Gmail, note…). Si c’est incomplet, dis ce qui manque. N’invente rien.`, { onText: t => { const el = $('memAnsText'); if (el) el.textContent = t; } });
+      const el = $('memAnsText'); if (el) el.textContent = txt;
+    }
+  } catch (err) { box.innerHTML = `<p class="meta">Recherche impossible : ${esc(errText(err))}</p>`; }
+};
+// Confier à Nora
+const loadScript = src => new Promise((ok, ko) => { if ([...document.scripts].some(x => x.src === src)) return ok(); const el = document.createElement('script'); el.src = src; el.onload = ok; el.onerror = () => ko({ code:'script', message:'Impossible de charger ' + src }); document.head.appendChild(el); });
+const ZIP_JS = 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js', PDF_JS = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+async function pdfText(file) {
+  await loadScript(PDF_JS);
+  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  const doc = await pdfjsLib.getDocument({ data: await file.arrayBuffer() }).promise; let out = '';
+  for (let i = 1; i <= Math.min(doc.numPages, 40) && out.length < 9000; i++) { const c = await (await doc.getPage(i)).getTextContent(); out += c.items.map(x => x.str).join(' ') + '\n'; }
+  return out;
+}
+async function docxText(file) {
+  await loadScript(ZIP_JS);
+  const zip = await JSZip.loadAsync(file), xml = await zip.file('word/document.xml').async('string');
+  return decode(xml.replace(/<\/w:p>/g, '\n').replace(/<[^>]+>/g, ''));
+}
+async function keepAsset(file) {
+  if (!STORE.assets || file.size > 19e6) return null;
+  try { return await STORE.assets.upload(file); } catch (e) { return null; }
+}
+async function describeImage(file) {
+  if (ENGINE.brain !== 'claude') return '';
+  try {
+    const lim = await ENGINE.sample.limits(); if (!lim.images || file.size > lim.images.maxInputBytes || !lim.images.mediaTypes.includes(file.type)) return '';
+    const r = await ENGINE.sample(`Décris cette photo pour la mémoire de Yosh (étudiant à Genève, stagiaire chez MCI Sport) : ce qu’on y voit, les personnes ou objets, le lieu ou l’événement s’il est reconnaissable, tout texte visible, et à quoi elle pourrait servir (post, dossier…). 120 mots au plus, en français. N’invente pas de noms.`, { images: [file], cache: false });
+    return r.text;
+  } catch (e) { return ''; }
+}
+async function importFiles(files) {
+  let n = 0;
+  for (const f of files) {
+    memStatus(`Nora range « ${f.name} »…`);
+    try {
+      const low = f.name.toLowerCase();
+      if (/\.zip$/.test(low) || (/\.json$/.test(low) && /conversation|memor|project|export/.test(low))) { n += await importClaudeExport(f); continue; }
+      let text = '', src = 'fichier';
+      if (f.type.startsWith('image/')) { src = 'photo'; text = await describeImage(f); }
+      else if (/\.pdf$/.test(low)) text = await pdfText(f);
+      else if (/\.docx$/.test(low)) text = await docxText(f);
+      else if (/\.(html?)$/.test(low)) { const d = new DOMParser().parseFromString(await f.text(), 'text/html'); text = d.body ? d.body.innerText || d.body.textContent : ''; }
+      else text = await f.text();
+      const asset = await keepAsset(f);
+      await addMem({ src, title: f.name, text: String(text || '').trim() || (src === 'photo' ? `Photo « ${f.name} » (pas de description automatique ici).` : `Fichier « ${f.name} » (texte illisible).`), url: asset ? asset.url : '', img: asset && src === 'photo' ? asset.url : '', asset: asset ? asset.id : '', by: 'Toi' }, { quiet: true });
+      n++;
+    } catch (e) { memStatus(`« ${f.name} » : ${errText(e)}`); await sleep(1200); }
+  }
+  memStatus(`${n} élément${n > 1 ? 's' : ''} ajouté${n > 1 ? 's' : ''} à la mémoire.`); refresh();
+}
+// Export claude.ai (Réglages › Confidentialité › Exporter les données) : conversations.json, projects.json, memories
+const msgText = m => String(m.text || (Array.isArray(m.content) ? m.content.map(c => c.text || '').join(' ') : '') || '').trim();
+async function importClaudeExport(file) {
+  const parts = {};
+  if (/\.zip$/i.test(file.name)) {
+    await loadScript(ZIP_JS);
+    const zip = await JSZip.loadAsync(file);
+    for (const name of Object.keys(zip.files)) if (/\.json$/i.test(name)) parts[name.split('/').pop().toLowerCase()] = await zip.file(name).async('string');
+  } else parts[file.name.toLowerCase()] = await file.text();
+  let n = 0;
+  const put = async e => { await addMem(e, { quiet: true }); n++; if (n % 10 === 0) { memStatus(`Nora range tes discussions claude.ai… ${n}`); renderTiles(); } };
+  for (const [name, raw] of Object.entries(parts)) {
+    let data; try { data = JSON.parse(raw); } catch (e) { continue; }
+    const arr = Array.isArray(data) ? data : [data];
+    if (arr.some(x => x && Array.isArray(x.chat_messages))) {
+      const convs = arr.filter(x => x && Array.isArray(x.chat_messages) && x.chat_messages.length)
+        .sort((a, b) => String(b.updated_at || b.created_at || '').localeCompare(String(a.updated_at || a.created_at || ''))).slice(0, 300);
+      for (const c of convs) {
+        const body = c.chat_messages.map(m => `${m.sender === 'human' ? 'Yosh' : 'Claude'} : ${msgText(m)}`).filter(x => x.length > 8).join('\n');
+        const text = body.length > 6000 ? body.slice(0, 3800) + '\n…\n' + body.slice(-2000) : body;
+        await put({ id: 'cl_' + String(c.uuid || newId()).replace(/[^a-z0-9]/gi, '').slice(0, 24), src: 'claude', title: c.name || 'Discussion sans titre', text, at: Date.parse(c.updated_at || c.created_at) || Date.now(), by: 'claude.ai' });
+      }
+    } else if (/project/.test(name) || arr.some(x => x && (x.prompt_template != null || Array.isArray(x.docs)))) {
+      for (const p of arr.filter(Boolean).slice(0, 60)) {
+        if (p.description || p.prompt_template) await put({ id: 'pj_' + String(p.uuid || newId()).replace(/[^a-z0-9]/gi, '').slice(0, 24), src: 'claude', title: 'Projet claude.ai : ' + (p.name || 'sans nom'), text: [p.description, p.prompt_template].filter(Boolean).join('\n\n'), by: 'claude.ai' });
+        for (const d of (p.docs || []).slice(0, 40)) await put({ id: 'pd_' + String(d.uuid || newId()).replace(/[^a-z0-9]/gi, '').slice(0, 24), src: 'fichier', title: `${d.filename || 'Document'} (projet ${p.name || ''})`, text: String(d.content || ''), by: 'claude.ai' });
+      }
+    } else if (/memor/.test(name)) {
+      const texts = []; deepWalk(data, (k, v) => { if (typeof v === 'string' && v.length > 80) texts.push(v); });
+      if (texts.length) await put({ id: 'profil_claude', src: 'profil', title: 'Ce que Claude sait de toi (export)', text: texts.join('\n\n'), by: 'claude.ai' });
+    }
+  }
+  return n;
+}
+function memForm(kind) {
+  const f = $('memForm'); f.hidden = false;
+  const prof = MEM.find(e => e.src === 'profil');
+  if (kind === 'note') f.innerHTML = `<form class="mem-form" data-kind="note"><h3 class="sp-h">Une note pour Nora</h3><input name="t" placeholder="Titre (ex. MCI Sport : qui fait quoi)" required><textarea name="x" placeholder="Ce que les agents doivent savoir : contacts, chiffres, ton, dates, préférences…" required></textarea><div class="row"><button class="btn" type="submit">Ranger</button><button class="btn ghost" type="button" data-x>Annuler</button></div></form>`;
+  else if (kind === 'profil') f.innerHTML = `<form class="mem-form" data-kind="profil"><h3 class="sp-h">Ce que Claude sait de toi</h3><p class="meta">Sur claude.ai : Réglages › Capacités › Mémoire › « Voir et modifier ». Copie le texte et colle-le ici. Nora le donnera à chaque agent, avant chaque tâche.</p><textarea name="x" required>${esc(prof ? prof.text : '')}</textarea><div class="row"><button class="btn" type="submit">Enregistrer</button><button class="btn ghost" type="button" data-x>Annuler</button></div></form>`;
+  else if (kind === 'export') f.innerHTML = `<div class="mem-form"><h3 class="sp-h">Tes discussions avec Claude</h3><p class="meta">La page ne peut pas lire ton historique claude.ai elle-même. Sur claude.ai : Réglages › Confidentialité › « Exporter les données ». Tu reçois un e-mail avec un fichier .zip : dépose-le ici tel quel. Nora range tes 300 discussions les plus récentes, tes projets et leurs documents.</p><div class="row"><button class="btn" type="button" data-pick-export>Choisir le fichier .zip</button><button class="btn ghost" type="button" data-x>Annuler</button></div></div>`;
+  else if (kind === 'drive') f.innerHTML = `<form class="mem-form" data-kind="drive"><h3 class="sp-h">Un document de ton Google Drive</h3>${ENGINE.drive ? '' : '<p class="meta">Google Drive n’est pas connecté.</p>'}<div class="row"><input name="q" placeholder="Mots du titre ou du contenu" required style="flex:1"><button class="btn" type="submit">Chercher</button><button class="btn ghost" type="button" data-x>Fermer</button></div><div id="driveHits" class="feed"></div></form>`;
+  const first = f.querySelector('input,textarea'); first && first.focus();
+}
+$('sp-mem').addEventListener('click', e => {
+  const a = e.target.closest('[data-madd]');
+  if (a) { const k = a.dataset.madd; if (k === 'files') $('memFiles').click(); else memForm(k); return; }
+  if (e.target.closest('[data-x]')) { $('memForm').hidden = true; return; }
+  if (e.target.closest('[data-pick-export]')) { $('memExport').click(); return; }
+  const add = e.target.closest('[data-dadd]');
+  if (add) (async () => {
+    add.disabled = true; add.textContent = 'Lecture…';
+    try { const r = payloadOf(await ENGINE.mcp.callTool('Google Drive', 'read_file_content', { fileId: add.dataset.dadd }));
+      await addMem({ id: 'dr_' + add.dataset.dadd.slice(0, 30), src: 'drive', title: r.title || add.dataset.title, text: String(r.fileContent || ''), url: r.viewUrl || '', by: 'Toi' });
+      add.textContent = 'Rangé ✓'; }
+    catch (err) { add.disabled = false; add.textContent = 'Échec : réessayer'; add.title = errText(err); }
+  })();
+});
+$('sp-mem').addEventListener('submit', async e => {
+  const f = e.target.closest('.mem-form'); if (!f || !f.dataset.kind) return; e.preventDefault();
+  const v = n => (f.elements[n] ? f.elements[n].value.trim() : '');
+  if (f.dataset.kind === 'note') { await addMem({ src: 'note', title: v('t'), text: v('x'), by: 'Toi' }); $('memForm').hidden = true; memStatus('Note rangée.'); }
+  if (f.dataset.kind === 'profil') { await addMem({ id: 'profil_yosh', src: 'profil', title: 'Ce que Claude sait de toi', text: v('x'), by: 'Toi' }); $('memForm').hidden = true; memStatus('Profil enregistré : tous les agents le recevront.'); }
+  if (f.dataset.kind === 'drive') {
+    const box = $('driveHits'); if (!ENGINE.drive) return; box.innerHTML = '<p class="meta">Recherche…</p>';
+    try {
+      const q = v('q').replace(/[\\']/g, ' ');
+      const files = payloadOf(await ENGINE.mcp.callTool('Google Drive', 'search_files', { query: `fullText contains '${q}' and trashed = false`, pageSize: 8, excludeContentSnippets: true })).files || [];
+      box.innerHTML = files.length ? files.map(x => `<div class="drive-hit"><span><b>${esc(x.title || 'Sans titre')}</b><small>${esc(String(x.modifiedTime || '').slice(0, 10))}</small></span><button class="btn sm ghost" type="button" data-dadd="${esc(x.id)}" data-title="${esc(x.title || '')}">Ranger</button></div>`).join('') : '<p class="meta">Aucun fichier trouvé.</p>';
+    } catch (err) { box.innerHTML = `<p class="meta">${esc(errText(err))}</p>`; }
+  }
+});
+$('memFiles').onchange = e => { const fs = [...e.target.files]; e.target.value = ''; if (fs.length) importFiles(fs); };
+$('memExport').onchange = async e => { const f = e.target.files[0]; e.target.value = ''; if (!f) return; $('memForm').hidden = true;
+  try { memStatus('Nora ouvre ton export claude.ai…'); const n = await importClaudeExport(f); memStatus(n ? `${n} discussions, projets et documents claude.ai rangés.` : 'Je n’ai rien reconnu dans ce fichier : il faut le .zip de l’export claude.ai (ou son conversations.json).'); refresh(); }
+  catch (err) { memStatus('Import impossible : ' + errText(err)); } };
+
 const agentOpts = POLES.map(p => `<optgroup label="${esc(p.full)}">${p.members.map(a => `<option value="${esc(a.name)}">${esc(a.name)} · ${esc(a.role)}</option>`).join('')}</optgroup>`).join('');
 $('askAgent').innerHTML = agentOpts;
 [['ask', 'askAgent', 'askText']].forEach(([f, s, i]) => {
@@ -2285,7 +2640,7 @@ const STATE = a => !a.inside && !a.courier ? ['Hors du bureau', '#9ca3af'] : a.m
   : ['type','web','mail','visio','call','meeting'].includes(a.anim) ? ['Au travail', '#16a34a'] : ['coffee','drink','fridge','relax','pingpong','eat','micro','chat'].includes(a.anim) ? ['En pause', '#0ea5e9'] : ['Disponible', '#64748b'];
 function zoneOf(a) {
   if (!a.visible) return 'Pas dans les locaux';
-  if (a.seated) return a.pole.id === 'dir' ? 'Dans le bureau de Jarvis' : `À son poste, tablée ${a.pole.full}`;
+  if (a.seated) return a.pole.id === 'dir' ? 'Dans le bureau de Jarvis' : a.memory ? 'Aux archives, à son bureau' : `À son poste, tablée ${a.pole.full}`;
   const z = ZONES.find(z => a.x >= z.x && a.x <= z.x + z.w && a.y >= z.y && a.y <= z.y + z.h);
   if (z) return z.label === 'Box' ? 'Dans un box téléphonique' : z.label;
   if (a.y < 80) return 'Devant le mur de post-its';

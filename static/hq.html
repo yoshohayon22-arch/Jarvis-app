@@ -261,8 +261,40 @@
   .tc-acts button:first-child{background:var(--ink);color:var(--bg);border-color:var(--ink)}
 
   /* Conversation : le livrable à gauche, la discussion à droite */
-  .space.is-thread .sp-body{overflow:hidden;padding-block:16px}
-  .sp-pane.thread{max-width:none;height:100%;display:grid;grid-template-columns:minmax(0,1.2fr) minmax(360px,.8fr);gap:16px}
+  .space.is-wa .sp-body{overflow:hidden;padding-block:16px}
+  .sp-pane.wa{max-width:1440px;height:100%;display:grid;grid-template-columns:340px minmax(0,1fr);gap:0;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--surface)}
+  .sp-pane.wa.has-doc{grid-template-columns:340px minmax(0,1fr) minmax(0,1.1fr)}
+  .wa-list{display:flex;flex-direction:column;min-height:0;border-right:1px solid var(--line)}
+  .wa-list .fsearch{margin:10px;width:auto}
+  .wa-contacts{flex:1;min-height:0;overflow:auto}
+  .wa-c{display:flex;gap:12px;align-items:center;width:100%;padding:10px 14px;background:transparent;border:0;border-bottom:1px solid var(--line);text-align:left;cursor:pointer;color:var(--ink);font:inherit}
+  .wa-c:hover{background:var(--surface2)}
+  .wa-c.sel{background:color-mix(in srgb, var(--accent) 12%, var(--surface))}
+  .wa-c .av{position:relative;width:46px;height:46px;border-radius:50%;flex:none}
+  .wa-c .av i{position:absolute;right:-1px;bottom:0;width:13px;height:13px;border-radius:50%;border:2px solid var(--surface)}
+  .wa-m{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+  .wa-top,.wa-bot{display:flex;gap:8px;align-items:center;min-width:0}
+  .wa-top b{flex:1;font:700 15.5px var(--body)}
+  .wa-top time{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+  .wa-c.unread .wa-top time{color:var(--accent);font-weight:700}
+  .wa-bot small{flex:1;min-width:0;color:var(--muted);font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .wa-c.unread .wa-bot small{color:var(--ink);font-weight:600}
+  .wa-u{font-style:normal;min-width:21px;height:21px;padding:0 6px;border-radius:99px;background:var(--accent);color:var(--accent-ink);font:700 11.5px/21px var(--body);text-align:center;flex:none}
+  .wa-p{font-style:normal;font:700 11px var(--body);color:var(--warn);white-space:nowrap;flex:none}
+  .sp-pane.wa .th-chat{border:0;border-radius:0}
+  .sp-pane.wa .chat-log{background:color-mix(in srgb, var(--accent) 4%, var(--bg))}
+  .sp-pane.wa .th-doc{position:relative;border:0;border-left:1px solid var(--line);border-radius:0;overflow:auto}
+  .doc-x{position:absolute;top:14px;right:14px}
+  .wa-empty{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;gap:8px;padding:30px;color:var(--muted);background:var(--bg)}
+  .wa-empty b{font:800 24px var(--display);color:var(--ink)}
+  .wa-empty p{max-width:420px;margin:0;line-height:1.5}
+  .wa-back{display:none}
+  .sp-pane.wa .th-head{flex-wrap:nowrap}
+  .th-head .who > div{min-width:0}
+  .th-head .who small{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .th-head .btn{flex:none}
+  .task-card .att{display:block;color:var(--muted);font-size:12px}
+  .bubble.me{background:color-mix(in srgb, var(--accent) 22%, var(--surface));color:var(--ink)}
   .th-doc{background:var(--surface);border:1px solid var(--line);border-radius:14px;min-height:0}
   .th-chat{display:flex;flex-direction:column;min-height:0;background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden}
   .th-head{display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid var(--line);flex-wrap:wrap}
@@ -276,8 +308,11 @@
   .drow small{color:var(--muted);font-size:12.5px}
   .link-btn{background:none;border:0;color:var(--muted);font:600 13px var(--body);cursor:pointer;padding:0;align-self:flex-start}
   @media (max-width:900px){
-    .sp-pane.thread{grid-template-columns:1fr;height:auto}
-    .space.is-thread .sp-body{overflow:auto}
+    .sp-pane.wa,.sp-pane.wa.has-doc{grid-template-columns:minmax(0,1fr);border-radius:0;border-inline:0}
+    .space.is-wa .sp-body{padding:0}
+    .sp-pane.wa.has-chat .wa-list,.sp-pane.wa:not(.has-chat) .th-chat,.sp-pane.wa.has-doc .th-chat{display:none}
+    .sp-pane.wa .th-doc{border-left:0}
+    .wa-back{display:inline-flex}
     .th-chat{min-height:70dvh}
     .files-grid,.day-grid{grid-template-columns:1fr}
   }
@@ -347,9 +382,19 @@
       <div class="vlist" id="vList"></div>
       <div id="vAskWrap" hidden><h3 class="sp-h">Les agents attendent ta réponse</h3><div class="feed" id="vAsk"></div></div>
     </div>
-    <div class="sp-pane" id="sp-msgs" hidden>
-      <form class="composer" id="msgForm"><select id="msgAgent" aria-label="Agent"></select><input id="msgText" placeholder="Écris à un agent…" required autocomplete="off"><button class="btn" type="submit">Envoyer</button></form>
-      <div class="feed" id="feed"></div>
+    <div class="sp-pane wa" id="sp-msgs" hidden>
+      <aside class="wa-list">
+        <input class="fsearch" id="waSearch" type="search" placeholder="Rechercher un agent" aria-label="Rechercher un agent">
+        <div class="wa-contacts" id="contacts" role="list"></div>
+      </aside>
+      <section class="th-chat" id="waChat">
+        <div class="wa-empty" id="waEmpty"><b>Tes agents</b><p>Choisis un contact à gauche pour lui écrire. Chaque agent t’envoie des messages courts : tu valides ses tâches directement dans la conversation.</p></div>
+        <div class="th-head" id="thHead" hidden></div>
+        <div class="chat-log" id="chatLog" aria-live="polite" hidden></div>
+        <div class="chips" id="chatChips" hidden></div>
+        <form class="chat-form" id="chatForm" hidden><textarea id="chatText" rows="1" placeholder="Écris un message… (Entrée pour envoyer)"></textarea><button class="btn" type="submit" id="chatSend">Envoyer</button></form>
+      </section>
+      <article class="cz-read th-doc" id="thDoc" hidden></article>
     </div>
     <div class="sp-pane" id="sp-files" hidden>
       <input class="fsearch" id="fSearch" type="search" placeholder="Chercher un fichier, un lien, un agent…" aria-label="Chercher dans les fichiers et les liens">
@@ -374,15 +419,6 @@
           <ul id="log"></ul>
         </section>
       </div>
-    </div>
-    <div class="sp-pane thread" id="sp-thread" hidden>
-      <article class="cz-read th-doc" id="thDoc"></article>
-      <section class="th-chat">
-        <div class="th-head" id="thHead"></div>
-        <div class="chat-log" id="chatLog" aria-live="polite"></div>
-        <div class="chips" id="chatChips"></div>
-        <form class="chat-form" id="chatForm"><textarea id="chatText" rows="2" placeholder="Écris ton message… (Entrée pour envoyer)"></textarea><button class="btn" type="submit" id="chatSend">Envoyer</button></form>
-      </section>
     </div>
   </div>
 </section>
@@ -432,13 +468,11 @@ const POLES = [
       { t:'Corriger un bug de Send Me Files', s:['web','type'] }, { t:'Revue de code de la semaine', s:['meeting','type'] },
       { t:'Brancher le QG sur l’agenda Google', s:['type','web'] } ] },
   { id:'ops', name:'Ops · Mail & Admin', full:'Ops · Mail & Admin', color:'#64748b', bench:1, half:1,
-    agents:[ { name:'Max', role:'Boîte mail' }, { name:'Jade', role:'Administratif' }, { name:'Lucas', role:'Candidatures' } ],
-    calls:['Service de l’état civil ? Bonjour…', 'Le poste à temps partiel est-il toujours ouvert ?', 'Bien reçu votre mail, je vous réponds vite'],
+    agents:[ { name:'Max', role:'Boîte mail' }, { name:'Jade', role:'Administratif' } ],
+    calls:['Service de l’état civil ? Bonjour…', 'Je vous confirme la réception du dossier', 'Bien reçu votre mail, je vous réponds vite'],
     tasks:[ { t:'Demander l’attestation et l’acte de naissance', s:['type','call'] },
       { t:'Relancer le service administratif sans réponse', s:['call','type'] },
-      { t:'Scanner et classer les documents reçus', s:['print','type'] },
-      { t:'Repérer 5 offres d’emploi étudiant à temps partiel à Genève', s:['web','type'] },
-      { t:'Rédiger une candidature spontanée', s:['type','print'] } ] },
+      { t:'Scanner et classer les documents reçus', s:['print','type'] } ] },
 ];
 const poleById = id => POLES.find(p => p.id === id) || POLES[0];
 
@@ -500,10 +534,6 @@ const PROFILES = {
     mission:'Mène tes démarches administratives à Genève.',
     resp:['Demandes à l’état civil', 'Relance les services sans réponse', 'Monte le dossier de pièces justificatives'],
     tools:['Téléphone', 'Scanner'], projects:['Attestation et acte de naissance'], habit:'Classe tout, même les post-its.' },
-  Lucas: { who:'Optimiste, il voit une opportunité dans chaque vitrine.',
-    mission:'Te trouve un emploi étudiant à temps partiel.',
-    resp:['Repère les offres à Genève', 'Rédige les candidatures spontanées', 'Relance les commerces sans réponse'],
-    tools:['CV', 'Lettres de motivation'], projects:['Candidatures aux Eaux-Vives'], habit:'Imprime ses lettres pour les relire au stylo.' },
   Livreur: { who:'Livreur de passage, il ne fait pas partie de l’équipe.',
     mission:'Dépose les colis à l’accueil du QG.', resp:['Passe vers 10h40 et 15h10'], tools:[], projects:[], habit:'Ne reste jamais pour le café.' },
 };
@@ -1839,41 +1869,37 @@ const hhmm = at => { if (!at) return ''; const d = new Date(at), today = d.toDat
 const TSTATUS = { proposee:'à valider', attente:'en attente', encours:'en cours', livre:'livrée', erreur:'bloquée', refusee:'refusée' };
 
 /* ---------- Espaces plein écran ---------- */
-const SP = { view:null, prev:'msgs', agent:null, deliv:null, fresh:new Set() };
+const SP = { view:null, agent:null, doc:null };
 const spEl = $('space');
 const TITLES = { valid:'À valider', msgs:'Messages', files:'Fichiers', team:'Équipe', day:'Journée' };
-const PANES = ['valid', 'msgs', 'files', 'team', 'day', 'thread'];
+const PANES = ['valid', 'msgs', 'files', 'team', 'day'];
 function openSpace(view) {
   const wasClosed = spEl.hidden;
-  if (view !== 'thread') SP.prev = view;
   SP.view = view;
-  if (view === 'msgs') {
-    // ce qui n'était pas lu reste en évidence pendant que tu regardes le fil
-    SP.fresh = new Set(allMsgs().filter(x => !x.m.seen).map(x => x.a.name + ':' + x.m.at));
-    markMsgsSeen(() => true);
-  }
   PANES.forEach(p => { $('sp-' + p).hidden = p !== view; });
-  spEl.classList.toggle('is-thread', view === 'thread');
-  [...$('spNav').children].forEach(b => b.setAttribute('aria-current', b.dataset.space === (view === 'thread' ? 'msgs' : view)));
-  $('spTitle').textContent = view === 'thread' ? (SP.agent ? 'Avec ' + SP.agent.name : 'Conversation') : TITLES[view];
+  spEl.classList.toggle('is-wa', view === 'msgs');
+  [...$('spNav').children].forEach(b => b.setAttribute('aria-current', b.dataset.space === view));
+  $('spTitle').textContent = TITLES[view];
   spEl.hidden = false; document.body.classList.add('in-space');
-  vKey = fKey = teamKey = chatKey = docKey = feedKey = '';
+  vKey = fKey = teamKey = chatKey = docKey = contactsKey = '';
+  if (view === 'msgs' && SP.agent) markMsgsSeen(x => x === SP.agent);
   refresh();
   if (view === 'files') markFilesSeen();
-  if (view === 'thread') setTimeout(() => $('chatText').focus(), 30);
+  if (view === 'msgs' && SP.agent) setTimeout(() => $('chatText').focus(), 30);
   else if (wasClosed) $('spBack').focus();
   $('spBody').scrollTop = 0;
 }
 function closeSpace() {
-  spEl.hidden = true; SP.view = null; SP.agent = null; SP.deliv = null; SP.fresh.clear();
+  spEl.hidden = true; SP.view = null; SP.doc = null;
+  if (matchMedia('(max-width:900px)').matches) SP.agent = null;
   document.body.classList.remove('in-space'); refresh();
 }
+// ouvre la conversation d'un agent (et, si besoin, un livrable en grand à côté)
 function openThread(a, delivId) {
   if (!a || a.courier) return;
-  SP.agent = a; SP.deliv = delivId || null;
-  markMsgsSeen(x => x === a);
+  SP.agent = a; SP.doc = delivId || null; chatKey = docKey = '';
   if (delivId) { const d = delivById(delivId); if (d && !d.read) { d.read = true; save(d); } }
-  openSpace('thread');
+  openSpace('msgs');
 }
 $('spBack').onclick = closeSpace;
 document.addEventListener('click', e => {
@@ -1883,9 +1909,8 @@ document.addEventListener('click', e => {
 
 function refresh() {
   renderTiles(); renderValidation(); renderFiles();
-  if (SP.view === 'msgs') renderFeed();
+  if (SP.view === 'msgs') { renderContacts(); renderChat(); renderDoc(); }
   if (SP.view === 'team') renderTeam();
-  if (SP.view === 'thread') { renderChat(); renderDoc(); }
 }
 
 /* ---------- Messages courts des agents ---------- */
@@ -1893,9 +1918,8 @@ const chatOf = a => CHATS[a.name] || (CHATS[a.name] = { messages: [], updatedAt:
 const shortLine = t => { const s = String(t).replace(/\s+/g, ' ').trim(), f = s.split(/(?<=[.!?])\s/)[0] || s; return f.length > 90 ? f.slice(0, 88).trimEnd() + '…' : f; };
 function agentSays(a, text, extra = {}) {
   const c = chatOf(a), at = Date.now();
-  const inThread = SP.view === 'thread' && SP.agent === a;
-  c.messages.push({ role:'agent', text, at, ...extra, line: String(extra.line || shortLine(text)).slice(0, 120), kind: extra.kind || 'info', seen: inThread || SP.view === 'msgs' });
-  if (SP.view === 'msgs') SP.fresh.add(a.name + ':' + at);
+  const open = SP.view === 'msgs' && SP.agent === a;
+  c.messages.push({ role:'agent', text, at, ...extra, line: String(extra.line || shortLine(text)).slice(0, 120), kind: extra.kind || 'info', seen: open });
   c.messages = c.messages.slice(-60); c.updatedAt = at; saveChat(a.name); refresh();
 }
 function markMsgsSeen(who) {
@@ -1932,27 +1956,45 @@ function msgActs(m, a, d, t) {
 }
 function feedRow({ m, a }) {
   const d = m.delivId ? delivById(m.delivId) : null, t = m.taskId ? taskById(m.taskId) : null;
-  const att = d ? attachSummary(d) : '', isNew = SP.fresh.has(a.name + ':' + m.at) || !m.seen;
+  const att = d ? attachSummary(d) : '', isNew = !m.seen;
   return `<div class="frow2 ${isNew ? 'new' : ''} k-${esc(m.kind || 'info')}" data-agent="${esc(a.name)}" ${d ? `data-deliv="${esc(d.id)}"` : ''}>
     <span class="av" style="background:${avatarBg(a)}"></span>
     <p title="${esc(m.line || '')}"><b>${esc(a.name)}</b> · ${esc(m.line || shortLine(m.text))}${att ? ` <span class="att">· ${esc(att)}</span>` : ''}</p>
     <time>${hhmm(m.at)}</time><span class="acts">${msgActs(m, a, d, t)}</span></div>`;
 }
-let feedKey = '';
-function renderFeed() {
-  const list = allMsgs().slice(0, 80);
-  const key = list.map(x => x.a.name + x.m.at + (SP.fresh.has(x.a.name + ':' + x.m.at) ? 1 : 0)).join('|') + '#' + HQ.tasks.map(t => t.id + t.status).join(',') + '#' + HQ.deliverables.map(d => d.id + (d.draftSaved ? 1 : 0) + d.status + JSON.stringify(d.drive || '')).join(',');
-  if (key === feedKey) return; feedKey = key;
-  const fresh = list.filter(x => SP.fresh.has(x.a.name + ':' + x.m.at)), old = list.filter(x => !SP.fresh.has(x.a.name + ':' + x.m.at));
-  $('feed').innerHTML = !list.length ? '<div class="empty-big">Les agents t’écrivent ici en une ligne : « Maya · 3 hôtels à Lyon trouvés · 1 doc, 1 tableau ». Clique sur une ligne pour voir le détail en grand.</div>'
-    : (fresh.length ? '<div class="fd-h">Nouveau</div>' + fresh.map(feedRow).join('') : '') + (old.length ? `<div class="fd-h">${fresh.length ? 'Plus tôt' : 'Tous les messages'}</div>` + old.map(feedRow).join('') : '');
+/* ---------- Messagerie : les contacts, comme sur WhatsApp ---------- */
+let contactsKey = '';
+function renderContacts() {
+  const q = $('waSearch').value.trim().toLowerCase();
+  const rows = AGENTS.map(a => { const ms = (CHATS[a.name] && CHATS[a.name].messages) || [], last = ms[ms.length - 1];
+      return { a, last, unread: ms.filter(m => m.role === 'agent' && !m.seen).length, pend: HQ.tasks.filter(t => t.status === 'proposee' && t.target === a.name).length }; })
+    .filter(x => !q || (x.a.name + ' ' + x.a.role + ' ' + x.a.pole.full).toLowerCase().includes(q))
+    .sort((x, y) => ((y.last ? y.last.at : 0) - (x.last ? x.last.at : 0)) || AGENTS.indexOf(x.a) - AGENTS.indexOf(y.a));
+  const key = q + rows.map(x => x.a.name + (x.last ? x.last.at : 0) + x.unread + x.pend + (SP.agent === x.a) + STATE(x.a)[0]).join('|');
+  if (key === contactsKey) return; contactsKey = key;
+  $('contacts').innerHTML = rows.length ? rows.map(({ a, last, unread, pend }) => {
+    const [st, col] = STATE(a);
+    const prev = last ? (last.role === 'user' ? 'Toi : ' + last.text : (last.line || shortLine(last.text))) : a.role + ' · ' + a.pole.name;
+    return `<button class="wa-c ${SP.agent === a ? 'sel' : ''} ${unread ? 'unread' : ''}" type="button" role="listitem" data-c="${esc(a.name)}" aria-current="${SP.agent === a}">
+      <span class="av" style="background:${avatarBg(a)};box-shadow:0 0 0 2px ${a.pole.color}"><i style="background:${col}" title="${esc(st)}"></i></span>
+      <span class="wa-m"><span class="wa-top"><b>${esc(a.name)}</b><time>${last ? hhmm(last.at) : ''}</time></span>
+      <span class="wa-bot"><small>${esc(prev)}</small>${pend ? `<em class="wa-p">${pend} à valider</em>` : ''}${unread ? `<em class="wa-u" aria-label="${unread} non lu${unread > 1 ? 's' : ''}">${unread}</em>` : ''}</span></span></button>`; }).join('')
+    : '<p class="meta" style="padding:14px">Aucun agent ne correspond.</p>';
 }
+function selectContact(a) {
+  if (!a) return;
+  SP.agent = a; SP.doc = null; chatKey = docKey = contactsKey = '';
+  markMsgsSeen(x => x === a); refresh();
+  setTimeout(() => $('chatText').focus(), 30);
+}
+$('contacts').addEventListener('click', e => { const b = e.target.closest('[data-c]'); if (b) selectContact(agentNamed(b.dataset.c)); });
+$('waSearch').addEventListener('input', () => renderContacts());
 async function doDraft(d, b) {
   if (!d || !d.reply) return;
   if (b) { b.disabled = true; b.textContent = 'Enregistrement…'; }
   try { await saveDraft(d.mail, d.reply); d.draftSaved = true; HQ.drafts++; save(d); log(agentNamed(d.agent) || AGENTS[0], `Brouillon enregistré dans Gmail pour « ${d.mail.subject} »`, true); }
   catch (err) { if (b) { b.disabled = false; b.textContent = 'Échec : réessayer'; b.title = errText(err); } return; }
-  feedKey = docKey = ''; refresh();
+  chatKey = docKey = ''; refresh();
 }
 function retryDeliv(d) {
   if (!d || !d.spec) return;
@@ -1960,7 +2002,7 @@ function retryDeliv(d) {
   const t = { id: newId(), title: d.spec.title, steps: d.spec.steps, brief: d.spec.brief, mail: d.spec.mail, requested: d.spec.requested, format: d.spec.format, custom: true, status: 'attente' };
   a.custom.push(t); HQ.tasks.push(t);
   HQ.deliverables.splice(HQ.deliverables.indexOf(d), 1); save(); if (STORE.db) STORE.db.doc(`data/users/${STORE.uid}/l_${d.id}`).delete().catch(() => {});
-  if (SP.deliv === d.id) SP.deliv = null;
+  if (SP.doc === d.id) SP.doc = null;
   log(a, `Tâche relancée : ${t.title}`); renderPlan(); setActive(true, { plan: false }); refresh();
 }
 // un seul gestionnaire pour toutes les lignes d'action (fil, questions, conversation, livrable)
@@ -1974,13 +2016,13 @@ async function actClick(e) {
     if (ds.go) { openSpace(ds.go); return; }
     if (ds.draft) { doDraft(delivById(ds.draft), b); return; }
     if (ds.retry) { retryDeliv(delivById(ds.retry)); return; }
-    if (ds.open) { if (row) openThread(agentNamed(row.dataset.agent), ds.open); else { SP.deliv = ds.open; docKey = ''; renderDoc(); } return; }
+    if (ds.open) { if (row) openThread(agentNamed(row.dataset.agent), ds.open); else { SP.doc = ds.open; docKey = ''; renderDoc(); } return; }
     if ('reply' in ds && row) { openThread(agentNamed(row.dataset.agent)); return; }
     if (b.closest('.frow2') == null) return;
   }
   if (row && !b) openThread(agentNamed(row.dataset.agent), row.dataset.deliv || null);
 }
-['feed', 'vAsk', 'chatLog'].forEach(id => $(id).addEventListener('click', actClick));
+['vAsk', 'chatLog'].forEach(id => $(id).addEventListener('click', actClick));
 
 /* ---------- Accueil : les tuiles ---------- */
 let tileKey = '';
@@ -2067,38 +2109,48 @@ $('fSearch').addEventListener('input', () => renderFiles());
 /* ---------- Conversation : livrable en grand + discussion ---------- */
 let chatBusy = null, chatKey = '', docKey = '';
 function renderChat() {
-  const a = SP.agent; if (!a) return;
-  const c = chatOf(a), [st, col] = STATE(a);
-  const key = st + c.messages.length + (c.messages.length ? c.messages[c.messages.length - 1].at : 0) + (chatBusy === a) + HQ.tasks.filter(t => c.messages.some(m => m.taskId === t.id)).map(t => t.status).join(',') + HQ.deliverables.length;
+  const a = SP.agent, pane = $('sp-msgs');
+  pane.classList.toggle('has-chat', !!a);
+  ['thHead', 'chatLog', 'chatForm'].forEach(id => { $(id).hidden = !a; }); $('waEmpty').hidden = !!a;
+  if (!a) { $('chatChips').hidden = true; chatKey = ''; return; }
+  const c = chatOf(a), [st, col] = STATE(a), nd = HQ.deliverables.filter(d => d.agent === a.name).length;
+  const key = a.name + st + nd + c.messages.length + (c.messages.length ? c.messages[c.messages.length - 1].at : 0) + (chatBusy === a) + HQ.tasks.filter(t => c.messages.some(m => m.taskId === t.id)).map(t => t.status).join(',') + HQ.deliverables.map(d => d.id + (d.draftSaved ? 1 : 0) + d.status + JSON.stringify(d.drive || '')).join(',');
   if (key === chatKey) return; chatKey = key;
-  $('thHead').innerHTML = `<div class="who"><span class="pf-av" style="--pc:${a.pole.color};width:40px;height:40px;background:${avatarBg(a)}"></span><div><b>${esc(a.name)}</b><small>${esc(a.role)} · <span style="color:${col}">${esc(st)}</span></small></div></div>
-    <button class="btn ghost sm" id="chatProfile" type="button">Sa fiche</button><button class="btn ghost sm" id="chatBack" type="button">← ${esc(TITLES[SP.prev] || 'Messages')}</button>`;
-  $('chatBack').onclick = () => openSpace(SP.prev || 'msgs');
+  if (c.messages.some(m => m.role === 'agent' && !m.seen)) { markMsgsSeen(x => x === a); contactsKey = ''; }
+  $('thHead').innerHTML = `<button class="btn ghost sm wa-back" id="waBack" type="button" aria-label="Retour aux contacts">←</button>
+    <div class="who"><span class="pf-av" style="--pc:${a.pole.color};width:40px;height:40px;background:${avatarBg(a)}"></span><div><b>${esc(a.name)}</b><small>${esc(a.role)} · <span style="color:${col}">${esc(st)}</span></small></div></div>
+    ${nd ? `<button class="btn ghost sm" id="chatDocs" type="button">Livrables (${nd})</button>` : ''}<button class="btn ghost sm" id="chatProfile" type="button">Sa fiche</button>`;
+  $('waBack').onclick = () => { SP.agent = null; SP.doc = null; contactsKey = ''; refresh(); };
+  if ($('chatDocs')) $('chatDocs').onclick = () => { SP.doc = 'list'; docKey = ''; renderDoc(); };
   $('chatProfile').onclick = () => { closeSpace(); openProfile(a); };
   const el = $('chatLog');
   const intro = `<div class="bubble agent">Salut Yosh, c’est ${esc(a.name)}. ${esc(a.mission || '')}\nDis-moi ce dont tu as besoin : je te propose la tâche, tu la valides en un clic, et je t’écris quand c’est prêt.</div>`;
   el.innerHTML = intro + c.messages.map(m => {
     const t = m.taskId ? taskById(m.taskId) : null, d = m.delivId ? delivById(m.delivId) : null;
-    const card = t || d ? `<div class="task-card"><span>${t ? '📌 ' + esc(t.title) : '📥 ' + esc(d.title)}</span><span class="acts">${msgActs({ ...m, kind: 'info' }, a, d, t).replace(/<button class="primary" type="button" data-reply>[^<]*<\/button>/, '')}</span></div>` : '';
+    const att = d ? attachSummary(d) : '';
+    const card = t || d ? `<div class="task-card"><span>${t ? '📌 ' + esc(t.title) : '📥 ' + esc(d.title) + (att ? `<small class="att">${esc(att)}</small>` : '')}</span><span class="acts">${msgActs({ ...m, kind: 'info' }, a, d, t)}</span></div>` : '';
     return `<div class="bubble ${m.role === 'user' ? 'me' : 'agent'} ${m.error ? 'err' : ''}">${esc(m.text)}${card}<small>${hhmm(m.at)}</small></div>`;
   }).join('') + (chatBusy === a ? `<div class="typing">${esc(a.name)} écrit…</div>` : '');
   el.scrollTop = el.scrollHeight;
   $('chatSend').disabled = chatBusy === a;
   $('chatChips').innerHTML = c.messages.length ? '' : (a.resp || []).slice(0, 3).map(r => `<button type="button" data-chip="${esc(r)}">${esc(r)}</button>`).join('');
+  $('chatChips').hidden = !!c.messages.length;
 }
 function renderDoc() {
-  const a = SP.agent; if (!a) return;
-  const mine = HQ.deliverables.filter(d => d.agent === a.name), d = SP.deliv ? delivById(SP.deliv) : null;
+  const a = SP.agent, el = $('thDoc'), pane = $('sp-msgs');
+  if (!a || !SP.doc) { el.hidden = true; pane.classList.remove('has-doc'); docKey = ''; return; }
+  el.hidden = false; pane.classList.add('has-doc');
+  const mine = HQ.deliverables.filter(d => d.agent === a.name), d = SP.doc !== 'list' ? delivById(SP.doc) : null;
   const key = (d ? d.id + d.status + (d.draftSaved ? 1 : 0) + JSON.stringify(d.drive || '') + (d.content || '').length : 'list' + mine.map(x => x.id + (x.read ? 1 : 0)).join(',')) + ENGINE.mail + ENGINE.drive;
   if (key === docKey) return; docKey = key;
-  const el = $('thDoc');
+  const close = '<button class="pf-close doc-x" type="button" data-pick="close" aria-label="Fermer le livrable">×</button>';
   if (!d) {
-    el.innerHTML = `<h4>Ce que ${esc(a.name)} t’a livré</h4>` + (mine.length ? `<div class="feed">${mine.map(x => `<div class="drow ${x.read ? '' : 'new'}" data-pick="${esc(x.id)}"><span><b>${esc(x.title)}</b><small>${esc(x.time)}${x.status === 'err' ? ' · bloqué' : ''}${attachSummary(x) ? ' · ' + esc(attachSummary(x)) : ''}</small></span></div>`).join('')}</div>`
-      : `<p class="meta">Rien pour l’instant. Écris-lui à droite : il te propose la tâche, tu la valides, et le résultat s’affiche ici en grand.</p>`);
+    el.innerHTML = close + `<h4>Ce que ${esc(a.name)} t’a livré</h4>` + (mine.length ? `<div class="feed">${mine.map(x => `<div class="drow ${x.read ? '' : 'new'}" data-pick="${esc(x.id)}"><span><b>${esc(x.title)}</b><small>${esc(x.time)}${x.status === 'err' ? ' · bloqué' : ''}${attachSummary(x) ? ' · ' + esc(attachSummary(x)) : ''}</small></span></div>`).join('')}</div>`
+      : `<p class="meta">Rien pour l’instant. Écris-lui : il te propose la tâche, tu la valides, et le résultat s’affiche ici en grand.</p>`);
     return;
   }
   if (!d.read) { d.read = true; save(d); }
-  el.innerHTML = `${mine.length > 1 ? `<button class="link-btn" type="button" data-pick="">← Tous ses livrables (${mine.length})</button>` : ''}
+  el.innerHTML = close + `${mine.length > 1 ? `<button class="link-btn" type="button" data-pick="">← Tous ses livrables (${mine.length})</button>` : ''}
     <h4>${esc(d.title)}</h4><div class="meta">${esc(d.agent)} · ${esc(poleById(d.pole).full)} · ${esc(d.time)}${d.requested ? ' · à ta demande' : ''}</div>
     <div class="cz-actions">
       <button class="btn ghost sm" data-act="copy" type="button">Copier le texte</button>
@@ -2115,11 +2167,11 @@ function renderDoc() {
   el.scrollTop = 0;
 }
 $('thDoc').addEventListener('click', async e => {
-  const pk = e.target.closest('[data-pick]'); if (pk) { SP.deliv = pk.dataset.pick || null; renderDoc(); return; }
+  const pk = e.target.closest('[data-pick]'); if (pk) { SP.doc = pk.dataset.pick === 'close' ? null : pk.dataset.pick || 'list'; renderDoc(); return; }
   const msg = txt => { const m = $('czMsg'); if (m) m.textContent = txt; };
   if (await fileOrCopyClick(e, msg)) return;
   const b = e.target.closest('[data-act]'); if (!b) return;
-  const d = delivById(SP.deliv); if (!d) return;
+  const d = delivById(SP.doc); if (!d) return;
   if (b.dataset.act === 'copy') {
     try { await navigator.clipboard.writeText(d.content); msg('Copié.'); }
     catch (err) { const r = document.createRange(); r.selectNodeContents($('czText')); getSelection().removeAllRanges(); getSelection().addRange(r); msg('Texte sélectionné : copie-le avec ton raccourci habituel.'); }
@@ -2173,8 +2225,8 @@ async function sendChat(a, text) {
   }
 }
 const agentOpts = POLES.map(p => `<optgroup label="${esc(p.full)}">${p.members.map(a => `<option value="${esc(a.name)}">${esc(a.name)} · ${esc(a.role)}</option>`).join('')}</optgroup>`).join('');
-$('askAgent').innerHTML = $('msgAgent').innerHTML = agentOpts;
-[['ask', 'askAgent', 'askText'], ['msgForm', 'msgAgent', 'msgText']].forEach(([f, s, i]) => {
+$('askAgent').innerHTML = agentOpts;
+[['ask', 'askAgent', 'askText']].forEach(([f, s, i]) => {
   $(f).onsubmit = e => {
     e.preventDefault(); const txt = $(i).value.trim(); if (!txt) return;
     const a = agentNamed($(s).value); $(i).value = '';
@@ -2187,7 +2239,7 @@ function renderUI() {
   $('kDone').textContent = HQ.done; $('kRun').textContent = HQ.tasks.filter(t => t.status === 'encours').length;
   renderTiles(); renderValidation(); renderFiles();
   if (SP.view === 'team') renderTeam();
-  if (SP.view === 'thread') renderChat();
+  if (SP.view === 'msgs') { renderContacts(); renderChat(); }
   renderProfileLive();
 }
 

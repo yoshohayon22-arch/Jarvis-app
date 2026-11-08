@@ -106,6 +106,7 @@
   .switch input{margin-top:2px;accent-color:var(--accent)}
   .pill{font:600 11.5px var(--body);padding:3px 9px;border-radius:99px;background:var(--surface2);color:var(--muted);text-transform:none;letter-spacing:0}
   .pill.ok{color:var(--ok);background:color-mix(in srgb, var(--ok) 14%, transparent)}
+  .pill.off{color:var(--warn);background:color-mix(in srgb, var(--warn) 12%, transparent)}
   .states{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
   .poles{display:flex;flex-direction:column;gap:6px}
   .pole{display:flex;gap:8px;align-items:center;font-size:13.5px}
@@ -132,7 +133,22 @@
   .dlg-h b{display:block;font:700 18px var(--display)}
   .dlg-h small{color:var(--muted)}
   #dlgBody{white-space:pre-wrap;padding:14px 16px;max-height:60vh;overflow:auto;font:14px/1.6 var(--body);margin:0}
-  .dlg-f{display:flex;gap:8px;justify-content:flex-end;padding:12px 16px;border-top:1px solid var(--line)}
+  .dlg-f{display:flex;gap:8px;justify-content:flex-end;align-items:center;flex-wrap:wrap;padding:12px 16px;border-top:1px solid var(--line)}
+  .dlg-msg{margin-right:auto;font-size:13px;color:var(--muted)}
+  .day-note{margin:0 0 10px;font-size:13.5px;line-height:1.5;color:var(--muted)}
+  .day-note.brief{color:var(--ink)}
+  .day-note.warn{color:var(--warn)}
+  .plan{list-style:none;margin:0 0 10px;padding:0;display:flex;flex-direction:column;gap:5px;max-height:260px;overflow:auto}
+  .plan li{display:flex;gap:8px;align-items:flex-start;font-size:13px;line-height:1.35}
+  .plan li i{width:8px;height:8px;border-radius:2px;flex:none;margin-top:5px}
+  .plan li span{flex:1;min-width:0}
+  .plan li small{display:block;color:var(--muted)}
+  .st{font-size:11px;padding:1px 7px;border-radius:99px;flex:none;background:var(--surface2);color:var(--muted);white-space:nowrap}
+  .st.encours{color:var(--warn);background:color-mix(in srgb, var(--warn) 14%, transparent)}
+  .st.livre{color:var(--ok);background:color-mix(in srgb, var(--ok) 14%, transparent)}
+  .st.erreur{color:var(--bad);background:color-mix(in srgb, var(--bad) 14%, transparent)}
+  .btn:disabled{opacity:.5;cursor:not-allowed}
+  .pf-live{margin:4px 0 0;padding:8px 10px;border-left:3px solid var(--pc);background:var(--surface);border-radius:6px;font-size:12.5px;line-height:1.45;max-height:120px;overflow:auto;white-space:pre-wrap}
   @media (max-width:1020px){ main{grid-template-columns:1fr} .kpis{grid-template-columns:repeat(3,minmax(0,1fr))} }
   @media (max-width:760px){ .profile{position:static;width:auto;max-height:none;box-shadow:none;border:0;border-top:1px solid var(--line);border-radius:0} }
   @media (max-width:520px){ .brand small{display:none} .clock{min-width:0} }
@@ -151,11 +167,11 @@
     <div class="stage"><canvas id="office" aria-label="Open space du QG"></canvas><div class="profile" id="profile" role="dialog" aria-label="Profil de l’agent" hidden></div></div>
     <div class="kpis">
       <div class="kpi"><b id="kAgents">0</b><span>présents</span></div>
-      <div class="kpi"><b id="kDone">0</b><span>tâches finies</span></div>
-      <div class="kpi"><b id="kCalls">0</b><span>appels</span></div>
-      <div class="kpi"><b id="kPrints">0</b><span>pages imprimées</span></div>
-      <div class="kpi"><b id="kCoffee">0</b><span>cafés</span></div>
-      <div class="kpi"><b id="kPing">0</b><span>parties de ping-pong</span></div>
+      <div class="kpi"><b id="kDone">0</b><span>livrables produits</span></div>
+      <div class="kpi"><b id="kRun">0</b><span>tâches en cours</span></div>
+      <div class="kpi"><b id="kWait">0</b><span>tâches en attente</span></div>
+      <div class="kpi"><b id="kMail">0</b><span>mails traités</span></div>
+      <div class="kpi"><b id="kDraft">0</b><span>brouillons Gmail</span></div>
     </div>
   </section>
 
@@ -163,19 +179,24 @@
     <div class="card"><h2>L’équipe <em>clique sur un agent</em></h2><div class="team" id="team"></div></div>
 
     <div class="card">
+      <h2>Journée <em id="dayDate"></em></h2>
+      <div class="states"><span class="pill" id="aiState">IA : recherche…</span><span class="pill" id="mailState">Gmail : recherche…</span><span class="pill" id="calState">Agenda : recherche…</span></div>
+      <p class="day-note" id="dayNote">Active le QG : Jarvis lit ton agenda et tes mails non lus, puis répartit le travail de la journée.</p>
+      <ol class="plan" id="plan"></ol>
+      <button class="btn" id="planBtn" type="button">Planifier la journée</button>
+    </div>
+
+    <div class="card">
       <h2>Confier une tâche</h2>
       <form id="assign">
         <select id="aPole" aria-label="Pôle"></select>
         <textarea id="aTask" placeholder="Ex. : Écris le post LinkedIn sur le match de samedi" required></textarea>
-        <label class="switch"><input type="checkbox" id="realAll">
-          <span>Exécuter aussi les tâches de routine avec l’IA (consomme des crédits API). Tes tâches à toi passent toujours par l’IA quand elle est connectée.</span></label>
         <button class="btn" type="submit">Confier au pôle</button>
       </form>
     </div>
 
     <div class="card">
       <h2>Pôles <em id="poleSum"></em></h2>
-      <div class="states"><span class="pill" id="aiState">IA : simulation</span><span class="pill" id="mailState">Gmail : non connecté</span></div>
       <div class="poles" id="poles"></div>
     </div>
 
@@ -190,7 +211,7 @@
 <dialog id="dlg">
   <div class="dlg-h"><b id="dlgTitle"></b><small id="dlgMeta"></small></div>
   <pre id="dlgBody"></pre>
-  <div class="dlg-f"><button class="btn ghost" id="dlgCopy">Copier</button><button class="btn" id="dlgClose">Fermer</button></div>
+  <div class="dlg-f"><span class="dlg-msg" id="dlgMsg"></span><button class="btn ghost" id="dlgRetry" hidden>Relancer la tâche</button><button class="btn ghost" id="dlgDraft" hidden>Enregistrer le brouillon dans Gmail</button><button class="btn ghost" id="dlgCopy">Copier</button><button class="btn" id="dlgClose">Fermer</button></div>
 </dialog>
 
 <script>
@@ -246,9 +267,7 @@ const POLES = [
       { t:'Relancer le service administratif sans réponse', s:['call','type'] },
       { t:'Scanner et classer les documents reçus', s:['print','type'] },
       { t:'Repérer 5 offres d’emploi étudiant à temps partiel à Genève', s:['web','type'] },
-      { t:'Rédiger une candidature spontanée', s:['type','print'] },
-      { t:'Trier la boîte de réception (simulation)', s:['read','type'], noMail:true },
-      { t:'Surveiller la boîte de réception', s:['read'], watch:true, needMail:true } ] },
+      { t:'Rédiger une candidature spontanée', s:['type','print'] } ] },
 ];
 const poleById = id => POLES.find(p => p.id === id) || POLES[0];
 
@@ -443,7 +462,7 @@ const inUse = id => { const m = AMEN[id]; return m.users.some((u, i) => u && i <
    État
    ====================================================================== */
 const HQ = { active:false, light:0, speed:1, minutes:MIN(9), day:1, done:0, calls:0, prints:0, coffees:0, pings:0,
-  ai:false, realAll:false, mail:false, mailAddr:'', deliverables:[], particles:[], selected:null, hover:null,
+  tasks:[], planning:false, plannedOn:'', brief:'', mailsDone:0, drafts:0, mailAddr:'', deliverables:[], particles:[], selected:null, hover:null,
   standup:false, standupEnd:0, parcel:null, parcelsToday:0, waterPending:false, watered:false };
 const timeStr = () => { const m = Math.floor(HQ.minutes) % 1440; return `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`; };
 
@@ -554,21 +573,27 @@ function plan(a) {
   if (a.energy < 28) return planBreak(a);
   if (Math.random() < .06) return planChat(a);
   if (!a.task) startTask(a);
-  return planStep(a);
+  return a.task ? planStep(a) : planIdle(a);
+}
+
+// Sans tâche réelle, l'agent ne fait pas semblant : il attend à son poste
+function planIdle(a) {
+  const label = a.jarvis && HQ.planning ? 'Planifie la journée avec Claude' : !ENGINE.brain ? 'Attend qu’une IA soit connectée' : 'Disponible : attend une tâche';
+  return [Act.walk(a.seat.x, a.seat.y, { label:'Retourne à son bureau' }),
+    Act.wait(rnd(8, 14), a.jarvis && HQ.planning ? 'type' : 'idle', { face: faceSeat(a.seat), label })];
 }
 
 function startTask(a) {
-  const p = a.pole; let t;
+  if (!ENGINE.brain) return;
+  const p = a.pole; let t = null;
   if (a.custom.length) t = a.custom.shift();
   else if (p.custom.length) t = p.custom.shift();
-  else {
-    const pool = p.tasks.filter(x => x.t !== p.last && !(x.needMail && !HQ.mail) && !(x.noMail && HQ.mail));
-    const tpl = pick(pool.length ? pool : p.tasks); p.last = tpl.t;
-    t = { title: tpl.t, steps: tpl.s.slice(), custom: false, watch: !!tpl.watch };
-  }
-  t.started = timeStr();
+  if (!t) return;
+  t.started = timeStr(); t.status = 'encours'; t.agent = a.name;
   a.task = t; a.stepIdx = 0; a.stepFrac = 0; a.stats = { calls:0, prints:0 };
-  if (!t.watch) log(a, `${a.name} commence : ${t.title}`);
+  if (!t.noJob) t.job = t.mail ? mailJob(a, t) : taskJob(a, t);
+  log(a, `${a.name} commence : ${t.title}`);
+  renderPlan();
 }
 
 function planStep(a) {
@@ -622,7 +647,21 @@ function planStep(a) {
   L.push(Act.fn(nextStep));
   return L;
 }
-function nextStep(a) { if (!a.task) return; a.stepIdx++; a.stepFrac = 0; if (a.stepIdx >= a.task.steps.length) completeTask(a); }
+function nextStep(a) {
+  if (!a.task) return;
+  a.stepIdx++; a.stepFrac = 0;
+  if (a.stepIdx < a.task.steps.length) return;
+  const t = a.task, job = t.job;
+  if (job && !job.settled) {
+    // le livrable n'est pas encore écrit : l'agent reste à son poste jusqu'à ce que l'IA ait fini
+    a.stepIdx = t.steps.length - 1; a.stepFrac = .9;
+    a.queue.unshift(Act.walk(a.seat.x, a.seat.y, { label:'Retourne à son bureau' }),
+      Act.wait(0, 'type', { face: faceSeat(a.seat), label: ENGINE.brain === 'claude' ? 'Claude rédige le livrable…' : 'L’IA rédige le livrable…', until: () => job.settled,
+        onEnd: x => { x.stepIdx = t.steps.length; completeTask(x); } }));
+    return;
+  }
+  completeTask(a);
+}
 
 function planBreak(a) {
   const back = Act.walk(a.seat.x, a.seat.y, { label:'Retourne à son bureau' });
@@ -673,7 +712,7 @@ function planWater(a) {
 
 function planChat(a) {
   const mates = AGENTS.filter(b => b !== a && b.inside && b.seated && b.anim !== 'call' && b.anim !== 'visio' && b.pole.id !== 'dir');
-  if (!mates.length) { if (!a.task) startTask(a); return planStep(a); }
+  if (!mates.length) { if (!a.task) startTask(a); return a.task ? planStep(a) : planIdle(a); }
   const b = pick(mates), off = b.seat.up ? 24 : -24;
   return [Act.walk(b.seat.x + 22, b.seat.y + off, { label:`Va voir ${b.name}` }),
     Act.wait(4, 'chat', { label:`Discute avec ${b.name}`, onStart: x => { x.say(pick(['Tu peux relire ça ?', 'Besoin d’un coup de main ?', 'Tu as le contact ?', 'J’ai fini la relance 👍'])); setTimeout(() => b.say(pick(['Je regarde ça', 'Oui, envoie !', 'Top, merci', 'Dans 5 min'])), 1500 / HQ.speed); } }),
@@ -753,83 +792,282 @@ function highFive(a) {
 function completeTask(a) {
   const t = a.task, p = a.pole;
   a.task = null;
-  if (t.watch) { a.say(pick(['📭 Rien de neuf', 'Boîte à jour ✓', 'J’attends le prochain mail']), 2.2); return; }
+  if (t.noJob) { t.status = 'livre'; a.say('✅ Fait', 2); renderPlan(); return; }
+  const job = t.job || { ok:false, error:{ code:'no_brain' } };
+  const spec = { title: t.title, steps: t.steps, brief: t.brief || '', mail: t.mail || null, agent: a.name };
+  if (!job.ok) {
+    t.status = 'erreur'; a.say('⚠️ Bloqué : ' + errText(job.error), 3.5);
+    const d = { id: Date.now() + Math.random(), title: t.title, pole: p.id, agent: a.name, time: stamp(), status: 'err', spec, isMail: !!t.mail,
+      content: `Cette tâche n’a pas pu être réalisée.\n\n${errText(job.error)}\n\nTu peux la relancer depuis ce livrable.` };
+    HQ.deliverables.unshift(d); log(a, `${a.name} est bloqué sur : ${t.title}`);
+    save(); renderDeliv(); renderPlan(); return;
+  }
+  t.status = 'livre';
   a.done++; p.done++; HQ.done++;
   a.history.unshift({ t: t.title, time: timeStr() }); a.history.length = Math.min(a.history.length, 5);
   highFive(a);
-  if (t.mail) return completeMail(a, t);
-  const d = { id: Date.now() + Math.random(), title: t.title, pole: p.id, agent: a.name, time: `J${HQ.day} ${timeStr()}`, status: 'sim', content: simulated(a, t) };
-  HQ.deliverables.unshift(d);
-  log(a, `${a.name} a terminé : ${t.title}`, true);
-  if (HQ.ai && (t.custom || HQ.realAll)) {
-    d.status = 'run';
-    fetch(API + '/hq/run', { method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify({ pole: p.id, agent: a.name, role: a.role, task: t.title }) })
-      .then(r => r.json()).then(j => { if (j.answer) { d.content = j.answer; d.status = 'ai'; } else { d.status = 'err'; d.content = 'Erreur IA : ' + (j.error || 'inconnue') + '\n\n' + d.content; } })
-      .catch(e => { d.status = 'err'; d.content = 'Serveur injoignable : ' + e.message + '\n\n' + d.content; })
-      .finally(() => { save(); renderDeliv(); });
+  let d;
+  if (t.mail) {
+    const m = t.mail, r = job.analysis || {};
+    HQ.mailsDone++;
+    d = { id: Date.now() + Math.random(), pole: p.id, agent: a.name, time: stamp(), status: 'ai', isMail: true, spec, mail: m,
+      title: `${r.priorite === 'haute' ? '🔴' : r.priorite === 'moyenne' ? '🟠' : '⚪'} ${m.subject}`,
+      reply: r.besoin_reponse && r.reponse ? String(r.reponse) : '',
+      content: [`De : ${m.from_name} <${m.from}>`, `Objet : ${m.subject}`, '', `Priorité : ${r.priorite || '?'} · Catégorie : ${r.categorie || '?'}`, '',
+        `Résumé : ${r.resume || ''}`, `À faire : ${r.action || ''}`,
+        ...(r.besoin_reponse && r.reponse ? ['', 'Brouillon de réponse proposé (rien n’est envoyé) :', '', String(r.reponse)] : ['', 'Pas de réponse nécessaire.'])].join('\n') };
+    log(a, `${a.name} a traité le mail « ${m.subject} »`, true);
+  } else {
+    d = { id: Date.now() + Math.random(), title: t.title, pole: p.id, agent: a.name, time: stamp(), status: 'ai', spec, content: job.text };
+    log(a, `${a.name} a livré : ${t.title}`, true);
   }
-  save(); renderDeliv();
+  HQ.deliverables.unshift(d);
+  save(); renderDeliv(); renderPlan();
+}
+const stamp = () => new Date().toLocaleString('fr-CH', { day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' });
+
+/* ======================================================================
+   Moteur réel : Claude (sur claude.ai) ou le serveur Jarvis, Gmail, agenda
+   ====================================================================== */
+const ENGINE = { brain:null, mail:null, cal:false, sample:null, mcp:null, blocked:null };
+const KIND_STEPS = { redaction:['type','type'], recherche:['web','type'], appel:['call','type'], impression:['type','print'], reunion:['meeting','type'] };
+const ERR = { not_granted:'Tu n’as pas autorisé Claude pour cette page.', sampling_disabled:'Claude n’est pas disponible sur ce compte.', rate_limited:'Trop de demandes à Claude pour le moment : réessaie un peu plus tard.',
+  session_expired:'Ta session claude.ai a expiré : reconnecte-toi.', refused:'Claude a refusé cette demande.', no_brain:'Aucune IA connectée.', no_mail:'Boîte mail non connectée.',
+  invalid_json:'La réponse de l’IA était illisible.', needs_reauth:'Reconnecte le connecteur dans les réglages de claude.ai.', server_not_connected:'Ajoute le connecteur dans les réglages de claude.ai.',
+  not_in_manifest:'Tu n’as pas autorisé ce connecteur pour cette page.', approval_required:'Cette action attend ton accord.' };
+const errText = e => ERR[e && e.code] || ('Erreur : ' + ((e && e.message) || 'inconnue'));
+const json = (url, body) => fetch(API + url, body ? { method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify(body) } : undefined)
+  .then(r => r.json()).then(j => { if (j.error) throw { code:'server', message: j.error }; return j; });
+const decode = txt => { const el = document.createElement('textarea'); el.innerHTML = txt; return el.value; };
+
+async function initEngine() {
+  if (window.claude && typeof window.claude.use === 'function') {
+    const [sample, mcp] = await Promise.all([claude.use('sample').catch(() => null), claude.use('mcp').catch(() => null)]);
+    if (sample) { ENGINE.sample = sample; ENGINE.brain = 'claude'; }
+    if (mcp) {
+      ENGINE.mcp = mcp;
+      try { const names = (await mcp.listTools()).servers.map(x => x.server); if (names.includes('Gmail')) ENGINE.mail = 'gmail'; if (names.includes('Google Calendar')) ENGINE.cal = true; } catch (e) {}
+    }
+  }
+  if (!ENGINE.brain || !ENGINE.mail) {
+    try { const j = await json('/hq/health'); if (!ENGINE.brain && j.ai) ENGINE.brain = 'server'; if (!ENGINE.mail && j.mail) { ENGINE.mail = 'server'; HQ.mailAddr = j.mail_address || ''; } } catch (e) {}
+  }
+  renderEngine(); renderPlan();
 }
 
-const STEP_LABEL = { type:'Rédaction du document', web:'Recherche et collecte d’informations', call:'Appels et visios', print:'Impression et classement', meeting:'Réunion de validation', tour:'Tour des pôles', read:'Lecture des mails', reply:'Rédaction du brouillon de réponse' };
-function simulated(a, t) {
-  const st = a.stats || {};
-  const lines = [`Livrable : ${t.title}`, `Réalisé par ${a.name} (${a.role}, ${a.pole.full})`, `Commencé à ${t.started}, terminé à ${timeStr()}.`, '', 'Ce que l’agent a fait :', ...t.steps.map(s => '• ' + STEP_LABEL[s])];
-  if (st.calls) lines.push(`• ${st.calls} appel(s) passé(s)`);
-  if (st.prints) lines.push(`• ${st.prints} page(s) imprimée(s)`);
-  lines.push('', HQ.ai ? 'Tâche de routine en simulation. Coche « Exécuter aussi les tâches de routine avec l’IA » pour obtenir le vrai contenu.'
-    : 'Mode simulation : lance le serveur Jarvis (server.py avec OPENAI_API_KEY) et ouvre /hq pour que les agents rendent de vrais livrables.');
-  return lines.join('\n');
+/* File d'attente : deux livrables rédigés en même temps au maximum */
+const JOBQ = []; let jobsRunning = 0;
+const brainAsk = (prompt, opts = {}) => new Promise((resolve, reject) => { JOBQ.push({ prompt, opts, resolve, reject }); pump(); });
+function pump() {
+  while (jobsRunning < 2 && JOBQ.length) {
+    const j = JOBQ.shift(); jobsRunning++;
+    runBrain(j.prompt, j.opts).then(j.resolve, e => {
+      if (e && ['not_granted', 'sampling_disabled', 'not_declared', 'capability_disabled', 'session_expired'].includes(e.code)) { ENGINE.blocked = e.code; ENGINE.brain = null; renderEngine(); }
+      j.reject(e);
+    }).finally(() => { jobsRunning--; pump(); });
+  }
+}
+async function runBrain(prompt, { asJson = false, onText } = {}) {
+  if (ENGINE.brain === 'claude') {
+    if (asJson) return ENGINE.sample.json(prompt, { cache: false });
+    const r = await ENGINE.sample(prompt, { cache: false, onText: onText ? (u => onText(u.text)) : undefined });
+    return r.text;
+  }
+  if (ENGINE.brain === 'server') {
+    const j = await json('/hq/ask', { prompt, json: asJson });
+    if (!asJson) return j.text;
+    try { return JSON.parse(j.text); } catch (e) { const m = String(j.text).match(/[\[{][\s\S]*[\]}]/); if (m) return JSON.parse(m[0]); throw { code:'invalid_json' }; }
+  }
+  throw { code:'no_brain' };
 }
 
-const mailHeader = m => `De : ${m.from_name} <${m.from}>\nObjet : ${m.subject}\nReçu : ${m.date}\n\nExtrait :\n${m.snippet}`;
-function completeMail(a, t) {
-  const m = t.mail, p = a.pole;
-  const d = { id: Date.now() + Math.random(), title: '📧 ' + m.subject, pole: p.id, agent: a.name, time: `J${HQ.day} ${timeStr()}`, status: 'mail', isMail: true,
-    content: mailHeader(m) + (HQ.ai ? '' : '\n\nConnecte l’IA (OPENAI_API_KEY) pour que l’agent résume ce mail et prépare un brouillon de réponse dans Gmail.') };
-  HQ.deliverables.unshift(d);
-  log(a, `${a.name} a traité le mail « ${m.subject} »`, true);
-  if (HQ.ai) {
-    d.status = 'run';
-    fetch(API + '/hq/mail/process', { method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify({ uid: m.uid }) })
-      .then(r => r.json()).then(j => {
-        if (j.error) { d.status = 'err'; d.content = 'Erreur : ' + j.error + '\n\n' + mailHeader(m); return; }
-        const r = j.analysis || {};
-        d.status = 'ai';
-        d.title = `${r.priorite === 'haute' ? '🔴' : r.priorite === 'moyenne' ? '🟠' : '⚪'} ${m.subject}`;
-        d.content = [`De : ${m.from_name} <${m.from}>`, `Objet : ${m.subject}`, '', `Priorité : ${r.priorite || '?'} · Catégorie : ${r.categorie || '?'}`, '',
-          `Résumé : ${r.resume || ''}`, `À faire : ${r.action || ''}`,
-          ...(r.besoin_reponse && r.reponse ? ['', j.draft_saved ? '✉️ Brouillon enregistré dans Gmail (rien n’a été envoyé) :' : '✉️ Brouillon proposé (non enregistré dans Gmail) :', '', r.reponse] : ['', 'Pas de réponse nécessaire.'])].join('\n');
-        if (j.draft_saved) log(a, `${a.name} a enregistré un brouillon de réponse à ${m.from_name}`);
-      })
-      .catch(e => { d.status = 'err'; d.content = 'Serveur injoignable : ' + e.message + '\n\n' + mailHeader(m); })
-      .finally(() => { save(); renderDeliv(); });
+const CTX = { calendar: [], calErr: null, mailErr: null };
+const todayLabel = () => new Date().toLocaleDateString('fr-CH', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+function persona(a) {
+  return `Tu es ${a.name}, ${a.role} au pôle « ${a.pole.full} » du QG Jarvis, l’équipe d’agents IA qui travaille pour Yosh (étudiant à Genève, maturité fédérale en poche, stagiaire chez MCI Sport, il développe des applis de révision et des agents IA).
+Qui tu es : ${a.who}
+Ton job au QG : ${a.mission}
+Tes responsabilités : ${(a.resp || []).join(' ; ')}.
+Projets que tu suis : ${(a.projects || []).join(', ') || 'aucun en particulier'}.`;
+}
+function taskJob(a, t) {
+  const job = { settled:false, ok:false, text:'', preview:'' };
+  const prompt = `${persona(a)}
+
+Nous sommes le ${todayLabel()}.
+${CTX.calendar.length ? 'Agenda de Yosh pour les prochains jours :\n' + CTX.calendar.join('\n') + '\n' : ''}
+Ta tâche : ${t.title}
+${t.brief ? 'Précisions de Jarvis : ' + t.brief + '\n' : ''}
+Réalise cette tâche maintenant et rends directement le livrable final, prêt à être utilisé par Yosh : un texte, un brouillon, un plan, une liste ou un script selon la tâche.
+Règles : en français ; texte simple avec des titres courts et des listes à tirets (pas de tableau) ; 350 mots au maximum ; n’invente aucun fait sur Yosh, ses clients ou ses chiffres : écris [à compléter] quand une information te manque ; commence directement par le livrable, sans phrase d’introduction.`;
+  brainAsk(prompt, { onText: txt => { job.preview = txt; } })
+    .then(text => { job.ok = true; job.text = text; }, e => { job.error = e; })
+    .finally(() => { job.settled = true; });
+  return job;
+}
+function mailJob(a, t) {
+  const job = { settled:false, ok:false, analysis:null, preview:'' };
+  (async () => {
+    const body = await readMail(t.mail);
+    job.preview = 'Mail lu, analyse en cours…';
+    const prompt = `${persona(a)}
+
+Analyse ce mail reçu par Yosh et prépare une réponse s’il en faut une. Réponds uniquement avec un objet JSON :
+{"resume":"2 à 3 phrases","priorite":"haute|moyenne|basse","categorie":"administratif|emploi|études|MCI Sport|perso|pub/newsletter|autre","action":"ce que Yosh doit faire","besoin_reponse":true,"reponse":"brouillon de réponse poli, prêt à envoyer, signé Yosh ; [à compléter] pour toute information manquante ; chaîne vide si aucune réponse"}
+besoin_reponse vaut false pour les pubs, newsletters et notifications automatiques.
+
+De : ${t.mail.from_name} <${t.mail.from}>
+Objet : ${t.mail.subject}
+Date : ${t.mail.date}
+
+${String(body).slice(0, 9000)}`;
+    job.analysis = await brainAsk(prompt, { asJson: true });
+    job.ok = true;
+  })().catch(e => { job.error = e; }).finally(() => { job.settled = true; });
+  return job;
+}
+
+/* ---------- Gmail : connecteur claude.ai ou serveur Jarvis ---------- */
+async function fetchInbox() {
+  if (ENGINE.mail === 'gmail') {
+    const r = await ENGINE.mcp.callTool('Gmail', 'search_threads', { query:'is:unread in:inbox newer_than:7d -category:promotions -category:social', pageSize:10, view:'THREAD_VIEW_SUMMARY' }, { cache:false });
+    return ((r.payload && r.payload.threads) || []).map(th => {
+      const msgs = th.messages || [], m = msgs[msgs.length - 1] || {};
+      const dn = (m.addressDisplayNames || []).find(x => x.emailAddress === m.sender);
+      return { key:'g:' + th.id + ':' + (m.id || ''), threadId: th.id, msgId: m.id, from: m.sender || '', from_name: (dn && dn.displayName) || m.sender || '',
+        subject: m.subject || '(sans objet)', date: m.date ? new Date(m.date).toLocaleString('fr-CH') : '', snippet: decode(m.snippet || '') };
+    });
   }
-  save(); renderDeliv();
+  if (ENGINE.mail === 'server') return ((await json('/hq/mail/inbox')).mails || []).map(m => ({ ...m, key:'s:' + m.uid }));
+  return [];
+}
+async function readMail(m) {
+  if (ENGINE.mail === 'gmail' && m.threadId) {
+    const r = await ENGINE.mcp.callTool('Gmail', 'get_thread', { threadId: m.threadId, messageFormat:'PLAIN_TEXT' });
+    const msgs = (r.payload && r.payload.messages) || [];
+    const last = msgs.filter(x => !(x.labelIds || []).includes('SENT')).pop() || msgs[msgs.length - 1] || {};
+    if (last.id) m.msgId = last.id; m.replyTo = last.sender || m.from;
+    return msgs.slice(-3).map(x => `De : ${x.sender}\nDate : ${x.date}\n${String(x.plaintextBody || decode(x.snippet || '')).slice(0, 4000)}`).join('\n\n---\n\n');
+  }
+  if (ENGINE.mail === 'server' && m.uid) return (await json('/hq/mail/read', { uid: m.uid })).body;
+  throw { code:'no_mail' };
+}
+async function saveDraft(m, body) {
+  if (ENGINE.mail === 'gmail' && m.threadId) {
+    await ENGINE.mcp.callTool('Gmail', 'create_draft', { to:[m.replyTo || m.from], subject: /^re\s*:/i.test(m.subject) ? m.subject : 'Re: ' + m.subject, body, replyToMessageId: m.msgId });
+    return true;
+  }
+  if (ENGINE.mail === 'server' && m.uid) return !!(await json('/hq/mail/draft', { uid: m.uid, body })).saved;
+  throw { code:'no_mail' };
 }
 
 const SEEN_KEY = 'jarvis-hq-mails-vus';
 let seenMails = [];
 try { seenMails = JSON.parse(localStorage.getItem(SEEN_KEY) || '[]'); } catch (e) {}
-let lastPoll = -1e9;
-function pollMail(force) {
-  if (!HQ.mail || !HQ.active) return;
-  if (!force && performance.now() - lastPoll < 90000) return;
-  lastPoll = performance.now();
+function enqueueMails(mails) {
   const p = poleById('ops');
-  fetch(API + '/hq/mail/inbox').then(r => r.json()).then(j => {
-    if (j.error) { log(p.members[0], '⚠️ ' + j.error); return; }
-    const fresh = (j.mails || []).filter(m => !seenMails.includes(m.uid));
-    fresh.reverse().forEach(m => {
-      seenMails.push(m.uid);
-      p.custom.push({ title: `Traiter le mail « ${m.subject} » de ${m.from_name}`, steps: ['read', 'reply'], custom: true, mail: m });
-      log(p.members[0], `📬 Nouveau mail de ${m.from_name} : ${m.subject}`);
+  const fresh = mails.filter(m => !seenMails.includes(m.key));
+  fresh.reverse().forEach(m => {
+    seenMails.push(m.key);
+    const t = { title: `Traiter le mail « ${m.subject} » de ${m.from_name}`, steps: ['read', 'reply'], custom: true, mail: m, status: 'attente' };
+    p.custom.push(t); HQ.tasks.push(t);
+    log(p.members[0], `📬 Nouveau mail de ${m.from_name} : ${m.subject}`);
+  });
+  if (fresh.length) { const lead = p.members.find(x => x.inside); lead && lead.say(`📬 ${fresh.length} nouveau${fresh.length > 1 ? 'x' : ''} mail${fresh.length > 1 ? 's' : ''} !`, 3); }
+  try { localStorage.setItem(SEEN_KEY, JSON.stringify(seenMails.slice(-500))); } catch (e) {}
+  renderPlan();
+}
+let mailWatch = null;
+function startMailWatch() {
+  if (mailWatch || !ENGINE.mail) return;
+  if (ENGINE.mail === 'gmail') {
+    mailWatch = ENGINE.mcp.watchTool('Gmail', 'search_threads', { query:'is:unread in:inbox newer_than:7d -category:promotions -category:social', pageSize:10, view:'THREAD_VIEW_SUMMARY' }, ev => {
+      if (ev.type !== 'data' || !HQ.active) return;
+      const th = (ev.result.payload && ev.result.payload.threads) || [];
+      enqueueMails(th.map(x => { const msgs = x.messages || [], m = msgs[msgs.length - 1] || {}; const dn = (m.addressDisplayNames || []).find(y => y.emailAddress === m.sender);
+        return { key:'g:' + x.id + ':' + (m.id || ''), threadId: x.id, msgId: m.id, from: m.sender || '', from_name: (dn && dn.displayName) || m.sender || '', subject: m.subject || '(sans objet)', date: m.date ? new Date(m.date).toLocaleString('fr-CH') : '', snippet: decode(m.snippet || '') }; }));
+    }, { refetchInterval: 120000 });
+  } else {
+    const tick = () => { if (HQ.active) fetchInbox().then(enqueueMails, () => {}); };
+    mailWatch = setInterval(tick, 120000);
+  }
+}
+
+/* ---------- Agenda (connecteur claude.ai) ---------- */
+async function loadCalendar() {
+  if (!ENGINE.cal) return [];
+  const pad = n => String(n).padStart(2, '0'), loc = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T00:00:00`;
+  const start = new Date(), end = new Date(); end.setDate(end.getDate() + 3);
+  try {
+    const r = await ENGINE.mcp.callTool('Google Calendar', 'list_events', { startTime: loc(start), endTime: loc(end), orderBy:'startTime', pageSize: 20 });
+    CTX.calErr = null;
+    return ((r.payload && r.payload.events) || []).map(e => {
+      const st = e.start || {}, when = st.dateTime ? new Date(st.dateTime).toLocaleString('fr-CH', { weekday:'short', day:'numeric', month:'short', hour:'2-digit', minute:'2-digit' })
+        : st.date ? new Date(st.date + 'T12:00:00').toLocaleDateString('fr-CH', { weekday:'short', day:'numeric', month:'short' }) + ' (journée)' : '';
+      return `- ${when} : ${e.summary || '(sans titre)'}${e.description ? ' — ' + String(e.description).slice(0, 140) : ''}`;
     });
-    if (fresh.length) {
-      const lead = p.members.find(x => x.inside); lead && lead.say(`📬 ${fresh.length} nouveau${fresh.length > 1 ? 'x' : ''} mail${fresh.length > 1 ? 's' : ''} !`, 3);
-      try { localStorage.setItem(SEEN_KEY, JSON.stringify(seenMails.slice(-500))); } catch (e) {}
-    }
-  }).catch(() => {});
+  } catch (e) { CTX.calErr = e.code || 'erreur'; return []; }
+}
+
+/* ---------- Jarvis planifie la journée ---------- */
+async function planDay() {
+  if (HQ.planning) return;
+  if (!ENGINE.brain) { renderPlan(); return; }
+  HQ.planning = true; renderPlan();
+  const jarvis = AGENTS.find(a => a.jarvis);
+  jarvis.say('🧠 Je planifie la journée…', 4);
+  log(jarvis, 'Jarvis lit l’agenda et les mails pour planifier la journée');
+  CTX.calendar = await loadCalendar();
+  let mails = [];
+  try { mails = ENGINE.mail ? await fetchInbox() : []; CTX.mailErr = null; } catch (e) { CTX.mailErr = e.code || 'erreur'; }
+  enqueueMails(mails);
+  renderEngine();
+  const pending = HQ.tasks.filter(t => t.status === 'attente' || t.status === 'encours').map(t => '- ' + t.title).join('\n');
+  const team = AGENTS.filter(a => !a.jarvis && a.name !== 'Max').map(a => `- ${a.name} (${a.role}, ${a.pole.full}) : ${a.mission} Projets : ${(a.projects || []).join(', ')}`).join('\n');
+  const ideas = POLES.filter(p => p.id !== 'dir').map(p => `- ${p.full} : ${p.tasks.map(t => t.t).join(' ; ')}`).join('\n');
+  const prompt = `Tu es Jarvis, le chef d’orchestre du QG d’agents IA de Yosh (étudiant à Genève, maturité fédérale en poche, stagiaire chez MCI Sport, il développe des applis de révision et des agents IA).
+Nous sommes le ${todayLabel()}.
+
+Agenda de Yosh pour les 3 prochains jours :
+${CTX.calendar.length ? CTX.calendar.join('\n') : '(vide ou non connecté)'}
+
+Mails non lus (le pôle Ops les traite déjà, ne les planifie pas) :
+${mails.length ? mails.map(m => '- ' + m.subject + ' (de ' + m.from_name + ')').join('\n') : '(aucun ou boîte non connectée)'}
+
+Tâches déjà en cours ou en attente (ne les reprends pas) :
+${pending || '(aucune)'}
+
+Équipe disponible :
+${team}
+
+Pistes de travail par pôle :
+${ideas}
+
+Planifie la journée : entre 6 et 10 tâches concrètes et vraiment utiles aujourd’hui pour Yosh, au plus une par agent. Chaque tâche doit pouvoir être réalisée par écrit par l’agent (brouillon, plan, liste, script, analyse). Appuie-toi sur l’agenda quand c’est pertinent.
+Réponds uniquement avec un objet JSON :
+{"brief":"3 à 5 phrases pour Yosh : priorités du jour et points d’attention","taches":[{"agent":"Léa","titre":"…","type":"redaction","precisions":"ce que le livrable doit contenir"}]}
+"type" vaut redaction, recherche, appel, impression ou reunion.`;
+  try {
+    const plan = await brainAsk(prompt, { asJson: true });
+    const items = Array.isArray(plan && plan.taches) ? plan.taches.slice(0, 12) : [];
+    HQ.brief = String((plan && plan.brief) || '');
+    items.forEach(x => {
+      const a = AGENTS.find(y => y.name.toLowerCase() === String(x.agent || '').toLowerCase() && !y.jarvis);
+      const title = String(x.titre || '').trim(); if (!title) return;
+      const t = { title, brief: String(x.precisions || ''), steps: KIND_STEPS[x.type] || guessSteps(title), custom: true, status: 'attente' };
+      (a ? a.custom : poleById('edu').custom).push(t); HQ.tasks.push(t);
+    });
+    const tour = { title: 'Faire le tour des équipes', steps: ['tour'], noJob: true, status: 'attente' };
+    jarvis.custom.push(tour); HQ.tasks.push(tour);
+    HQ.plannedOn = new Date().toDateString();
+    HQ.deliverables.unshift({ id: Date.now(), title: 'Brief du jour', pole: 'dir', agent: 'Jarvis', time: stamp(), status: 'ai', spec: null,
+      content: `${HQ.brief}\n\nPlan de la journée :\n${items.map(x => `- ${x.agent} : ${x.titre}`).join('\n')}` });
+    save(); renderDeliv();
+    log(jarvis, `Jarvis a planifié ${items.length} tâches pour aujourd’hui`, true);
+    jarvis.say(`📋 ${items.length} tâches au programme !`, 3.5);
+  } catch (e) {
+    HQ.planError = errText(e); log(jarvis, 'Planification impossible : ' + errText(e));
+  } finally { HQ.planning = false; renderPlan(); }
 }
 
 function guessSteps(text) {
@@ -1011,7 +1249,6 @@ function frame(now) {
     if (m >= MIN(19)) { HQ.minutes = MIN(9); HQ.day++; HQ.standup = false; HQ.parcelsToday = 0; HQ.watered = false; AGENTS.forEach(a => { a.ate = false; }); log(AGENTS[0], `Jour ${HQ.day} : nouvelle journée au QG`); }
   }
   AGENTS.forEach(a => a.update(dt)); COURIER.update(dt);
-  pollMail(false);
 
   ctx.setTransform(scale, 0, 0, scale, 0, 0);
   drawFloor(); drawFurniture(); drawWalls();
@@ -1040,13 +1277,38 @@ let delivFilter = 'all';
 function renderDeliv() {
   const list = HQ.deliverables.map((d, i) => [d, i]).filter(([d]) => delivFilter === 'all' || d.isMail || d.status === 'mail').slice(0, 40);
   if (!list.length) { delivEl.innerHTML = `<li class="empty" style="cursor:default">${delivFilter === 'all' ? 'Les documents produits par les agents arrivent ici.' : 'Aucun mail traité pour l’instant.'}</li>`; return; }
-  const TAG = { sim:['simulé',''], run:['IA en cours…','run'], ai:['IA','ai'], err:['erreur','err'], mail:['mail','ai'] };
-  delivEl.innerHTML = list.map(([d, i]) => { const [t, c] = TAG[d.status] || TAG.sim; return `<li data-i="${i}"><i style="background:${poleById(d.pole).color}"></i><span>${esc(d.title)}</span><em class="tag ${c}">${t}</em></li>`; }).join('');
+  const TAG = { run:['en cours','run'], ai:['livré','ai'], err:['bloqué','err'] };
+  delivEl.innerHTML = list.map(([d, i]) => { const [t, c] = d.draftSaved ? ['brouillon Gmail','ai'] : (TAG[d.status] || TAG.ai); return `<li data-i="${i}"><i style="background:${poleById(d.pole).color}"></i><span>${esc(d.title)}</span><em class="tag ${c}">${t}</em></li>`; }).join('');
 }
 delivEl.addEventListener('click', e => {
   const li = e.target.closest('li[data-i]'); if (!li) return; const d = HQ.deliverables[+li.dataset.i];
-  $('dlgTitle').textContent = d.title; $('dlgMeta').textContent = `${d.agent} · ${poleById(d.pole).full} · ${d.time}`; $('dlgBody').textContent = d.content; $('dlg').showModal();
+  openDeliv(d);
 });
+let dlgItem = null;
+function openDeliv(d) {
+  dlgItem = d;
+  $('dlgTitle').textContent = d.title; $('dlgMeta').textContent = `${d.agent} · ${poleById(d.pole).full} · ${d.time}`; $('dlgBody').textContent = d.content;
+  $('dlgMsg').textContent = d.draftSaved ? 'Brouillon enregistré dans Gmail. Rien n’a été envoyé.' : '';
+  $('dlgDraft').hidden = !(d.reply && !d.draftSaved && ENGINE.mail);
+  $('dlgRetry').hidden = !(d.status === 'err' && d.spec);
+  if (!$('dlg').open) $('dlg').showModal();
+}
+$('dlgDraft').onclick = async () => {
+  const d = dlgItem; if (!d || !d.mail || !d.reply) return;
+  const b = $('dlgDraft'); b.disabled = true; $('dlgMsg').textContent = 'Enregistrement dans Gmail…';
+  try { await saveDraft(d.mail, d.reply); d.draftSaved = true; HQ.drafts++; save(); renderDeliv(); log(AGENTS.find(a => a.name === d.agent) || AGENTS[0], `Brouillon enregistré dans Gmail pour « ${d.mail.subject} »`, true); }
+  catch (e) { $('dlgMsg').textContent = errText(e); b.disabled = false; return; }
+  b.disabled = false; openDeliv(d);
+};
+$('dlgRetry').onclick = () => {
+  const d = dlgItem; if (!d || !d.spec) return;
+  const a = AGENTS.find(x => x.name === d.spec.agent) || AGENTS[0];
+  const t = { title: d.spec.title, steps: d.spec.steps, brief: d.spec.brief, mail: d.spec.mail, custom: true, status: 'attente' };
+  a.custom.push(t); HQ.tasks.push(t);
+  HQ.deliverables.splice(HQ.deliverables.indexOf(d), 1); save(); renderDeliv(); renderPlan();
+  log(a, `Tâche relancée : ${t.title}`); $('dlg').close();
+  if (!HQ.active) $('power').click();
+};
 $('dFilter').onclick = e => { const b = e.target.closest('button'); if (!b) return; delivFilter = b.dataset.f; [...$('dFilter').children].forEach(x => x.classList.toggle('sel', x === b)); renderDeliv(); };
 $('dlgClose').onclick = () => $('dlg').close();
 $('dlgCopy').onclick = () => { const t = $('dlgBody').textContent; const ok = () => { $('dlgCopy').textContent = 'Copié ✓'; setTimeout(() => $('dlgCopy').textContent = 'Copier', 1500); };
@@ -1055,12 +1317,45 @@ $('dlgCopy').onclick = () => { const t = $('dlgBody').textContent; const ok = ()
 
 function renderUI() {
   $('clock').innerHTML = HQ.active || AGENTS.some(a => a.visible) ? `<b>${timeStr()}</b> · jour ${HQ.day}` : '<b>--:--</b> · veille';
-  $('kAgents').textContent = AGENTS.filter(a => a.inside).length; $('kDone').textContent = HQ.done; $('kCalls').textContent = HQ.calls;
-  $('kPrints').textContent = HQ.prints; $('kCoffee').textContent = HQ.coffees; $('kPing').textContent = HQ.pings;
+  $('kAgents').textContent = AGENTS.filter(a => a.inside).length; $('kDone').textContent = HQ.done;
+  $('kRun').textContent = HQ.tasks.filter(t => t.status === 'encours').length; $('kWait').textContent = HQ.tasks.filter(t => t.status === 'attente').length;
+  $('kMail').textContent = HQ.mailsDone; $('kDraft').textContent = HQ.drafts;
   $('poles').innerHTML = POLES.map(p => `<div class="pole"><i style="background:${p.color}"></i><span>${esc(p.full)}</span><b>${p.done}</b></div>`).join('');
   $('poleSum').textContent = `${POLES.length} pôles · ${AGENTS.length} agents`;
   renderTeam(); renderProfileLive();
 }
+
+/* ---------- Journée : état des connexions et plan ---------- */
+function renderEngine() {
+  const set = (id, txt, cls) => { const el = $(id); el.textContent = txt; el.className = 'pill ' + (cls || ''); };
+  set('aiState', ENGINE.brain === 'claude' ? 'IA : Claude' : ENGINE.brain === 'server' ? 'IA : serveur Jarvis' : 'IA : non connectée', ENGINE.brain ? 'ok' : 'off');
+  set('mailState', ENGINE.mail === 'gmail' ? (CTX.mailErr ? 'Gmail : ' + (ERR[CTX.mailErr] ? 'à autoriser' : 'erreur') : 'Gmail : connecté') : ENGINE.mail === 'server' ? 'Gmail : ' + (HQ.mailAddr || 'serveur') : 'Gmail : non connecté', ENGINE.mail && !CTX.mailErr ? 'ok' : 'off');
+  set('calState', ENGINE.cal ? (CTX.calErr ? 'Agenda : à autoriser' : 'Agenda : connecté') : 'Agenda : non connecté', ENGINE.cal && !CTX.calErr ? 'ok' : 'off');
+}
+let planKey = '';
+function renderPlan() {
+  $('dayDate').textContent = todayLabel();
+  const note = $('dayNote'), btn = $('planBtn');
+  if (!ENGINE.brain) {
+    note.className = 'day-note warn';
+    note.textContent = ENGINE.blocked ? errText({ code: ENGINE.blocked }) + ' Les agents attendent, aucun contenu n’est inventé.'
+      : 'Aucune IA connectée : ouvre ce QG depuis claude.ai, ou lance server.py avec ta clé OpenAI. En attendant, les agents ne produisent rien.';
+  } else if (HQ.planning) { note.className = 'day-note'; note.textContent = 'Jarvis lit ton agenda et tes mails, puis répartit le travail…'; }
+  else if (HQ.brief) { note.className = 'day-note brief'; note.textContent = HQ.brief; }
+  else if (HQ.planError) { note.className = 'day-note warn'; note.textContent = 'Planification impossible : ' + HQ.planError; }
+  else { note.className = 'day-note'; note.textContent = 'Active le QG : Jarvis lit ton agenda et tes mails non lus, puis répartit le travail de la journée.'; }
+  btn.disabled = !ENGINE.brain || HQ.planning;
+  btn.textContent = HQ.planning ? 'Jarvis planifie…' : HQ.plannedOn === new Date().toDateString() ? 'Planifier la suite' : 'Planifier la journée';
+  const order = { encours:0, attente:1, erreur:2, livre:3 }, LBL = { encours:'en cours', attente:'en attente', erreur:'bloqué', livre:'livré' };
+  const items = HQ.tasks.filter(t => !t.noJob).slice().sort((a, b) => order[a.status] - order[b.status]);
+  const key = items.map(t => t.title + t.status + (t.agent || '')).join('|');
+  if (key === planKey) return; planKey = key;
+  const color = t => { const a = AGENTS.find(x => x.name === t.agent) || AGENTS.find(x => x.custom.includes(t)); return a ? a.pole.color : poleById(t.mail ? 'ops' : 'edu').color; };
+  const who = t => t.agent || (AGENTS.find(x => x.custom.includes(t)) || {}).name || (t.mail ? 'Ops' : 'Pôle');
+  $('plan').innerHTML = items.slice(0, 14).map(t => `<li><i style="background:${color(t)}"></i><span>${esc(t.title)}<small>${esc(who(t))}</small></span><em class="st ${t.status}">${LBL[t.status]}</em></li>`).join('')
+    + (items.length > 14 ? `<li><span><small>et ${items.length - 14} autres</small></span></li>` : '');
+}
+$('planBtn').onclick = () => { if (!HQ.active) $('power').click(); else planDay(); };
 
 /* ---------- L'équipe et les fiches profil ---------- */
 const avatarBg = a => `radial-gradient(circle at 50% 40%, ${a.skin} 0 36%, ${a.hair} 37% 50%, ${a.courier ? a.shirt : a.pole.color} 51%)`;
@@ -1108,7 +1403,7 @@ function openProfile(a) {
   const form = $('pfForm');
   if (form) form.onsubmit = e => {
     e.preventDefault(); const text = $('pfTask').value.trim(); if (!text) return;
-    a.custom.push({ title: text, steps: guessSteps(text), custom: true }); $('pfTask').value = '';
+    const t = { title: text, steps: guessSteps(text), custom: true, status: 'attente' }; a.custom.push(t); HQ.tasks.push(t); $('pfTask').value = ''; renderPlan();
     log(a, `Nouvelle tâche confiée à ${a.name} : ${text}`);
     if (a.inside) a.say('📥 Bien reçu, je m’en occupe !', 3);
     if (!HQ.active) $('power').click();
@@ -1125,8 +1420,10 @@ function renderProfileLive() {
     <b>${a.task ? esc(a.task.title) : (a.courier ? 'Livraison d’un colis' : 'Aucune tâche en cours')}</b>
     <small>${esc(a.doing)}${a.task ? ` · étape ${Math.min(a.stepIdx + 1, a.task.steps.length)}/${a.task.steps.length}` : ''}</small>
     ${a.task ? `<div class="bar"><i style="width:${Math.round(a.progress * 100)}%"></i></div>` : ''}
+    ${a.task && a.task.job && !a.task.job.settled ? (a.task.job.preview ? `<small>${ENGINE.brain === 'claude' ? 'Claude' : 'L’IA'} écrit en ce moment :</small><div class="pf-live">${esc(a.task.job.preview.slice(-320))}</div>` : `<small>${ENGINE.brain === 'claude' ? 'Claude' : 'L’IA'} réfléchit au livrable…</small>`) : ''}
     ${queued ? `<small>${queued} tâche${queued > 1 ? 's' : ''} que tu lui as confiée${queued > 1 ? 's' : ''} en attente</small>` : ''}`;
-  const stats = `<div><b>${a.done}</b><span>tâches</span></div><div><b>${a.callsN}</b><span>appels</span></div><div><b>${a.printsN}</b><span>pages</span></div><div><b>${Math.round(clamp(a.energy, 0, 100))}%</b><span>énergie</span></div>`;
+  const mine = HQ.tasks.filter(t => t.agent === a.name || a.custom.includes(t));
+  const stats = `<div><b>${a.done}</b><span>livrés</span></div><div><b>${mine.filter(t => t.status === 'encours').length}</b><span>en cours</span></div><div><b>${a.custom.length}</b><span>en attente</span></div><div><b>${Math.round(clamp(a.energy, 0, 100))}%</b><span>énergie</span></div>`;
   const hist = a.history.length ? a.history.map(h => `<li><time>${h.time}</time><span>${esc(h.t)}</span></li>`).join('') : '<li><span style="color:var(--muted)">Pas encore de tâche terminée.</span></li>';
   const key = now + stats + hist; if (key === liveKey) return; liveKey = key;
   $('pfNow').innerHTML = now;
@@ -1147,29 +1444,26 @@ canvas.addEventListener('click', e => { openProfile(agentAt(e)); });
 $('power').onclick = () => {
   HQ.active = !HQ.active; document.body.classList.toggle('on', HQ.active);
   $('power').textContent = HQ.active ? 'Mettre en veille' : 'Activer le QG';
-  if (HQ.active) { if (HQ.minutes > MIN(18)) HQ.minutes = MIN(9); arrive(); setTimeout(() => pollMail(true), 4000); } else leave();
+  if (HQ.active) {
+    if (HQ.minutes > MIN(18)) HQ.minutes = MIN(9);
+    arrive(); startMailWatch();
+    if (HQ.plannedOn !== new Date().toDateString()) planDay();
+  } else leave();
 };
 $('speed').onclick = e => { const b = e.target.closest('button'); if (!b) return; HQ.speed = +b.dataset.s; [...$('speed').children].forEach(x => x.classList.toggle('sel', x === b)); };
 
 $('aPole').innerHTML = POLES.map(p => `<option value="${p.id}">${esc(p.full)}</option>`).join('');
-$('realAll').onchange = e => HQ.realAll = e.target.checked;
 $('assign').onsubmit = e => {
   e.preventDefault();
   const p = poleById($('aPole').value), text = $('aTask').value.trim(); if (!text) return;
-  p.custom.push({ title: text, steps: guessSteps(text), custom: true });
-  $('aTask').value = '';
+  const t = { title: text, steps: guessSteps(text), custom: true, status: 'attente' }; p.custom.push(t); HQ.tasks.push(t);
+  $('aTask').value = ''; renderPlan();
   const lead = p.members[0]; log(lead, `Nouvelle tâche confiée à ${p.full} : ${text}`);
   if (lead.inside) lead.say('📥 Bien reçu, on s’en occupe !', 3);
   if (!HQ.active) $('power').click();
 };
 
-fetch(API + '/hq/health').then(r => r.json()).then(j => {
-  HQ.ai = !!j.ai; HQ.mail = !!j.mail; HQ.mailAddr = j.mail_address || '';
-  $('aiState').textContent = HQ.ai ? 'IA : connectée' : 'IA : pas de clé API'; $('aiState').classList.toggle('ok', HQ.ai);
-  $('mailState').textContent = HQ.mail ? 'Gmail : ' + HQ.mailAddr : 'Gmail : non connecté'; $('mailState').classList.toggle('ok', HQ.mail);
-  if (HQ.mail) pollMail(true);
-}).catch(() => {});
-
+initEngine();
 renderDeliv(); renderUI();
 requestAnimationFrame(frame);
 window.HQ = HQ; window.AGENTS = AGENTS; window.AMEN = AMEN;

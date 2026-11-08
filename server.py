@@ -4,7 +4,6 @@ from flask_cors import CORS
 from openai import OpenAI
 import os
 import re
-import json
 import time
 import imaplib
 import email
@@ -98,15 +97,6 @@ def revision():
 # des tâches de chaque pôle.
 # ---------------------------------------------------------------------------
 
-HQ_POLES = {
-    "dir": "Tu es à la Direction du QG, aux côtés de Jarvis. Tu organises la journée et la semaine, tu fixes les priorités et tu fais le lien entre les pôles.",
-    "edu": "Tu es au Pôle Produit Study Buddy. Tu fais avancer les applications de révision IA (Smart Study Buddy, Dossier Interactif, Study Companion, Repères Scolaires) : roadmap, textes, tests, retours des élèves.",
-    "soc": "Tu es au Pôle Réseaux & Contenu, notamment pour MCI Sport, une agence de sport. LinkedIn d'abord, puis Instagram : posts, scripts de Reels, calendrier éditorial, statistiques (Metricool, Typefully).",
-    "tech": "Tu es au Pôle Tech & Agents IA. Tu développes Jarvis (Flask, OpenAI), des agents vocaux ElevenLabs et des outils internes : specs, code, corrections, déploiements.",
-    "ops": "Tu es au Pôle Ops · Mail & Admin, à Genève. Tu tries la boîte mail, tu prépares des brouillons de réponse, tu gères les démarches administratives (état civil, pièces justificatives) et les candidatures à des emplois étudiants.",
-}
-
-
 @app.route('/hq')
 def hq():
     return send_from_directory(STATIC_DIR, 'hq.html')
@@ -121,37 +111,28 @@ def hq_health():
     })
 
 
-@app.route('/hq/run', methods=['POST'])
-def hq_run():
+@app.route('/hq/ask', methods=['POST'])
+def hq_ask():
+    """Fait travailler un agent du QG : le prompt complet (persona, tâche, contexte) vient de la page."""
     data = request.json or {}
-    pole = data.get('pole')
-    task = (data.get('task') or '').strip()
-    agent = (data.get('agent') or 'un agent')[:40]
-    role = (data.get('role') or '')[:60]
-
-    if pole not in HQ_POLES or not task:
-        return jsonify({'error': 'Pôle inconnu ou tâche vide'}), 400
-
-    system = (
-        SYSTEM_PROMPT
-        + f" Dans le QG, tu incarnes {agent} ({role}). " + HQ_POLES[pole]
-        + " Tu réalises la tâche toi-même et tu rends un livrable concret, prêt à l'emploi"
-        " (texte rédigé, liste, planning, brouillon de mail...), en français, structuré et concis."
-        " Si une information te manque, indique-la entre crochets [à compléter] au lieu de l'inventer."
-    )
-
+    prompt = (data.get('prompt') or '').strip()
+    if not prompt:
+        return jsonify({'error': 'Prompt vide'}), 400
     try:
+        kwargs = {}
+        if data.get('json'):
+            kwargs['response_format'] = {"type": "json_object"}
         response = client.chat.completions.create(
             model="gpt-4o",
             messages=[
-                {"role": "system", "content": system},
-                {"role": "user", "content": task[:2000]}
-            ]
+                {"role": "system", "content": SYSTEM_PROMPT + " Tu travailles au QG des agents de Jarvis et tu rends un travail réel, concret et prêt à l'emploi, en français."},
+                {"role": "user", "content": prompt[:60000]},
+            ],
+            **kwargs,
         )
-        return jsonify({'answer': response.choices[0].message.content})
+        return jsonify({'text': response.choices[0].message.content})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
-
 
 
 # ---------------------------------------------------------------------------
@@ -264,14 +245,40 @@ def hq_mail_inbox():
         return jsonify({'error': f'Connexion Gmail impossible : {e}'}), 502
 
 
-@app.route('/hq/mail/process', methods=['POST'])
-def hq_mail_process():
-    """Lit un mail, l'analyse avec l'IA et enregistre un brouillon de réponse dans Gmail si besoin."""
+def _uid_arg():
+    uid = str((request.json or {}).get('uid', ''))
+    return uid if uid.isdigit() else None
+
+
+@app.route('/hq/mail/read', methods=['POST'])
+def hq_mail_read():
+    """Renvoie le texte d'un mail (sans le marquer comme lu)."""
     if not _mail_configured():
         return jsonify({'error': 'Boîte mail non connectée'}), 400
-    uid = str((request.json or {}).get('uid', ''))
-    if not uid.isdigit():
+    uid = _uid_arg()
+    if not uid:
         return jsonify({'error': 'Identifiant de mail invalide'}), 400
+    try:
+        conn = _imap()
+        conn.select("INBOX", readonly=True)
+        msg = _fetch(conn, uid.encode())
+        conn.logout()
+        if msg is None:
+            return jsonify({'error': 'Mail introuvable'}), 404
+        return jsonify({'mail': _summary(uid, msg), 'body': _body_text(msg)[:8000]})
+    except Exception as e:
+        return jsonify({'error': f'Connexion Gmail impossible : {e}'}), 502
+
+
+@app.route('/hq/mail/draft', methods=['POST'])
+def hq_mail_draft():
+    """Enregistre un brouillon de réponse dans Gmail. N'envoie jamais rien."""
+    if not _mail_configured():
+        return jsonify({'error': 'Boîte mail non connectée'}), 400
+    uid = _uid_arg()
+    body = ((request.json or {}).get('body') or '').strip()
+    if not uid or not body:
+        return jsonify({'error': 'Mail ou texte manquant'}), 400
     try:
         conn = _imap()
         conn.select("INBOX", readonly=True)
@@ -279,44 +286,19 @@ def hq_mail_process():
         if msg is None:
             conn.logout()
             return jsonify({'error': 'Mail introuvable'}), 404
-        info = _summary(uid, msg)
-        body = _body_text(msg)[:6000]
-
-        system = (
-            SYSTEM_PROMPT + " " + HQ_POLES["ops"]
-            + " Tu écris pour le compte de " + os.environ["GMAIL_ADDRESS"] + "."
-            " Réponds uniquement en JSON avec les clés : resume (2-3 phrases), priorite (haute, moyenne ou basse),"
-            " categorie (ex. administratif, emploi, études, MCI Sport, perso, pub/newsletter), action (ce que je dois faire),"
-            " besoin_reponse (booléen, faux pour les pubs, newsletters et notifications automatiques),"
-            " reponse (brouillon de réponse en français, poli et prêt à envoyer, sans objet ni signature inventée ;"
-            " mets [à compléter] pour toute information manquante ; chaîne vide si aucune réponse)."
-        )
-        user = f"De : {info['from_name']} <{info['from']}>\nObjet : {info['subject']}\nDate : {info['date']}\n\n{body}"
-        response = client.chat.completions.create(
-            model="gpt-4o",
-            response_format={"type": "json_object"},
-            messages=[{"role": "system", "content": system}, {"role": "user", "content": user}],
-        )
-        result = json.loads(response.choices[0].message.content)
-
-        draft_saved = False
-        reply = (result.get("reponse") or "").strip()
-        if result.get("besoin_reponse") and reply:
-            draft = EmailMessage()
-            draft["From"] = os.environ["GMAIL_ADDRESS"]
-            draft["To"] = _dec(msg.get("Reply-To")) or _dec(msg.get("From"))
-            subject = info["subject"]
-            draft["Subject"] = subject if subject.lower().startswith("re:") else "Re: " + subject
-            draft["Message-ID"] = make_msgid()
-            if msg.get("Message-ID"):
-                draft["In-Reply-To"] = msg["Message-ID"]
-                draft["References"] = ((msg.get("References") or "") + " " + msg["Message-ID"]).strip()
-            draft.set_content(reply)
-            folder = _drafts_folder(conn)
-            status, _ = conn.append('"%s"' % folder, "\\Draft", imaplib.Time2Internaldate(time.time()), draft.as_bytes())
-            draft_saved = status == "OK"
+        draft = EmailMessage()
+        draft["From"] = os.environ["GMAIL_ADDRESS"]
+        draft["To"] = _dec(msg.get("Reply-To")) or _dec(msg.get("From"))
+        subject = _dec(msg.get("Subject")) or ""
+        draft["Subject"] = subject if subject.lower().startswith("re:") else "Re: " + subject
+        draft["Message-ID"] = make_msgid()
+        if msg.get("Message-ID"):
+            draft["In-Reply-To"] = msg["Message-ID"]
+            draft["References"] = ((msg.get("References") or "") + " " + msg["Message-ID"]).strip()
+        draft.set_content(body[:20000])
+        status, _ = conn.append('"%s"' % _drafts_folder(conn), "\\Draft", imaplib.Time2Internaldate(time.time()), draft.as_bytes())
         conn.logout()
-        return jsonify({'mail': info, 'analysis': result, 'draft_saved': draft_saved})
+        return jsonify({'saved': status == "OK"})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 

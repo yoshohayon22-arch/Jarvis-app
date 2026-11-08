@@ -25,7 +25,7 @@
   .clock{font-variant-numeric:tabular-nums;font-size:15px;color:var(--muted);min-width:118px}
   .clock b{color:var(--text);font-size:18px}
   .speed{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
-  .speed button{background:transparent;color:var(--muted);border:0;padding:7px 10px;cursor:pointer;font:inherit;font-size:13px}
+  .speed button{background:transparent;color:var(--muted);border:0;padding:7px 10px;text-transform:none;letter-spacing:0;cursor:pointer;font:inherit;font-size:13px}
   .speed button.sel{background:var(--panel2);color:var(--neon)}
   #power{border:1px solid var(--neon);background:transparent;color:var(--neon);padding:9px 16px;border-radius:999px;
     font:inherit;font-weight:600;cursor:pointer;transition:.25s;letter-spacing:.3px}
@@ -144,8 +144,9 @@
       </form>
     </div>
 
-    <div class="card"><h2>Pôles <em id="poleSum"></em></h2><div class="poles" id="poles"></div></div>
-    <div class="card"><h2>Livrables</h2><ul id="deliv"></ul></div>
+    <div class="card"><h2>Pôles <em id="poleSum"></em></h2>
+      <div style="margin:-2px 0 10px"><span class="ai-state" id="mailState">Gmail : non connecté</span></div><div class="poles" id="poles"></div></div>
+    <div class="card"><h2>Livrables <span class="speed" id="dFilter"><button data-f="all" class="sel">Tous</button><button data-f="mail">Mails</button></span></h2><ul id="deliv"></ul></div>
     <div class="card"><h2>Fil d'activité</h2><ul id="log"></ul></div>
   </aside>
 </main>
@@ -187,7 +188,7 @@ const POLES = [
       { t: 'Préparer le brief de la journée', s: ['type', 'print'] },
       { t: 'Faire le tour des pôles', s: ['tour'] },
       { t: 'Planifier la semaine : agenda et priorités', s: ['type', 'meeting'] },
-      { t: 'Trier la boîte mail et lister les réponses à faire', s: ['web', 'type'] },
+      { t: 'Faire le bilan de fin de journée', s: ['type', 'print'] },
     ] },
   { id: 'candidatures', name: 'Candidatures', full: 'Pôle Candidatures', color: '#f59e0b', cx: 420, cy: 170,
     agents: [
@@ -230,17 +231,18 @@ const POLES = [
       { t: 'Programmer les publications de la semaine', s: ['type'] },
       { t: 'Répondre aux commentaires et aux DM', s: ['type', 'call'] },
     ] },
-  { id: 'stage', name: 'Stage Liège', full: 'Pôle Stage · Standard de Liège', color: '#22c55e', cx: 420, cy: 455,
+  { id: 'mail', name: 'Boîte mail', full: 'Pôle Boîte mail', color: '#22c55e', cx: 420, cy: 455,
     agents: [
-      { name: 'Tom', role: 'Logistique', skin: '#e0ac69', hair: '#2b1a0e' },
-      { name: 'Jade', role: 'Planning & programme', skin: '#8d5524', hair: '#140a05' },
+      { name: 'Max', role: 'Tri du courrier', skin: '#e0ac69', hair: '#2b1a0e' },
+      { name: 'Jade', role: 'Rédactrice des réponses', skin: '#8d5524', hair: '#140a05' },
+      { name: 'Lucas', role: 'Veille des urgences', skin: '#ffdbac', hair: '#5a3a1a' },
     ],
-    calls: ['Les chambres sont confirmées pour le groupe ?', 'Le car part à quelle heure ?', 'On a le terrain de 10h à 12h ?', 'Il me faut la liste des joueurs'],
+    calls: ['Bien reçu votre mail, je vous réponds vite', 'Vous pouvez me renvoyer la pièce jointe ?', 'C’est noté, merci'],
+    // Tâches de démonstration : remplacées par tes vrais mails quand Gmail est connecté
     tasks: [
-      { t: 'Construire le planning du stage de préparation', s: ['type', 'meeting', 'print'] },
-      { t: 'Appeler l’hébergement pour confirmer les chambres', s: ['call'] },
-      { t: 'Organiser le transport de l’équipe', s: ['call', 'type'] },
-      { t: 'Préparer la feuille de route des joueurs', s: ['type', 'print'] },
+      { t: 'Trier la boîte de réception (simulation)', s: ['read', 'type'] },
+      { t: 'Préparer les brouillons de réponse (simulation)', s: ['read', 'reply'] },
+      { t: 'Repérer les mails urgents (simulation)', s: ['read', 'type'] },
     ] },
   { id: 'etudes', name: 'Études', full: 'Pôle Études', color: '#14b8a6', cx: 700, cy: 455,
     agents: [
@@ -374,7 +376,7 @@ const release = (a) => Object.values(AMEN).forEach(m => m.users.forEach((u, i) =
    ====================================================================== */
 const HQ = {
   active: false, light: 0, speed: 1, minutes: 9 * 60, day: 1,
-  done: 0, calls: 0, prints: 0, coffees: 0, ai: false, realAll: false,
+  done: 0, calls: 0, prints: 0, coffees: 0, ai: false, realAll: false, mail: false, mailAddr: '', mails: 0,
   deliverables: [], particles: [], selected: null, hover: null,
 };
 const timeStr = () => { const m = Math.floor(HQ.minutes) % 1440; return `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`; };
@@ -475,7 +477,9 @@ function startTask(a) {
   const p = a.pole;
   let t;
   if (p.custom.length) t = p.custom.shift();
-  else {
+  else if (p.id === 'mail' && HQ.mail) {
+    t = { title: 'Surveiller la boîte de réception', steps: ['read'], custom: false, watch: true };
+  } else {
     const pool = p.tasks.filter(x => x.t !== p.last) ;
     const tpl = pick(pool.length ? pool : p.tasks); p.last = tpl.t;
     t = { title: tpl.t, steps: tpl.s.slice(), custom: false };
@@ -496,6 +500,12 @@ function planStep(a) {
       break;
     case 'web':
       L.push(back, sit(rnd(8, 12), 'web', `Recherche en ligne : ${a.task.title}`, [0, 1], { onStart: x => x.say('🔎 Je cherche…') }));
+      break;
+    case 'read':
+      L.push(back, sit(rnd(6, 9), 'mail', a.task.mail ? `Lit le mail de ${a.task.mail.from_name}` : 'Lit les mails', [0, 1], { onStart: x => x.say(x.task && x.task.mail ? '📧 ' + x.task.mail.subject : '📧 Je lis les mails…', 3.5) }));
+      break;
+    case 'reply':
+      L.push(back, sit(rnd(8, 12), 'type', 'Rédige le brouillon de réponse', [0, 1], { onStart: x => x.say('✉️ Je prépare la réponse…') }));
       break;
     case 'call': {
       const line = pick(p.calls);
@@ -601,7 +611,10 @@ const save = () => { try { localStorage.setItem(LS_KEY, JSON.stringify(HQ.delive
 
 function completeTask(a) {
   const t = a.task, p = a.pole;
-  a.task = null; a.done++; p.done++; HQ.done++;
+  a.task = null;
+  if (t.watch) { a.say(pick(['📭 Rien de neuf', 'Boîte à jour ✓', 'J’attends le prochain mail']), 2.2); return; }
+  a.done++; p.done++; HQ.done++;
+  if (t.mail) return completeMail(a, t);
   a.say('✅ Terminé !', 2.5);
   const d = { id: Date.now() + Math.random(), title: t.title, pole: p.id, agent: a.name, time: `J${HQ.day} ${timeStr()}`, status: 'sim', content: simulated(a, t) };
   HQ.deliverables.unshift(d);
@@ -616,6 +629,60 @@ function completeTask(a) {
   save(); renderDeliv();
 }
 
+function mailHeader(m) {
+  return `De : ${m.from_name} <${m.from}>\nObjet : ${m.subject}\nReçu : ${m.date}\n\nExtrait :\n${m.snippet}`;
+}
+function completeMail(a, t) {
+  const m = t.mail, p = a.pole;
+  a.say('✅ Mail traité', 2.5);
+  const d = { id: Date.now() + Math.random(), title: '📧 ' + m.subject, pole: p.id, agent: a.name, time: `J${HQ.day} ${timeStr()}`, status: 'mail',
+    content: mailHeader(m) + (HQ.ai ? '' : '\n\n— Connecte l’IA (OPENAI_API_KEY) pour que l’agent résume ce mail et prépare un brouillon de réponse dans Gmail.') };
+  HQ.deliverables.unshift(d);
+  log(a, `${a.name} a traité le mail « ${m.subject} »`, true);
+  if (HQ.ai) {
+    d.status = 'run';
+    fetch(API + '/hq/mail/process', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ uid: m.uid }) })
+      .then(r => r.json()).then(j => {
+        if (j.error) { d.status = 'err'; d.content = 'Erreur : ' + j.error + '\n\n' + mailHeader(m); return; }
+        const r = j.analysis || {};
+        d.status = 'ai';
+        d.title = `${r.priorite === 'haute' ? '🔴' : r.priorite === 'moyenne' ? '🟠' : '⚪'} ${m.subject}`;
+        d.content = [`De : ${m.from_name} <${m.from}>`, `Objet : ${m.subject}`, '',
+          `Priorité : ${r.priorite || '?'} · Catégorie : ${r.categorie || '?'}`, '', `Résumé : ${r.resume || ''}`, `À faire : ${r.action || ''}`,
+          ...(r.besoin_reponse && r.reponse ? ['', j.draft_saved ? '✉️ Brouillon enregistré dans Gmail (rien n’a été envoyé) :' : '✉️ Brouillon proposé (non enregistré dans Gmail) :', '', r.reponse] : ['', 'Pas de réponse nécessaire.'])].join('\n');
+        if (j.draft_saved) log(a, `${a.name} a enregistré un brouillon de réponse à ${m.from_name}`);
+      })
+      .catch(e => { d.status = 'err'; d.content = 'Serveur injoignable : ' + e.message + '\n\n' + mailHeader(m); })
+      .finally(() => { save(); renderDeliv(); });
+  }
+  save(); renderDeliv();
+}
+
+/* Relève du courrier : chaque mail non lu devient une tâche du pôle Boîte mail */
+const SEEN_KEY = 'jarvis-hq-mails-vus';
+let seenMails = [];
+try { seenMails = JSON.parse(localStorage.getItem(SEEN_KEY) || '[]'); } catch (e) {}
+let lastPoll = -1e9;
+function pollMail(force) {
+  if (!HQ.mail || !HQ.active) return;
+  if (!force && performance.now() - lastPoll < 90000) return;
+  lastPoll = performance.now();
+  const p = poleById('mail');
+  fetch(API + '/hq/mail/inbox').then(r => r.json()).then(j => {
+    if (j.error) { log(p.members[0], '⚠️ ' + j.error); return; }
+    const fresh = (j.mails || []).filter(m => !seenMails.includes(m.uid));
+    fresh.reverse().forEach(m => {
+      seenMails.push(m.uid); HQ.mails++;
+      p.custom.push({ title: `Traiter le mail « ${m.subject} » de ${m.from_name}`, steps: ['read', 'reply'], custom: true, mail: m });
+      log(p.members[0], `📬 Nouveau mail de ${m.from_name} : ${m.subject}`);
+    });
+    if (fresh.length) {
+      const lead = p.members.find(x => x.inside); lead && lead.say(`📬 ${fresh.length} nouveau${fresh.length > 1 ? 'x' : ''} mail${fresh.length > 1 ? 's' : ''} !`, 3);
+      try { localStorage.setItem(SEEN_KEY, JSON.stringify(seenMails.slice(-500))); } catch (e) {}
+    }
+  }).catch(() => {});
+}
+
 function simulated(a, t) {
   const st = a.stats || {};
   const lines = [
@@ -624,7 +691,7 @@ function simulated(a, t) {
     `Commencé à ${t.started}, terminé à ${timeStr()}.`,
     '',
     'Ce que l’agent a fait :',
-    ...t.steps.map(s => '• ' + ({ type: 'Rédaction du document', web: 'Recherche et collecte d’informations', call: 'Appels téléphoniques', print: 'Impression et classement', meeting: 'Réunion de validation', tour: 'Tour des pôles et arbitrage des priorités' })[s]),
+    ...t.steps.map(s => '• ' + ({ type: 'Rédaction du document', web: 'Recherche et collecte d’informations', call: 'Appels téléphoniques', print: 'Impression et classement', meeting: 'Réunion de validation', tour: 'Tour des pôles et arbitrage des priorités', read: 'Lecture des mails', reply: 'Rédaction du brouillon de réponse' })[s]),
   ];
   if (st.calls) lines.push(`• ${st.calls} appel(s) passé(s)`);
   if (st.prints) lines.push(`• ${st.prints} page(s) imprimée(s)`);
@@ -710,7 +777,8 @@ function drawPole(p) {
     // chaise
     ctx.fillStyle = '#3b4252'; ctx.beginPath(); ctx.arc(s.x, s.y + (up ? 4 : -4), 10, 0, 7); ctx.fill();
     // écran
-    const sx = s.x - 17, sy = my, active = a && a.seated && ['type', 'web', 'call'].includes(a.anim);
+    const sx = s.x - 17, sy = my;
+    const active = a && a.seated && ['type', 'web', 'call', 'mail'].includes(a.anim);
     ctx.fillStyle = '#1f2633'; rrect(sx - 2, sy - 2, 38, 22, 3); ctx.fill();
     ctx.fillStyle = HQ.light > .3 && a && a.inside ? (active ? '#0b1726' : '#16202e') : '#0d1118'; ctx.fillRect(sx, sy, 34, 18);
     if (active) drawScreen(a, sx, sy);
@@ -730,6 +798,11 @@ function drawScreen(a, x, y) {
     const off = (T * 12) % 4;
     for (let k = 0; k < 5; k++) { ctx.fillStyle = alpha(c, .9 - k * .12); ctx.fillRect(x + 3, y + 3 + k * 3 - off * .2, 6 + ((k * 7 + Math.floor(T * 3)) % 22), 1.6); }
     if (Math.floor(T * 3) % 2) { ctx.fillStyle = '#fff'; ctx.fillRect(x + 28, y + 13, 2, 3); }
+  } else if (a.anim === 'mail') {
+    ctx.fillStyle = '#f8fafc'; ctx.fillRect(x, y, 34, 18);
+    ctx.fillStyle = '#ea4335'; ctx.fillRect(x, y, 34, 3);
+    const sel = Math.floor(T * 1.5) % 4;
+    for (let k = 0; k < 4; k++) { ctx.fillStyle = k === sel ? alpha(c, .35) : '#e2e8f0'; ctx.fillRect(x + 2, y + 4.5 + k * 3.3, 30, 2.6); ctx.fillStyle = '#334155'; ctx.fillRect(x + 3, y + 5 + k * 3.3, 7, 1.4); }
   } else if (a.anim === 'web') {
     ctx.fillStyle = '#334155'; ctx.fillRect(x, y, 34, 4);
     ctx.fillStyle = '#e2e8f0'; ctx.fillRect(x + 2, y + 1, 18, 2);
@@ -802,7 +875,7 @@ function drawAgentBody(a) {
   ctx.fillStyle = a.shirt; ctx.beginPath(); ctx.ellipse(x, y + 1 + bob * .3, 10, 8, 0, 0, 7); ctx.fill();
   ctx.fillStyle = a.pole.color; ctx.fillRect(x - 2, y - 4 + bob * .3, 4, 5);
   // mains (frappe au clavier)
-  if (a.anim === 'type' || a.anim === 'web') { const j = Math.sin(T * 22) * 1.2, dy = a.seat.up ? -9 : 9;
+  if (a.anim === 'type' || a.anim === 'web' || a.anim === 'mail') { const j = Math.sin(T * 22) * 1.2, dy = a.seat.up ? -9 : 9;
     ctx.fillStyle = a.skin; ctx.beginPath(); ctx.arc(x - 5, y + dy + j, 2.4, 0, 7); ctx.arc(x + 5, y + dy - j, 2.4, 0, 7); ctx.fill(); }
   // tête
   const hy = y - 7 + bob;
@@ -872,6 +945,7 @@ function frame(now) {
   HQ.light = clamp(HQ.light + (HQ.active ? raw * .8 : -raw * .5), 0, 1);
   if (HQ.active) { HQ.minutes += dt * 2; if (HQ.minutes >= 19 * 60) { HQ.minutes = 9 * 60; HQ.day++; } }
   AGENTS.forEach(a => a.update(dt));
+  pollMail(false);
 
   ctx.setTransform(scale, 0, 0, scale, 0, 0);
   drawFloor(); drawAmenities(); POLES.forEach(drawPole);
@@ -899,10 +973,13 @@ function log(a, text, done) {
 function esc(s) { return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]); }
 const poleById = id => POLES.find(p => p.id === id) || POLES[0];
 
+let delivFilter = 'all';
 function renderDeliv() {
   if (!HQ.deliverables.length) { delivEl.innerHTML = '<li class="empty-note" style="cursor:default">Les documents produits par les agents arrivent ici.</li>'; return; }
-  const TAG = { sim: ['simulé', ''], run: ['IA en cours…', 'run'], ai: ['IA', 'ai'], err: ['erreur', 'err'] };
-  delivEl.innerHTML = HQ.deliverables.slice(0, 40).map((d, i) => {
+  const TAG = { sim: ['simulé', ''], run: ['IA en cours…', 'run'], ai: ['IA', 'ai'], err: ['erreur', 'err'], mail: ['mail', 'ai'] };
+  const list = HQ.deliverables.map((d, i) => [d, i]).filter(([d]) => delivFilter === 'all' || d.pole === 'mail').slice(0, 40);
+  if (!list.length) { delivEl.innerHTML = '<li class="empty-note" style="cursor:default">Aucun mail traité pour l’instant.</li>'; return; }
+  delivEl.innerHTML = list.map(([d, i]) => {
     const [t, c] = TAG[d.status] || TAG.sim;
     return `<li data-i="${i}"><i style="background:${poleById(d.pole).color}"></i><span>${esc(d.title)}</span><em class="tag ${c}">${t}</em></li>`;
   }).join('');
@@ -915,6 +992,7 @@ delivEl.addEventListener('click', e => {
   $('dlgBody').textContent = d.content;
   $('dlg').showModal();
 });
+$('dFilter').onclick = e => { const b = e.target.closest('button'); if (!b) return; delivFilter = b.dataset.f; [...$('dFilter').children].forEach(x => x.classList.toggle('sel', x === b)); renderDeliv(); };
 $('dlgClose').onclick = () => $('dlg').close();
 $('dlgCopy').onclick = () => { navigator.clipboard && navigator.clipboard.writeText($('dlgBody').textContent).then(() => { $('dlgCopy').textContent = 'Copié ✓'; setTimeout(() => $('dlgCopy').textContent = 'Copier', 1500); }); };
 
@@ -953,7 +1031,7 @@ $('power').onclick = () => {
   HQ.active = !HQ.active;
   document.body.classList.toggle('on', HQ.active);
   $('power').textContent = HQ.active ? 'Mettre en veille' : 'Activer le QG';
-  if (HQ.active) { if (HQ.minutes > 18 * 60) HQ.minutes = 9 * 60; arrive(); } else leave();
+  if (HQ.active) { if (HQ.minutes > 18 * 60) HQ.minutes = 9 * 60; arrive(); setTimeout(() => pollMail(true), 4000); } else leave();
 };
 $('speed').onclick = e => { const b = e.target.closest('button'); if (!b) return; HQ.speed = +b.dataset.s; [...$('speed').children].forEach(x => x.classList.toggle('sel', x === b)); };
 
@@ -974,7 +1052,10 @@ $('assign').onsubmit = e => {
 
 // IA disponible ?
 fetch(API + '/hq/health').then(r => r.json()).then(j => {
-  HQ.ai = !!j.ai;
+  HQ.ai = !!j.ai; HQ.mail = !!j.mail; HQ.mailAddr = j.mail_address || '';
+  $('mailState').textContent = HQ.mail ? 'Gmail : ' + HQ.mailAddr : 'Gmail : non connecté';
+  $('mailState').classList.toggle('ok', HQ.mail);
+  if (HQ.mail) pollMail(true);
   $('aiState').textContent = HQ.ai ? 'IA : connectée' : 'IA : pas de clé API';
   $('aiState').classList.toggle('ok', HQ.ai);
 }).catch(() => { $('aiState').textContent = 'IA : simulation'; });

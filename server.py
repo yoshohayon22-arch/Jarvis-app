@@ -3,6 +3,15 @@ from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 from openai import OpenAI
 import os
+import re
+import json
+import time
+import imaplib
+import email
+from email.header import decode_header, make_header
+from email.message import EmailMessage
+from email.utils import parseaddr, make_msgid
+from datetime import datetime, timedelta
 
 app = Flask(__name__)
 CORS(app) # Active CORS pour toutes les routes
@@ -94,7 +103,7 @@ HQ_POLES = {
     "candidatures": "Tu es au Pôle Candidatures. Tu aides un jeune diplômé de la maturité fédérale, à Genève, à trouver un emploi d'étudiant à temps partiel : offres, CV, lettres de motivation, relances, entretiens.",
     "admin": "Tu es au Pôle Administratif. Tu prépares les démarches administratives en Suisse (Genève) : état civil, attestations, pièces justificatives, courriers et relances aux services.",
     "reseaux": "Tu es au Pôle Réseaux de MCI Sport, une agence de sport. LinkedIn d'abord, puis Instagram : posts, scripts de Reels, calendrier éditorial, analyse des statistiques.",
-    "stage": "Tu es au Pôle Stage. Tu organises le stage de préparation du Standard de Liège pour MCI Sport : planning, hébergement, transport, feuille de route.",
+    "mail": "Tu es au Pôle Boîte mail. Tu tries la boîte de réception, tu résumes les mails, tu repères ce qui est urgent et tu prépares des brouillons de réponse.",
     "etudes": "Tu es au Pôle Études. Tu compares des écoles et universités (programmes, prix, admission, délais) et tu prépares des fiches de révision et des quiz.",
 }
 
@@ -106,7 +115,11 @@ def hq():
 
 @app.route('/hq/health')
 def hq_health():
-    return jsonify({'ai': bool(os.environ.get("OPENAI_API_KEY"))})
+    return jsonify({
+        'ai': bool(os.environ.get("OPENAI_API_KEY")),
+        'mail': _mail_configured(),
+        'mail_address': os.environ.get("GMAIL_ADDRESS", "") if _mail_configured() else "",
+    })
 
 
 @app.route('/hq/run', methods=['POST'])
@@ -137,6 +150,174 @@ def hq_run():
             ]
         )
         return jsonify({'answer': response.choices[0].message.content})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+
+# ---------------------------------------------------------------------------
+# Pôle Boîte mail : connexion à Gmail en IMAP.
+#   GMAIL_ADDRESS       ton adresse Gmail
+#   GMAIL_APP_PASSWORD  un mot de passe d'application Google (16 caractères)
+# Les agents lisent sans marquer comme lu et n'envoient JAMAIS de mail :
+# ils enregistrent des brouillons de réponse dans Gmail.
+# ---------------------------------------------------------------------------
+
+IMAP_HOST = os.environ.get("GMAIL_IMAP_HOST", "imap.gmail.com")
+
+
+def _mail_configured():
+    return bool(os.environ.get("GMAIL_ADDRESS") and os.environ.get("GMAIL_APP_PASSWORD"))
+
+
+def _imap():
+    conn = imaplib.IMAP4_SSL(IMAP_HOST)
+    conn.login(os.environ["GMAIL_ADDRESS"], os.environ["GMAIL_APP_PASSWORD"].replace(" ", ""))
+    return conn
+
+
+def _dec(value):
+    if not value:
+        return ""
+    try:
+        return str(make_header(decode_header(value)))
+    except Exception:
+        return value
+
+
+def _body_text(msg):
+    """Texte brut du mail (text/plain de préférence, sinon HTML nettoyé)."""
+    html = None
+    parts = msg.walk() if msg.is_multipart() else [msg]
+    for part in parts:
+        if part.get_content_maintype() == "multipart" or part.get("Content-Disposition", "").startswith("attachment"):
+            continue
+        try:
+            payload = part.get_payload(decode=True)
+            if payload is None:
+                continue
+            text = payload.decode(part.get_content_charset() or "utf-8", errors="replace")
+        except Exception:
+            continue
+        if part.get_content_type() == "text/plain":
+            return text.strip()
+        if part.get_content_type() == "text/html" and html is None:
+            html = text
+    if html:
+        html = re.sub(r"(?is)<(script|style).*?</\1>", " ", html)
+        html = re.sub(r"<[^>]+>", " ", html)
+        return re.sub(r"\s+", " ", html.replace("&nbsp;", " ")).strip()
+    return ""
+
+
+def _summary(uid, msg):
+    name, addr = parseaddr(_dec(msg.get("From")))
+    body = _body_text(msg)
+    return {
+        "uid": uid,
+        "from_name": name or addr,
+        "from": addr,
+        "subject": _dec(msg.get("Subject")) or "(sans objet)",
+        "date": msg.get("Date", ""),
+        "snippet": re.sub(r"\s+", " ", body)[:280],
+    }
+
+
+def _fetch(conn, uid):
+    status, data = conn.uid("fetch", uid, "(BODY.PEEK[])")
+    if status != "OK" or not data or not isinstance(data[0], tuple):
+        return None
+    return email.message_from_bytes(data[0][1])
+
+
+def _drafts_folder(conn):
+    status, boxes = conn.list()
+    if status == "OK":
+        for line in boxes or []:
+            line = line.decode(errors="replace")
+            if "\\Drafts" in line:
+                m = re.search(r'"([^"]+)"\s*$', line) or re.search(r"(\S+)\s*$", line)
+                if m:
+                    return m.group(1)
+    return "[Gmail]/Drafts"
+
+
+@app.route('/hq/mail/inbox')
+def hq_mail_inbox():
+    if not _mail_configured():
+        return jsonify({'error': 'Boîte mail non connectée'}), 400
+    days = max(1, min(30, int(request.args.get('days', 7))))
+    limit = max(1, min(30, int(request.args.get('limit', 15))))
+    since = (datetime.now() - timedelta(days=days)).strftime("%d-%b-%Y")
+    try:
+        conn = _imap()
+        conn.select("INBOX", readonly=True)
+        status, data = conn.uid("search", None, "UNSEEN", "SINCE", since)
+        uids = (data[0].split() if status == "OK" and data and data[0] else [])[-limit:]
+        mails = []
+        for uid in reversed(uids):
+            msg = _fetch(conn, uid)
+            if msg is not None:
+                mails.append(_summary(uid.decode(), msg))
+        conn.logout()
+        return jsonify({'mails': mails})
+    except Exception as e:
+        return jsonify({'error': f'Connexion Gmail impossible : {e}'}), 502
+
+
+@app.route('/hq/mail/process', methods=['POST'])
+def hq_mail_process():
+    """Lit un mail, l'analyse avec l'IA et enregistre un brouillon de réponse dans Gmail si besoin."""
+    if not _mail_configured():
+        return jsonify({'error': 'Boîte mail non connectée'}), 400
+    uid = str((request.json or {}).get('uid', ''))
+    if not uid.isdigit():
+        return jsonify({'error': 'Identifiant de mail invalide'}), 400
+    try:
+        conn = _imap()
+        conn.select("INBOX", readonly=True)
+        msg = _fetch(conn, uid.encode())
+        if msg is None:
+            conn.logout()
+            return jsonify({'error': 'Mail introuvable'}), 404
+        info = _summary(uid, msg)
+        body = _body_text(msg)[:6000]
+
+        system = (
+            SYSTEM_PROMPT + " " + HQ_POLES["mail"]
+            + " Tu écris pour le compte de " + os.environ["GMAIL_ADDRESS"] + "."
+            " Réponds uniquement en JSON avec les clés : resume (2-3 phrases), priorite (haute, moyenne ou basse),"
+            " categorie (ex. administratif, emploi, études, MCI Sport, perso, pub/newsletter), action (ce que je dois faire),"
+            " besoin_reponse (booléen, faux pour les pubs, newsletters et notifications automatiques),"
+            " reponse (brouillon de réponse en français, poli et prêt à envoyer, sans objet ni signature inventée ;"
+            " mets [à compléter] pour toute information manquante ; chaîne vide si aucune réponse)."
+        )
+        user = f"De : {info['from_name']} <{info['from']}>\nObjet : {info['subject']}\nDate : {info['date']}\n\n{body}"
+        response = client.chat.completions.create(
+            model="gpt-4o",
+            response_format={"type": "json_object"},
+            messages=[{"role": "system", "content": system}, {"role": "user", "content": user}],
+        )
+        result = json.loads(response.choices[0].message.content)
+
+        draft_saved = False
+        reply = (result.get("reponse") or "").strip()
+        if result.get("besoin_reponse") and reply:
+            draft = EmailMessage()
+            draft["From"] = os.environ["GMAIL_ADDRESS"]
+            draft["To"] = _dec(msg.get("Reply-To")) or _dec(msg.get("From"))
+            subject = info["subject"]
+            draft["Subject"] = subject if subject.lower().startswith("re:") else "Re: " + subject
+            draft["Message-ID"] = make_msgid()
+            if msg.get("Message-ID"):
+                draft["In-Reply-To"] = msg["Message-ID"]
+                draft["References"] = ((msg.get("References") or "") + " " + msg["Message-ID"]).strip()
+            draft.set_content(reply)
+            folder = _drafts_folder(conn)
+            status, _ = conn.append('"%s"' % folder, "\\Draft", imaplib.Time2Internaldate(time.time()), draft.as_bytes())
+            draft_saved = status == "OK"
+        conn.logout()
+        return jsonify({'mail': info, 'analysis': result, 'draft_saved': draft_saved})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 

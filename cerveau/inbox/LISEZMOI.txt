@@ -1,0 +1,3 @@
+Dépose ici tes PDF, Word (.docx), images et captures d'écran.
+Le Cerveau les analyse automatiquement (toutes les ~10 s quand l'app tourne),
+en garde une copie dans data/files/ puis déplace l'original dans inbox/traites/.

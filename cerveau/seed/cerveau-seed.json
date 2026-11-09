@@ -1,0 +1,745 @@
+{
+ "meta": {
+  "description": "Données de départ du Cerveau de Yosh — VERSION PARTIELLE reconstruite depuis un PDF tronqué (résumés, URLs et une partie des liens manquent). Remplace ce fichier par le vrai cerveau-seed.json : l'import complètera les neurones sans doublon.",
+  "genere_le": "2026-11-09",
+  "partiel": true,
+  "types": [
+   "personne",
+   "projet",
+   "idee",
+   "tache",
+   "argent",
+   "lieu",
+   "organisation",
+   "note",
+   "document"
+  ]
+ },
+ "nodes": [
+  {
+   "id": "yosh",
+   "type": "personne",
+   "title": "Yosh (Joshua Ohayon)",
+   "summary": "",
+   "tags": []
+  },
+  {
+   "id": "langues",
+   "type": "note",
+   "title": "Mes langues",
+   "summary": "",
+   "tags": []
+  },
+  {
+   "id": "competences",
+   "type": "note",
+   "title": "Mes compétences et expériences",
+   "summary": "",
+   "tags": []
+  },
+  {
+   "id": "geneve",
+   "type": "lieu",
+   "title": "Genève",
+   "summary": "",
+   "tags": []
+  },
+  {
+   "id": "eaux-vives",
+   "type": "lieu",
+   "title": "Eaux-Vives",
+   "summary": "",
+   "tags": []
+  },
+  {
+   "id": "maturite",
+   "type": "projet",
+   "title": "Maturité fédérale",
+   "summary": "",
+   "tags": []
+  },
+  {
+   "id": "mci-sport",
+   "type": "organisation",
+   "title": "MCI Sport",
+   "summary": "",
+   "tags": []
+  },
+  {
+   "id": "stage-mci",
+   "type": "projet",
+   "title": "Mon stage chez MCI Sport",
+   "summary": "",
+   "tags": []
+  },
+  {
+   "id": "standard-liege",
+   "type": "organisation",
+   "title": "Standard de Liège",
+   "summary": "",
+   "tags": []
+  },
+  {
+   "id": "stage-standard",
+   "type": "projet",
+   "title": "Stage de préparation du Standard",
+   "summary": "",
+   "tags": []
+  },
+  {
+   "id": "ol",
+   "type": "organisation",
+   "title": "Olympique Lyonnais (OL)",
+   "summary": "",
+   "tags": []
+  },
+  {
+   "id": "agent-reseaux",
+   "type": "projet",
+   "title": "Agent Réseaux MCI Sport",
+   "summary": "",
+   "tags": []
+  },
+  {
+   "id": "ce-qui-marche",
+   "type": "note",
+   "title": "Ce qui marche sur les réseaux MCI",
+   "summary": "",
+   "tags": []
+  },
+  {
+   "id": "concurrents",
+   "type": "note",
+   "title": "Concurrents de MCI",
+   "summary": "",
+   "tags": []
+  },
+  {
+   "id": "videastes",
+   "type": "note",
+   "title": "Vidéastes de MCI",
+   "summary": "",
+   "tags": []
+  },
+  {
+   "id": "site-mci",
+   "type": "projet",
+   "title": "Refonte du site mcisport.com",
+   "summary": "",
+   "tags": []
+  },
+  {
+   "id": "qg-jarvis",
+   "type": "projet",
+   "title": "QG Jarvis",
+   "summary": "",
+   "tags": []
+  },
+  {
+   "id": "nora",
+   "type": "personne",
+   "title": "Nora (agent mémoire)",
+   "summary": "",
+   "tags": []
+  },
+  {
+   "id": "lea",
+   "type": "personne",
+   "title": "Léa (agent)",
+   "summary": "",
+   "tags": []
+  },
+  {
+   "id": "jarvis",
+   "type": "projet",
+   "title": "Jarvis (assistant perso)",
+   "summary": "",
+   "tags": []
+  },
+  {
+   "id": "yosh-os",
+   "type": "projet",
+   "title": "Yosh OS",
+   "summary": "",
+   "tags": []
+  },
+  {
+   "id": "jarvis-etudiants",
+   "type": "idee",
+   "title": "Jarvis pour étudiants",
+   "summary": "",
+   "tags": []
+  },
+  {
+   "id": "cerveau",
+   "type": "projet",
+   "title": "Le Cerveau",
+   "summary": "",
+   "tags": []
+  },
+  {
+   "id": "global-shopping",
+   "type": "organisation",
+   "title": "Global Shopping Casher",
+   "summary": "",
+   "tags": []
+  },
+  {
+   "id": "daniel-ohayon",
+   "type": "personne",
+   "title": "Daniel Ohayon",
+   "summary": "",
+   "tags": []
+  },
+  {
+   "id": "site-vin",
+   "type": "projet",
+   "title": "Site de vente de vin Global Shopping Casher",
+   "summary": "",
+   "tags": []
+  },
+  {
+   "id": "recherche-emploi",
+   "type": "projet",
+   "title": "Recherche de stage / job",
+   "summary": "",
+   "tags": []
+  },
+  {
+   "id": "mevy-azaria",
+   "type": "personne",
+   "title": "Mevy Azaria",
+   "summary": "",
+   "tags": []
+  },
+  {
+   "id": "cv",
+   "type": "projet",
+   "title": "Mon CV",
+   "summary": "",
+   "tags": []
+  },
+  {
+   "id": "uni",
+   "type": "projet",
+   "title": "Mes études universitaires",
+   "summary": "",
+   "tags": []
+  },
+  {
+   "id": "simulation-onu",
+   "type": "projet",
+   "title": "Simulations ONU",
+   "summary": "",
+   "tags": []
+  },
+  {
+   "id": "app-spss",
+   "type": "projet",
+   "title": "App d'étude SPSS",
+   "summary": "",
+   "tags": []
+  },
+  {
+   "id": "quizzly",
+   "type": "projet",
+   "title": "Quizzly",
+   "summary": "",
+   "tags": []
+  },
+  {
+   "id": "batz",
+   "type": "projet",
+   "title": "Batz – menus suisses à petit budget",
+   "summary": "",
+   "tags": []
+  },
+  {
+   "id": "manager-v3",
+   "type": "projet",
+   "title": "Manager V3",
+   "summary": "",
+   "tags": []
+  },
+  {
+   "id": "football-legends",
+   "type": "projet",
+   "title": "Football Legends",
+   "summary": "",
+   "tags": []
+  },
+  {
+   "id": "encheres-legendes",
+   "type": "projet",
+   "title": "Enchères des Légendes",
+   "summary": "",
+   "tags": []
+  },
+  {
+   "id": "draft-legendes",
+   "type": "projet",
+   "title": "Draft des Légendes",
+   "summary": "",
+   "tags": []
+  },
+  {
+   "id": "grand-strategy",
+   "type": "projet",
+   "title": "GRAND STRATEGY – Civilizations & Nations",
+   "summary": "",
+   "tags": []
+  },
+  {
+   "id": "world-war",
+   "type": "projet",
+   "title": "WORLD WAR : Historical Strategy",
+   "summary": "",
+   "tags": []
+  },
+  {
+   "id": "jeu-civilisation",
+   "type": "idee",
+   "title": "Bâtisseurs de mondes",
+   "summary": "",
+   "tags": []
+  },
+  {
+   "id": "doc-qg",
+   "type": "document",
+   "title": "QG Jarvis (page)",
+   "summary": "",
+   "tags": []
+  },
+  {
+   "id": "doc-maquettes-qg",
+   "type": "document",
+   "title": "Maquettes QG Jarvis",
+   "summary": "",
+   "tags": []
+  },
+  {
+   "id": "doc-casier-qg",
+   "type": "document",
+   "title": "Casier du QG : propositions",
+   "summary": "",
+   "tags": []
+  },
+  {
+   "id": "doc-palette-mci",
+   "type": "document",
+   "title": "Palette MCI Sport",
+   "summary": "",
+   "tags": []
+  },
+  {
+   "id": "doc-simulation-posts",
+   "type": "document",
+   "title": "Simulation posts MCI",
+   "summary": "",
+   "tags": []
+  },
+  {
+   "id": "doc-strategie-posts",
+   "type": "document",
+   "title": "Stratégie des posts MCI Sport",
+   "summary": "",
+   "tags": []
+  },
+  {
+   "id": "doc-idees-reseaux",
+   "type": "document",
+   "title": "Réseaux sociaux de MCI Sport : idées",
+   "summary": "",
+   "tags": []
+  },
+  {
+   "id": "doc-recap-posts",
+   "type": "document",
+   "title": "Récap des idées de posts MCI Sport",
+   "summary": "",
+   "tags": []
+  },
+  {
+   "id": "doc-agent-reseaux",
+   "type": "document",
+   "title": "Agent Réseaux MCI Sport (page)",
+   "summary": "",
+   "tags": []
+  },
+  {
+   "id": "doc-playbook",
+   "type": "document",
+   "title": "Playbook Réseaux MCI Sport",
+   "summary": "",
+   "tags": []
+  },
+  {
+   "id": "doc-affiche-standard",
+   "type": "document",
+   "title": "Affiche du stage du Standard",
+   "summary": "",
+   "tags": []
+  },
+  {
+   "id": "doc-standard-sion",
+   "type": "document",
+   "title": "Standard vs Sion – Marbella",
+   "summary": "",
+   "tags": []
+  },
+  {
+   "id": "doc-dossier-mci",
+   "type": "document",
+   "title": "Dossier MCI Sport",
+   "summary": "",
+   "tags": []
+  },
+  {
+   "id": "doc-chine-onu",
+   "type": "document",
+   "title": "China – Simulation 1 (UNIFIL)",
+   "summary": "",
+   "tags": []
+  },
+  {
+   "id": "doc-indonesie-onu",
+   "type": "document",
+   "title": "Indonesia – Simulation 1 (UNIFIL)",
+   "summary": "",
+   "tags": []
+  },
+  {
+   "id": "doc-arabe",
+   "type": "document",
+   "title": "Pratique de l'arabe pour débutants",
+   "summary": "",
+   "tags": []
+  },
+  {
+   "id": "doc-spss",
+   "type": "document",
+   "title": "Apprendre malin (app SPSS)",
+   "summary": "",
+   "tags": []
+  },
+  {
+   "id": "doc-jarvis",
+   "type": "document",
+   "title": "Jarvis (page)",
+   "summary": "",
+   "tags": []
+  },
+  {
+   "id": "doc-cv",
+   "type": "document",
+   "title": "CV (version design)",
+   "summary": "",
+   "tags": []
+  },
+  {
+   "id": "doc-site-vin",
+   "type": "document",
+   "title": "Site Global Shopping Casher",
+   "summary": "",
+   "tags": []
+  },
+  {
+   "id": "doc-batz",
+   "type": "document",
+   "title": "Batz Menus Suisses",
+   "summary": "",
+   "tags": []
+  },
+  {
+   "id": "doc-quizzly",
+   "type": "document",
+   "title": "Quizzly (app)",
+   "summary": "",
+   "tags": []
+  },
+  {
+   "id": "doc-manager",
+   "type": "document",
+   "title": "Manager V3 (jeu)",
+   "summary": "",
+   "tags": []
+  },
+  {
+   "id": "doc-football-legends",
+   "type": "document",
+   "title": "Football Legends (jeu)",
+   "summary": "",
+   "tags": []
+  },
+  {
+   "id": "doc-encheres",
+   "type": "document",
+   "title": "Enchères des Légendes (jeu)",
+   "summary": "",
+   "tags": []
+  },
+  {
+   "id": "doc-draft",
+   "type": "document",
+   "title": "Draft des Légendes (jeu)",
+   "summary": "",
+   "tags": []
+  },
+  {
+   "id": "doc-grand-strategy",
+   "type": "document",
+   "title": "Grand Strategy (jeu)",
+   "summary": "",
+   "tags": []
+  },
+  {
+   "id": "doc-world-war",
+   "type": "document",
+   "title": "World War (jeu)",
+   "summary": "",
+   "tags": []
+  }
+ ],
+ "edges": [
+  [
+   "yosh",
+   "geneve",
+   "habite"
+  ],
+  [
+   "yosh",
+   "langues",
+   "parle"
+  ],
+  [
+   "yosh",
+   "competences",
+   "a"
+  ],
+  [
+   "yosh",
+   "stage-mci",
+   "fait"
+  ],
+  [
+   "stage-mci",
+   "mci-sport",
+   "chez"
+  ],
+  [
+   "stage-mci",
+   "stage-standard",
+   "inclut"
+  ],
+  [
+   "stage-mci",
+   "agent-reseaux",
+   "outil"
+  ],
+  [
+   "stage-standard",
+   "standard-liege",
+   "pour"
+  ],
+  [
+   "mci-sport",
+   "ol",
+   "client"
+  ],
+  [
+   "agent-reseaux",
+   "mci-sport",
+   "pour"
+  ],
+  [
+   "ce-qui-marche",
+   "ol",
+   "exemples"
+  ],
+  [
+   "ce-qui-marche",
+   "videastes",
+   "utilise"
+  ],
+  [
+   "yosh",
+   "qg-jarvis",
+   "a créé"
+  ],
+  [
+   "qg-jarvis",
+   "nora",
+   "contient"
+  ],
+  [
+   "qg-jarvis",
+   "jarvis",
+   "évolution de"
+  ],
+  [
+   "jarvis",
+   "yosh-os",
+   "synchronisé avec"
+  ],
+  [
+   "cerveau",
+   "qg-jarvis",
+   "même esprit que"
+  ],
+  [
+   "cerveau",
+   "nora",
+   "comme"
+  ],
+  [
+   "yosh",
+   "global-shopping",
+   "a travaillé chez"
+  ],
+  [
+   "global-shopping",
+   "geneve",
+   "basé à"
+  ],
+  [
+   "site-vin",
+   "global-shopping",
+   "pour"
+  ],
+  [
+   "yosh",
+   "recherche-emploi",
+   "a mené"
+  ],
+  [
+   "recherche-emploi",
+   "cv",
+   "utilise"
+  ],
+  [
+   "recherche-emploi",
+   "stage-mci",
+   "a abouti à"
+  ],
+  [
+   "yosh",
+   "uni",
+   "étudie"
+  ],
+  [
+   "uni",
+   "simulation-onu",
+   "inclut"
+  ],
+  [
+   "quizzly",
+   "jarvis-etudiants",
+   "même cible"
+  ],
+  [
+   "quizzly",
+   "app-spss",
+   "proche de"
+  ],
+  [
+   "manager-v3",
+   "football-legends",
+   "même univers"
+  ],
+  [
+   "grand-strategy",
+   "world-war",
+   "même univers"
+  ],
+  [
+   "maturite",
+   "manager-v3",
+   "passion football"
+  ],
+  [
+   "doc-qg",
+   "qg-jarvis",
+   "document de"
+  ],
+  [
+   "doc-maquettes-qg",
+   "qg-jarvis",
+   "document de"
+  ],
+  [
+   "doc-palette-mci",
+   "mci-sport",
+   "document de"
+  ],
+  [
+   "doc-strategie-posts",
+   "agent-reseaux",
+   "document de"
+  ],
+  [
+   "doc-recap-posts",
+   "agent-reseaux",
+   "document de"
+  ],
+  [
+   "doc-playbook",
+   "agent-reseaux",
+   "document de"
+  ],
+  [
+   "doc-standard-sion",
+   "stage-standard",
+   "document de"
+  ],
+  [
+   "doc-chine-onu",
+   "simulation-onu",
+   "document de"
+  ],
+  [
+   "doc-arabe",
+   "uni",
+   "document de"
+  ],
+  [
+   "doc-spss",
+   "app-spss",
+   "document de"
+  ],
+  [
+   "doc-cv",
+   "cv",
+   "document de"
+  ],
+  [
+   "doc-site-vin",
+   "site-vin",
+   "document de"
+  ],
+  [
+   "doc-quizzly",
+   "quizzly",
+   "document de"
+  ],
+  [
+   "doc-manager",
+   "manager-v3",
+   "document de"
+  ],
+  [
+   "doc-football-legends",
+   "football-legends",
+   "document de"
+  ],
+  [
+   "doc-draft",
+   "draft-legendes",
+   "document de"
+  ],
+  [
+   "doc-world-war",
+   "world-war",
+   "document de"
+  ]
+ ]
+}

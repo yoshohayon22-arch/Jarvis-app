@@ -1,0 +1,118 @@
+@import "tailwindcss";
+
+:root {
+  --bg: #03050b;
+  --panel: rgba(8, 14, 28, 0.78);
+  --line: rgba(80, 200, 255, 0.18);
+  --cyan: #38e1ff;
+  --violet: #a78bfa;
+  --text: #dbeafe;
+  --muted: #7f93b5;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-panel: var(--panel);
+  --color-line: var(--line);
+  --color-cyan: var(--cyan);
+  --color-violet: var(--violet);
+  --color-ink: var(--text);
+  --color-muted: var(--muted);
+  --font-sans: var(--font-inter), system-ui, sans-serif;
+  --font-display: var(--font-orbitron), var(--font-inter), sans-serif;
+}
+
+html,
+body {
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  overscroll-behavior: none;
+}
+
+body {
+  background:
+    radial-gradient(1200px 800px at 50% 40%, rgba(56, 225, 255, 0.07), transparent 60%),
+    radial-gradient(900px 600px at 80% 90%, rgba(167, 139, 250, 0.07), transparent 60%),
+    var(--bg);
+}
+
+/* Grille holographique discrète */
+.holo-grid {
+  background-image:
+    linear-gradient(rgba(56, 225, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(56, 225, 255, 0.035) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
+}
+
+.glass {
+  background: var(--panel);
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  border: 1px solid var(--line);
+  box-shadow: 0 0 0 1px rgba(56, 225, 255, 0.04), 0 10px 40px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.glow-text {
+  text-shadow: 0 0 12px rgba(56, 225, 255, 0.65), 0 0 28px rgba(56, 225, 255, 0.25);
+}
+
+.glow-ring {
+  box-shadow: 0 0 0 1px rgba(56, 225, 255, 0.45), 0 0 18px rgba(56, 225, 255, 0.35);
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.75); }
+}
+.pulse-dot { animation: pulse-dot 1.8s ease-in-out infinite; }
+
+@keyframes scan {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+.scanline { position: relative; overflow: hidden; }
+.scanline::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(56, 225, 255, 0.18), transparent);
+  animation: scan 1.6s linear infinite;
+}
+
+@keyframes rise {
+  from { opacity: 0; transform: translateY(10px) scale(0.98); }
+  to { opacity: 1; transform: none; }
+}
+.rise { animation: rise 0.35s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+
+@keyframes slide-in {
+  from { opacity: 0; transform: translateX(24px); }
+  to { opacity: 1; transform: none; }
+}
+.slide-in { animation: slide-in 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { scrollbar-width: none; }
+
+.thin-scroll::-webkit-scrollbar { width: 6px; }
+.thin-scroll::-webkit-scrollbar-thumb { background: rgba(56, 225, 255, 0.2); border-radius: 3px; }
+
+.pb-safe { padding-bottom: max(env(safe-area-inset-bottom), 0.75rem); }
+.pt-safe { padding-top: max(env(safe-area-inset-top), 0.5rem); }
+
+button, a { -webkit-tap-highlight-color: transparent; }
+:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
+
+@layer components {
+  .inp {
+    @apply w-full rounded-lg border border-line bg-black/30 px-3 py-2 text-[15px] text-ink placeholder:text-muted/60 focus:border-cyan-400/60 focus:outline-none;
+  }
+  .btn-primary {
+    @apply rounded-lg bg-cyan-400/90 px-3 py-1.5 text-sm font-semibold text-slate-950 transition hover:bg-cyan-300 disabled:opacity-40;
+  }
+  .btn-ghost {
+    @apply rounded-lg border border-line px-3 py-1.5 text-sm text-ink/85 transition hover:border-cyan-400/50 hover:text-cyan-100;
+  }
+}

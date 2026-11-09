@@ -604,40 +604,11 @@ const POLES = [
 ];
 const poleById = id => POLES.find(p => p.id === id) || POLES[0];
 
-/* Ce que le QG sait du stage MCI Sport (tiré du cerveau de Yosh : ses fiches « stage MCI » et « réseaux MCI », et le mail de Clément du 6 novembre 2026).
-   Pas de coordonnées personnelles ici : Max les retrouve dans les mails si besoin. */
-const MCI_BRIEF = `L’AGENCE
-- MCI Sport (Genève) organise des matchs amicaux internationaux, des stages de préparation et des tournées, et fait du conseil. Active depuis 2000, travaille en 5 langues.
-- CEO : Pierre Mévy Azaria (agent de matchs FIFA). Équipe : Alain Gaspoz, Manon Leroyer, Clément Michon (Director of Development, le tuteur de Yosh), Arnaud Andrieu.
-- Références : Lausanne-Sport, Sion, Nantes, Arsenal, AS Roma, OL féminin, équipe de Suisse, Copenhague–Rangers, Liverpool–Monaco. Partenaires : Proximma Sports, TEG Sport, Singular Sport, TRAVELclub AG.
-- Déjà publiés : OL vs Servette et OL vs Getafe (stade Pierre-Rajon), OL x Torino, Benfica x Almería, Servette vs Cercle Brugge (Évian), stage Lausanne-Sport (Divonne), stage OL féminin (Gérone, janvier 2024, 5 jours), affiche Arsenal vs Real Betis (Dublin, 5 août 2026, avec TEG Sport).
+/* La fiche du stage MCI Sport n'est pas dans le code : elle vit dans le cerveau privé de Yosh (souvenir « fiche_mci »).
+   La page publiée peut en recevoir une copie de départ (FICHE_DEPART), rangée dans le cerveau au premier lancement. */
+const FICHE_DEPART = '';
+let MCI_BRIEF = FICHE_DEPART;
 
-LA MISSION DE YOSH (mail de Clément, 6 novembre 2026, objet « Evenements MCI », avec le fichier evenements_MCI_saison_2026.xlsx)
-1. Analyser les matchs et stages 2026 de l’agence et proposer la liste des sujets à mettre en avant sur LinkedIn et Instagram, plus une idée de communication ciblée clubs et partenaires. Dire quels événements valorisent le mieux MCI (type de club, football féminin…).
-2. Une fois la stratégie validée : organiser la récupération des images auprès des clubs concernés et travailler les contenus.
-3. Produire 15 à 20 contenus pour décembre 2026.
-Point de suivi avec Clément le jeudi matin. Autre mission : préparer le stage d’hiver du Standard de Liège (besoins du staff, destination, hôtel, terrains, adversaires, logistique, planning et budget, communication).
-
-LA MARQUE
-- Couleurs : bleu nuit #292756 en fond, cyan #10F6F9 pour les accents, texte blanc. Signature et seul hashtag : #AtTheCenterOfTheGame.
-- Ton professionnel et enthousiaste, 1 à 2 emojis au plus (aucun sur LinkedIn de préférence). Mentionner chaque club, sélection, partenaire et vidéaste.
-
-LINKEDIN (canal principal, en anglais, pour directeurs sportifs, team managers, fédérations, partenaires)
-- 3 posts par semaine, du mardi au jeudi, 8h30. Formats les plus forts : document PDF en carrousel (1080x1350, 5 à 12 pages), vidéo native sous-titrée, texte avec chiffres.
-- Première phrase avec un chiffre ou une date. Aucun lien externe dans le texte. Pas d’appât à commentaires.
-
-INSTAGRAM (FR/EN, pour les supporters)
-- Ce qui marche : les aftermovies de vrais matchs avec un grand club (OL vs Getafe : 8 800 vues, près de 5 fois la médiane). Affiches et photos fixes : environ 200 vues.
-- Reels de 30 à 45 s, un plan toutes les 1 à 2 s, voix off, sous-titres. Rythme visé : 3 reels + 1 carrousel par semaine.
-
-CALENDRIER
-- Trêve internationale : 9-17 novembre 2026, puis 22-30 mars et 7-15 juin 2027.
-- Super League suisse : trêve du 20 décembre 2026 au 16 janvier 2027. Jupiler Pro League (Standard de Liège) : du 28 décembre 2026 au 14 janvier 2027.
-
-RÈGLES
-- Rien n’est publié avant l’annonce officielle des clubs. Chaque post est validé par le tuteur (Clément).
-- N’invente aucun chiffre, client ou anecdote : écris {{à confirmer}} et pose la question.
-- À obtenir du tuteur : accès à la page LinkedIn, rushs des aftermovies, anecdotes vraies, accord pour citer les clubs.`;
 
 /* Qui est chaque agent, et quel est son job au QG */
 const PROFILES = {
@@ -1228,6 +1199,7 @@ async function initStore() {
       }
     });
     HQ.deliverables.sort((a, b) => (b.created || 0) - (a.created || 0)); MEM.sort((a, b) => (b.at || 0) - (a.at || 0));
+    const fm = MEM.find(e => e.id === 'fiche_mci'); if (fm && fm.text) MCI_BRIEF = fm.text; else if (FICHE_DEPART && !HQ.ficheSeeded) { HQ.ficheSeeded = true; addMem({ id:'fiche_mci', src:'note', title:'Fiche du stage MCI Sport', text: FICHE_DEPART, by:'Cerveau' }, { quiet: true }); }
     refresh();
   }, e => { STORE.err = e.code; });
 }
@@ -2774,7 +2746,7 @@ Réponds à Yosh en tant que ${a.name}, en français, naturellement et brièveme
 - N’invente aucun fait sur Yosh.
 - Le résultat sera livré à Yosh sous forme de fichier dans son Google Drive : "document" (Google Docs) par défaut, "tableur" (Google Sheets) s’il veut un tableau, une liste chiffrée ou un comparatif à trier, "document+tableur" s’il veut les deux. S’il précise un format, respecte-le.
 ${a.memory ? '- Tu es la mémoire du QG : réponds à partir de ce que tu as trouvé ci-dessus et cite tes sources (Drive, Gmail, note, discussion…). Si tu ne trouves rien, dis-le et propose à Yosh de t’ajouter l’info (note, fichier, export claude.ai). Tu ne vois pas directement l’historique claude.ai ni la mémoire de Claude : seulement ce qu’il t’a confié.\n' : ''}- Si Yosh vient de t’envoyer des fichiers ou des photos, dis en une ou deux phrases ce que tu y vois ou ce que tu en retiens${a.memory ? ' : ils sont rangés dans ta mémoire et les autres agents pourront s’en servir' : ''}.
-${a.mailer ? '- Tu es le seul agent des mails de Yosh. Avec tes outils tu peux chercher, lire et résumer n’importe quel mail, et enregistrer des brouillons dans Gmail (jamais d’envoi). Pour une question sur ses mails, cherche d’abord, puis réponds avec les faits (expéditeur, date, contenu). Pour une réponse à écrire, crée le brouillon et dis-le.\n' : ''}${a.mci ? '- Pour un post ou un visuel, donne la stratégie et le texte, puis propose de passer la création à Zoé. Pour un mail de Clément, demande-le à Max.\n' : ''}- "a_retenir" : la liste des faits durables que Yosh vient de dire sur lui, ses projets, ses contacts ou ses préférences (ex. « Clément Michon est son responsable chez MCI Sport »), sinon [].
+${a.mailer ? '- Tu es le seul agent des mails de Yosh. Avec tes outils tu peux chercher, lire et résumer n’importe quel mail, et enregistrer des brouillons dans Gmail (jamais d’envoi). Pour une question sur ses mails, cherche d’abord, puis réponds avec les faits (expéditeur, date, contenu). Pour une réponse à écrire, crée le brouillon et dis-le.\n' : ''}${a.mci ? '- Pour un post ou un visuel, donne la stratégie et le texte, puis propose de passer la création à Zoé. Pour un mail de Clément, demande-le à Max.\n' : ''}- "a_retenir" : la liste des faits durables que Yosh vient de dire sur lui, ses projets, ses contacts ou ses préférences (ex. « Untel est son responsable de stage »), sinon [].
 - "ligne" résume ta réponse en 10 mots au plus, comme une notification (ex. « Propose : post LinkedIn du match », « Question : pour quelles dates ? »).
 Réponds uniquement avec un objet JSON : {"reponse":"…","ligne":"…","a_retenir":[],"tache":null} ou {"reponse":"…","ligne":"…","a_retenir":[],"tache":{"titre":"…","precisions":"tout ce que Yosh a demandé, en détail","type":"redaction|recherche|appel|impression|reunion","fichier":"document|tableur|document+tableur"}}`;
 }

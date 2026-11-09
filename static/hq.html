@@ -40,7 +40,7 @@
   body.on #power{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
   button:focus-visible,select:focus-visible,textarea:focus-visible,input:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
 
-  main{display:grid;grid-template-columns:minmax(0,1fr) 400px;gap:14px;padding-block:12px;
+  main{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));grid-template-rows:minmax(0,.85fr) minmax(0,1.6fr) auto;gap:12px;padding-block:12px;
     padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px))}
   .stage-wrap{min-width:0;min-height:0;display:flex;justify-content:center;align-items:center}
   .stats{display:flex;gap:6px;flex-wrap:wrap}
@@ -160,19 +160,19 @@
   .st.proposee{color:#fff;background:var(--warn)}
   .btn:disabled{opacity:.5;cursor:not-allowed}
   .pf-live{margin:4px 0 0;padding:8px 10px;border-left:3px solid var(--pc);background:var(--surface);border-radius:6px;font-size:12.5px;line-height:1.45;max-height:120px;overflow:auto;white-space:pre-wrap}
-  @media (min-width:1101px){
+  @media (min-width:901px){
     html,body{height:100%}
     body{display:flex;flex-direction:column;overflow:hidden}
     main{flex:1;min-height:0}
   }
-  @media (max-width:1100px){ main{grid-template-columns:1fr} .home{grid-template-rows:none} .t-sm{min-height:96px} .t-msgs,.t-cre{grid-row:auto} }
+  @media (max-width:900px){ main{grid-template-rows:none} main > .tile{grid-column:span 12} .t-office .stage-wrap{aspect-ratio:1200/760;flex:none} .kpis{grid-template-columns:1fr} }
   @media (max-width:760px){ .profile{position:static;width:auto;max-height:none;box-shadow:none;border:0;border-top:1px solid var(--line);border-radius:0} }
   @media (max-width:520px){ .brand small{display:none} .clock{min-width:0} }
   /* Accueil : de grandes tuiles, chacune ouvre son espace en plein écran */
   .home{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));grid-template-rows:minmax(0,1.3fr) minmax(0,1.3fr) minmax(0,.75fr) auto;gap:10px;min-width:0;min-height:0}
   .tile{position:relative;display:flex;flex-direction:column;gap:10px;min-width:0;min-height:0;overflow:hidden;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px 16px;color:var(--ink);font:inherit;cursor:pointer;transition:border-color .15s, box-shadow .15s}
   .tile:hover{border-color:color-mix(in srgb, var(--ink) 28%, var(--line));box-shadow:0 6px 18px rgba(20,18,16,.07)}
-  .t-valid,.t-ask{grid-column:span 12} .t-msgs{grid-column:span 7;grid-row:2} .t-cre{grid-column:8 / span 5;grid-row:2} .t-sm{grid-column:span 3;gap:4px;justify-content:space-between;padding:12px 13px}
+  .t-dash{grid-column:span 8} .t-valid{grid-column:span 4} .t-office{grid-column:span 5;cursor:pointer;padding:12px} .t-msgs{grid-column:span 3} .t-cre{grid-column:span 4} .t-ask{grid-column:span 9} .t-brain{grid-column:span 3;flex-direction:row;align-items:center;gap:12px} .t-sm{grid-column:span 3;gap:4px;justify-content:space-between;padding:12px 13px}
   .t-top{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
   .t-name{font:600 12px var(--body);text-transform:uppercase;letter-spacing:.12em;color:var(--muted)}
   .t-n{font:800 34px/1 var(--display);font-variant-numeric:tabular-nums}
@@ -290,6 +290,24 @@
   .wa-empty b{font:800 24px var(--display);color:var(--ink)}
   .wa-empty p{max-width:420px;margin:0;line-height:1.5}
   .wa-back{display:none}
+  .t-brain .t-n{font-size:26px} .t-brain small{color:var(--muted);font-size:13px}
+  .t-office .stage-wrap{flex:1;min-height:0;width:100%}
+  .t-office .stage{border-radius:10px;pointer-events:none}
+  .t-top small{color:var(--muted);font-size:12.5px}
+  .kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;flex:1;min-height:0}
+  .kgrp{display:flex;flex-direction:column;gap:6px;min-width:0;background:var(--surface2);border-radius:12px;padding:10px 12px}
+  .kgrp h4{margin:0;font:700 12.5px var(--body);display:flex;gap:6px;align-items:center}
+  .kgrp h4 i{width:9px;height:9px;border-radius:3px}
+  .krow{display:flex;gap:12px;flex-wrap:wrap}
+  .krow span{display:flex;flex-direction:column;min-width:0}
+  .krow b{font:800 24px/1.05 var(--display);font-variant-numeric:tabular-nums}
+  .krow b.warn{color:var(--warn)} .krow b.ok{color:var(--accent)}
+  .krow small{color:var(--muted);font-size:11.5px;white-space:nowrap}
+  .kgrp p{margin:0;font-size:12.5px;color:var(--muted);line-height:1.35;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+  .kpis.big{flex:none} .kpis.big .kgrp{background:var(--surface);border:1px solid var(--line);padding:16px 18px;gap:10px} .kpis.big .krow b{font-size:34px} .kpis.big .kgrp p{-webkit-line-clamp:6;font-size:14px}
+  .kbar{height:6px;border-radius:9px;background:var(--line);overflow:hidden} .kbar i{display:block;height:100%;background:var(--accent)}
+  .space.is-office .sp-body{overflow:hidden;padding-block:14px}
+  .sp-pane.office{max-width:none;height:100%} .office-hold{height:100%;display:flex} .office-hold .stage-wrap{flex:1;min-height:0}
   .t-cre-prev{display:flex;flex-direction:column;gap:6px;min-height:0;overflow:hidden;font-size:13.5px;line-height:1.35}
   .t-cre-prev img{width:100%;height:70px;object-fit:cover;border-radius:8px}
   .t-cre-prev span{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
@@ -396,7 +414,7 @@
 </head>
 <body>
 <header>
-  <div class="brand"><div class="dot"></div><div><h1>QG Jarvis</h1><small>L’open space de tes agents IA</small></div></div>
+  <div class="brand"><div class="dot"></div><div><h1>QG Jarvis</h1><small>Ton équipe d’agents IA</small></div></div>
   <div class="stats" aria-label="Chiffres du jour">
     <button class="stat" id="sValid" type="button" data-space="valid"><b id="kValid">0</b>à valider</button>
     <span class="stat"><b id="kRun">0</b>en cours</span>
@@ -407,47 +425,48 @@
   <button id="power">Activer le QG</button>
 </header>
 
-<main>
-  <section class="stage-wrap" id="stageWrap">
-    <div class="stage" id="stage"><canvas id="office" aria-label="Open space du QG"></canvas><div class="profile" id="profile" role="dialog" aria-label="Profil de l’agent" hidden></div></div>
-  </section>
-
-  <aside class="home" id="home" aria-label="Tes espaces">
-    <button class="tile t-valid" type="button" data-space="valid">
-      <span class="t-top"><span class="t-name">À valider</span><b class="t-n" id="tValidN">0</b></span>
-      <span class="t-lines" id="tValidL"></span>
-    </button>
-    <button class="tile t-cre" type="button" data-space="cre">
-      <span class="t-top"><span class="t-name">Créations</span><b class="t-n" id="tCreN">0</b></span>
-      <span class="t-cre-prev" id="tCreP"></span>
-    </button>
-    <button class="tile t-msgs" type="button" data-space="msgs">
-      <span class="t-top"><span class="t-name">Messages</span><b class="t-n" id="tMsgN">0</b></span>
-      <span class="t-lines" id="tMsgL"></span>
-    </button>
-    <button class="tile t-sm" type="button" data-space="files"><span class="t-name">Fichiers</span><b class="t-n" id="tFileN">0</b><small id="tFileS">docs</small></button>
-    <button class="tile t-sm" type="button" data-space="team"><span class="t-name">Équipe</span><b class="t-n" id="tTeamN">0</b><small id="tTeamS">au bureau</small></button>
-    <button class="tile t-sm" type="button" data-space="mem"><span class="t-name">Mémoire</span><b class="t-n" id="tMemN">0</b><small id="tMemS">souvenirs</small></button>
-    <button class="tile t-sm" type="button" data-space="day"><span class="t-name">Journée</span><b class="t-n" id="tDayN">--:--</b><small id="tDayS">plan</small></button>
-    <form class="tile t-ask" id="ask">
+<main class="dash" id="home" aria-label="Ton QG">
+  <button class="tile t-dash" type="button" data-space="day" aria-label="Ouvrir le Dashboard">
+    <span class="t-top"><span class="t-name">Dashboard</span><small id="dashDate"></small></span>
+    <span class="kpis" id="dashK"></span>
+  </button>
+  <button class="tile t-valid" type="button" data-space="valid">
+    <span class="t-top"><span class="t-name">À valider</span><b class="t-n" id="tValidN">0</b></span>
+    <span class="t-lines" id="tValidL"></span>
+  </button>
+  <div class="tile t-office" id="officeTile" role="button" tabindex="0" data-space="office" aria-label="Agrandir l’open space">
+    <span class="t-top"><span class="t-name">Open space</span><small id="tTeamS">au bureau</small></span>
+    <section class="stage-wrap" id="stageWrap">
+      <div class="stage" id="stage"><canvas id="office" aria-label="Open space du QG"></canvas><div class="profile" id="profile" role="dialog" aria-label="Profil de l’agent" hidden></div></div>
+    </section>
+  </div>
+  <button class="tile t-msgs" type="button" data-space="msgs">
+    <span class="t-top"><span class="t-name">Messages</span><b class="t-n" id="tMsgN">0</b></span>
+    <span class="t-lines" id="tMsgL"></span>
+  </button>
+  <button class="tile t-cre" type="button" data-space="cre">
+    <span class="t-top"><span class="t-name">Créations &amp; fichiers</span><b class="t-n" id="tCreN">0</b></span>
+    <span class="t-cre-prev" id="tCreP"></span>
+  </button>
+  <form class="tile t-ask" id="ask">
       <label class="t-name" for="askText">Demander à un agent</label>
       <div class="ask-row"><select id="askAgent" aria-label="Agent"></select><input id="askText" placeholder="Ex. : trouve-moi un hôtel à Lyon samedi" required autocomplete="off"><button class="btn" type="submit">Envoyer</button></div>
     </form>
-  </aside>
+  <button class="tile t-brain" type="button" data-space="mem"><span class="t-name">Cerveau</span><b class="t-n" id="tMemN">0</b><small id="tMemS">souvenirs</small></button>
+  <div hidden><b id="tFileN"></b><small id="tFileS"></small><b id="tTeamN"></b><b id="tDayN"></b><small id="tDayS"></small></div>
 </main>
 
 <section class="space" id="space" role="dialog" aria-modal="true" aria-labelledby="spTitle" hidden>
   <div class="sp-bar">
-    <button class="btn ghost" id="spBack" type="button">← Open space</button>
+    <button class="btn ghost" id="spBack" type="button">← Accueil</button>
     <h2 id="spTitle">À valider</h2>
     <nav class="sp-nav" id="spNav" aria-label="Espaces">
       <button type="button" data-space="valid">À valider<b id="nValid" hidden></b></button>
       <button type="button" data-space="msgs">Messages<b id="nMsgs" hidden></b></button>
       <button type="button" data-space="cre">Créations<b id="nCre" hidden></b></button>
-      <button type="button" data-space="files">Fichiers<b id="nFiles" hidden></b></button>
-      <button type="button" data-space="mem">Mémoire</button>
-      <button type="button" data-space="team">Équipe</button>
-      <button type="button" data-space="day">Journée</button>
+      <button type="button" data-space="mem">Cerveau</button>
+      <button type="button" data-space="day">Dashboard</button>
+      <button type="button" data-space="office">Open space</button><b id="nFiles" hidden></b>
     </nav>
   </div>
   <div class="sp-body" id="spBody">
@@ -472,17 +491,19 @@
       <article class="cz-read th-doc" id="thDoc" hidden></article>
     </div>
     <div class="sp-pane" id="sp-cre" hidden>
-      <div class="sp-head"><p>Les posts que tes agents ont préparés, tels qu’ils apparaîtront. Rien n’est publié : copie le texte, ouvre le visuel, ou demande une modification.</p></div>
+      <div class="sp-head"><p>Tout ce que tu as demandé arrive ici : posts, vidéos, fichiers et liens. Rien n’est publié : copie le texte, ouvre le visuel, ou demande une modification.</p></div>
       <div class="mem-src" id="creFilters"></div>
       <div class="cre-grid" id="creGrid"></div>
-    </div>
-    <div class="sp-pane" id="sp-files" hidden>
+      <div id="creFiles" hidden style="display:flex;flex-direction:column;gap:14px">
       <input class="fsearch" id="fSearch" type="search" placeholder="Chercher un fichier, un lien, un agent…" aria-label="Chercher dans les fichiers et les liens">
       <div class="files-grid">
         <section><h3 class="sp-h">Fichiers <em id="fCount"></em></h3><ul class="flist" id="fFiles"></ul></section>
         <section><h3 class="sp-h">Liens <em id="lCount"></em></h3><ul class="flist" id="fLinks"></ul></section>
       </div>
+      </div>
     </div>
+    <div class="sp-pane" id="sp-files" hidden></div>
+    <div class="sp-pane office" id="sp-office" hidden><div class="office-hold" id="officeHold"></div></div>
     <div class="sp-pane" id="sp-mem" hidden>
       <form class="composer" id="memAsk"><input id="memQ" placeholder="Que sait Nora sur… ? (ex. MCI Sport, Clément, mes études)" required autocomplete="off"><button class="btn" type="submit">Demander à Nora</button></form>
       <div class="card2 mem-answer" id="memAnswer" hidden></div>
@@ -513,6 +534,7 @@
     </div>
     <div class="sp-pane" id="sp-team" hidden><div class="team" id="team"></div></div>
     <div class="sp-pane" id="sp-day" hidden>
+      <div class="kpis big" id="dashBig"></div>
       <div class="day-grid">
         <section class="card2">
           <h3 class="sp-h">Plan du jour <em id="dayDate"></em></h3>
@@ -549,107 +571,96 @@ const MIN = (h, m = 0) => h * 60 + m;
    Pôles et tâches (tirées de tes vrais projets)
    ---------------------------------------------------------------------- */
 const POLES = [
-  { id:'dir', name:'Direction', full:'Direction · Jarvis', color:'#0ea5e9',
-    agents:[ { name:'Jarvis', role:'Chef d’orchestre', jarvis:true }, { name:'Clara', role:'Assistante de direction' } ],
-    calls:['On cale les priorités du jour ?', 'Je te mets ça dans l’agenda', 'Point rapide à 14h ?'],
-    tasks:[ { t:'Préparer le brief de la journée', s:['type','print'] }, { t:'Faire le tour des pôles', s:['tour'] },
-      { t:'Planifier la semaine : priorités par pôle', s:['type','meeting'] }, { t:'Faire le bilan de fin de journée', s:['type'] } ] },
-  { id:'web', name:'Recherche web', full:'Recherche web', color:'#7c3aed', bench:0, half:0, research:true,
-    agents:[ { name:'Sacha', role:'Chercheur principal' }, { name:'Maya', role:'Voyages et hébergements' }, { name:'Théo', role:'Comparatifs et achats' } ],
-    calls:['Je recoupe avec une deuxième source', 'Le prix affiché a changé depuis hier', 'Trois sites disent la même chose'],
-    tasks:[ { t:'Veille : les nouveautés des outils IA utiles pour Jarvis', s:['web','web','type'] },
-      { t:'Trouver un hébergement pour un déplacement prévu à l’agenda', s:['web','web','type'] },
-      { t:'Repérer les offres d’emploi étudiant publiées cette semaine à Genève', s:['web','web','type'] },
-      { t:'Comparer les prix d’un achat prévu (3 boutiques, livraison comprise)', s:['web','web','type'] } ] },
-  { id:'soc', name:'Réseaux & Contenu', full:'Réseaux & Contenu', color:'#f97316', bench:0, half:1,
-    agents:[ { name:'Léa', role:'Rédactrice LinkedIn' }, { name:'Noah', role:'Créateur de Reels' }, { name:'Emma', role:'Analyste des stats' }, { name:'Zoé', role:'Directrice artistique · visuels et vidéos', studio:true } ],
-    calls:['On valide le post avec MCI Sport ?', 'Tu peux m’envoyer les photos du match ?', 'Le Reel sort demain 18h', 'On tague qui sur LinkedIn ?'],
-    tasks:[ { t:'Rédiger le post LinkedIn de la semaine pour MCI Sport', s:['type','meeting'] },
-      { t:'Écrire le script d’un Reel Instagram', s:['type','web'] },
-      { t:'Analyser les stats Metricool des derniers posts', s:['web','type','print'] },
-      { t:'Programmer les publications de la semaine dans Typefully', s:['type'] },
-      { t:'Répondre aux commentaires et aux DM', s:['type','call'] } ] },
-  { id:'tech', name:'Tech & Agents IA', full:'Tech & Agents IA', color:'#10b981', bench:1, half:0,
-    agents:[ { name:'Hugo', role:'Développeur Jarvis' }, { name:'Malik', role:'Agents vocaux' }, { name:'Sofia', role:'Intégrations et déploiement' } ],
-    calls:['Le webhook répond en 200 ?', 'On teste l’agent vocal ensemble ?', 'Je déploie dans 5 minutes'],
-    tasks:[ { t:'Ajouter une fonction à Jarvis', s:['type','web'] }, { t:'Configurer un agent vocal ElevenLabs', s:['type','call'] },
-      { t:'Corriger un bug de Send Me Files', s:['web','type'] }, { t:'Revue de code de la semaine', s:['meeting','type'] },
-      { t:'Brancher le QG sur l’agenda Google', s:['type','web'] } ] },
-  { id:'ops', name:'Ops · Mail & Admin', full:'Ops · Mail & Admin', color:'#64748b', bench:1, half:1,
-    agents:[ { name:'Max', role:'Boîte mail' }, { name:'Jade', role:'Administratif' } ],
-    calls:['Service de l’état civil ? Bonjour…', 'Je vous confirme la réception du dossier', 'Bien reçu votre mail, je vous réponds vite'],
-    tasks:[ { t:'Demander l’attestation et l’acte de naissance', s:['type','call'] },
-      { t:'Relancer le service administratif sans réponse', s:['call','type'] },
-      { t:'Scanner et classer les documents reçus', s:['print','type'] } ] },
-  { id:'mem', name:'Mémoire', full:'Mémoire · Archives', color:'#a16207', memory:true,
-    agents:[ { name:'Nora', role:'Mémoire du QG', memory:true } ],
-    calls:['Je te retrouve ça dans les archives', 'C’est noté, je le range', 'J’ai un document là-dessus'],
+  { id:'dir', name:'Direction', full:'Direction', color:'#0ea5e9',
+    agents:[ { name:'Jarvis', role:'Chef d’orchestre', jarvis:true } ],
+    calls:['On cale les priorités du jour ?', 'Point rapide à 14h ?'],
+    tasks:[ { t:'Préparer le brief de la journée', s:['type'] } ] },
+  { id:'web', name:'Recherche', full:'Recherche web', color:'#7c3aed', bench:0, half:0, research:true,
+    agents:[ { name:'Sacha', role:'Recherche web' } ],
+    calls:['Je recoupe avec une deuxième source', 'Trois sites disent la même chose'],
+    tasks:[ { t:'Vérifier une info, comparer des options, trouver un hôtel ou un prix', s:['web','web','type'] } ] },
+  { id:'soc', name:'Création', full:'Posts & vidéos', color:'#f97316', bench:0, half:1,
+    agents:[ { name:'Zoé', role:'Posts et vidéos', studio:true } ],
+    calls:['Tu peux m’envoyer les photos du match ?', 'Le visuel est prêt, je te l’envoie'],
+    tasks:[ { t:'Créer un post complet (texte + visuel) ou une vidéo courte', s:['type','type'] } ] },
+  { id:'mci', name:'Stage MCI', full:'Stage MCI Sport', color:'#10b981', bench:1, half:0,
+    agents:[ { name:'Sam', role:'Expert du stage MCI Sport', mci:true } ],
+    calls:['On valide ça avec Clément ?', 'Rien ne sort avant l’annonce du club'],
+    tasks:[ { t:'Analyser les événements MCI 2026 et proposer les sujets à mettre en avant', s:['type','type'] },
+      { t:'Préparer le point du jeudi avec Clément', s:['type'] },
+      { t:'Tenir le plan des 15 à 20 contenus de décembre', s:['type'] } ] },
+  { id:'ops', name:'Mails', full:'Mails', color:'#64748b', bench:1, half:1,
+    agents:[ { name:'Max', role:'Tes mails', mailer:true } ],
+    calls:['Bien reçu votre mail, je vous réponds vite', 'Je prépare le brouillon'],
+    tasks:[ { t:'Trier les mails non lus et préparer les réponses', s:['read','reply'] } ] },
+  { id:'mem', name:'Cerveau', full:'Cerveau', color:'#a16207', memory:true,
+    agents:[ { name:'Nora', role:'Le cerveau du QG', memory:true } ],
+    calls:['Je te retrouve ça dans le cerveau', 'C’est noté, je le range'],
     tasks:[ { t:'Faire la fiche de tout ce que je sais sur un sujet', s:['web','type'] } ] },
 ];
 const poleById = id => POLES.find(p => p.id === id) || POLES[0];
 
+/* Ce que le QG sait du stage MCI Sport (tiré du cerveau de Yosh : ses fiches « stage MCI » et « réseaux MCI », et le mail de Clément du 6 novembre 2026).
+   Pas de coordonnées personnelles ici : Max les retrouve dans les mails si besoin. */
+const MCI_BRIEF = `L’AGENCE
+- MCI Sport (Genève) organise des matchs amicaux internationaux, des stages de préparation et des tournées, et fait du conseil. Active depuis 2000, travaille en 5 langues.
+- CEO : Pierre Mévy Azaria (agent de matchs FIFA). Équipe : Alain Gaspoz, Manon Leroyer, Clément Michon (Director of Development, le tuteur de Yosh), Arnaud Andrieu.
+- Références : Lausanne-Sport, Sion, Nantes, Arsenal, AS Roma, OL féminin, équipe de Suisse, Copenhague–Rangers, Liverpool–Monaco. Partenaires : Proximma Sports, TEG Sport, Singular Sport, TRAVELclub AG.
+- Déjà publiés : OL vs Servette et OL vs Getafe (stade Pierre-Rajon), OL x Torino, Benfica x Almería, Servette vs Cercle Brugge (Évian), stage Lausanne-Sport (Divonne), stage OL féminin (Gérone, janvier 2024, 5 jours), affiche Arsenal vs Real Betis (Dublin, 5 août 2026, avec TEG Sport).
+
+LA MISSION DE YOSH (mail de Clément, 6 novembre 2026, objet « Evenements MCI », avec le fichier evenements_MCI_saison_2026.xlsx)
+1. Analyser les matchs et stages 2026 de l’agence et proposer la liste des sujets à mettre en avant sur LinkedIn et Instagram, plus une idée de communication ciblée clubs et partenaires. Dire quels événements valorisent le mieux MCI (type de club, football féminin…).
+2. Une fois la stratégie validée : organiser la récupération des images auprès des clubs concernés et travailler les contenus.
+3. Produire 15 à 20 contenus pour décembre 2026.
+Point de suivi avec Clément le jeudi matin. Autre mission : préparer le stage d’hiver du Standard de Liège (besoins du staff, destination, hôtel, terrains, adversaires, logistique, planning et budget, communication).
+
+LA MARQUE
+- Couleurs : bleu nuit #292756 en fond, cyan #10F6F9 pour les accents, texte blanc. Signature et seul hashtag : #AtTheCenterOfTheGame.
+- Ton professionnel et enthousiaste, 1 à 2 emojis au plus (aucun sur LinkedIn de préférence). Mentionner chaque club, sélection, partenaire et vidéaste.
+
+LINKEDIN (canal principal, en anglais, pour directeurs sportifs, team managers, fédérations, partenaires)
+- 3 posts par semaine, du mardi au jeudi, 8h30. Formats les plus forts : document PDF en carrousel (1080x1350, 5 à 12 pages), vidéo native sous-titrée, texte avec chiffres.
+- Première phrase avec un chiffre ou une date. Aucun lien externe dans le texte. Pas d’appât à commentaires.
+
+INSTAGRAM (FR/EN, pour les supporters)
+- Ce qui marche : les aftermovies de vrais matchs avec un grand club (OL vs Getafe : 8 800 vues, près de 5 fois la médiane). Affiches et photos fixes : environ 200 vues.
+- Reels de 30 à 45 s, un plan toutes les 1 à 2 s, voix off, sous-titres. Rythme visé : 3 reels + 1 carrousel par semaine.
+
+CALENDRIER
+- Trêve internationale : 9-17 novembre 2026, puis 22-30 mars et 7-15 juin 2027.
+- Super League suisse : trêve du 20 décembre 2026 au 16 janvier 2027. Jupiler Pro League (Standard de Liège) : du 28 décembre 2026 au 14 janvier 2027.
+
+RÈGLES
+- Rien n’est publié avant l’annonce officielle des clubs. Chaque post est validé par le tuteur (Clément).
+- N’invente aucun chiffre, client ou anecdote : écris {{à confirmer}} et pose la question.
+- À obtenir du tuteur : accès à la page LinkedIn, rushs des aftermovies, anecdotes vraies, accord pour citer les clubs.`;
+
 /* Qui est chaque agent, et quel est son job au QG */
 const PROFILES = {
-  Jarvis: { who:'L’IA qui dirige le QG. Inspiré de l’assistant de Tony Stark : poli, efficace, avec une pointe d’humour britannique.',
-    mission:'Chef d’orchestre : il répartit le travail entre les pôles et veille à ce que tes priorités avancent.',
-    resp:['Anime le stand-up de 9h30 devant les post-its', 'Fait le tour des équipes et débloque les sujets', 'Prépare ton brief du matin et le bilan du soir'],
-    tools:['Agenda', 'Brief quotidien', 'Tous les pôles'], projects:['Jarvis-app'], habit:'Ne boit jamais de café, mais en propose toujours.' },
-  Clara: { who:'Organisée et discrète, elle est la mémoire du QG.',
-    mission:'Transforme les décisions de Jarvis en tâches claires pour chaque pôle.',
-    resp:['Prépare les réunions et note les décisions', 'Planifie la semaine avec Jarvis', 'Rédige le bilan de fin de journée'],
-    tools:['Google Agenda', 'Docs'], projects:['Organisation du QG'], habit:'Arrive avec un carnet, repart avec trois listes.' },
-  Sacha: { who:'Curieux et méthodique : il ne croit une information qu’après l’avoir vue dans deux sources.',
-    mission:'Mène les recherches approfondies sur internet : il fouille, lit les pages, recoupe et te rend un rapport sourcé.',
-    resp:['Lance plusieurs recherches sous des angles différents', 'Lit les pages clés pour vérifier les faits', 'Cite chaque source avec son lien'],
-    tools:['Recherche web (Firecrawl)', 'Lecture de pages'], projects:['Veille', 'Questions de Yosh'], habit:'Ouvre toujours un onglet de trop.' },
-  Maya: { who:'Elle a l’œil pour le bon plan : bien placé, bien noté, au bon prix.',
-    mission:'Trouve hôtels, hébergements et activités avec les prix et disponibilités réels.',
-    resp:['Cherche les hébergements sur Booking.com aux dates demandées', 'Compare prix, notes, quartier et conditions', 'Donne le lien de réservation de chaque option'],
-    tools:['Booking.com', 'Recherche web (Firecrawl)'], projects:['Déplacements', 'Sorties'], habit:'Vérifie toujours la distance à pied jusqu’à la gare.' },
-  Théo: { who:'Le comparateur du QG : il épluche les fiches produit et les frais cachés.',
-    mission:'Compare des offres, des prix et des produits pour t’aider à choisir.',
-    resp:['Trouve les meilleures offres en ligne', 'Compare prix, livraison et avis', 'Recommande un choix clair avec ses raisons'],
-    tools:['Recherche web (Firecrawl)', 'Lecture de pages'], projects:['Achats', 'Emplois étudiants'], habit:'Calcule le prix au kilo de tout, même du café.' },
-  Zoé: { who:'L’œil du QG : elle pense en images, en couleurs et en rythme de montage.',
-    mission:'Crée tes posts en image et monte tes vidéos courtes, prêts à publier.',
-    resp:['Conçoit les visuels de posts et de stories dans Canva', 'Monte des vidéos courtes sous-titrées (jusqu’à 90 secondes)', 'Écrit la légende et les hashtags qui vont avec'],
-    tools:['Canva', 'HyperFrames (HeyGen)'], projects:['MCI Sport', 'Réseaux de Yosh'], habit:'Refait toujours une version « plus audacieuse » au cas où.' },
-  Léa: { who:'La plume du QG : elle raconte une victoire en trois lignes.',
-    mission:'Écrit les posts LinkedIn, en priorité pour MCI Sport.',
-    resp:['Rédige le post de la semaine', 'Adapte le ton à chaque club', 'Fait valider avant publication'],
-    tools:['LinkedIn', 'Typefully'], projects:['MCI Sport'], habit:'Relit chaque post à voix haute.' },
-  Noah: { who:'Le plus créatif du pôle, toujours un téléphone à la main.',
-    mission:'Imagine et scénarise les Reels Instagram.',
-    resp:['Écrit les scripts de Reels', 'Trouve les accroches des trois premières secondes', 'Prépare les plans à tourner'],
-    tools:['Instagram', 'Notes de tournage'], projects:['MCI Sport'], habit:'Champion officieux du ping-pong.' },
-  Emma: { who:'Elle croit aux chiffres plus qu’aux impressions.',
-    mission:'Mesure ce qui marche sur les réseaux et le dit à l’équipe.',
-    resp:['Analyse les stats Metricool', 'Imprime le rapport de la semaine', 'Propose quoi refaire et quoi arrêter'],
-    tools:['Metricool', 'Tableurs'], projects:['MCI Sport'], habit:'Toujours une gourde pleine sur le bureau.' },
-  Hugo: { who:'Il connaît chaque ligne de Jarvis.',
-    mission:'Fait évoluer Jarvis et ce QG.',
-    resp:['Ajoute de nouvelles fonctions à Jarvis', 'Branche le QG sur Gmail et l’agenda', 'Fait la revue de code'],
-    tools:['Flask', 'OpenAI', 'GitHub'], projects:['Jarvis-app'], habit:'Se lève pour s’étirer toutes les heures.' },
-  Malik: { who:'Passionné de voix et de téléphonie.',
-    mission:'Donne une voix aux agents du QG.',
-    resp:['Configure les agents vocaux ElevenLabs', 'Teste les conversations au téléphone', 'Connecte les agents à tes outils'],
-    tools:['ElevenLabs'], projects:['Agents vocaux'], habit:'Teste ses agents en appelant depuis un box.' },
-  Sofia: { who:'Calme même quand un serveur tombe.',
-    mission:'Relie les outils entre eux et met les projets en ligne.',
-    resp:['Corrige les bugs de Send Me Files', 'Déploie les nouvelles versions', 'Surveille que tout tourne'],
-    tools:['Lovable', 'GitHub'], projects:['Send Me Files', 'Clear Path Organizer'], habit:'Premier café à 9h01 précises.' },
-  Max: { who:'Rien ne lui échappe dans une boîte de réception.',
-    mission:'Lit tes mails, repère l’urgent et prépare les réponses.',
-    resp:['Relève tes mails non lus toutes les 90 secondes', 'Classe chaque mail par priorité', 'Enregistre des brouillons dans Gmail, sans jamais rien envoyer'],
-    tools:['Gmail'], projects:['Ta boîte mail'], habit:'Dit « rien de neuf » plus souvent qu’il ne le voudrait.' },
+  Jarvis: { who:'L’IA qui dirige le QG : poli, efficace, une pointe d’humour britannique.',
+    mission:'Lit ton agenda et tes mails, te propose les priorités du jour et répartit le travail. Rien ne part sans ta validation.',
+    resp:['Propose le plan du jour', 'Envoie chaque demande au bon agent', 'Te résume où en est le travail'],
+    tools:['Google Agenda', 'Tableau de bord'], projects:['Toute l’équipe'], habit:'Fait le tour des bureaux les mains dans le dos.' },
+  Max: { who:'Le seul agent de tes mails : il lit tout, ne perd rien, n’envoie jamais rien sans toi.',
+    mission:'S’occupe de toute ta boîte Gmail : trie les non lus, résume, retrouve un mail ou une pièce jointe, prépare les réponses en brouillon.',
+    resp:['Trie et résume les mails non lus', 'Retrouve n’importe quel mail sur demande', 'Écrit les réponses et les enregistre en brouillon dans Gmail', 'Transmet aux autres agents le contenu d’un mail'],
+    tools:['Gmail (lecture, recherche, brouillons)'], projects:['Ta boîte mail'], habit:'Atteint l’inbox zéro avant son premier café.' },
+  Sam: { who:'Il connaît ton stage chez MCI Sport par cœur : l’agence, l’équipe, la marque, le plan de Clément.',
+    mission:'Ton bras droit pour le stage MCI Sport : stratégie de contenus, sujets à mettre en avant, préparation des points avec Clément, stage du Standard de Liège.',
+    resp:['Analyse les événements MCI et propose les sujets LinkedIn et Instagram', 'Tient le plan des 15 à 20 contenus de décembre', 'Prépare tes points du jeudi avec Clément', 'Brief Zoé pour chaque post, aux couleurs MCI', 'Vérifie les règles : validation du tuteur, rien avant l’annonce des clubs'],
+    tools:['Fiche MCI Sport', 'Cerveau', 'Mails via Max', 'Recherche via Sacha'], projects:['Stage MCI Sport', 'Standard de Liège'], habit:'Connaît le calendrier des trêves mieux que les clubs.' },
+  'Zoé': { who:'Créatrice : elle rend toujours un post fini, pas un brouillon.',
+    mission:'Crée tes posts complets (texte prêt à publier + visuel Canva) et tes vidéos courtes (HeyGen). Tout arrive dans Créations.',
+    resp:['Écrit le texte du post, adapté au réseau', 'Crée le visuel dans Canva', 'Monte les vidéos courtes sous-titrées (90 s au plus)', 'Demande à Sam les règles MCI et à Nora tes photos'],
+    tools:['Canva', 'HyperFrames by HeyGen', 'Cerveau'], projects:['Posts MCI Sport', 'Tes réseaux'], habit:'Aligne tout au pixel près.' },
+  Sacha: { who:'Curieux et méthodique : il ne croit une info que s’il la trouve deux fois.',
+    mission:'Fait de vraies recherches sur internet : hôtels, prix, comparatifs, infos à vérifier, veille.',
+    resp:['Cherche, lit et recoupe plusieurs sources', 'Trouve hôtels et prix réels (Booking.com)', 'Rend un rapport avec les liens'],
+    tools:['Firecrawl', 'Booking.com'], projects:['Tes recherches'], habit:'Ouvre 30 onglets, n’en ferme aucun.' },
   Nora: { who:'Elle n’oublie rien et sait où tout est rangé.',
-    mission:'Tient la mémoire du QG : ce que tu lui confies, tes fichiers et photos, tes discussions avec Claude, et elle fouille ton Drive et tes mails quand un agent a besoin d’une info.',
-    resp:['Range tes notes, fichiers, photos, tes sessions Claude Code et l’export de tes discussions claude.ai', 'Demande à ses collègues ce qui lui manque : Max pour un mail et ses pièces jointes, Léa pour ses posts…', 'Répond aux autres agents avant chaque tâche : ce qu’on sait déjà sur le sujet', 'Cherche dans Google Drive et Gmail les documents utiles', 'Retient ce que tu dis de toi dans les discussions'],
-    tools:['Mémoire du QG', 'Google Drive', 'Gmail', 'Sessions Claude Code', 'Export claude.ai', 'Ses collègues'], projects:['Tout ce que tu fais'], habit:'Colle une étiquette sur chaque boîte d’archives.' },
-  Jade: { who:'Patiente avec les guichets, tenace avec les relances.',
-    mission:'Mène tes démarches administratives à Genève.',
-    resp:['Demandes à l’état civil', 'Relance les services sans réponse', 'Monte le dossier de pièces justificatives'],
-    tools:['Téléphone', 'Scanner'], projects:['Attestation et acte de naissance'], habit:'Classe tout, même les post-its.' },
+    mission:'Tient le cerveau du QG : tes notes, fichiers, photos, tes discussions avec Claude, et elle fouille ton Drive et tes mails quand un agent a besoin d’une info.',
+    resp:['Range ce que tu lui confies (notes, fichiers, photos, exports Claude)', 'Répond aux agents avant chaque tâche : ce qu’on sait déjà', 'Cherche dans Google Drive et Gmail', 'Retient ce que tu dis de toi dans les discussions'],
+    tools:['Cerveau', 'Google Drive', 'Gmail', 'Sessions Claude Code'], projects:['Tout ce que tu fais'], habit:'Colle une étiquette sur chaque boîte d’archives.' },
   Livreur: { who:'Livreur de passage, il ne fait pas partie de l’équipe.',
     mission:'Dépose les colis à l’accueil du QG.', resp:['Passe vers 10h40 et 15h10'], tools:[], projects:[], habit:'Ne reste jamais pour le café.' },
 };
@@ -663,7 +674,7 @@ const seatPos = (bi, half, i, top) => ({ x: BX + half * 250 + 45 + i * 80, y: to
 POLES.forEach(p => {
   if (p.id === 'dir') p.seats = [ { x:1005, y:282, up:false }, { x:1005, y:364, up:true } ];
   else if (p.id === 'mem') p.seats = [ { x:190, y:248, up:true } ];
-  else p.seats = [ seatPos(p.bench, p.half, 0, true), seatPos(p.bench, p.half, 2, false), seatPos(p.bench, p.half, 1, true), seatPos(p.bench, p.half, 0, false) ];
+  else p.seats = [ seatPos(p.bench, p.half, 1, p.bench === 1), seatPos(p.bench, p.half, 0, false) ];
   p.custom = []; p.done = 0; p.last = null;
 });
 
@@ -906,16 +917,9 @@ function planIdle(a) {
 }
 
 function startTask(a) {
-  if (!ENGINE.brain) return;
-  const p = a.pole; let t = null;
-  if (a.custom.length) t = a.custom.shift();
-  else if (p.custom.length) t = p.custom.shift();
-  if (!t) return;
-  t.started = timeStr(); t.status = 'encours'; t.agent = a.name;
+  let t = a.work && !a.work.finished ? a.work : null;
+  if (!t) { t = a.custom.find(x => x.noJob); if (!t) return; a.custom.splice(a.custom.indexOf(t), 1); t.started = timeStr(); t.status = 'encours'; t.agent = a.name; }
   a.task = t; a.stepIdx = 0; a.stepFrac = 0; a.stats = { calls:0, prints:0 };
-  if (!t.noJob) t.job = t.mail ? mailJob(a, t) : a.studio ? studioJob(a, t) : a.pole.research ? researchJob(a, t) : taskJob(a, t);
-  log(a, `${a.name} commence : ${t.title}`);
-  renderPlan();
 }
 
 function planStep(a) {
@@ -1204,10 +1208,28 @@ function highFive(a) {
   if (mate) setTimeout(() => { mate.say('✋ Bien joué !', 2); mate.stretchT = 1; }, 700 / HQ.speed);
 }
 
+// l'animation a fini de « jouer » la tâche : le vrai travail, lui, est suivi par dispatch()
 function completeTask(a) {
-  const t = a.task, p = a.pole;
-  a.task = null;
-  if (t.noJob) { t.status = 'livre'; a.say('✅ Fait', 2); renderPlan(); return; }
+  const t = a.task; a.task = null;
+  if (t && t.noJob) { t.status = 'livre'; a.say('✅ Fait', 2); renderPlan(); }
+}
+/* Moteur réel : dès qu'une tâche est validée, le travail part tout de suite (une tâche à la fois par agent),
+   que l'open space soit affiché ou non. L'animation ne fait que montrer ce qui se passe. */
+function dispatch() {
+  if (!ENGINE.brain) return;
+  AGENTS.forEach(a => {
+    if (a.work) return;
+    const t = a.custom.find(x => !x.noJob); if (!t) return;
+    a.custom.splice(a.custom.indexOf(t), 1);
+    t.started = timeStr(); t.status = 'encours'; t.agent = a.name; a.work = t;
+    t.job = t.mail ? mailJob(a, t) : a.studio ? studioJob(a, t) : a.pole.research ? researchJob(a, t) : taskJob(a, t);
+    log(a, `${a.name} commence : ${t.title}`); renderPlan(); refresh();
+    const tick = setInterval(() => { if (!t.job.settled) return; clearInterval(tick); try { finishTask(a, t); } finally { a.work = null; t.finished = true; dispatch(); refresh(); } }, 400);
+  });
+}
+setInterval(dispatch, 2000);
+function finishTask(a, t) {
+  const p = a.pole;
   const job = t.job || { ok:false, error:{ code:'no_brain' } };
   const spec = { title: t.title, steps: t.steps, brief: t.brief || '', mail: t.mail || null, agent: a.name, requested: !!t.requested, format: t.format || '' };
   if (!job.ok) {
@@ -1237,6 +1259,7 @@ function completeTask(a) {
     d = { title: t.title, pole: p.id, agent: a.name, time: stamp(), status: 'ai', spec, content: job.text, requested: !!t.requested, format: t.format || 'document' };
     d.links = buildLinks(job.text, job);
     if (job.media && job.media.length) { d.media = job.media; d.links = []; }
+    if (job.network) d.network = job.network;
     if (job.hotels && job.hotels.length) d.tables = [{ name: 'hebergements-' + slug(t.title) + '.csv', rows: job.hotels }];
     log(a, `${a.name} a livré : ${t.title}`, true);
   }
@@ -1337,7 +1360,7 @@ function persona(a) {
 Qui tu es : ${a.who}
 Ton job au QG : ${a.mission}
 Tes responsabilités : ${(a.resp || []).join(' ; ')}.
-Projets que tu suis : ${(a.projects || []).join(', ') || 'aucun en particulier'}.`;
+Projets que tu suis : ${(a.projects || []).join(', ') || 'aucun en particulier'}.${a.mci ? '\n\nCE QUE TU SAIS DU STAGE MCI SPORT (ta référence, à appliquer) :\n' + MCI_BRIEF : ''}`;
 }
 /* ---------- Mémoire : Nora pioche dans tes archives pour les autres agents ---------- */
 const MEM_SRC = { profil:['Profil Claude','🧠'], note:['Note','✏️'], fichier:['Fichier','📎'], photo:['Photo','🖼️'], claude:['Discussion claude.ai','💬'], claudecode:['Session Claude Code','🤖'], retenu:['Retenu en discussion','📌'],
@@ -1369,6 +1392,7 @@ async function recall(q, { by = null, deep = true } = {}) {
   if (by && by !== nora && by.inside) by.say('🧠 Je demande à Nora', 2.2);
   if (nora && nora.inside) nora.say(`📚 Je cherche${by && by !== nora ? ' pour ' + by.name : ''}…`, 2.5);
   const prof = MEM.filter(e => e.src === 'profil');
+  const mciHit = /mci|stage|cl[ée]ment|linkedin|instagram|post|standard|club|match/i.test(q) && !(by && by.mci);
   const found = localRecall(q, deep ? 6 : 4);
   if (deep && ENGINE.brain && (ENGINE.drive || ENGINE.mail === 'gmail')) {
     const st = searchTerms(q), plan = { drive: st.drive, gmail: st.gmail };
@@ -1400,6 +1424,7 @@ async function recall(q, { by = null, deep = true } = {}) {
     }
   }
   const text = [prof.length ? 'Profil de Yosh (ce que Claude sait de lui) :\n' + prof.map(e => e.text.slice(0, 2500)).join('\n') : '',
+    mciHit ? '[Fiche du cerveau] Stage MCI Sport :\n' + MCI_BRIEF : '',
     ...found.map(x => `[${(MEM_SRC[x.src] || ['Archive'])[0]}] ${x.title}${x.url ? ' — ' + x.url : ''}\n${x.src === 'drive' || x.src === 'gmail' ? x.text : around(x.text, ws)}`)]
     .filter(Boolean).join('\n\n---\n\n').slice(0, 18000);
   MEMLOG.unshift({ at: Date.now(), by: by ? by.name : 'Toi', q: String(q).split('\n')[0].slice(0, 90), hits: found.map(x => ({ src: x.src, title: x.title, url: x.url })) }); MEMLOG.length = Math.min(MEMLOG.length, 30);
@@ -1464,7 +1489,7 @@ async function askAgent(from, toName, question) {
     if (to.name === 'Max' || (to.pole.id === 'ops' && /mail|courriel|pièce jointe|pj\b/i.test(question))) { const m = await mailLookup(question, from, links); if (m) parts.push('Ce que j’ai trouvé dans la boîte Gmail de Yosh :\n' + m); }
     if (to.pole.research && ENGINE.web) { try { const web = (payloadOf(await ENGINE.mcp.callTool('Firecrawl', 'firecrawl_search', { query: String(question).slice(0, 300), limit: 5, sources:['web'], domainTools:false, objective: String(question).slice(0, 900) })).data || {}).web || [];
       if (web.length) parts.push('Résultats web :\n' + web.map(w => `- ${w.title} — ${w.url}\n  ${String(w.description || '').slice(0, 300)}`).join('\n')); } catch (e) {} }
-    if (to.jarvis || to.name === 'Clara') parts.push('Agenda :\n' + (CTX.calendar.join('\n') || '(vide)') + '\nTâches en cours : ' + HQ.tasks.filter(t => t.status === 'encours' || t.status === 'attente').map(t => t.title).join(' ; '));
+    if (to.jarvis) parts.push('Agenda :\n' + (CTX.calendar.join('\n') || '(vide)') + '\nTâches en cours : ' + HQ.tasks.filter(t => t.status === 'encours' || t.status === 'attente').map(t => t.title).join(' ; '));
     if (!parts.length) { const r = localRecall(question, 3); if (r.length) parts.push(r.map(x => `${x.title}\n${around(x.text, ws)}`).join('\n\n')); }
     const material = parts.join('\n\n=====\n\n').slice(0, 16000);
     // entre agents : aucun appel à Claude ici (l'agent qui demande est déjà en train d'en utiliser un)
@@ -1486,8 +1511,26 @@ Réponds-lui directement, en français, en 250 mots au plus. Donne le contenu ut
   } finally { saveComms(); refresh(); }
 }
 // outils donnés à chaque agent pendant son travail
-function teamTools(a) {
+function mailTools(a) {
+  if (ENGINE.mail !== 'gmail') return [];
+  const brief = m => ({ id_fil: m.threadId || '', id_message: m.id, de: m.sender, objet: m.subject, date: m.date, extrait: decode(m.snippet || '').slice(0, 200) });
   return [
+    { name:'chercher_mails', description:'Cherche dans la boîte Gmail de Yosh. Syntaxe Gmail : mots-clés, from:, subject:, is:unread, newer_than:7d, has:attachment…',
+      inputSchema:{ type:'object', properties:{ requete:{ type:'string' }, nombre:{ type:'integer' } }, required:['requete'] },
+      execute: async inp => { const th = payloadOf(await ENGINE.mcp.callTool('Gmail', 'search_threads', { query: String(inp.requete || '').slice(0, 300), pageSize: clamp(Number(inp.nombre) || 8, 1, 15), view:'THREAD_VIEW_SUMMARY' })).threads || [];
+        return th.map(x => ({ ...brief({ ...((x.messages || [])[0] || {}), threadId: x.id }), messages: x.messageCount })); } },
+    { name:'lire_mail', description:'Lit un fil de mails en entier (texte et noms des pièces jointes) à partir de son id_fil.',
+      inputSchema:{ type:'object', properties:{ id_fil:{ type:'string' } }, required:['id_fil'] },
+      execute: async inp => (payloadOf(await ENGINE.mcp.callTool('Gmail', 'get_thread', { threadId: String(inp.id_fil), messageFormat:'PLAIN_TEXT' })).messages || []).slice(-4)
+        .map(m => ({ id_message: m.id, de: m.sender, date: m.date, objet: m.subject, texte: String(m.plaintextBody || decode(m.snippet || '')).slice(0, 5000), pieces_jointes: (m.attachments || []).map(x => x.filename).filter(n => !/^image\./.test(n)) })) },
+    { name:'creer_brouillon', description:'Enregistre un brouillon dans Gmail (réponse ou nouveau mail). N’ENVOIE RIEN : Yosh relit et envoie lui-même. À utiliser quand Yosh demande de répondre ou d’écrire un mail.',
+      inputSchema:{ type:'object', properties:{ destinataire:{ type:'string', description:'adresse e-mail' }, objet:{ type:'string' }, texte:{ type:'string' }, id_message_repondu:{ type:'string', description:'id_message auquel on répond, sinon vide' } }, required:['destinataire', 'objet', 'texte'] },
+      execute: async inp => { const arg = { to:[String(inp.destinataire)], subject: String(inp.objet), body: String(inp.texte) }; if (inp.id_message_repondu) arg.replyToMessageId = String(inp.id_message_repondu);
+        await ENGINE.mcp.callTool('Gmail', 'create_draft', arg); HQ.drafts++; log(a, `Brouillon enregistré dans Gmail : ${arg.subject}`, true); return 'Brouillon enregistré dans Gmail. Rien n’a été envoyé.'; } },
+  ];
+}
+function teamTools(a) {
+  return [...(a.mailer ? mailTools(a) : []),
     { name:'demander_a_un_collegue', description:`Pose une question à un collègue du QG et reçois sa réponse avec ses pièces (mails, fichiers, livrables, résultats). Collègues : ${AGENTS.filter(x => x !== a).map(x => `${x.name} (${x.role})`).join(', ')}. Max lit la boîte Gmail (contenu des mails, pièces jointes), Nora tient la mémoire (notes, fichiers, historiques Claude, Drive), chaque agent connaît ses propres livrables.`,
       inputSchema:{ type:'object', properties:{ collegue:{ type:'string', description:'prénom du collègue' }, question:{ type:'string', description:'ta question précise' } }, required:['collegue', 'question'] },
       execute: async inp => askAgent(a, String(inp.collegue || ''), String(inp.question || '').slice(0, 1200)) },
@@ -1591,7 +1634,7 @@ async function exportToDrive(d, only) {
     } catch (e) { f.status = 'err'; f.error = errText(e); }
     save(d); refresh();
   }
-  d.filesSeen = SP.view === 'files'; save(d); refresh();
+  d.filesSeen = SP.view === 'cre' && creFilter === 'files'; save(d); refresh();
 }
 // fichiers affichés : seulement pour tes demandes
 function filesOf(d) {
@@ -1627,7 +1670,7 @@ function fileRow(f) {
 }
 let fKey = '';
 function renderFiles() {
-  if (SP.view !== 'files') return;
+  if (!(SP.view === 'cre' && creFilter === 'files')) return;
   const q = $('fSearch').value.trim().toLowerCase();
   const match = (...xs) => !q || xs.join(' ').toLowerCase().includes(q);
   const files = HQ.deliverables.flatMap(filesOf).filter(f => match(f.name, f.d.title, f.d.agent, f.label));
@@ -1637,7 +1680,7 @@ function renderFiles() {
   $('fCount').textContent = files.length ? `${files.length}` : '';
   $('lCount').textContent = links.length ? `${links.length}` : '';
   $('fFiles').innerHTML = files.length ? files.map(fileRow).join('')
-    : `<li class="frow"><span><small>${q ? 'Aucun fichier ne correspond.' : 'Ici n’arrivent que les fichiers de ce que tu demandes aux agents. Demande-leur quelque chose depuis l’accueil ou l’espace Messages.'}</small></span></li>`;
+    : `<li class="frow"><span><small>${q ? 'Aucun fichier ne correspond.' : 'Ici arrivent les fichiers de ce que tu demandes aux agents (Google Docs, Sheets…).'}</small></span></li>`;
   $('fLinks').innerHTML = links.length ? links.slice(0, 120).map(l => `<li class="frow ${l.d.filesSeen ? '' : 'new'}"><span class="ic" style="background:${poleById(l.d.pole).color}">URL</span>
       <span><a href="${esc(l.url)}" target="_blank" rel="noopener noreferrer">${esc(l.title)}</a><small>${esc(host(l.url))} · ${esc(l.d.agent)} · ${esc(l.d.title)}</small></span>
       <button type="button" data-copy="${esc(l.url)}">Copier</button></li>`).join('')
@@ -1656,7 +1699,6 @@ function studioJob(a, t) {
   const intent = 'QG Jarvis : création demandée par Yosh pour ses réseaux';
   (async () => {
     if (!ENGINE.brain) throw { code:'no_brain' };
-    if (!ENGINE.canva && !ENGINE.video) throw { code:'no_studio' };
     note('🧠 Zoé demande à Nora ce qu’on sait déjà');
     const mem = await memContext(a, t);
     note('✏️ Zoé prépare le brief créatif');
@@ -1665,14 +1707,19 @@ function studioJob(a, t) {
 Nous sommes le ${todayLabel()}.
 Demande de Yosh : ${t.title}
 ${t.brief ? 'Détails : ' + t.brief + '\n' : ''}${mem}
-Outils disponibles : ${[ENGINE.canva && 'Canva pour les visuels (posts, stories, affiches)', ENGINE.video && 'HyperFrames pour les vidéos courtes animées et sous-titrées (90 secondes au plus)'].filter(Boolean).join(' ; ')}.
-Prépare la production. Choisis "image" pour un post, une story, une affiche ou une miniature, "video" pour une vidéo, un Reel ou un montage.
+Outils disponibles : ${[ENGINE.canva && 'Canva pour les visuels (posts, stories, affiches)', ENGINE.video && 'HyperFrames pour les vidéos courtes animées et sous-titrées (90 secondes au plus)'].filter(Boolean).join(' ; ') || 'aucun outil visuel connecté : rends quand même le texte complet'}.
+Tu rends TOUJOURS un post fini. "texte" est le texte complet du post, prêt à publier tel quel sur le réseau visé (pour MCI Sport sur LinkedIn : en anglais, première phrase avec un chiffre ou une date, un seul hashtag #AtTheCenterOfTheGame ; n’invente aucun fait : écris {{à confirmer}} si une info manque).
+Pour un visuel MCI Sport, le brief impose : fond bleu nuit #292756, accents cyan #10F6F9, texte blanc.
+Choisis "image" pour un post, une story, une affiche ou une miniature, "video" pour une vidéo, un Reel ou un montage.
 Réponds uniquement avec un objet JSON :
-{"media":"image|video","format":"Instagram Post|Instagram Story|LinkedIn Post|Facebook Post|YouTube Thumbnail|Poster","brief":"brief détaillé pour l’outil : sujet, textes exacts à afficher, style, couleurs, ambiance, et pour une vidéo le déroulé scène par scène","legende":"légende prête à publier, avec hashtags","duree":30}`, { asJson: true });
+{"media":"image|video","reseau":"LinkedIn|Instagram|autre","texte":"le texte complet du post","format":"Instagram Post|Instagram Story|LinkedIn Post|Facebook Post|YouTube Thumbnail|Poster","brief":"brief détaillé pour l’outil : sujet, textes exacts à afficher, style, couleurs, ambiance, et pour une vidéo le déroulé scène par scène","legende":"légende prête à publier, avec hashtags","duree":30}`, { asJson: true });
     const want = plan && plan.media === 'video' ? 'video' : 'image';
     const media = want === 'video' ? (ENGINE.video ? 'video' : 'image') : (ENGINE.canva ? 'image' : 'video');
     const brief = String((plan && plan.brief) || t.brief || t.title).slice(0, 3000);
     const format = String((plan && plan.format) || (media === 'video' ? 'Instagram Story' : 'Instagram Post'));
+    job.text = String((plan && plan.texte) || '').trim(); job.preview = job.text;
+    try {
+    if ((media === 'image' && !ENGINE.canva) || (media === 'video' && !ENGINE.video)) throw { code:'no_studio' };
     if (media === 'image') {
       note('🎨 Canva crée le visuel…');
       let r = await ENGINE.mcp.callTool('Canva', 'create-design', { brief, format, user_intent: intent });
@@ -1691,12 +1738,14 @@ Réponds uniquement avec un objet JSON :
       const designId = designIdIn(pl);
       if (!designId) throw { code:'studio', message:'Canva n’a pas terminé le visuel à temps. Il est peut-être dans tes designs récents.' };
       const urls = urlsIn(pl).map(x => x.v);
-      const edit = urls.find(u => /canva\.com\/design\/.*edit/.test(u)) || urls.find(u => /canva\.com\/design\//.test(u)) || `https://www.canva.com/design/${designId}/edit`;
+      const edit = urls.find(u => /canva\.(com|link)\//.test(u)) || `https://www.canva.com/design/${designId}/edit`;
       let png = '';
       try {
         note('🖼️ Export en PNG');
         const ex = await ENGINE.mcp.callTool('Canva', 'export-design', { design_id: designId, format: { type: 'png' }, user_intent: intent });
-        png = urlsIn(ex && ex.payload).map(x => x.v).find(u => !/canva\.com\/design\//.test(u)) || '';
+        png = urlsIn(ex && ex.payload).map(x => x.v).find(u => !/canva\.(com\/design|link)\//.test(u)) || '';
+        // le lien d'export Canva expire en quelques heures : on garde une copie durable quand c'est possible
+        if (png && STORE.assets) { try { const bl = await (await fetch(png)).blob(); if (bl.size > 500) png = (await STORE.assets.upload(new File([bl], slug(t.title) + '.png', { type: 'image/png' }))).url; } catch (e) {} }
       } catch (e) {}
       job.media.push({ kind:'image', title: t.title, url: edit, file: png, format });
     } else {
@@ -1721,10 +1770,13 @@ Réponds uniquement avec un objet JSON :
       const mp4 = urls.find(u => /\.mp4(\?|$)/i.test(u)) || '';
       job.media.push({ kind:'video', title: t.title, url: `https://app.heygen.com/projects/${pid}`, file: mp4, format });
     }
-    const m = job.media[0];
-    job.text = [`${m.kind === 'image' ? 'Visuel' : 'Vidéo'} au format ${m.format}.`, '',
-      'Ouvrir et modifier : ' + m.url, m.file ? (m.kind === 'image' ? 'Image PNG : ' : 'Vidéo MP4 : ') + m.file : '', '',
-      'Légende proposée :', String((plan && plan.legende) || '[à compléter]'), '', 'Brief de création :', brief].filter((x, i, arr) => x !== '' || arr[i - 1] !== '').join('\n');
+    } catch (e) { job.prodError = errText(e); }
+    // le post est toujours rendu : texte + visuel ou vidéo quand la production a réussi
+    const m = job.media[0], legende = String((plan && plan.legende) || '').trim();
+    job.text = [job.text || legende || '[texte à compléter]', legende && legende !== job.text ? '\nLégende :\n' + legende : '',
+      m ? `\n${m.kind === 'image' ? 'Visuel' : 'Vidéo'} (${m.format}) : ${m.url}` : `\n⚠️ ${media === 'video' ? 'La vidéo' : 'Le visuel'} n’a pas pu être créé : ${job.prodError || 'outil indisponible'} Le texte est prêt ; relance-moi pour le visuel.`,
+      '\nBrief de création :\n' + brief].filter(Boolean).join('\n');
+    job.network = String((plan && plan.reseau) || '');
     job.ok = true;
   })().catch(e => { job.error = e; }).finally(() => { job.settled = true; });
   return job;
@@ -1875,9 +1927,9 @@ function propose(spec, agentName, source) {
 }
 function approve(t) {
   if (!t || t.status !== 'proposee') return;
-  const a = AGENTS.find(x => x.name === t.target) || (t.mail ? poleById('ops').members[0] : AGENTS[1]);
+  const a = AGENTS.find(x => x.name === t.target) || (t.mail ? poleById('ops').members[0] : AGENTS.find(x => x.pole.research));
   t.status = 'attente'; t.target = a.name; t.requested = t.requested || t.source === 'chat' || t.source === 'toi';
-  a.custom.push(t);
+  a.custom.push(t); setTimeout(dispatch, 0);
   if (t.mail) markSeen(t.mail.key);
   log(a, `Validé : ${t.title} (${a.name})`);
   if (t.source === 'chat') agentSays(a, `Merci, je lance « ${t.title} ». Je t’écris dès que c’est prêt.`, { kind: 'info', line: `Validé · je lance « ${t.title} »` });
@@ -1900,7 +1952,7 @@ function startMailWatch() {
   if (ENGINE.mail === 'gmail') {
     mailWatch = ENGINE.mcp.watchTool('Gmail', 'search_threads', { query:'is:unread in:inbox newer_than:7d -category:promotions -category:social', pageSize:10, view:'THREAD_VIEW_SUMMARY' }, ev => {
       if (ev.type !== 'data' || !HQ.active) return;
-      const th = (ev.result.payload && ev.result.payload.threads) || [];
+      const th = (ev.result.payload && ev.result.payload.threads) || []; HQ.unread = th.length;
       enqueueMails(th.map(x => { const msgs = x.messages || [], m = msgs[msgs.length - 1] || {}; const dn = (m.addressDisplayNames || []).find(y => y.emailAddress === m.sender);
         return { key:'g:' + x.id + ':' + (m.id || ''), threadId: x.id, msgId: m.id, from: m.sender || '', from_name: (dn && dn.displayName) || m.sender || '', subject: m.subject || '(sans objet)', date: m.date ? new Date(m.date).toLocaleString('fr-CH') : '', snippet: decode(m.snippet || '') }; }));
     }, { refetchInterval: 120000 });
@@ -2002,8 +2054,8 @@ const canvas = document.getElementById('office'), ctx = canvas.getContext('2d');
 let scale = 1, cssScale = 1;
 function resize() {
   const wrap = document.getElementById('stageWrap'), stage = document.getElementById('stage'), dpr = Math.min(2, devicePixelRatio || 1);
-  const fit = matchMedia('(min-width:1101px)').matches;
-  const w = Math.floor(fit ? Math.min(wrap.clientWidth, wrap.clientHeight * W / H) : wrap.clientWidth);
+  const hh = wrap.clientHeight;
+  const w = Math.max(60, Math.floor(hh > 40 ? Math.min(wrap.clientWidth, hh * W / H) : wrap.clientWidth));
   stage.style.width = w + 'px';
   cssScale = w / W; canvas.style.height = (H * cssScale) + 'px';
   canvas.width = Math.round(w * dpr); canvas.height = Math.round(H * cssScale * dpr); scale = cssScale * dpr;
@@ -2209,16 +2261,20 @@ const TSTATUS = { proposee:'à valider', attente:'en attente', encours:'en cours
 /* ---------- Espaces plein écran ---------- */
 const SP = { view:null, agent:null, doc:null };
 const spEl = $('space');
-const TITLES = { valid:'À valider', msgs:'Messages', cre:'Créations', files:'Fichiers', mem:'Mémoire', team:'Équipe', day:'Journée' };
-const PANES = ['valid', 'msgs', 'cre', 'files', 'mem', 'team', 'day'];
+const TITLES = { valid:'À valider', msgs:'Messages', cre:'Créations & fichiers', files:'Fichiers', mem:'Cerveau', team:'Équipe', day:'Dashboard', office:'Open space' };
+const PANES = ['valid', 'msgs', 'cre', 'files', 'mem', 'team', 'day', 'office'];
 function openSpace(view) {
   const wasClosed = spEl.hidden;
+  if (view === 'files') { view = 'cre'; creFilter = 'files'; }
+  if (view === 'team') view = 'msgs';
   SP.view = view;
+  spEl.style.top = document.querySelector('header').offsetHeight + 'px';
+  (view === 'office' ? $('officeHold') : $('officeTile')).appendChild($('stageWrap')); spEl.classList.toggle('is-office', view === 'office');
   PANES.forEach(p => { $('sp-' + p).hidden = p !== view; });
   spEl.classList.toggle('is-wa', view === 'msgs');
   [...$('spNav').children].forEach(b => b.setAttribute('aria-current', b.dataset.space === view));
   $('spTitle').textContent = TITLES[view];
-  spEl.hidden = false; document.body.classList.add('in-space');
+  spEl.hidden = false; document.body.classList.add('in-space'); requestAnimationFrame(resize);
   vKey = fKey = teamKey = chatKey = docKey = contactsKey = memKey = creKey = '';
   if (view === 'msgs' && SP.agent) markMsgsSeen(x => x === SP.agent);
   refresh();
@@ -2230,7 +2286,7 @@ function openSpace(view) {
   $('spBody').scrollTop = 0;
 }
 function closeSpace() {
-  spEl.hidden = true; SP.view = null; SP.doc = null;
+  spEl.hidden = true; SP.view = null; SP.doc = null; $('officeTile').appendChild($('stageWrap')); if (HQ.selected) openProfile(null); requestAnimationFrame(resize);
   if (matchMedia('(max-width:900px)').matches) SP.agent = null;
   document.body.classList.remove('in-space'); refresh();
 }
@@ -2365,7 +2421,7 @@ function retryDeliv(d) {
   if (!d || !d.spec) return;
   const a = agentNamed(d.spec.agent) || AGENTS[0];
   const t = { id: newId(), title: d.spec.title, steps: d.spec.steps, brief: d.spec.brief, mail: d.spec.mail, requested: d.spec.requested, format: d.spec.format, custom: true, status: 'attente' };
-  a.custom.push(t); HQ.tasks.push(t);
+  a.custom.push(t); HQ.tasks.push(t); setTimeout(dispatch, 0);
   HQ.deliverables.splice(HQ.deliverables.indexOf(d), 1); save(); if (STORE.db) STORE.db.doc(`data/users/${STORE.uid}/l_${d.id}`).delete().catch(() => {});
   if (SP.doc === d.id) SP.doc = null;
   log(a, `Tâche relancée : ${t.title}`); renderPlan(); setActive(true, { plan: false }); refresh();
@@ -2390,12 +2446,34 @@ async function actClick(e) {
 ['vAsk', 'chatLog'].forEach(id => $(id).addEventListener('click', actClick));
 
 /* ---------- Accueil : les tuiles ---------- */
+/* ---------- Dashboard : mails, stage MCI Sport, travail des agents ---------- */
+let dashKey = '';
+function renderDash() {
+  const props = HQ.tasks.filter(t => t.status === 'proposee'), run = HQ.tasks.filter(t => t.status === 'encours' && !t.noJob);
+  const mailTodo = props.filter(t => t.mail).length, drafts = HQ.deliverables.filter(d => d.isMail && d.reply && !d.draftSaved).length;
+  const posts = HQ.deliverables.filter(isCreation).flatMap(postsOf).length;
+  const now = new Date(), thu = new Date(now); thu.setDate(now.getDate() + ((4 - now.getDay() + 7) % 7));
+  const end = now.getMonth() === 11 ? new Date(now.getFullYear(), 11, 31) : new Date(now.getFullYear(), 11, 1), left = Math.max(0, Math.ceil((end - now) / 864e5));
+  const lastMail = HQ.deliverables.find(d => d.isMail);
+  const key = [HQ.unread, mailTodo, drafts, posts, left, run.map(t => t.id).join(','), props.length, HQ.done, ENGINE.mail, lastMail && lastMail.id, thu.getDate()].join('|');
+  if (key === dashKey) return; dashKey = key;
+  const grp = (col, title, rows, note, extra = '') => `<span class="kgrp"><h4><i style="background:${col}"></i>${title}</h4><span class="krow">${rows.map(([v, l, c]) => `<span><b class="${c || ''}">${esc(v)}</b><small>${esc(l)}</small></span>`).join('')}</span>${extra}<p>${esc(note)}</p></span>`;
+  const html = grp('#64748b', 'Mails', [[HQ.unread == null ? '–' : HQ.unread >= 10 ? '10+' : HQ.unread, 'non lus'], [mailTodo, 'à valider', mailTodo ? 'warn' : ''], [drafts, 'réponses prêtes', drafts ? 'ok' : '']],
+      !ENGINE.mail ? 'Gmail n’est pas connecté ici.' : lastMail ? 'Dernier traité : ' + lastMail.title : 'Max trie tes mails et prépare les réponses en brouillon.')
+    + grp('#10b981', 'Stage MCI Sport', [[`${posts}/15`, 'contenus prêts', posts ? 'ok' : ''], [`J-${left}`, now.getMonth() === 11 ? 'fin décembre' : 'avant décembre'], [thu.toLocaleDateString('fr-CH', { weekday:'short', day:'numeric' }), 'point Clément']],
+      'Objectif fixé par Clément : 15 à 20 contenus pour décembre. Sam tient le plan.', `<span class="kbar"><i style="width:${Math.min(100, Math.round(posts / 15 * 100))}%"></i></span>`)
+    + grp('#0ea5e9', 'Travail des agents', [[run.length, 'en cours', run.length ? 'ok' : ''], [props.length, 'à valider', props.length ? 'warn' : ''], [HQ.done, 'livrés']],
+      run.length ? run.map(t => `${t.agent} : ${t.title}`).join(' · ') : 'Personne ne travaille : demande quelque chose à un agent.');
+  $('dashK').innerHTML = html; $('dashBig').innerHTML = html.replace(/<span class="kgrp">/g, '<div class="kgrp">').replace(/<\/p><\/span>/g, '</p></div>');
+  $('dashDate').textContent = todayLabel();
+}
 let tileKey = '';
 function renderTiles() {
+  renderDash();
   const props = HQ.tasks.filter(t => t.status === 'proposee'), msgs = allMsgs(), unseen = msgs.filter(x => !x.m.seen).length;
   const files = HQ.deliverables.flatMap(filesOf), links = HQ.deliverables.flatMap(linksOf);
   const fNew = HQ.deliverables.filter(d => !d.filesSeen).reduce((n, d) => n + filesOf(d).length + linksOf(d).length, 0);
-  const inside = AGENTS.filter(a => a.inside).length, working = AGENTS.filter(a => a.task).length;
+  const inside = AGENTS.filter(a => a.inside).length, working = AGENTS.filter(a => a.work).length;
   const plan = HQ.tasks.filter(t => !t.noJob && t.status !== 'refusee' && t.status !== 'proposee'), done = plan.filter(t => t.status === 'livre').length;
   const clock = HQ.active || AGENTS.some(a => a.visible) ? timeStr() : '--:--';
   const key = [HQ.deliverables.filter(isCreation).map(d => d.id + (d.creSeen ? 1 : 0)).join(','), MEM.length, MEMLOG.length, props.map(t => t.id + t.title + t.target).join(','), msgs.slice(0, 6).map(x => x.m.at + (x.m.seen ? 1 : 0)).join(','), unseen, files.length, links.length, fNew, inside, working, done, plan.length, clock, HQ.active].join('|');
@@ -2411,7 +2489,7 @@ function renderTiles() {
     : '<span class="t-line dim"><span>Les agents t’écrivent ici en une ligne, avec le bouton pour agir.</span></span>';
   $('tFileN').textContent = files.length + links.length;
   $('tFileS').textContent = fNew ? `${fNew} nouveau${fNew > 1 ? 'x' : ''}` : 'docs';
-  $('tTeamN').textContent = `${inside}/${AGENTS.length}`; $('tTeamS').textContent = working ? `${working} au travail` : 'au bureau';
+  $('tTeamS').textContent = !HQ.active ? 'en veille' : `${inside}/${AGENTS.length} au bureau` + (AGENTS.some(a => a.work) ? ` · ${AGENTS.filter(a => a.work).length} au travail` : '');
   const cres = HQ.deliverables.filter(isCreation), creNew = cres.filter(d => !d.creSeen).length, lastC = cres[0];
   $('tCreN').textContent = cres.length; document.querySelector('.t-cre').classList.toggle('hot', creNew > 0);
   const lm = lastC && lastC.media && lastC.media[0];
@@ -2473,7 +2551,7 @@ async function fileOrCopyClick(e, onMsg) {
   if (sb) { const d = delivById(sb.dataset.see); if (d) openThread(agentNamed(d.agent), d.id); return true; }
   return false;
 }
-$('sp-files').addEventListener('click', e => { fileOrCopyClick(e, txt => { if (txt) log(AGENTS[0], txt); }); });
+$('creFiles').addEventListener('click', e => { fileOrCopyClick(e, txt => { if (txt) log(AGENTS[0], txt); }); });
 $('fSearch').addEventListener('input', () => renderFiles());
 
 /* ---------- Conversation : livrable en grand + discussion ---------- */
@@ -2629,7 +2707,7 @@ Réponds à Yosh en tant que ${a.name}, en français, naturellement et brièveme
 - N’invente aucun fait sur Yosh.
 - Le résultat sera livré à Yosh sous forme de fichier dans son Google Drive : "document" (Google Docs) par défaut, "tableur" (Google Sheets) s’il veut un tableau, une liste chiffrée ou un comparatif à trier, "document+tableur" s’il veut les deux. S’il précise un format, respecte-le.
 ${a.memory ? '- Tu es la mémoire du QG : réponds à partir de ce que tu as trouvé ci-dessus et cite tes sources (Drive, Gmail, note, discussion…). Si tu ne trouves rien, dis-le et propose à Yosh de t’ajouter l’info (note, fichier, export claude.ai). Tu ne vois pas directement l’historique claude.ai ni la mémoire de Claude : seulement ce qu’il t’a confié.\n' : ''}- Si Yosh vient de t’envoyer des fichiers ou des photos, dis en une ou deux phrases ce que tu y vois ou ce que tu en retiens${a.memory ? ' : ils sont rangés dans ta mémoire et les autres agents pourront s’en servir' : ''}.
-- "a_retenir" : la liste des faits durables que Yosh vient de dire sur lui, ses projets, ses contacts ou ses préférences (ex. « Clément Michon est son responsable chez MCI Sport »), sinon [].
+${a.mailer ? '- Tu es le seul agent des mails de Yosh. Avec tes outils tu peux chercher, lire et résumer n’importe quel mail, et enregistrer des brouillons dans Gmail (jamais d’envoi). Pour une question sur ses mails, cherche d’abord, puis réponds avec les faits (expéditeur, date, contenu). Pour une réponse à écrire, crée le brouillon et dis-le.\n' : ''}${a.mci ? '- Pour un post ou un visuel, donne la stratégie et le texte, puis propose de passer la création à Zoé. Pour un mail de Clément, demande-le à Max.\n' : ''}- "a_retenir" : la liste des faits durables que Yosh vient de dire sur lui, ses projets, ses contacts ou ses préférences (ex. « Clément Michon est son responsable chez MCI Sport »), sinon [].
 - "ligne" résume ta réponse en 10 mots au plus, comme une notification (ex. « Propose : post LinkedIn du match », « Question : pour quelles dates ? »).
 Réponds uniquement avec un objet JSON : {"reponse":"…","ligne":"…","a_retenir":[],"tache":null} ou {"reponse":"…","ligne":"…","a_retenir":[],"tache":{"titre":"…","precisions":"tout ce que Yosh a demandé, en détail","type":"redaction|recherche|appel|impression|reunion","fichier":"document|tableur|document+tableur"}}`;
 }
@@ -2687,7 +2765,7 @@ function renderMem() {
       <p>${esc(memOpen === e.id ? e.text : String(e.text).slice(0, 400))}</p>
       <span class="acts"><button type="button" data-mv>${memOpen === e.id ? 'Réduire' : 'Lire'}</button>${e.url ? `<a href="${esc(e.url)}" target="_blank" rel="noopener noreferrer">Ouvrir</a>` : ''}<button type="button" class="no" data-mdel>Oublier</button></span>
     </article>`; }).join('')
-    : `<div class="empty-big">${MEM.length ? 'Rien dans ce rangement.' : 'La mémoire est vide. Confie à Nora une note, tes fichiers et photos, l’export de tes discussions claude.ai ou ce que Claude sait de toi : les agents s’en serviront avant chaque tâche. Elle fouille aussi ton Drive et tes mails à leur demande.'}</div>`;
+    : `<div class="empty-big">${MEM.length ? 'Rien dans ce rangement.' : 'Le cerveau est vide. Confie à Nora une note, tes fichiers et photos, l’export de tes discussions claude.ai ou ce que Claude sait de toi : les agents s’en serviront avant chaque tâche. Elle fouille aussi ton Drive et tes mails à leur demande.'}</div>`;
 }
 $('memSrc').addEventListener('click', e => { const b = e.target.closest('[data-mf]'); if (b) { memFilter = b.dataset.mf; renderMem(); } });
 $('memList').addEventListener('click', e => {
@@ -2898,12 +2976,12 @@ $('memExport').onchange = async e => { const f = e.target.files[0]; e.target.val
 /* ---------- Créations : les posts préparés par les agents, montrés comme sur les réseaux ---------- */
 const POST_RE = /post|reel|story|stories|carrousel|carousel|légende|legende|linkedin|instagram|tiktok|publication|visuel|vidéo|video|script|caption/i;
 const isCreation = d => d && d.status === 'ai' && !d.isMail && (!!(d.media && d.media.length) || d.pole === 'soc' || POST_RE.test(d.title));
-const platformOf = (txt, d) => { const s = normT(txt + ' ' + (d.media && d.media[0] ? d.media[0].format : '') + ' ' + d.title);
+const platformOf = (txt, d) => { if (/linkedin/i.test(d.network || '')) return 'linkedin'; const s = normT(txt + ' ' + (d.media && d.media[0] ? d.media[0].format : '') + ' ' + d.title);
   return d.media && d.media[0] && d.media[0].kind === 'video' ? 'video' : /reel|tiktok|short|video/.test(s) && !/linkedin/.test(s) ? 'video' : /instagram|story|stories|carrousel|carousel|insta/.test(s) ? 'instagram' : /linkedin/.test(s) ? 'linkedin' : d.media ? 'instagram' : 'post'; };
 const PLAT = { linkedin:['LinkedIn','#0a66c2'], instagram:['Instagram','#d6249f'], video:['Vidéo','#7c3aed'], post:['Post','#64748b'] };
 // un livrable qui contient « POST 1 … POST 2 … » donne plusieurs cartes
 function postsOf(d) {
-  const txt = String(d.content || '').replace(/^#.*\n+/, '');
+  const txt = String(d.content || '').replace(/^#.*\n+/, '').split('\nBrief de création :')[0].trim();
   const parts = txt.split(/\n(?=\s*(?:#{1,3}\s*)?(?:\*\*)?\s*(?:post|reel|story|carrousel|vid[ée]o)\s*\d+\b)/i).map(x => x.trim()).filter(x => x.length > 40);
   const list = parts.length > 1 ? parts : [txt.trim()];
   return list.map((t, i) => { const head = (t.match(/^[^\n]{0,120}/) || [''])[0].replace(/[#*]/g, '').trim();
@@ -2913,12 +2991,15 @@ let creFilter = 'all', creKey = '', creOpen = new Set();
 function creationsList() { return HQ.deliverables.filter(isCreation).flatMap(postsOf); }
 function renderCreations() {
   const all = creationsList();
-  const brewing = HQ.tasks.filter(t => { if (t.status !== 'encours') return false; const a = AGENTS.find(x => x.task === t); return (a && a.pole.id === 'soc') || POST_RE.test(t.title); });
+  const brewing = HQ.tasks.filter(t => { if (t.status !== 'encours') return false; const a = AGENTS.find(x => x.work === t); return (a && a.pole.id === 'soc') || POST_RE.test(t.title); });
   const list = all.filter(p => creFilter === 'all' || p.plat === creFilter);
-  const key = creFilter + '|' + [...creOpen].join(',') + '|' + all.map(p => p.key + (p.d.media ? p.d.media.length : 0) + JSON.stringify(p.d.drive || '')).join(',') + '|' + brewing.map(t => t.id).join(',');
+  const key = creFilter + '|' + HQ.deliverables.length + '|' + [...creOpen].join(',') + '|' + all.map(p => p.key + (p.d.media ? p.d.media.length : 0) + JSON.stringify(p.d.drive || '')).join(',') + '|' + brewing.map(t => t.id).join(',');
   if (key === creKey) return; creKey = key;
   const counts = {}; all.forEach(p => { counts[p.plat] = (counts[p.plat] || 0) + 1; });
-  $('creFilters').innerHTML = `<button type="button" data-cf="all" aria-pressed="${creFilter === 'all'}">Tout · ${all.length}</button>` + Object.keys(PLAT).filter(k => counts[k]).map(k => `<button type="button" data-cf="${k}" aria-pressed="${creFilter === k}">${PLAT[k][0]} · ${counts[k]}</button>`).join('');
+  $('creFilters').innerHTML = `<button type="button" data-cf="all" aria-pressed="${creFilter === 'all'}">Tout · ${all.length}</button>` + Object.keys(PLAT).filter(k => counts[k]).map(k => `<button type="button" data-cf="${k}" aria-pressed="${creFilter === k}">${PLAT[k][0]} · ${counts[k]}</button>`).join('')
+    + `<button type="button" data-cf="files" aria-pressed="${creFilter === 'files'}">Fichiers et liens · ${HQ.deliverables.flatMap(filesOf).length + HQ.deliverables.flatMap(linksOf).length}</button>`;
+  $('creGrid').hidden = creFilter === 'files'; $('creFiles').hidden = creFilter !== 'files';
+  if (creFilter === 'files') { fKey = ''; renderFiles(); return; }
   const card = p => {
     const d = p.d, a = agentNamed(d.agent), [pl, col] = PLAT[p.plat], m = d.media && d.media[p.i] || (p.i === 0 && d.media && d.media[0]);
     const open = creOpen.has(p.key), fl = filesOf(d).filter(f => f.url && !f.d.media);
@@ -2933,10 +3014,10 @@ function renderCreations() {
       ${p.text.length > 420 ? `<button class="link-btn" type="button" data-more>${open ? 'Réduire' : '… voir plus'}</button>` : ''}
       <footer class="acts"><button type="button" data-ccopy>Copier le texte</button>${m && m.url ? `<a href="${esc(m.url)}" target="_blank" rel="noopener noreferrer">${m.kind === 'video' ? 'Ouvrir dans HeyGen' : 'Ouvrir dans Canva'}</a>` : ''}${m && m.file ? `<a href="${esc(m.file)}" target="_blank" rel="noopener noreferrer">${m.kind === 'video' ? 'MP4' : 'PNG'}</a>` : ''}${fl.slice(0, 1).map(f => `<a href="${esc(f.url)}" target="_blank" rel="noopener noreferrer">Google Docs</a>`).join('')}<button type="button" class="primary" data-cedit>Modifier avec ${esc(d.agent)}</button></footer>
     </article>`; };
-  $('creGrid').innerHTML = (creFilter === 'all' ? brewing.map(t => { const a = AGENTS.find(x => x.task === t); return `<article class="cre-card brewing"><header><span class="av" style="background:${a ? avatarBg(a) : '#ccc'}"></span><span><b>${esc(t.title)}</b><small>${a ? esc(a.name) + ' y travaille' : 'En préparation'}…</small></span></header><div class="cre-skel"></div><div class="cre-skel short"></div></article>`; }).join('') : '')
+  $('creGrid').innerHTML = (creFilter === 'all' ? brewing.map(t => { const a = AGENTS.find(x => x.work === t); return `<article class="cre-card brewing"><header><span class="av" style="background:${a ? avatarBg(a) : '#ccc'}"></span><span><b>${esc(t.title)}</b><small>${a ? esc(a.name) + ' y travaille' : 'En préparation'}…</small></span></header><div class="cre-skel"></div><div class="cre-skel short"></div></article>`; }).join('') : '')
     + (list.length ? list.map(card).join('') : (brewing.length && creFilter === 'all' ? '' : `<div class="empty-big">${all.length ? 'Rien dans ce format.' : 'Ici s’affichent les posts que les agents créent pour toi : textes LinkedIn de Léa, scripts de Reels de Noah, visuels et vidéos de Zoé. Demande-leur un post depuis Messages.'}</div>`));
 }
-$('creFilters').addEventListener('click', e => { const b = e.target.closest('[data-cf]'); if (b) { creFilter = b.dataset.cf; renderCreations(); } });
+$('creFilters').addEventListener('click', e => { const b = e.target.closest('[data-cf]'); if (b) { creFilter = b.dataset.cf; creKey = ''; renderCreations(); if (creFilter === 'files') markFilesSeen(); } });
 $('creGrid').addEventListener('click', async e => {
   const c = e.target.closest('.cre-card[data-key]'); if (!c) return;
   const p = creationsList().find(x => x.key === c.dataset.key); if (!p) return;
@@ -3082,7 +3163,8 @@ function agentAt(ev) {
 }
 canvas.addEventListener('mousemove', e => { HQ.hover = agentAt(e); canvas.style.cursor = HQ.hover ? 'pointer' : 'default'; });
 canvas.addEventListener('mouseleave', () => HQ.hover = null);
-canvas.addEventListener('click', e => { openProfile(agentAt(e)); });
+canvas.addEventListener('click', e => { if (SP.view === 'office') openProfile(agentAt(e)); });
+$('officeTile').addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === ' ') && e.target === $('officeTile')) { e.preventDefault(); openSpace('office'); } });
 
 function setActive(on, { plan = true } = {}) {
   if (on === HQ.active) return;

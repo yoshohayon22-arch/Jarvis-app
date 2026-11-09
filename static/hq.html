@@ -522,6 +522,7 @@
             <input type="file" id="memFiles" multiple hidden accept="image/*,.pdf,.txt,.md,.csv,.json,.docx,.xlsx,.html,.htm">
             <input type="file" id="memExport" hidden accept=".zip,.json">
           </section>
+          <section class="card2"><h3 class="sp-h">🧬 Le Cerveau</h3><div id="memCerveau" style="display:flex;flex-direction:column;gap:8px"></div></section>
           <section class="card2"><h3 class="sp-h">Rangement</h3><div class="mem-src" id="memSrc"></div></section>
           <section class="card2"><h3 class="sp-h">Les agents ont demandé</h3><ul class="mem-log" id="memLog"></ul></section>
         </aside>
@@ -660,7 +661,7 @@ const PROFILES = {
   Nora: { who:'Elle n’oublie rien et sait où tout est rangé.',
     mission:'Tient le cerveau du QG : tes notes, fichiers, photos, tes discussions avec Claude, et elle fouille ton Drive et tes mails quand un agent a besoin d’une info.',
     resp:['Range ce que tu lui confies (notes, fichiers, photos, exports Claude)', 'Répond aux agents avant chaque tâche : ce qu’on sait déjà', 'Cherche dans Google Drive et Gmail', 'Retient ce que tu dis de toi dans les discussions'],
-    tools:['Cerveau', 'Google Drive', 'Gmail', 'Sessions Claude Code'], projects:['Tout ce que tu fais'], habit:'Colle une étiquette sur chaque boîte d’archives.' },
+    tools:['Le Cerveau (tes neurones)', 'Google Drive', 'Gmail', 'Sessions Claude Code'], projects:['Tout ce que tu fais'], habit:'Colle une étiquette sur chaque boîte d’archives.' },
   Livreur: { who:'Livreur de passage, il ne fait pas partie de l’équipe.',
     mission:'Dépose les colis à l’accueil du QG.', resp:['Passe vers 10h40 et 15h10'], tools:[], projects:[], habit:'Ne reste jamais pour le café.' },
 };
@@ -1114,6 +1115,31 @@ const CHATS = {};
 try { HQ.deliverables = JSON.parse(localStorage.getItem(LS_KEY) || '[]').filter(d => d && d.id && typeof d.id === 'string'); } catch (e) { HQ.deliverables = []; }
 try { Object.assign(CHATS, JSON.parse(localStorage.getItem(CHAT_KEY) || '{}')); } catch (e) {}
 const MEM = [], MEMLOG = [], MEM_KEY = 'jarvis-hq-memoire-v1';
+/* Le Cerveau (second cerveau de Yosh) branché sur la mémoire de Nora : neurones et liens copiés dans cerveau_nodes / cerveau_edges */
+const CERVEAU_URL = 'https://claude.ai/code/artifact/e1c58511-8bb8-4248-9d94-4913200976f4';
+const CERV = { nodes: new Map(), edges: new Map(), sync: null, list: [] };
+const CERV_TYPES = { personne:['Personne','👤'], projet:['Projet','🚀'], idee:['Idée','💡'], tache:['Tâche','✅'], argent:['Argent','💰'], lieu:['Lieu','📍'], organisation:['Organisation','🏢'], note:['Note','📝'], document:['Document','📄'] };
+function cervBuild() {
+  const out = [];
+  for (const [id, n] of CERV.nodes) {
+    const [tl, ic] = CERV_TYPES[n.type] || ['Neurone', '🧬'];
+    const links = [];
+    for (const e of CERV.edges.values()) {
+      if (e.source === id && CERV.nodes.has(e.target)) links.push(`${e.label || 'lié à'} → ${CERV.nodes.get(e.target).title}`);
+      else if (e.target === id && CERV.nodes.has(e.source)) links.push(`${CERV.nodes.get(e.source).title} → ${e.label || 'lié à'} → ${n.title}`);
+    }
+    const money = n.amount != null ? `Montant : ${n.amount} ${n.currency || ''}${n.direction ? ' (' + n.direction + ')' : ''}${n.occurred_at ? ', le ' + n.occurred_at : ''}.` : '';
+    const text = [`${ic} ${tl} du Cerveau.`, n.summary || '', money, (n.tags || []).length ? 'Étiquettes : ' + n.tags.join(', ') + '.' : '', links.length ? 'Liens dans le Cerveau :\n· ' + links.join('\n· ') : ''].filter(Boolean).join('\n');
+    out.push({ id: 'cerv_' + id, src: 'cerveau', title: n.title || id, text, url: n.url || CERVEAU_URL, at: Date.parse(n.last_activity_at || n.created_at || 0) || 0, ctype: n.type, ro: true });
+  }
+  CERV.list = out.sort((a, b) => b.at - a.at);
+  if (typeof refresh === 'function') refresh();
+}
+function cervSubscribe(db) {
+  db.collection('cerveau_nodes').limit(1000).onSnapshot(snap => { CERV.nodes.clear(); snap.docs.forEach(d => { const v = d.data(); if (v) CERV.nodes.set(d.id, v); }); cervBuild(); }, () => {});
+  db.collection('cerveau_edges').limit(1000).onSnapshot(snap => { CERV.edges.clear(); snap.docs.forEach(d => { const v = d.data(); if (v) CERV.edges.set(d.id, v); }); cervBuild(); }, () => {});
+  db.doc('cerveau_meta/sync').onSnapshot(d => { CERV.sync = d && d.exists ? d.data() : null; if (typeof refresh === 'function') refresh(); }, () => {});
+}
 // échanges entre agents (canal Équipe)
 const COMMS = [], COMMS_KEY = 'jarvis-hq-equipe-v1';
 try { COMMS.push(...JSON.parse(localStorage.getItem(COMMS_KEY) || '[]').filter(x => x && x.id)); } catch (e) {}
@@ -1166,6 +1192,7 @@ async function initStore() {
   const [db, user, dl, assets] = await Promise.all(['db', 'user', 'downloads', 'assets'].map(n => claude.use(n).catch(() => null)));
   STORE.dl = dl; STORE.assets = assets;
   const uid = user ? await user.id() : null;
+  if (db) { try { cervSubscribe(db); } catch (e) {} }
   if (!db || !uid) return;
   // remise à zéro unique de l'ancien casier dans ta base privée
   try {
@@ -1364,7 +1391,7 @@ Projets que tu suis : ${(a.projects || []).join(', ') || 'aucun en particulier'}
 }
 /* ---------- Mémoire : Nora pioche dans tes archives pour les autres agents ---------- */
 const MEM_SRC = { profil:['Profil Claude','🧠'], note:['Note','✏️'], fichier:['Fichier','📎'], photo:['Photo','🖼️'], claude:['Discussion claude.ai','💬'], claudecode:['Session Claude Code','🤖'], retenu:['Retenu en discussion','📌'],
-  drive:['Google Drive','📁'], gmail:['Gmail','✉️'], livrable:['Livrable du QG','📥'], discussion:['Discussion au QG','🗨️'] };
+  drive:['Google Drive','📁'], gmail:['Gmail','✉️'], livrable:['Livrable du QG','📥'], discussion:['Discussion au QG','🗨️'], cerveau:['Le Cerveau','🧬'] };
 const STOP = new Set('les des une pour avec dans sur que qui est pas plus par aux ces son ses mon mes ton tes leur nous vous elle ils elles mais donc car cette tout tous faire fais moi peux peut veux etre avoir comme quoi quel quelle dont the and for you sur entre bien tres aussi alors faut peux merci stp svp'.split(' '));
 const normT = s => String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
 const keyWords = s => [...new Set(normT(s).split(/[^a-z0-9]+/).filter(w => w.length > 2 && !STOP.has(w)))];
@@ -1378,6 +1405,7 @@ function localRecall(q, limit = 6) {
   const ws = keyWords(q); if (!ws.length) return [];
   const pool = [
     ...MEM.filter(e => e.src !== 'profil').map(e => ({ src: e.src, title: e.title, text: e.text, url: e.url, id: e.id, w: 1 })),
+    ...CERV.list.map(e => ({ src: 'cerveau', title: e.title, text: e.text, url: e.url, id: e.id, w: .9 })),
     ...HQ.deliverables.filter(d => d.status === 'ai' && !d.isMail).map(d => ({ src:'livrable', title: `${d.title} (${d.agent})`, text: d.content, w: .45 })),
     ...Object.entries(CHATS).flatMap(([n, c]) => (c.messages || []).filter(m => m.role === 'user' && m.text.length > 25).map(m => ({ src:'discussion', title: `Tu as écrit à ${n}`, text: m.text, w: .8 }))),
   ];
@@ -1534,7 +1562,7 @@ function teamTools(a) {
     { name:'demander_a_un_collegue', description:`Pose une question à un collègue du QG et reçois sa réponse avec ses pièces (mails, fichiers, livrables, résultats). Collègues : ${AGENTS.filter(x => x !== a).map(x => `${x.name} (${x.role})`).join(', ')}. Max lit la boîte Gmail (contenu des mails, pièces jointes), Nora tient la mémoire (notes, fichiers, historiques Claude, Drive), chaque agent connaît ses propres livrables.`,
       inputSchema:{ type:'object', properties:{ collegue:{ type:'string', description:'prénom du collègue' }, question:{ type:'string', description:'ta question précise' } }, required:['collegue', 'question'] },
       execute: async inp => askAgent(a, String(inp.collegue || ''), String(inp.question || '').slice(0, 1200)) },
-    { name:'consulter_memoire', description:'Demande à Nora ce que les archives de Yosh contiennent sur un sujet (notes, fichiers, photos, historiques Claude, Google Drive, Gmail).',
+    { name:'consulter_memoire', description:'Demande à Nora ce que les archives de Yosh contiennent sur un sujet (notes, fichiers, photos, Le Cerveau, historiques Claude, Google Drive, Gmail).',
       inputSchema:{ type:'object', properties:{ sujet:{ type:'string' } }, required:['sujet'] },
       execute: async inp => (await recall(String(inp.sujet || ''), { by: a, deep: true })).text || 'Rien dans les archives.' },
   ];
@@ -2476,7 +2504,7 @@ function renderTiles() {
   const inside = AGENTS.filter(a => a.inside).length, working = AGENTS.filter(a => a.work).length;
   const plan = HQ.tasks.filter(t => !t.noJob && t.status !== 'refusee' && t.status !== 'proposee'), done = plan.filter(t => t.status === 'livre').length;
   const clock = HQ.active || AGENTS.some(a => a.visible) ? timeStr() : '--:--';
-  const key = [HQ.deliverables.filter(isCreation).map(d => d.id + (d.creSeen ? 1 : 0)).join(','), MEM.length, MEMLOG.length, props.map(t => t.id + t.title + t.target).join(','), msgs.slice(0, 6).map(x => x.m.at + (x.m.seen ? 1 : 0)).join(','), unseen, files.length, links.length, fNew, inside, working, done, plan.length, clock, HQ.active].join('|');
+  const key = [HQ.deliverables.filter(isCreation).map(d => d.id + (d.creSeen ? 1 : 0)).join(','), MEM.length, CERV.list.length, MEMLOG.length, props.map(t => t.id + t.title + t.target).join(','), msgs.slice(0, 6).map(x => x.m.at + (x.m.seen ? 1 : 0)).join(','), unseen, files.length, links.length, fNew, inside, working, done, plan.length, clock, HQ.active].join('|');
   if (key === tileKey) return; tileKey = key;
   const n = props.length;
   $('tValidN').textContent = n; $('kValid').textContent = n; $('sValid').classList.toggle('hot', n > 0);
@@ -2494,7 +2522,7 @@ function renderTiles() {
   $('tCreN').textContent = cres.length; document.querySelector('.t-cre').classList.toggle('hot', creNew > 0);
   const lm = lastC && lastC.media && lastC.media[0];
   $('tCreP').innerHTML = lastC ? `${lm && lm.file && lm.kind === 'image' ? `<img src="${esc(lm.file)}" alt="" onerror="this.remove()">` : ''}<span><b>${esc(lastC.agent)}</b> · ${esc(lastC.title)}</span>` : '<span class="dim">Les posts créés par les agents s’affichent ici.</span>';
-  $('tMemN').textContent = MEM.length; $('tMemS').textContent = 'souvenirs';
+  $('tMemN').textContent = MEM.length + CERV.list.length; $('tMemS').textContent = CERV.list.length ? `souvenirs · dont ${CERV.list.length} du Cerveau` : 'souvenirs';
   $('tDayN').textContent = clock; $('tDayS').textContent = plan.length ? `${done}/${plan.length} livrées` : 'plan';
   const badge = (id, v) => { $(id).hidden = !v; $(id).textContent = v; };
   badge('nValid', n); badge('nMsgs', unseen); badge('nFiles', fNew); badge('nCre', creNew);
@@ -2747,13 +2775,27 @@ async function sendChat(a, text, { message } = {}) {
 /* ---------- Mémoire : l'espace de Nora ---------- */
 let memFilter = 'all', memKey = '', memOpen = null;
 const memStatus = txt => { $('memStatus').textContent = txt || ''; };
+function renderCerveauCard() {
+  const el = $('memCerveau'); if (!el) return;
+  const n = CERV.nodes.size, l = CERV.edges.size;
+  const by = {}; CERV.list.forEach(e => { by[e.ctype] = (by[e.ctype] || 0) + 1; });
+  const when = CERV.sync && CERV.sync.syncedAt ? new Date(CERV.sync.syncedAt).toLocaleString('fr-CH', { day:'numeric', month:'short', hour:'2-digit', minute:'2-digit' }) : null;
+  el.innerHTML = n
+    ? `<p class="meta">${n} neurones · ${l} liens${when ? ' · copiés le ' + esc(when) : ''}</p>
+       <div class="mem-src">${Object.entries(CERV_TYPES).filter(([k]) => by[k]).map(([k, [t, ic]]) => `<span class="pill">${ic} ${esc(t)} · ${by[k]}</span>`).join('')}</div>
+       <p class="meta">Nora s’en sert pour répondre aux agents. Pour mettre à jour la copie, demande à Claude « resynchronise Le Cerveau avec Nora ».</p>
+       <a class="btn ghost" href="${CERVEAU_URL}" target="_blank" rel="noopener noreferrer">🧬 Ouvrir Le Cerveau</a>`
+    : `<p class="meta">Le Cerveau n’est pas encore copié dans la mémoire de Nora.</p><a class="btn ghost" href="${CERVEAU_URL}" target="_blank" rel="noopener noreferrer">🧬 Ouvrir Le Cerveau</a>`;
+}
 function renderMem() {
   if (SP.view !== 'mem') return;
-  const counts = {}; MEM.forEach(e => { counts[e.src] = (counts[e.src] || 0) + 1; });
-  const list = MEM.filter(e => memFilter === 'all' || e.src === memFilter);
-  const key = memFilter + '|' + memOpen + '|' + MEM.map(e => e.id + (e.at || 0) + (e.title || '').length).join(',') + '|' + MEMLOG.map(x => x.at).join(',');
+  const ALL = [...MEM, ...CERV.list];
+  const counts = {}; ALL.forEach(e => { counts[e.src] = (counts[e.src] || 0) + 1; });
+  const list = ALL.filter(e => memFilter === 'all' || e.src === memFilter);
+  const key = memFilter + '|' + memOpen + '|' + ALL.map(e => e.id + (e.at || 0) + (e.title || '').length + (e.text || '').length).join(',') + '|' + MEMLOG.map(x => x.at).join(',') + '|' + (CERV.sync ? CERV.sync.syncedAt : '');
+  renderCerveauCard();
   if (key === memKey) return; memKey = key;
-  $('memSrc').innerHTML = `<button type="button" data-mf="all" aria-pressed="${memFilter === 'all'}">Tout · ${MEM.length}</button>` +
+  $('memSrc').innerHTML = `<button type="button" data-mf="all" aria-pressed="${memFilter === 'all'}">Tout · ${ALL.length}</button>` +
     Object.entries(MEM_SRC).filter(([k]) => counts[k]).map(([k, [l, ic]]) => `<button type="button" data-mf="${k}" aria-pressed="${memFilter === k}">${ic} ${esc(l)} · ${counts[k]}</button>`).join('');
   $('memLog').innerHTML = MEMLOG.length ? MEMLOG.slice(0, 12).map(x => `<li><b>${esc(x.by)}</b> · ${esc(x.q)}<small>${hhmm(x.at)} · ${x.hits.length ? x.hits.length + ' trouvaille' + (x.hits.length > 1 ? 's' : '') + ' : ' + esc([...new Set(x.hits.map(h => (MEM_SRC[h.src] || ['?'])[0]))].join(', ')) : 'rien trouvé'}</small></li>`).join('')
     : '<li class="meta">Avant chaque tâche, l’agent demande à Nora ce qu’on sait déjà. Leurs demandes s’affichent ici.</li>';
@@ -2763,15 +2805,16 @@ function renderMem() {
       <h4><span>${ic}</span><span>${esc(e.title)}</span></h4>
       <div class="meta">${esc(l)}${e.by ? ' · par ' + esc(e.by) : ''} · ${hhmm(e.at)}</div>
       <p>${esc(memOpen === e.id ? e.text : String(e.text).slice(0, 400))}</p>
-      <span class="acts"><button type="button" data-mv>${memOpen === e.id ? 'Réduire' : 'Lire'}</button>${e.url ? `<a href="${esc(e.url)}" target="_blank" rel="noopener noreferrer">Ouvrir</a>` : ''}<button type="button" class="no" data-mdel>Oublier</button></span>
+      <span class="acts"><button type="button" data-mv>${memOpen === e.id ? 'Réduire' : 'Lire'}</button>${e.url ? `<a href="${esc(e.url)}" target="_blank" rel="noopener noreferrer">${e.ro && e.url === CERVEAU_URL ? 'Voir dans le Cerveau' : 'Ouvrir'}</a>` : ''}${e.ro ? '' : '<button type="button" class="no" data-mdel>Oublier</button>'}</span>
     </article>`; }).join('')
-    : `<div class="empty-big">${MEM.length ? 'Rien dans ce rangement.' : 'Le cerveau est vide. Confie à Nora une note, tes fichiers et photos, l’export de tes discussions claude.ai ou ce que Claude sait de toi : les agents s’en serviront avant chaque tâche. Elle fouille aussi ton Drive et tes mails à leur demande.'}</div>`;
+    : `<div class="empty-big">${ALL.length ? 'Rien dans ce rangement.' : 'Le cerveau est vide. Confie à Nora une note, tes fichiers et photos, l’export de tes discussions claude.ai ou ce que Claude sait de toi : les agents s’en serviront avant chaque tâche. Elle fouille aussi ton Drive et tes mails à leur demande.'}</div>`;
 }
 $('memSrc').addEventListener('click', e => { const b = e.target.closest('[data-mf]'); if (b) { memFilter = b.dataset.mf; renderMem(); } });
 $('memList').addEventListener('click', e => {
   const c = e.target.closest('[data-mid]'); if (!c) return;
-  const m = MEM.find(x => x.id === c.dataset.mid); if (!m) return;
+  const m = MEM.find(x => x.id === c.dataset.mid) || CERV.list.find(x => x.id === c.dataset.mid); if (!m) return;
   if (e.target.closest('[data-mv]')) { memOpen = memOpen === m.id ? null : m.id; renderMem(); }
+  if (m.ro) return;
   if (e.target.closest('[data-mdel]')) {
     MEM.splice(MEM.indexOf(m), 1); saveMem(m, true); saveMem();
     if (m.asset && STORE.assets) STORE.assets.delete(m.asset).catch(() => {});

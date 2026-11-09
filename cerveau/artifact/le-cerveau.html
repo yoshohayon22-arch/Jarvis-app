@@ -1,0 +1,1311 @@
+<title>Le Cerveau</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout : carte plein écran ; en-tête et barre de commande flottantes ; panneau latéral (bas sur mobile). Univers unique sombre « Jarvis ». */
+:root {
+  color-scheme: dark;
+  --bg: #04060d;
+  --bg-2: #070b17;
+  --panel: rgba(9, 15, 30, 0.82);
+  --line: rgba(86, 205, 255, 0.18);
+  --line-strong: rgba(86, 205, 255, 0.45);
+  --ink: #dce9ff;
+  --muted: #8296b8;
+  --cyan: #45e3ff;
+  --violet: #a78bfa;
+  --amber: #fbbf24;
+  --good: #6ee7b7;
+  --bad: #fda4af;
+  --f-display: "Orbitron", "Eurostile", "Segoe UI", system-ui, sans-serif;
+  --f-body: "IBM Plex Sans", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --f-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+html, body { height: 100%; }
+body {
+  background:
+    radial-gradient(1100px 760px at 50% 42%, rgba(69, 227, 255, 0.07), transparent 62%),
+    radial-gradient(900px 600px at 85% 95%, rgba(167, 139, 250, 0.08), transparent 60%),
+    var(--bg);
+  color: var(--ink);
+  font: 15px/1.45 var(--f-body);
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+* { box-sizing: border-box; }
+button, input, textarea, select { font: inherit; color: inherit; }
+button { cursor: pointer; background: none; border: 0; -webkit-tap-highlight-color: transparent; }
+:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
+a { color: var(--cyan); }
+
+#app { position: fixed; inset: 0; }
+.grid-bg {
+  position: absolute; inset: 0; pointer-events: none;
+  background-image: linear-gradient(rgba(69,227,255,.035) 1px, transparent 1px), linear-gradient(90deg, rgba(69,227,255,.035) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: radial-gradient(ellipse at center, #000 30%, transparent 75%);
+  -webkit-mask-image: radial-gradient(ellipse at center, #000 30%, transparent 75%);
+}
+#graph { position: absolute; inset: 0; }
+
+.glass {
+  background: var(--panel);
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  border: 1px solid var(--line);
+  box-shadow: 0 10px 40px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.04);
+}
+
+/* ---------- En-tête ---------- */
+header {
+  position: absolute; left: 0; right: 0; top: 0; z-index: 20; pointer-events: none;
+  padding-top: max(10px, env(safe-area-inset-top, 0px));
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: flex; flex-direction: column; gap: 8px;
+}
+header > * { pointer-events: auto; }
+.topline { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.brand { font: 900 17px/1 var(--f-display); letter-spacing: .26em; color: #bff4ff; text-shadow: 0 0 12px rgba(69,227,255,.65), 0 0 28px rgba(69,227,255,.25); display: flex; align-items: center; gap: 10px; white-space: nowrap; }
+.brand i { width: 8px; height: 8px; border-radius: 50%; background: var(--cyan); box-shadow: 0 0 12px var(--cyan); animation: pulse 1.8s ease-in-out infinite; }
+.count { font: 11px var(--f-mono); color: var(--muted); white-space: nowrap; }
+.spacer { flex: 1; }
+.pill { border-radius: 999px; padding: 7px 13px; font-size: 13px; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+.search { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.search input { background: transparent; border: 0; outline: 0; width: 200px; font-size: 14px; }
+.search input::placeholder { color: color-mix(in srgb, var(--muted) 75%, transparent); }
+.search .n { font: 11px var(--f-mono); color: var(--cyan); }
+#search-mobile { display: none; }
+.chips { display: flex; gap: 6px; flex-wrap: wrap; }
+.chip { border: 1px solid; border-radius: 999px; padding: 4px 10px; font-size: 12px; transition: opacity .2s, background .2s; display: inline-flex; gap: 5px; align-items: center; white-space: nowrap; }
+.chip .k { opacity: .6; font-family: var(--f-mono); font-size: 11px; }
+.chip.off { opacity: .35; background: transparent !important; }
+
+/* ---------- Neurone oublié ---------- */
+#forgotten { max-width: 440px; border-radius: 16px; padding: 10px 14px; animation: rise .4s both; }
+#forgotten .eyebrow { display: flex; align-items: center; gap: 8px; font: 500 10.5px var(--f-mono); letter-spacing: .18em; text-transform: uppercase; color: color-mix(in srgb, var(--amber) 85%, white); }
+#forgotten .eyebrow i { width: 6px; height: 6px; border-radius: 50%; background: var(--amber); animation: pulse 1.8s infinite; }
+#forgotten h3 { margin: 6px 0 2px; font: 800 14px var(--f-display); letter-spacing: .02em; text-wrap: balance; }
+#forgotten p { margin: 0; font-size: 13.5px; color: color-mix(in srgb, var(--ink) 90%, transparent); }
+#forgotten .acts { display: flex; gap: 14px; margin-top: 6px; font-size: 12.5px; flex-wrap: wrap; }
+.link { color: var(--cyan); }
+.link.dim { color: var(--muted); }
+.link:hover { text-decoration: underline; }
+.x { color: var(--muted); border-radius: 999px; padding: 2px 7px; margin-left: auto; }
+.x:hover { color: var(--ink); background: rgba(255,255,255,.05); }
+
+/* ---------- Bas : réponse + barre ---------- */
+#bottom {
+  position: absolute; left: 0; right: 0; bottom: 0; z-index: 20; pointer-events: none;
+  padding-bottom: max(12px, env(safe-area-inset-bottom, 0px));
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+#bottom > * { pointer-events: auto; max-width: 760px; margin-inline: auto; }
+.modes { display: flex; gap: 6px; align-items: center; margin-bottom: 8px; }
+.mode { border-radius: 999px; padding: 5px 12px; font-size: 12.5px; font-weight: 500; letter-spacing: .02em; color: var(--muted); }
+.mode[aria-pressed="true"].saisie { color: #c8f6ff; background: rgba(69,227,255,.13); box-shadow: 0 0 0 1px rgba(69,227,255,.45), 0 0 18px rgba(69,227,255,.3); }
+.mode[aria-pressed="true"].question { color: #e0d6ff; background: rgba(167,139,250,.14); box-shadow: 0 0 0 1px rgba(167,139,250,.5), 0 0 18px rgba(167,139,250,.32); }
+.hint { margin-left: auto; font: 11px var(--f-mono); color: var(--muted); }
+.bar-wrap { border-radius: 18px; padding: 1px; background: linear-gradient(90deg, rgba(69,227,255,.7), rgba(56,189,248,.6)); position: relative; overflow: hidden; }
+.bar-wrap.q { background: linear-gradient(90deg, rgba(167,139,250,.75), rgba(217,70,239,.55)); }
+.bar-wrap.busy::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, transparent, rgba(69,227,255,.25), transparent); animation: scan 1.4s linear infinite; pointer-events: none; }
+.bar { border-radius: 17px; display: flex; align-items: flex-end; gap: 6px; padding: 6px 8px 6px 14px; background: rgba(7,12,25,.94); }
+.bar textarea { flex: 1; min-width: 0; resize: none; border: 0; outline: 0; background: transparent; font-size: 16px; line-height: 1.4; padding: 10px 0; max-height: 160px; min-height: 44px; }
+.bar textarea::placeholder { color: color-mix(in srgb, var(--muted) 80%, transparent); }
+.icon-btn { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; color: var(--muted); flex: none; margin-bottom: 2px; }
+.icon-btn:hover { color: var(--ink); background: rgba(255,255,255,.05); }
+.send { background: var(--cyan); color: #031018; }
+.send:hover { background: #8cefff; color: #031018; }
+.bar-wrap.q .send { background: var(--violet); }
+.send:disabled { opacity: .3; cursor: default; }
+.spin { width: 16px; height: 16px; border-radius: 50%; border: 2px solid rgba(3,16,24,.3); border-top-color: #031018; animation: spin .8s linear infinite; }
+
+#answer { border-radius: 18px; padding: 14px 16px; margin-bottom: 10px; max-height: 42vh; overflow: auto; box-shadow: 0 0 30px rgba(167,139,250,.15); animation: rise .35s both; }
+#answer .q { display: flex; gap: 8px; color: var(--muted); font-size: 13px; margin-bottom: 8px; }
+#answer .q span { flex: 1; min-width: 0; }
+#answer .a { white-space: pre-wrap; font-size: 15px; line-height: 1.6; }
+.cite { display: inline-block; border-radius: 6px; padding: 0 6px; font-size: 12.5px; font-weight: 500; margin: 0 2px; line-height: 1.6; }
+.cites { display: flex; flex-wrap: wrap; gap: 6px; border-top: 1px solid var(--line); margin-top: 12px; padding-top: 10px; align-items: center; }
+.cites .lbl { font: 10.5px var(--f-mono); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+.thinking { display: flex; gap: 8px; align-items: center; color: #d8ccff; font-size: 14px; }
+.thinking i { width: 7px; height: 7px; border-radius: 50%; background: var(--violet); animation: pulse 1.2s infinite; }
+
+/* ---------- Panneau ---------- */
+#panel {
+  position: absolute; z-index: 30; right: max(16px, env(safe-area-inset-right, 0px)); top: calc(max(10px, env(safe-area-inset-top, 0px)) + 52px); bottom: max(16px, env(safe-area-inset-bottom, 0px));
+  width: 410px; border-radius: 22px; display: flex; flex-direction: column; animation: slide .3s both;
+}
+#panel .close { position: absolute; top: 10px; right: 10px; }
+#panel .body { overflow: auto; padding: 16px 18px 22px; flex: 1; min-height: 0; }
+.type-tag { display: inline-flex; gap: 6px; align-items: center; border-radius: 999px; padding: 3px 9px; font: 600 10.5px var(--f-mono); letter-spacing: .12em; text-transform: uppercase; }
+.meta-line { font: 11px var(--f-mono); color: var(--muted); margin-top: 8px; }
+#panel h2 { font: 800 21px/1.2 var(--f-display); margin: 10px 0 0; text-wrap: balance; overflow-wrap: anywhere; }
+.amount { font: 800 24px var(--f-display); margin-top: 8px; font-variant-numeric: tabular-nums; }
+.amount small { font: 12px var(--f-body); color: var(--muted); margin-left: 8px; }
+.summary { margin-top: 12px; white-space: pre-wrap; font-size: 14.5px; line-height: 1.6; overflow-wrap: anywhere; }
+.empty { color: var(--muted); font-style: italic; font-size: 14px; margin-top: 12px; }
+.tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
+.tags span { background: rgba(255,255,255,.05); border-radius: 6px; padding: 1px 7px; font: 11.5px var(--f-mono); color: var(--muted); }
+.actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; align-items: center; }
+.btn { border: 1px solid var(--line); border-radius: 10px; padding: 7px 12px; font-size: 13.5px; color: color-mix(in srgb, var(--ink) 88%, transparent); }
+.btn:hover { border-color: var(--line-strong); color: #cdf6ff; }
+.btn.primary { background: var(--cyan); color: #031018; border-color: transparent; font-weight: 600; }
+.btn.danger { background: #e11d48; color: white; border-color: transparent; }
+.btn.open { border-color: rgba(45,212,191,.45); color: #99f6e4; background: rgba(45,212,191,.1); text-decoration: none; display: inline-flex; gap: 6px; }
+.sec { margin-top: 22px; }
+.sec h4 { margin: 0 0 8px; font: 600 10.5px var(--f-mono); letter-spacing: .2em; text-transform: uppercase; color: color-mix(in srgb, var(--cyan) 70%, var(--muted)); }
+.conn { display: flex; align-items: center; gap: 8px; font-size: 14px; padding: 3px 0; min-width: 0; }
+.conn .l { width: 108px; flex: none; font: 11px var(--f-mono); color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.conn button.t { text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; flex: 1; }
+.conn button.t:hover { text-decoration: underline; }
+.conn .rm { color: var(--muted); font-size: 12px; opacity: .55; }
+.conn .rm:hover { color: var(--bad); opacity: 1; }
+.src { border-left: 2px solid rgba(69,227,255,.4); background: rgba(255,255,255,.03); border-radius: 8px; padding: 8px 12px; margin-bottom: 8px; }
+.src p { margin: 0; font-size: 13.5px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.src small { display: block; margin-top: 4px; font: 11px var(--f-mono); color: var(--muted); }
+.thumb { margin-top: 12px; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; background: rgba(0,0,0,.3); }
+.thumb img { display: block; width: 100%; max-height: 260px; object-fit: contain; background: #0b1020; }
+.thumb div { display: flex; justify-content: space-between; gap: 8px; padding: 6px 10px; font: 11px var(--f-mono); color: var(--muted); }
+.field { display: block; margin-top: 10px; }
+.field span { display: block; font: 10.5px var(--f-mono); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
+.inp { width: 100%; border: 1px solid var(--line); background: rgba(0,0,0,.3); border-radius: 9px; padding: 8px 10px; font-size: 15px; outline: 0; }
+.inp:focus { border-color: var(--line-strong); }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0 10px; }
+.merge-box { margin-top: 12px; border: 1px solid var(--line); border-radius: 12px; padding: 10px; background: rgba(0,0,0,.2); }
+.merge-box p { margin: 0 0 8px; font-size: 12.5px; color: var(--muted); }
+.merge-box ul { list-style: none; margin: 8px 0 0; padding: 0; }
+.merge-box li button { width: 100%; text-align: left; padding: 6px 8px; border-radius: 8px; font-size: 14px; }
+.merge-box li button:hover { background: rgba(255,255,255,.05); }
+
+/* ---------- Argent ---------- */
+#money { position: absolute; inset: 0; z-index: 40; background: color-mix(in srgb, var(--bg) 94%, transparent); backdrop-filter: blur(6px); overflow: auto;
+  padding-top: max(14px, env(safe-area-inset-top, 0px)); padding-bottom: max(30px, env(safe-area-inset-bottom, 0px));
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+#money .inner { max-width: 760px; margin: 0 auto; display: flex; flex-direction: column; gap: 14px; }
+#money .head { display: flex; align-items: center; gap: 14px; }
+#money h1 { margin: 0; font: 900 18px var(--f-display); letter-spacing: .25em; color: #b7f7dd; text-shadow: 0 0 14px rgba(52,211,153,.55); }
+.month { display: flex; align-items: center; justify-content: space-between; border-radius: 16px; padding: 6px; }
+.month span { font: 600 14px var(--f-display); letter-spacing: .12em; text-transform: capitalize; }
+.month button { font-size: 20px; padding: 2px 14px; color: var(--muted); }
+.stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.stat { border-radius: 16px; padding: 12px 14px; min-width: 0; }
+.stat p { margin: 0; font: 10.5px var(--f-mono); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+.stat b { display: block; margin-top: 4px; font: 800 clamp(15px, 4.4vw, 22px) var(--f-display); font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.card { border-radius: 16px; padding: 14px 16px; }
+.cat { margin-bottom: 10px; }
+.cat .row { display: flex; justify-content: space-between; gap: 10px; font-size: 14px; margin-bottom: 4px; }
+.cat .row span:first-child { text-transform: capitalize; }
+.cat .vals { font-family: var(--f-mono); font-size: 12.5px; font-variant-numeric: tabular-nums; }
+.track { height: 6px; border-radius: 99px; background: rgba(255,255,255,.05); display: flex; gap: 2px; overflow: hidden; }
+.track i { display: block; height: 100%; border-radius: 99px; }
+.mv { display: flex; gap: 12px; align-items: center; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,.05); font-size: 14px; }
+.mv .d { width: 44px; flex: none; font: 11.5px var(--f-mono); color: var(--muted); }
+.mv .t { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mv .v { font-family: var(--f-mono); font-variant-numeric: tabular-nums; }
+
+/* ---------- Menu, toasts, dépôt, état ---------- */
+#menu { position: absolute; z-index: 45; right: max(16px, env(safe-area-inset-right, 0px)); top: calc(max(10px, env(safe-area-inset-top, 0px)) + 46px); width: 280px; border-radius: 16px; padding: 6px; animation: rise .25s both; }
+#menu button, #menu label { display: block; width: 100%; text-align: left; padding: 9px 12px; border-radius: 10px; font-size: 14px; cursor: pointer; }
+#menu button:hover, #menu label:hover { background: rgba(255,255,255,.05); }
+#menu .note { border-top: 1px solid var(--line); margin-top: 4px; padding: 8px 12px 4px; font: 11px/1.5 var(--f-mono); color: var(--muted); }
+#toasts { position: absolute; z-index: 60; left: 50%; transform: translateX(-50%); top: calc(max(10px, env(safe-area-inset-top, 0px)) + 96px); width: min(92vw, 440px); display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
+.toast { border-radius: 12px; padding: 10px 14px; font-size: 14px; animation: rise .3s both; }
+.toast.err { border-color: rgba(253,164,175,.45); color: #ffe4e8; }
+#drop { position: absolute; inset: 0; z-index: 70; display: grid; place-items: center; background: rgba(69,227,255,.05); backdrop-filter: blur(2px); pointer-events: none; }
+#drop div { border: 2px dashed rgba(69,227,255,.7); border-radius: 26px; padding: 30px 40px; text-align: center; box-shadow: 0 0 24px rgba(69,227,255,.3); }
+#drop b { font: 800 17px var(--f-display); letter-spacing: .18em; color: #bff4ff; }
+#drop p { margin: 6px 0 0; color: var(--muted); font-size: 14px; }
+#state { position: absolute; inset: 0; display: grid; place-items: center; pointer-events: none; z-index: 5; padding: 0 24px; text-align: center; }
+#state p { max-width: 380px; color: var(--muted); font-size: 14px; }
+#state b { display: block; font: 800 13px var(--f-display); letter-spacing: .3em; color: rgba(69,227,255,.75); margin-bottom: 8px; }
+
+@keyframes pulse { 0%,100% { opacity: 1; transform: scale(1); } 50% { opacity: .4; transform: scale(.75); } }
+@keyframes scan { from { transform: translateX(-100%); } to { transform: translateX(100%); } }
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@keyframes slide { from { opacity: 0; transform: translateX(22px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; } }
+
+@media (max-width: 760px) {
+  .count, .hint, .search-desk { display: none !important; }
+  #search-mobile { display: flex; }
+  .search input { width: 100%; flex: 1; font-size: 16px; }
+  .chips { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; margin-inline: -16px; padding-inline: 16px; }
+  .chips::-webkit-scrollbar { display: none; }
+  #forgotten { max-width: none; }
+  #forgotten p { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  #panel { left: 0; right: 0; bottom: 0; top: auto; width: auto; max-height: 74vh; border-radius: 22px 22px 0 0; padding-bottom: env(safe-area-inset-bottom, 0px); }
+  body.panel-open #bottom, body.panel-open #forgotten { display: none; }
+}
+@media (min-width: 761px) { body.panel-open #bottom { padding-right: 440px; } }
+</style>
+
+<div id="app">
+  <div class="grid-bg"></div>
+  <div id="graph"></div>
+  <div id="state"><p><b>INITIALISATION</b>Connexion à ton cerveau…</p></div>
+
+  <header>
+    <div class="topline">
+      <div class="brand"><i></i>LE CERVEAU</div>
+      <span class="count" id="count"></span>
+      <span class="spacer"></span>
+      <label class="glass pill search search-desk"><span aria-hidden="true">⌕</span><input id="search" placeholder="Chercher un neurone" autocomplete="off"><span class="n" id="search-n"></span></label>
+      <button class="glass pill" id="btn-money" style="color:#b7f7dd">💰 <span class="search-desk">Argent</span></button>
+      <button class="glass pill" id="btn-menu" aria-label="Menu" aria-expanded="false">⋯</button>
+    </div>
+    <label class="glass pill search" id="search-mobile"><span aria-hidden="true">⌕</span><input id="search-m" placeholder="Chercher un neurone" autocomplete="off"><span class="n" id="search-n-m"></span></label>
+    <div class="chips" id="chips"></div>
+    <div id="forgotten" class="glass" hidden></div>
+  </header>
+
+  <div id="bottom">
+    <div id="answer" class="glass" hidden></div>
+    <div>
+      <div class="modes">
+        <button class="mode saisie" data-mode="saisie" aria-pressed="true">✦ Saisie</button>
+        <button class="mode question" data-mode="question" aria-pressed="false">◈ Question</button>
+        <span class="hint">« / » saisie · « ? » question · Entrée pour envoyer</span>
+      </div>
+      <div class="bar-wrap" id="bar-wrap">
+        <div class="bar">
+          <textarea id="input" rows="1" enterkeyhint="send" aria-label="Nouvelle info"></textarea>
+          <label class="icon-btn" title="Ajouter un fichier (PDF, Word, image)" aria-label="Ajouter un fichier">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M21 11.5 12.6 19.9a5.5 5.5 0 0 1-7.8-7.8l8.5-8.5a3.7 3.7 0 0 1 5.2 5.2l-8.5 8.5a1.8 1.8 0 0 1-2.6-2.6l7.8-7.8"/></svg>
+            <input type="file" id="file-in" multiple accept=".pdf,.docx,.png,.jpg,.jpeg,.webp,.gif,.txt,.md,image/*" hidden>
+          </label>
+          <button class="icon-btn send" id="send" aria-label="Envoyer" disabled>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6l6 6-6 6"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <aside id="panel" class="glass" hidden></aside>
+  <section id="money" hidden></section>
+  <div id="menu" class="glass" hidden></div>
+  <div id="toasts"></div>
+  <div id="drop" hidden><div><b>DÉPOSE TES FICHIERS</b><p>PDF, Word, images, captures d'écran → neurones</p></div></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/force-graph@1.49.5/dist/force-graph.min.js"></script>
+<script>
+"use strict";
+/* ============================================================
+   LE CERVEAU — second cerveau de Yosh.
+   Données : capability `db` (collections nodes, edges, sources, meta).
+   IA : capability `sample` (Claude), fichiers : capability `assets`.
+   ============================================================ */
+
+const TYPES = {
+  personne:     { label: "Personne",     color: "#38bdf8", emoji: "👤" },
+  projet:       { label: "Projet",       color: "#a78bfa", emoji: "🚀" },
+  idee:         { label: "Idée",         color: "#facc15", emoji: "💡" },
+  tache:        { label: "Tâche",        color: "#fb923c", emoji: "✅" },
+  argent:       { label: "Argent",       color: "#34d399", emoji: "💰" },
+  lieu:         { label: "Lieu",         color: "#f472b6", emoji: "📍" },
+  organisation: { label: "Organisation", color: "#60a5fa", emoji: "🏢" },
+  note:         { label: "Note",         color: "#94a3b8", emoji: "📝" },
+  document:     { label: "Document",     color: "#2dd4bf", emoji: "📄" },
+};
+const TYPE_KEYS = Object.keys(TYPES);
+const EXTRACTABLE = TYPE_KEYS.filter(t => t !== "document");
+const MODEL_OPTS = { model: "claude-sonnet-5-5", modelTier: "default", cache: false };
+
+/* ---------- utilitaires ---------- */
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const norm = s => String(s ?? "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[’']/g, " ").replace(/\s+/g, " ").trim();
+const slug = s => norm(s).replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 48) || "neurone";
+const nowIso = () => new Date().toISOString();
+const rid = p => p + "_" + Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4);
+const hexRgb = h => { const n = parseInt(h.slice(1), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; };
+const RGB = Object.fromEntries(TYPE_KEYS.map(k => [k, hexRgb(TYPES[k].color)]));
+const rgba = (c, a) => `rgba(${c[0]|0},${c[1]|0},${c[2]|0},${Math.max(0, Math.min(1, a))})`;
+const STOP = new Set(("le la les un une des de du d l au aux et ou mais donc ni car a en dans par pour sur avec sans sous chez ce cet cette ces mon ma mes ton ta tes son sa ses notre nos votre vos leur leurs je tu il elle on nous vous ils elles me te se lui y que qui quoi dont est sont suis es etre ai as avons avez ont avait fait faire quel quelle quels quelles qu ne pas plus tres tout tous toute toutes moi toi sait sais savoir comment combien pourquoi quand rien chose choses m t s n j c").split(" "));
+const keywords = (s, max = 12) => { const out = []; for (const w of norm(s).split(/[^a-z0-9@]+/)) { if (w.length < 2 || STOP.has(w) || out.includes(w)) continue; out.push(w); if (out.length >= max) break; } return out; };
+const daysSince = iso => Math.max(0, (Date.now() - Date.parse(iso || 0)) / 86400000);
+const rel = iso => { const d = Math.floor(daysSince(iso)); return d <= 0 ? "aujourd'hui" : d === 1 ? "hier" : d < 30 ? `il y a ${d} j` : d < 365 ? `il y a ${Math.floor(d / 30)} mois` : `il y a ${Math.floor(d / 365)} an(s)`; };
+const fmtNum = n => new Intl.NumberFormat("fr-CH", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n);
+const today = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`; };
+const todayFr = () => `${today()} (${new Date().toLocaleDateString("fr-CH", { weekday: "long" })})`;
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const blobUrl = id => id ? "/_blob/" + id : null;
+
+function toast(msg, kind = "ok") {
+  const el = document.createElement("div");
+  el.className = "toast glass" + (kind === "err" ? " err" : "");
+  el.textContent = msg;
+  $("#toasts").append(el);
+  setTimeout(() => el.remove(), kind === "err" ? 7000 : 4200);
+}
+
+/* ---------- état ---------- */
+const S = {
+  db: null, sample: null, assets: null,
+  nodes: new Map(), edges: new Map(), sources: new Map(),
+  loaded: { nodes: false, edges: false, sources: false },
+  born: new Map(), known: null,
+  selected: null, highlight: new Set(), hidden: new Set(),
+  search: "", mode: "saisie", busy: false,
+  pendingFocus: null, forgotten: null, forgottenSkip: [],
+  moneyMonth: new Date().toISOString().slice(0, 7),
+};
+
+function glowOf(n) {
+  const recency = Math.exp(-daysSince(n.last_activity_at) / 14);
+  const freq = Math.min(1, Math.log(1 + (n.touch_count || 1)) / Math.log(11));
+  return Math.max(0.15, Math.min(1, 0.15 + 0.85 * recency * (0.6 + 0.4 * freq)));
+}
+function degreeMap() {
+  const d = new Map();
+  for (const e of S.edges.values()) { d.set(e.source, (d.get(e.source) || 0) + 1); d.set(e.target, (d.get(e.target) || 0) + 1); }
+  return d;
+}
+function neighbors(id) {
+  const out = [];
+  for (const e of S.edges.values()) { if (e.source === id) out.push([e, e.target, "out"]); else if (e.target === id) out.push([e, e.source, "in"]); }
+  return out;
+}
+function sourcesOf(id) { return [...S.sources.values()].filter(s => (s.node_ids || []).includes(id)).sort((a, b) => (b.created_at || "").localeCompare(a.created_at || "")); }
+
+/* ============================================================
+   CARTE
+   ============================================================ */
+const BIRTH = 2200, LINK_DRAW = 1400;
+const radius = n => Math.min(20, 3.2 + Math.sqrt(n.degree || 0) * 2.3);
+const easeBack = t => 1 + 2.4 * Math.pow(t - 1, 3) + 1.4 * Math.pow(t - 1, 2);
+const cache = new Map();
+let graph, graphSig = "", fitted = false, matches = null, selNeighbors = new Set();
+
+function initGraph() {
+  if (typeof ForceGraph !== "function") { $("#state").innerHTML = "<p><b>CARTE INDISPONIBLE</b>La bibliothèque de la carte n'a pas pu se charger. Recharge la page.</p>"; return; }
+  const el = $("#graph");
+  graph = ForceGraph()(el)
+    .backgroundColor("rgba(0,0,0,0)")
+    .nodeId("id")
+    .nodeCanvasObject(drawNode)
+    .nodePointerAreaPaint((n, color, ctx) => { ctx.fillStyle = color; ctx.beginPath(); ctx.arc(n.x, n.y, radius(n) + 4, 0, 7); ctx.fill(); })
+    .linkCanvasObjectMode(() => "replace")
+    .linkCanvasObject(drawLink)
+    .linkDirectionalParticles(l => { const s = l.source.id ?? l.source, t = l.target.id ?? l.target; if (S.highlight.has(s) && S.highlight.has(t)) return 3; if (S.selected && (s === S.selected || t === S.selected)) return 2; return 0; })
+    .linkDirectionalParticleWidth(2.2).linkDirectionalParticleSpeed(0.008).linkDirectionalParticleColor(() => "#a5f3fc")
+    .autoPauseRedraw(false).cooldownTicks(180).d3VelocityDecay(0.32).minZoom(0.3).maxZoom(8)
+    .onNodeClick(n => onNodeClick(n.id))
+    .onBackgroundClick(() => select(null))
+    .onEngineStop(() => { if (!fitted && cache.size) { fitted = true; graph.zoomToFit(700, 70); } });
+  graph.d3Force("charge").strength(-75);
+  graph.d3Force("link").distance(42);
+  // Légère gravité vers le centre (les neurones isolés ne s'éloignent pas).
+  let gNodes = [];
+  const gravity = alpha => { for (const n of gNodes) { n.vx -= n.x * 0.045 * alpha; n.vy -= n.y * 0.045 * alpha; } };
+  gravity.initialize = ns => { gNodes = ns; };
+  graph.d3Force("gravity", gravity);
+  const ro = new ResizeObserver(() => graph.width(el.clientWidth).height(el.clientHeight));
+  ro.observe(el);
+}
+
+function refreshGraph() {
+  if (!graph) return;
+  const deg = degreeMap();
+  const visible = [...S.nodes.values()].filter(n => !S.hidden.has(n.type));
+  const ids = new Set(visible.map(n => n.id));
+  const links = [...S.edges.values()].filter(e => ids.has(e.source) && ids.has(e.target));
+  const sig = [...ids].sort().join("|") + "#" + links.map(l => l.id).sort().join("|");
+  for (const n of visible) {
+    let o = cache.get(n.id);
+    if (!o) {
+      o = { id: n.id };
+      const e = links.find(l => l.source === n.id || l.target === n.id);
+      const nb = e ? cache.get(e.source === n.id ? e.target : e.source) : null;
+      if (nb && nb.x !== undefined) { o.x = nb.x + (Math.random() - .5) * 30; o.y = nb.y + (Math.random() - .5) * 30; }
+      cache.set(n.id, o);
+    }
+    o.type = n.type; o.title = n.title; o.degree = deg.get(n.id) || 0; o.glow = glowOf(n); o.tags = n.tags || [];
+  }
+  for (const id of [...cache.keys()]) if (!ids.has(id)) cache.delete(id);
+  if (sig !== graphSig) {
+    graphSig = sig;
+    graph.graphData({ nodes: visible.map(n => cache.get(n.id)), links: links.map(l => ({ id: l.id, source: l.source, target: l.target, label: l.label })) });
+  }
+}
+
+function drawNode(node, ctx, scale) {
+  if (node.x === undefined) return;
+  const now = performance.now();
+  const c = RGB[node.type] || [148, 163, 184];
+  const r0 = radius(node);
+  const isSel = node.id === S.selected, isHi = S.highlight.has(node.id), isMatch = matches ? matches.has(node.id) : false;
+  const dimmed = (matches && !isMatch) || (S.selected && !isSel && !selNeighbors.has(node.id) && !isHi);
+  const glow = isHi || isSel || isMatch ? 1 : node.glow;
+  const alpha = dimmed ? 0.12 : 0.3 + 0.7 * glow;
+  const b = S.born.get(node.id), age = b ? now - b : Infinity, t = Math.min(1, Math.max(0, age) / BIRTH);
+  const r = age < BIRTH ? r0 * Math.max(0.2, easeBack(Math.min(1, Math.max(0, t) * 1.6))) : r0;
+  if (!dimmed) {
+    const hr = r * (2.2 + 2.6 * glow) + (isHi ? 6 + 3 * Math.sin(now / 260) : 0);
+    const g = ctx.createRadialGradient(node.x, node.y, r * .4, node.x, node.y, hr);
+    g.addColorStop(0, rgba(c, .55 * glow)); g.addColorStop(.45, rgba(c, .16 * glow)); g.addColorStop(1, rgba(c, 0));
+    ctx.fillStyle = g; ctx.beginPath(); ctx.arc(node.x, node.y, hr, 0, 7); ctx.fill();
+  }
+  if (age >= 0 && age < BIRTH) {
+    ctx.strokeStyle = rgba([255, 255, 255], .9 * (1 - t)); ctx.lineWidth = 2 / scale;
+    ctx.beginPath(); ctx.arc(node.x, node.y, r0 * (1 + 5 * t), 0, 7); ctx.stroke();
+    const f = ctx.createRadialGradient(node.x, node.y, 0, node.x, node.y, r0 * 4);
+    f.addColorStop(0, rgba([255, 255, 255], .8 * (1 - t))); f.addColorStop(1, rgba([255, 255, 255], 0));
+    ctx.fillStyle = f; ctx.beginPath(); ctx.arc(node.x, node.y, r0 * 4, 0, 7); ctx.fill();
+  }
+  const core = ctx.createRadialGradient(node.x - r * .3, node.y - r * .3, r * .1, node.x, node.y, r);
+  core.addColorStop(0, rgba([255, 255, 255], alpha * (.35 + .5 * glow))); core.addColorStop(.35, rgba(c, alpha)); core.addColorStop(1, rgba(c.map(v => v * .55), alpha));
+  ctx.fillStyle = core; ctx.beginPath();
+  if (node.type === "document") { ctx.moveTo(node.x, node.y - r * 1.2); ctx.lineTo(node.x + r * 1.2, node.y); ctx.lineTo(node.x, node.y + r * 1.2); ctx.lineTo(node.x - r * 1.2, node.y); ctx.closePath(); }
+  else ctx.arc(node.x, node.y, r, 0, 7);
+  ctx.fill();
+  if (isHi) { ctx.strokeStyle = rgba([180, 245, 255], .6 + .4 * Math.sin(now / 200)); ctx.lineWidth = 2.2 / scale; ctx.beginPath(); ctx.arc(node.x, node.y, r + 4 / scale + 2, 0, 7); ctx.stroke(); }
+  if (isSel) { ctx.save(); ctx.setLineDash([3 / scale, 3 / scale]); ctx.lineDashOffset = -now / 60 / scale; ctx.strokeStyle = "rgba(255,255,255,.95)"; ctx.lineWidth = 1.6 / scale; ctx.beginPath(); ctx.arc(node.x, node.y, r + 5 / scale + 2, 0, 7); ctx.stroke(); ctx.restore(); }
+  const show = isSel || isHi || isMatch || (!dimmed && (scale > 1.5 || node.degree >= 7 || (age >= 0 && age < BIRTH * 2)));
+  if (show) {
+    const fs = Math.max(10 / scale, 2.4);
+    ctx.font = `${isSel || isHi ? 600 : 500} ${fs}px "IBM Plex Sans", system-ui, sans-serif`;
+    ctx.textAlign = "center"; ctx.textBaseline = "top";
+    const label = node.title.length > 34 ? node.title.slice(0, 32) + "…" : node.title;
+    const w = ctx.measureText(label).width;
+    ctx.fillStyle = `rgba(4,6,13,${dimmed ? .2 : .65})`; ctx.fillRect(node.x - w / 2 - 2 / scale, node.y + r + 3 / scale, w + 4 / scale, fs + 3 / scale);
+    ctx.fillStyle = dimmed ? "rgba(220,233,255,.25)" : `rgba(226,240,255,${.55 + .45 * glow})`;
+    ctx.fillText(label, node.x, node.y + r + 4 / scale);
+  }
+}
+
+function drawLink(link, ctx, scale) {
+  const s = link.source, t = link.target;
+  if (s.x === undefined || t.x === undefined) return;
+  const now = performance.now();
+  const touchesSel = S.selected && (s.id === S.selected || t.id === S.selected);
+  const hi = S.highlight.has(s.id) && S.highlight.has(t.id);
+  const dim = (matches && !(matches.has(s.id) || matches.has(t.id))) || (S.selected && !touchesSel);
+  const g = ((s.glow || .3) + (t.glow || .3)) / 2;
+  const b = S.born.get(link.id), age = b ? now - b : Infinity;
+  let x2 = t.x, y2 = t.y;
+  const drawing = age >= 0 && age < LINK_DRAW;
+  if (age < 0) return; // le lien n'a pas encore commencé à se tracer
+  if (drawing) { const e = 1 - Math.pow(1 - age / LINK_DRAW, 3); x2 = s.x + (t.x - s.x) * e; y2 = s.y + (t.y - s.y) * e; }
+  ctx.lineWidth = (touchesSel || hi || drawing ? 1.6 : .8) / scale + .15;
+  ctx.strokeStyle = drawing ? "rgba(190,250,255,.95)" : touchesSel || hi ? "rgba(120,230,255,.75)" : dim ? "rgba(120,170,230,.05)" : `rgba(120,180,240,${.1 + .28 * g})`;
+  ctx.beginPath(); ctx.moveTo(s.x, s.y); ctx.lineTo(x2, y2); ctx.stroke();
+  if (drawing) { const h = ctx.createRadialGradient(x2, y2, 0, x2, y2, 6); h.addColorStop(0, "rgba(255,255,255,.95)"); h.addColorStop(1, "rgba(120,230,255,0)"); ctx.fillStyle = h; ctx.beginPath(); ctx.arc(x2, y2, 6, 0, 7); ctx.fill(); }
+  if ((touchesSel || hi) && scale > 1.8 && link.label) { ctx.font = `${Math.max(8 / scale, 1.8)}px "IBM Plex Sans", sans-serif`; ctx.fillStyle = "rgba(160,220,255,.75)"; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText(link.label, (s.x + t.x) / 2, (s.y + t.y) / 2); }
+}
+
+function focusNode(id) {
+  const go = (tries = 0) => {
+    const n = cache.get(id);
+    if (!n || n.x === undefined) { if (tries < 10) setTimeout(() => go(tries + 1), 200); return; }
+    graph.centerAt(n.x, n.y, 800); graph.zoom(Math.max(graph.zoom(), 2.4), 800);
+  };
+  go();
+}
+
+/* ============================================================
+   DONNÉES (db)
+   ============================================================ */
+async function connect() {
+  const cl = window.claude;
+  if (!cl || typeof cl.use !== "function") { setState("HORS DE CLAUDE", "Ouvre cette page depuis claude.ai, connecté, pour accéder à ton cerveau."); return; }
+  S.db = await cl.use("db");
+  cl.use("sample").then(s => { S.sample = s; }).catch(() => {});
+  cl.use("assets").then(a => { S.assets = a; }).catch(() => {});
+  if (!S.db) { setState("CERVEAU INACCESSIBLE", "Connecte-toi à claude.ai avec le compte propriétaire pour ouvrir ton cerveau."); return; }
+  const timer = setTimeout(() => { if (!S.nodes.size) setState("CONNEXION LENTE", "Ton cerveau ne répond pas encore. Vérifie ta connexion, la page continue d'essayer."); }, 10000);
+  const sub = (name, map) => S.db.collection(name).limit(1000).onSnapshot(snap => {
+    clearTimeout(timer);
+    map.clear();
+    for (const d of snap.docs) { const v = d.data(); if (v) map.set(d.id, { id: d.id, ...v }); }
+    S.loaded[name] = true;
+    onData();
+  }, err => { clearTimeout(timer); toast(`Lecture impossible (${name}) : ${err?.message || err?.code || "erreur"}`, "err"); });
+  sub("nodes", S.nodes); sub("edges", S.edges); sub("sources", S.sources);
+  S.db.doc("meta/forgotten").onSnapshot(s => { S.forgotten = s.data() || null; renderForgotten(); }, () => {});
+}
+
+function setState(title, text) {
+  const el = $("#state");
+  if (!title) { el.hidden = true; return; }
+  el.hidden = false;
+  el.innerHTML = `<p><b>${esc(title)}</b>${esc(text)}</p>`;
+}
+
+function onData() {
+  if (!S.loaded.nodes || !S.loaded.edges) return;
+  // Nouveaux neurones / liens → animation de naissance (pas au premier chargement).
+  const ids = [...S.nodes.keys(), ...S.edges.keys()];
+  const now = performance.now();
+  if (S.known) {
+    let i = 0;
+    for (const id of ids) if (!S.known.has(id)) { S.born.set(id, now + (S.edges.has(id) ? 500 : 0) + (i++) * 60); }
+    for (const [id, t] of S.born) if (now - t > 6000) S.born.delete(id);
+  }
+  S.known = new Set(ids);
+  setState(S.nodes.size ? null : "CERVEAU VIDE", "Écris une première info en bas, ou dépose un fichier sur l'écran.");
+  refreshGraph();
+  renderChips(); renderCount(); updateMatches();
+  if (S.selected && !S.nodes.has(S.selected)) select(null); else if (S.selected) renderPanel();
+  if (S.pendingFocus && S.nodes.has(S.pendingFocus)) { const id = S.pendingFocus; S.pendingFocus = null; setTimeout(() => focusNode(id), 250); }
+  renderForgotten();
+  if (!$("#money").hidden) renderMoney();
+}
+
+/** Exécute des écritures (une seule écriture à la fois par document), 6 en parallèle. */
+async function runWrites(ops) {
+  const queue = [...ops]; const errors = [];
+  const worker = async () => { while (queue.length) { const op = queue.shift(); try { await op(); } catch (e) { errors.push(e); } } };
+  await Promise.all(Array.from({ length: 6 }, worker));
+  if (errors.length) throw errors[0];
+}
+const nodeRef = id => S.db.doc("nodes/" + id);
+const edgeRef = id => S.db.doc("edges/" + id);
+
+function uniqueNodeId(title, taken) {
+  const base = slug(title); let id = base, i = 2;
+  while (S.nodes.has(id) || taken.has(id)) id = `${base}-${i++}`;
+  taken.add(id); return id;
+}
+function findEdge(a, b) { for (const e of S.edges.values()) if ((e.source === a && e.target === b) || (e.source === b && e.target === a)) return e; return null; }
+function findSameTitle(title, type) {
+  const t = norm(title); if (!t) return null;
+  for (const n of S.nodes.values()) {
+    if (n.type !== type && !["personne", "organisation", "lieu"].includes(type)) continue;
+    if (norm(n.title.replace(/\(.*?\)/g, "")) === t || norm(n.title) === t) return n;
+  }
+  return null;
+}
+const cleanTags = arr => [...new Set((arr || []).map(t => String(t).trim().replace(/^#/, "").toLowerCase()).filter(Boolean))].slice(0, 12);
+
+/* ============================================================
+   IA : prompts + validation
+   ============================================================ */
+const EXTRACTION_RULES = `Tu es le module de rangement du « Cerveau », le second cerveau personnel de Yosh (Genève).
+Yosh te donne une information brute (phrase libre, dictée, ou contenu d'un fichier). Tu la transformes en « neurones » et en liens.
+
+Types de neurones : personne, projet, idee, tache, argent, lieu, organisation, note.
+
+Règles :
+1. RÉUTILISE avant de créer. Tu reçois la liste des neurones existants (id | type | titre | tags). Si la source parle de la même entité
+   (même personne, organisation, projet — même avec une autre orthographe, un prénom seul, un surnom ou une abréviation),
+   mets son id dans existing_id. N'invente jamais d'id : existing_id est soit un id de la liste, soit null.
+2. Crée peu de neurones : seulement ce qui mérite d'être retrouvé. Une phrase simple = 1 à 4 neurones.
+   Une dépense ou rentrée = un neurone « argent » (montant positif, devise, sens, catégorie). Devise par défaut : CHF.
+   Une chose à faire = « tache ». Une idée de business ou de projet pas encore lancé = « idee ».
+3. Pour un neurone existant, le résumé ne contient que l'information NOUVELLE de cette source (elle sera ajoutée). Rien de nouveau : "".
+4. Relie les neurones entre eux et aux neurones existants pertinents (« de »/« vers » = ref n1… ou id existant).
+   Ajoute un lien vers « yosh » seulement si c'est vraiment personnel et structurant.
+5. N'invente rien. Titres courts (1 à 6 mots) en français. Tags (2 à 5) en minuscules sans #.
+6. Dates : convertis « hier », « lundi dernier »… en AAAA-MM-JJ grâce à la date du jour fournie.`;
+
+const NEURON_SHAPE = `{"ref":"n1","existing_id":null,"type":"personne|projet|idee|tache|argent|lieu|organisation|note","titre":"…","resume":"…","tags":["…"],"montant":null,"devise":null,"sens":null,"categorie":null,"date":null}
+(montant: nombre positif, devise: "CHF"/"EUR"…, sens: "depense"|"rentree", categorie: courte — uniquement pour type argent ; date: "AAAA-MM-JJ" ou null)`;
+
+function validNeurons(arr, errs) {
+  if (!Array.isArray(arr)) { errs.push("neurones doit être un tableau"); return []; }
+  return arr.filter((n, i) => {
+    if (!n || typeof n !== "object") { errs.push(`neurones[${i}] n'est pas un objet`); return false; }
+    if (typeof n.ref !== "string" || typeof n.titre !== "string" || !n.titre.trim()) { errs.push(`neurones[${i}] : ref/titre manquant`); return false; }
+    if (!EXTRACTABLE.includes(n.type)) { errs.push(`neurones[${i}] : type « ${n.type} » invalide`); return false; }
+    return true;
+  });
+}
+function validLinks(arr, errs) {
+  if (!Array.isArray(arr)) { errs.push("liens doit être un tableau"); return []; }
+  return arr.filter(l => l && typeof l.de === "string" && typeof l.vers === "string");
+}
+
+/** Appel JSON à Claude avec validation et UN nouvel essai si la réponse est invalide. */
+async function askJson(prompt, validate, extra = {}) {
+  if (!S.sample) throw new Error("Claude n'est pas disponible sur cette page (autorise « Claude » dans les permissions de la page).");
+  let last = "";
+  for (let attempt = 0; attempt < 2; attempt++) {
+    const p = attempt === 0 ? prompt : `${prompt}\n\nTa réponse précédente était invalide (${last}). Renvoie UNIQUEMENT un JSON strictement conforme.`;
+    try {
+      const opts = { ...MODEL_OPTS, ...extra }; for (const k of Object.keys(opts)) if (opts[k] === undefined) delete opts[k];
+      const out = await S.sample.json(p, opts);
+      const errs = [];
+      const v = validate(out, errs);
+      if (v && !errs.length) return v;
+      if (v && errs.length <= 2 && attempt === 1) return v; // erreurs mineures au second essai : on garde le valide
+      last = errs.slice(0, 3).join("; ") || "format inattendu";
+    } catch (e) {
+      if (e?.code === "not_granted") throw new Error("Tu as refusé l'accès à Claude pour cette page. Réautorise-le dans les permissions de la page.");
+      if (e?.code === "rate_limited") throw new Error("Claude est très sollicité : réessaie dans un instant.");
+      if (e?.code === "images_unavailable" || e?.code === "image_rejected") throw e;
+      last = e?.message || String(e);
+    }
+  }
+  throw new Error(`Réponse de Claude invalide après 2 essais : ${last}`);
+}
+
+/* ---------- choix des neurones existants à montrer à Claude ---------- */
+function scoreNodes(text) {
+  const kws = keywords(text, 14); const scored = [];
+  for (const n of S.nodes.values()) {
+    const t = norm(n.title), tg = norm((n.tags || []).join(" ")), sm = norm(n.summary);
+    let s = 0;
+    for (const k of kws) { if (t.includes(k)) s += 5; if (tg.includes(k)) s += 2; if (sm.includes(k)) s += 1; }
+    if (s) scored.push([s + glowOf(n), n]);
+  }
+  return scored.sort((a, b) => b[0] - a[0]).map(x => x[1]);
+}
+function candidates(text, limit = 150) {
+  const picked = new Map();
+  for (const n of scoreNodes(text).slice(0, 60)) picked.set(n.id, n);
+  const nt = ` ${norm(text)} `;
+  for (const n of S.nodes.values()) {
+    if (n.type === "document") continue;
+    const t = norm(n.title.replace(/\(.*?\)/g, "")), first = t.split(" ")[0];
+    if ((t.length > 2 && nt.includes(` ${t} `)) || (first.length > 3 && nt.includes(` ${first} `))) picked.set(n.id, n);
+  }
+  for (const n of [...S.nodes.values()].filter(n => n.type !== "document").sort((a, b) => (b.last_activity_at || "").localeCompare(a.last_activity_at || ""))) {
+    if (picked.size >= limit) break; picked.set(n.id, n);
+  }
+  return [...picked.values()].slice(0, limit);
+}
+const fmtCandidates = list => list.length ? list.map(n => `${n.id} | ${n.type} | ${n.title}${(n.tags || []).length ? " | " + n.tags.slice(0, 4).join(", ") : ""}`).join("\n") : "(aucun neurone pour l'instant)";
+
+/* ---------- application d'une extraction ---------- */
+async function applyExtraction(ex, { sourceText, kind, docNode = null, assetId = null }) {
+  const now = nowIso(), day = now.slice(0, 10);
+  const refMap = new Map(), taken = new Set(), created = [], updated = [], writes = [];
+  const nodeWrites = new Map(); // id → données finales (une écriture par document)
+  if (docNode) { nodeWrites.set(docNode.id, docNode); refMap.set("doc", docNode.id); created.push(docNode.id); taken.add(docNode.id); }
+
+  for (const n of ex.neurones) {
+    let target = n.existing_id && S.nodes.get(n.existing_id) || null;
+    if (!target && n.type !== "argent" && n.type !== "tache") target = findSameTitle(n.titre, n.type);
+    const date = /^\d{4}-\d{2}-\d{2}/.test(n.date || "") ? n.date.slice(0, 10) : null;
+    const money = n.type === "argent" ? {
+      amount: n.montant != null && !isNaN(Number(n.montant)) ? Math.abs(Number(n.montant)) : null,
+      currency: String(n.devise || "CHF").toUpperCase().replace("€", "EUR").replace("$", "USD").slice(0, 3),
+      direction: n.sens === "rentree" ? "rentree" : "depense",
+      category: (n.categorie || "").trim() || null,
+      occurred_at: date || day,
+    } : (date ? { occurred_at: date } : {});
+    if (target) {
+      const prev = nodeWrites.get(target.id) || target;
+      const add = (n.resume || "").trim();
+      const summary = add && !norm(prev.summary).includes(norm(add)) ? [prev.summary, add].filter(Boolean).join("\n") : prev.summary || "";
+      nodeWrites.set(target.id, { ...prev, summary, tags: cleanTags([...(prev.tags || []), ...(n.tags || [])]), touch_count: (prev.touch_count || 1) + 1, last_activity_at: now, ...(prev.type === "argent" && prev.amount == null ? money : {}) });
+      refMap.set(n.ref, target.id); if (!updated.includes(target.id)) updated.push(target.id);
+    } else {
+      const id = uniqueNodeId(n.titre, taken);
+      nodeWrites.set(id, { id, type: n.type, title: n.titre.trim().slice(0, 200), summary: (n.resume || "").trim(), tags: cleanTags(n.tags), url: null, origin: kind, user_edited: false, touch_count: 1, created_at: now, last_activity_at: now, amount: null, currency: null, direction: null, category: null, occurred_at: null, ...money });
+      refMap.set(n.ref, id); created.push(id);
+    }
+  }
+
+  const resolve = r => refMap.get(r) || (S.nodes.has(r) ? r : null);
+  const edgeWrites = new Map();
+  for (const l of ex.liens) {
+    const a = resolve(l.de), b = resolve(l.vers);
+    if (!a || !b || a === b) continue;
+    const ex1 = findEdge(a, b) || [...edgeWrites.values()].find(e => (e.source === a && e.target === b) || (e.source === b && e.target === a));
+    if (ex1) { edgeWrites.set(ex1.id, { ...ex1, last_activity_at: now, weight: (ex1.weight || 1) + 1 }); continue; }
+    const id = rid("e");
+    edgeWrites.set(id, { id, source: a, target: b, label: String(l.label || "lié à").trim().slice(0, 60) || "lié à", weight: 1, created_at: now, last_activity_at: now });
+    if (!nodeWrites.has(a) && S.nodes.has(a)) nodeWrites.set(a, { ...S.nodes.get(a), touch_count: (S.nodes.get(a).touch_count || 1) + 1, last_activity_at: now });
+    if (!nodeWrites.has(b) && S.nodes.has(b)) nodeWrites.set(b, { ...S.nodes.get(b), touch_count: (S.nodes.get(b).touch_count || 1) + 1, last_activity_at: now });
+  }
+  // Un neurone extrait d'un fichier et resté sans lien est rattaché au fichier.
+  if (docNode) for (const id of created) {
+    if (id === docNode.id) continue;
+    if (![...edgeWrites.values()].some(e => e.source === id || e.target === id)) { const eid = rid("e"); edgeWrites.set(eid, { id: eid, source: docNode.id, target: id, label: "mentionne", weight: 1, created_at: now, last_activity_at: now }); }
+  }
+
+  const touchedIds = [...new Set([...created, ...updated])];
+  const sid = rid("s");
+  for (const [id, data] of nodeWrites) { const { id: _drop, ...rest } = data; writes.push(() => nodeRef(id).set(rest)); }
+  for (const [id, data] of edgeWrites) { const { id: _drop, ...rest } = data; writes.push(() => edgeRef(id).set(rest)); }
+  writes.push(() => S.db.doc("sources/" + sid).set({ raw_text: String(sourceText).slice(0, 20000), kind, node_ids: touchedIds, asset_id: assetId, created_at: now }));
+  await runWrites(writes);
+  return { created, updated, edges: [...edgeWrites.keys()] };
+}
+
+/* ---------- saisie ---------- */
+async function captureText(text) {
+  const cands = candidates(text);
+  const prompt = `${EXTRACTION_RULES}
+
+Réponds UNIQUEMENT avec un objet JSON de la forme :
+{"neurones":[${NEURON_SHAPE}],"liens":[{"de":"n1 ou id existant","vers":"n2 ou id existant","label":"relation courte"}]}
+
+Date du jour : ${todayFr()}
+
+Neurones existants (id | type | titre | tags) :
+${fmtCandidates(cands)}
+
+Source à ranger :
+"""
+${text}
+"""`;
+  let ex;
+  try {
+    ex = await askJson(prompt, (o, errs) => o && typeof o === "object" ? { neurones: validNeurons(o.neurones, errs), liens: validLinks(o.liens, errs) } : (errs.push("pas un objet"), null));
+  } catch (e) {
+    // On ne perd jamais une saisie : en dernier recours, une note brute.
+    const r = await applyExtraction({ neurones: [{ ref: "n1", existing_id: null, type: "note", titre: text.split(/\s+/).slice(0, 6).join(" "), resume: text, tags: [] }], liens: [] }, { sourceText: text, kind: "saisie" });
+    toast(`${e.message} — gardé comme note.`, "err");
+    return r;
+  }
+  return applyExtraction(ex, { sourceText: text, kind: "saisie" });
+}
+
+/* ---------- fichiers ---------- */
+const loadScript = src => new Promise((ok, ko) => { if ([...document.scripts].some(s => s.src === src)) return ok(); const s = document.createElement("script"); s.src = src; s.onload = ok; s.onerror = () => ko(new Error("Chargement impossible : " + src)); document.head.append(s); });
+async function pdfLib() {
+  if (!window.pdfjsWorker) await loadScript("https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js");
+  if (!window.pdfjsLib) await loadScript("https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js");
+  return window.pdfjsLib;
+}
+async function readPdf(file) {
+  const lib = await pdfLib();
+  const pdf = await lib.getDocument({ data: new Uint8Array(await file.arrayBuffer()) }).promise;
+  let text = "";
+  for (let i = 1; i <= Math.min(pdf.numPages, 40); i++) { const c = await (await pdf.getPage(i)).getTextContent(); text += c.items.map(x => x.str).join(" ") + "\n"; if (text.length > 60000) break; }
+  const page = await pdf.getPage(1); const vp0 = page.getViewport({ scale: 1 }); const sc = Math.min(2, 1100 / vp0.width); const vp = page.getViewport({ scale: sc });
+  const cv = document.createElement("canvas"); cv.width = vp.width; cv.height = vp.height;
+  const ctx = cv.getContext("2d"); ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, cv.width, cv.height);
+  await page.render({ canvasContext: ctx, viewport: vp }).promise;
+  const thumb = await new Promise(r => cv.toBlob(r, "image/jpeg", .85));
+  return { text, thumb, pages: pdf.numPages };
+}
+async function readDocx(file) {
+  if (!window.mammoth) await loadScript("https://cdn.jsdelivr.net/npm/mammoth@1.8.0/mammoth.browser.min.js");
+  const r = await window.mammoth.extractRawText({ arrayBuffer: await file.arrayBuffer() });
+  return r.value || "";
+}
+async function shrinkImage(file, max = 1568) {
+  const bmp = await createImageBitmap(file);
+  const k = Math.min(1, max / Math.max(bmp.width, bmp.height));
+  const cv = document.createElement("canvas"); cv.width = Math.round(bmp.width * k); cv.height = Math.round(bmp.height * k);
+  const ctx = cv.getContext("2d"); ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, cv.width, cv.height); ctx.drawImage(bmp, 0, 0, cv.width, cv.height);
+  return new Promise(r => cv.toBlob(r, "image/jpeg", .86));
+}
+async function upload(blob) {
+  if (!S.assets) return null;
+  try { return await S.assets.upload(blob); } catch (e) { toast(`Copie du fichier impossible : ${e?.message || e?.code}`, "err"); return null; }
+}
+
+async function captureFile(file) {
+  const name = file.name || "fichier";
+  const ext = (name.match(/\.[a-z0-9]+$/i)?.[0] || "").toLowerCase();
+  const isImg = file.type.startsWith("image/") || [".png", ".jpg", ".jpeg", ".webp", ".gif"].includes(ext);
+  if (/heic|heif/i.test(file.type + ext)) throw new Error("Les photos HEIC ne sont pas lisibles : exporte-la en JPG.");
+  let text = "", images = [], thumbBlob = null, kindLabel = "fichier";
+  if (isImg) { const img = await shrinkImage(file); images = [img]; thumbBlob = img; kindLabel = "image"; }
+  else if (ext === ".pdf" || file.type === "application/pdf") { const r = await readPdf(file); text = r.text; thumbBlob = r.thumb; images = r.thumb ? [r.thumb] : []; kindLabel = `PDF (${r.pages} p.)`; }
+  else if (ext === ".docx") { text = await readDocx(file); kindLabel = "document Word"; }
+  else if ([".txt", ".md"].includes(ext) || file.type.startsWith("text/")) { text = await file.text(); kindLabel = "texte"; }
+  else throw new Error(`Format non pris en charge : ${ext || file.type} (PDF, DOCX, images, TXT, MD)`);
+
+  const original = await upload(file);
+  const thumb = thumbBlob && !isImg ? await upload(thumbBlob) : null;
+  if (images.length) { const lim = await S.sample?.limits?.().catch(() => null); if (!lim?.images) images = []; }
+
+  const now = nowIso();
+  const baseTitle = name.replace(/\.[^.]+$/, "").slice(0, 80);
+  const docNode = { id: uniqueNodeId(baseTitle, new Set()), type: "document", title: baseTitle, summary: "", tags: ["fichier"], url: original ? blobUrl(original.id) : null, asset_id: original?.id || null, thumb_id: isImg ? original?.id || null : thumb?.id || null, file_name: name, file_size: file.size, origin: "depot", user_edited: false, touch_count: 1, created_at: now, last_activity_at: now };
+
+  const cands = candidates(`${name} ${text.slice(0, 4000)}`);
+  const prompt = `${EXTRACTION_RULES}
+
+Tu reçois un FICHIER (${kindLabel}) nommé « ${name} »${images.length ? " : son image est jointe (lis aussi le texte visible dans l'image)" : ""}.
+- Remplis « document » : titre court et parlant, résumé (2 à 4 phrases), tags, et texte_cle (texte important lu, max ~800 caractères).
+- Extrais les neurones utiles (personnes, organisations, montants, tâches, idées…). Un ticket / une facture = un neurone « argent ».
+- Relie les neurones extraits au fichier avec la ref spéciale « doc » (ex. {"de":"doc","vers":"n1","label":"mentionne"}).
+
+Réponds UNIQUEMENT avec un objet JSON de la forme :
+{"document":{"titre":"…","resume":"…","tags":["…"],"texte_cle":"…"},"neurones":[${NEURON_SHAPE}],"liens":[{"de":"doc, n1 ou id existant","vers":"…","label":"…"}]}
+
+Date du jour : ${todayFr()}
+
+Neurones existants (id | type | titre | tags) :
+${fmtCandidates(cands)}
+${text ? `\nContenu du fichier :\n"""\n${text.slice(0, 50000)}\n"""` : ""}`;
+
+  let ex;
+  try {
+    ex = await askJson(prompt, (o, errs) => {
+      if (!o || typeof o !== "object") { errs.push("pas un objet"); return null; }
+      const d = o.document && typeof o.document === "object" ? o.document : (errs.push("document manquant"), {});
+      return { document: d, neurones: validNeurons(o.neurones, errs), liens: validLinks(o.liens, errs) };
+    }, images.length ? { images } : {});
+  } catch (e) {
+    await applyExtraction({ neurones: [], liens: [] }, { sourceText: text.slice(0, 4000) || `[${name}]`, kind: "depot", docNode: { ...docNode, summary: `Analyse impossible : ${e.message}` }, assetId: original?.id || null });
+    S.pendingFocus = docNode.id;
+    throw new Error(`${name} gardé, analyse impossible : ${e.message}`);
+  }
+  if (ex.document.titre) docNode.title = String(ex.document.titre).slice(0, 120);
+  docNode.summary = String(ex.document.resume || "");
+  docNode.tags = cleanTags(["fichier", ...(ex.document.tags || [])]);
+  const r = await applyExtraction(ex, { sourceText: String(ex.document.texte_cle || "").trim() || text.slice(0, 4000) || `[${name}]`, kind: "depot", docNode, assetId: original?.id || null });
+  S.pendingFocus = docNode.id;
+  return r;
+}
+
+async function handleFiles(files) {
+  const list = [...files]; if (!list.length) return;
+  if (!S.db) return toast("Ton cerveau n'est pas connecté.", "err");
+  setBusy(true);
+  try {
+    for (const f of list) {
+      toast(`Analyse de ${f.name}…`);
+      try { const r = await captureFile(f); toast(`${f.name} : ${r.created.length} neurone(s), ${r.edges.length} lien(s)`); select(S.pendingFocus); }
+      catch (e) { toast(e.message, "err"); }
+    }
+  } finally { setBusy(false); }
+}
+
+/* ---------- questions ---------- */
+const TYPE_HINTS = [[/\bidees?\b/, "idee"], [/\btaches?\b|a faire|todo/, "tache"], [/\bprojets?\b/, "projet"], [/\bpersonnes?\b|\bqui\b|\bcontacts?\b/, "personne"], [/\blieux?\b/, "lieu"], [/\borganisations?\b|\bclubs?\b|\bentreprises?\b/, "organisation"], [/\bdocuments?\b|\bfichiers?\b|\bpages?\b/, "document"]];
+const MONEY_RE = /(combien|depens|argent|budget|paye|achat|achete|gagne|rentree|salaire|chf|eur|francs|cout|frais)/;
+function monthFromQuestion(q) {
+  const n = norm(q), d = new Date();
+  if (/mois dernier|mois passe/.test(n)) return new Date(d.getFullYear(), d.getMonth() - 1, 15).toISOString().slice(0, 7);
+  const ms = ["janvier", "fevrier", "mars", "avril", "mai", "juin", "juillet", "aout", "septembre", "octobre", "novembre", "decembre"];
+  const i = ms.findIndex(m => n.includes(m));
+  if (i >= 0) return `${i > d.getMonth() ? d.getFullYear() - 1 : d.getFullYear()}-${String(i + 1).padStart(2, "0")}`;
+  return d.toISOString().slice(0, 7);
+}
+function describe(n) {
+  const nb = neighbors(n.id).slice(0, 12).map(([e, o, dir]) => `${dir === "out" ? "→" : "←"} ${e.label} ${S.nodes.get(o)?.title || o}`);
+  const src = sourcesOf(n.id).slice(0, 3).map(s => `  source (${(s.created_at || "").slice(0, 10)}) : « ${String(s.raw_text).slice(0, 300)} »`);
+  return [
+    `[${n.id}] (${n.type}) ${n.title}`,
+    n.summary ? `  résumé : ${String(n.summary).slice(0, 600)}` : "",
+    (n.tags || []).length ? `  tags : ${n.tags.join(", ")}` : "",
+    n.type === "argent" && n.amount != null ? `  montant : ${n.direction === "rentree" ? "+" : "-"}${n.amount} ${n.currency || ""} · ${n.category || "?"} · ${(n.occurred_at || n.created_at || "").slice(0, 10)}` : "",
+    n.url ? `  lien : ${n.url}` : "",
+    nb.length ? `  connexions : ${nb.join(" ; ")}` : "",
+    ...src,
+    `  créé le ${(n.created_at || "").slice(0, 10)}, dernière activité ${(n.last_activity_at || "").slice(0, 10)}`,
+  ].filter(Boolean).join("\n");
+}
+async function ask(question) {
+  const picked = new Map();
+  const hits = scoreNodes(question).slice(0, 15);
+  hits.forEach(n => picked.set(n.id, n));
+  const nq = norm(question);
+  for (const [re, type] of TYPE_HINTS) if (re.test(nq)) [...S.nodes.values()].filter(n => n.type === type).sort((a, b) => (b.last_activity_at || "").localeCompare(a.last_activity_at || "")).slice(0, 25).forEach(n => picked.size < 40 && picked.set(n.id, n));
+  let money = "";
+  if (MONEY_RE.test(nq)) {
+    const m = monthFromQuestion(question), s = moneySummary(m);
+    money = s.currencies.length ? `Totaux pré-calculés pour ${m} :\n` + s.currencies.map(c => `- ${c.currency} : dépenses ${c.dep}, rentrées ${c.ren}, solde ${c.solde}. Par catégorie : ` + c.cats.map(k => `${k.name} (dép. ${k.dep}${k.ren ? `, rentr. ${k.ren}` : ""})`).join(", ")).join("\n") : `Aucun mouvement d'argent enregistré pour ${m}.`;
+    s.items.slice(0, 25).forEach(it => picked.size < 40 && picked.set(it.id, S.nodes.get(it.id)));
+  }
+  for (const h of hits.slice(0, 8)) for (const [, o] of neighbors(h.id)) { if (picked.size >= 40) break; if (S.nodes.has(o)) picked.set(o, S.nodes.get(o)); }
+  const ctxNodes = [...picked.values()].filter(Boolean);
+  if (!ctxNodes.length && !money) return { answer: "Je ne sais pas : rien dans ton cerveau ne correspond à cette question.", cited: [] };
+
+  const prompt = `Tu es la voix du « Cerveau », le second cerveau personnel de Yosh. Tu réponds en français, en tutoyant, de façon concise.
+Règle absolue : tu réponds UNIQUEMENT à partir des neurones et sources ci-dessous. Aucune connaissance extérieure, aucune supposition.
+Chaque fait que tu donnes est suivi de l'id du neurone entre crochets, par exemple [mevy-azaria].
+Si les données ne permettent pas de répondre, dis-le clairement (« Je ne sais pas : ce n'est pas dans ton cerveau. ») et mets sait=false.
+Pour l'argent, utilise les totaux pré-calculés (ne refais pas les additions).
+
+Réponds UNIQUEMENT avec un objet JSON : {"reponse":"…","neurones_cites":["id",…],"sait":true}
+
+Date du jour : ${todayFr()}
+${money ? "\n" + money + "\n" : ""}
+Neurones disponibles (${ctxNodes.length}) :
+${ctxNodes.map(describe).join("\n\n")}
+
+Question de Yosh : ${question}`;
+  const out = await askJson(prompt, (o, errs) => (o && typeof o.reponse === "string") ? { reponse: o.reponse, cites: Array.isArray(o.neurones_cites) ? o.neurones_cites.map(String) : [] } : (errs.push("reponse manquante"), null));
+  const allowed = new Set(ctxNodes.map(n => n.id));
+  const inText = [...out.reponse.matchAll(/\[([a-z0-9][a-z0-9_-]*)\]/gi)].map(m => m[1]);
+  const cited = [...new Set([...out.cites, ...inText])].filter(id => allowed.has(id));
+  const now = nowIso();
+  runWrites(cited.map(id => () => nodeRef(id).update({ touch_count: (S.nodes.get(id)?.touch_count || 1) + 1, last_activity_at: now }))).catch(() => {});
+  return { answer: out.reponse, cited };
+}
+
+/* ============================================================
+   INTERFACE
+   ============================================================ */
+function renderCount() { $("#count").textContent = `${S.nodes.size} neurones · ${S.edges.size} liens`; }
+
+function renderChips() {
+  const counts = {}; for (const n of S.nodes.values()) counts[n.type] = (counts[n.type] || 0) + 1;
+  const el = $("#chips"); el.innerHTML = "";
+  for (const t of TYPE_KEYS) {
+    if (!counts[t]) continue;
+    const b = document.createElement("button");
+    b.className = "chip" + (S.hidden.has(t) ? " off" : "");
+    b.style.borderColor = TYPES[t].color + "55"; b.style.color = TYPES[t].color; b.style.background = TYPES[t].color + "14";
+    b.title = "Clic : afficher/masquer · double-clic : seulement ce type";
+    b.innerHTML = `${TYPES[t].emoji} ${TYPES[t].label} <span class="k">${counts[t]}</span>`;
+    b.onclick = () => { S.hidden.has(t) ? S.hidden.delete(t) : S.hidden.add(t); refreshGraph(); renderChips(); };
+    b.ondblclick = () => { S.hidden = new Set(TYPE_KEYS.filter(x => x !== t)); refreshGraph(); renderChips(); };
+    el.append(b);
+  }
+  if (S.hidden.size) { const b = document.createElement("button"); b.className = "chip"; b.style.borderColor = "transparent"; b.style.color = "var(--muted)"; b.textContent = "Tout afficher"; b.onclick = () => { S.hidden.clear(); refreshGraph(); renderChips(); }; el.append(b); }
+}
+
+function updateMatches() {
+  const q = norm(S.search);
+  matches = q.length >= 2 ? new Set([...S.nodes.values()].filter(n => norm(`${n.title} ${(n.tags || []).join(" ")}`).includes(q)).map(n => n.id)) : null;
+  const txt = matches ? String(matches.size) : "";
+  $("#search-n").textContent = txt; $("#search-n-m").textContent = txt;
+}
+for (const id of ["#search", "#search-m"]) {
+  const inp = $(id);
+  inp.addEventListener("input", () => { S.search = inp.value; $("#search").value = $("#search-m").value = inp.value; updateMatches(); });
+  inp.addEventListener("keydown", e => { if (e.key === "Enter" && matches?.size) select([...matches][0], true); if (e.key === "Escape") { inp.value = ""; S.search = ""; updateMatches(); } });
+}
+
+function onNodeClick(id) {
+  const n = S.nodes.get(id);
+  if (n?.type === "document" && n.url) { try { window.open(n.url, "_blank", "noopener"); } catch {} }
+  select(id);
+}
+function select(id, focus = false) {
+  S.selected = id && S.nodes.has(id) ? id : null;
+  selNeighbors = new Set(S.selected ? neighbors(S.selected).map(x => x[1]) : []);
+  document.body.classList.toggle("panel-open", !!S.selected);
+  if (focus && S.selected) focusNode(S.selected);
+  renderPanel();
+}
+
+/* ---------- panneau ---------- */
+let editMode = false, mergeMode = false, confirmDel = false, panelFor = null;
+function renderPanel() {
+  const p = $("#panel");
+  if (!S.selected) { p.hidden = true; panelFor = null; return; }
+  if (panelFor !== S.selected) { editMode = mergeMode = confirmDel = false; panelFor = S.selected; }
+  const n = S.nodes.get(S.selected); const m = TYPES[n.type];
+  p.hidden = false;
+  const conns = neighbors(n.id), srcs = sourcesOf(n.id);
+  const thumb = n.thumb_id ? `<div class="thumb"><a href="${esc(n.url || blobUrl(n.thumb_id))}" target="_blank" rel="noopener"><img src="${esc(blobUrl(n.thumb_id))}" alt="${esc(n.file_name || n.title)}"></a><div><span>${esc(n.file_name || "")}</span><span>${n.file_size ? Math.round(n.file_size / 1024) + " Ko" : ""}</span></div></div>` : "";
+  let html = `<button class="x close" data-a="close" aria-label="Fermer">✕</button><div class="body">
+    <span class="type-tag" style="background:${m.color}20;color:${m.color};box-shadow:0 0 12px ${m.color}40">${m.emoji} ${m.label}</span>
+    <div class="meta-line">créé ${rel(n.created_at)} · actif ${rel(n.last_activity_at)} · touché ${n.touch_count || 1}×</div>`;
+  if (editMode) {
+    html += `<form id="edit-form">
+      <label class="field"><span>Titre</span><input class="inp" id="f-title" value="${esc(n.title)}" required></label>
+      <label class="field"><span>Type</span><select class="inp" id="f-type">${TYPE_KEYS.map(t => `<option value="${t}" ${t === n.type ? "selected" : ""}>${TYPES[t].label}</option>`).join("")}</select></label>
+      <label class="field"><span>Résumé</span><textarea class="inp" id="f-summary" rows="5">${esc(n.summary)}</textarea></label>
+      <label class="field"><span>Tags (séparés par des virgules)</span><input class="inp" id="f-tags" value="${esc((n.tags || []).join(", "))}"></label>
+      <label class="field"><span>Lien (URL)</span><input class="inp" id="f-url" value="${esc(n.url || "")}" placeholder="https://…"></label>
+      <div class="grid2" id="f-money" ${n.type === "argent" ? "" : "hidden"}>
+        <label class="field"><span>Montant</span><input class="inp" id="f-amount" inputmode="decimal" value="${n.amount ?? ""}"></label>
+        <label class="field"><span>Devise</span><input class="inp" id="f-currency" value="${esc(n.currency || "CHF")}"></label>
+        <label class="field"><span>Sens</span><select class="inp" id="f-direction"><option value="depense">Dépense</option><option value="rentree" ${n.direction === "rentree" ? "selected" : ""}>Rentrée</option></select></label>
+        <label class="field"><span>Catégorie</span><input class="inp" id="f-category" value="${esc(n.category || "")}"></label>
+        <label class="field"><span>Date</span><input class="inp" id="f-date" type="date" value="${esc((n.occurred_at || "").slice(0, 10))}"></label>
+      </div>
+      <div class="actions"><button class="btn primary" type="submit">Enregistrer</button><button class="btn" type="button" data-a="cancel">Annuler</button></div>
+    </form>`;
+  } else {
+    html += `<h2 style="color:${m.color};text-shadow:0 0 18px ${m.color}55">${esc(n.title)}</h2>`;
+    if (n.type === "argent" && n.amount != null) html += `<div class="amount" style="color:${n.direction === "rentree" ? "var(--good)" : "var(--bad)"}">${n.direction === "rentree" ? "+" : "−"}${fmtNum(n.amount)} ${esc(n.currency || "CHF")}<small>${esc(n.category || "sans catégorie")} · ${esc((n.occurred_at || n.created_at || "").slice(0, 10))}</small></div>`;
+    if (n.url) html += `<div class="actions" style="margin-top:12px"><a class="btn open" href="${esc(n.url)}" target="_blank" rel="noopener">Ouvrir ${n.asset_id ? "le fichier" : "le document"} ↗</a></div>`;
+    html += thumb;
+    html += n.summary ? `<div class="summary">${esc(n.summary)}</div>` : `<div class="empty">Pas encore de résumé.</div>`;
+    if ((n.tags || []).length) html += `<div class="tags">${n.tags.map(t => `<span>#${esc(t)}</span>`).join("")}</div>`;
+    html += `<div class="actions"><button class="btn" data-a="edit">✎ Modifier</button><button class="btn" data-a="merge">⇄ Fusionner</button>${confirmDel ? `<button class="btn danger" data-a="del-yes">Confirmer la suppression</button><button class="btn" data-a="del-no">Annuler</button>` : `<button class="btn" data-a="del">🗑 Supprimer</button>`}</div>`;
+    if (mergeMode) html += `<div class="merge-box"><p>Fusionner « ${esc(n.title)} » <b>dans</b> un autre neurone (liens, sources et tags y sont rapatriés) :</p><input class="inp" id="merge-q" placeholder="Chercher le neurone cible…" autocomplete="off"><ul id="merge-list"></ul></div>`;
+  }
+  html += `<div class="sec"><h4>Connexions (${conns.length})</h4>${conns.length ? conns.map(([e, o, dir]) => { const on = S.nodes.get(o); if (!on) return ""; return `<div class="conn"><span class="l" title="${esc(e.label)}">${dir === "out" ? "→" : "←"} ${esc(e.label)}</span><button class="t" data-open="${esc(o)}" style="color:${TYPES[on.type].color}">${TYPES[on.type].emoji} ${esc(on.title)}</button><button class="rm" data-unlink="${esc(e.id)}" aria-label="Supprimer ce lien" title="Supprimer ce lien">✕</button></div>`; }).join("") : `<div class="empty" style="margin:0">Aucune connexion.</div>`}</div>`;
+  html += `<div class="sec"><h4>Sources (${srcs.length})</h4>${srcs.length ? srcs.map(s => `<div class="src"><p>« ${esc(String(s.raw_text).slice(0, 600))}${String(s.raw_text).length > 600 ? "…" : ""} »</p><small>${({ saisie: "⌨ saisie", depot: "📎 fichier", claude: "✦ ajouté par Claude", import: "⬆ import" })[s.kind] || esc(s.kind)} · ${s.created_at ? new Date(s.created_at).toLocaleString("fr-CH", { dateStyle: "medium", timeStyle: "short" }) : ""}</small></div>`).join("") : `<div class="empty" style="margin:0">${n.origin === "seed" ? "Importé du cerveau de départ." : "Aucune source."}</div>`}</div></div>`;
+  const scroll = p.querySelector(".body")?.scrollTop || 0;
+  p.innerHTML = html;
+  const body = p.querySelector(".body"); if (body) body.scrollTop = scroll;
+  const form = $("#edit-form");
+  if (form) {
+    $("#f-type").onchange = e => { $("#f-money").hidden = e.target.value !== "argent"; };
+    form.onsubmit = async e => { e.preventDefault(); await saveEdit(n.id); };
+  }
+  const mq = $("#merge-q");
+  if (mq) { mq.focus(); mq.oninput = () => renderMergeList(n.id, mq.value); }
+}
+function renderMergeList(fromId, q) {
+  const ul = $("#merge-list"); if (!ul) return;
+  const qq = norm(q); ul.innerHTML = "";
+  if (qq.length < 2) return;
+  [...S.nodes.values()].filter(x => x.id !== fromId && norm(x.title).includes(qq)).slice(0, 12).forEach(x => {
+    const li = document.createElement("li"); const b = document.createElement("button");
+    b.style.color = TYPES[x.type].color; b.textContent = `${TYPES[x.type].emoji} ${x.title}`;
+    b.onclick = () => mergeNodes(fromId, x.id); li.append(b); ul.append(li);
+  });
+}
+$("#panel").addEventListener("click", async e => {
+  const t = e.target.closest("[data-a],[data-open],[data-unlink]"); if (!t) return;
+  if (t.dataset.open) return select(t.dataset.open, true);
+  if (t.dataset.unlink) { try { await edgeRef(t.dataset.unlink).delete(); toast("Lien supprimé"); } catch (er) { toast(er.message, "err"); } return; }
+  const a = t.dataset.a, id = S.selected;
+  if (a === "close") select(null);
+  else if (a === "edit") { editMode = true; mergeMode = false; renderPanel(); }
+  else if (a === "cancel") { editMode = false; renderPanel(); }
+  else if (a === "merge") { mergeMode = !mergeMode; renderPanel(); }
+  else if (a === "del") { confirmDel = true; renderPanel(); }
+  else if (a === "del-no") { confirmDel = false; renderPanel(); }
+  else if (a === "del-yes") await deleteNode(id);
+});
+async function saveEdit(id) {
+  const n = S.nodes.get(id); const v = s => $(s).value;
+  const title = v("#f-title").trim(); if (!title) return toast("Le titre ne peut pas être vide.", "err");
+  const type = v("#f-type");
+  const data = { title, type, summary: v("#f-summary").trim(), tags: cleanTags(v("#f-tags").split(",")), url: v("#f-url").trim() || null, user_edited: true, touch_count: (n.touch_count || 1) + 1, last_activity_at: nowIso() };
+  if (type === "argent") { const a = v("#f-amount").replace(",", ".").trim(); Object.assign(data, { amount: a === "" ? null : Math.abs(Number(a)), currency: v("#f-currency").trim().toUpperCase() || "CHF", direction: v("#f-direction"), category: v("#f-category").trim() || null, occurred_at: v("#f-date") || null }); }
+  try { await nodeRef(id).update(data); editMode = false; toast("Neurone mis à jour"); } catch (e) { toast(e.message, "err"); }
+}
+async function deleteNode(id) {
+  try {
+    const ops = neighbors(id).map(([e]) => () => edgeRef(e.id).delete());
+    ops.push(...sourcesOf(id).map(s => () => S.db.doc("sources/" + s.id).update({ node_ids: (s.node_ids || []).filter(x => x !== id) })));
+    await runWrites(ops); await nodeRef(id).delete();
+    select(null); toast("Neurone supprimé");
+  } catch (e) { toast(e.message, "err"); }
+}
+async function mergeNodes(fromId, intoId) {
+  const from = S.nodes.get(fromId), into = S.nodes.get(intoId); if (!from || !into) return;
+  try {
+    const now = nowIso(), ops = [];
+    for (const [e, o] of neighbors(fromId)) {
+      ops.push(() => edgeRef(e.id).delete());
+      if (o !== intoId && !findEdge(intoId, o)) { const s = e.source === fromId ? intoId : e.source, t = e.target === fromId ? intoId : e.target; ops.push(() => edgeRef(rid("e")).set({ source: s, target: t, label: e.label, weight: e.weight || 1, created_at: e.created_at || now, last_activity_at: now })); }
+    }
+    for (const s of sourcesOf(fromId)) ops.push(() => S.db.doc("sources/" + s.id).update({ node_ids: [...new Set((s.node_ids || []).map(x => x === fromId ? intoId : x))] }));
+    await runWrites(ops);
+    const summary = from.summary && !String(into.summary || "").includes(from.summary) ? [into.summary, from.summary].filter(Boolean).join("\n") : into.summary || "";
+    await nodeRef(intoId).update({ summary, tags: cleanTags([...(into.tags || []), ...(from.tags || [])]), url: into.url || from.url || null, touch_count: (into.touch_count || 1) + (from.touch_count || 1), last_activity_at: now, user_edited: true });
+    await nodeRef(fromId).delete();
+    toast(`Fusionné dans « ${into.title} »`); select(intoId, true);
+  } catch (e) { toast(e.message, "err"); }
+}
+
+/* ---------- neurone oublié du jour ---------- */
+function pickForgotten() {
+  const day = today();
+  const rows = [...S.nodes.values()].filter(n => (n.type === "projet" || n.type === "idee") && !S.forgottenSkip.includes(n.id));
+  if (!rows.length) return null;
+  const deg = degreeMap();
+  const scored = rows.map(n => ({ n, d: daysSince(n.last_activity_at), s: daysSince(n.last_activity_at) * (1 + Math.log(1 + (deg.get(n.id) || 0))) }));
+  const old = scored.filter(x => x.d >= 21);
+  const pool = (old.length ? old : scored).sort((a, b) => b.s - a.s).slice(0, 7);
+  let h = 0; for (const ch of day + S.forgottenSkip.length) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+  return pool[h % pool.length];
+}
+function renderForgotten() {
+  const el = $("#forgotten");
+  let hiddenDay = null; try { hiddenDay = localStorage.getItem("cerveau:oublie-masque"); } catch {}
+  if (hiddenDay === today() || !S.nodes.size) { el.hidden = true; return; }
+  const stored = S.forgotten && S.forgotten.day === today() && S.nodes.has(S.forgotten.node_id) && !S.forgottenSkip.includes(S.forgotten.node_id) ? S.forgotten : null;
+  const pick = stored ? { n: S.nodes.get(stored.node_id), d: daysSince(S.nodes.get(stored.node_id).last_activity_at) } : pickForgotten();
+  if (!pick) { el.hidden = true; return; }
+  const n = pick.n, d = Math.floor(pick.d), m = TYPES[n.type];
+  const sentence = stored?.sentence || (d >= 21 ? `Tu n'as pas touché à « ${n.title} » depuis ${d} jours. Un petit pas aujourd'hui ?` : `Rien n'est encore vraiment oublié… mais « ${n.title} » mérite peut-être un nouveau pas aujourd'hui.`);
+  el.hidden = false;
+  el.innerHTML = `<div class="eyebrow"><i></i>Neurone oublié du jour<button class="x" data-f="hide" aria-label="Masquer pour aujourd'hui">✕</button></div>
+    <h3 style="color:${m.color}">${m.emoji} ${esc(n.title)}</h3><p>${esc(sentence)}</p>
+    <div class="acts"><button class="link" data-f="see">Voir sur la carte</button>${stored?.sentence ? "" : `<button class="link" data-f="why">✦ Pourquoi y revenir ?</button>`}<button class="link dim" data-f="next">Un autre</button></div>`;
+  el.dataset.node = n.id;
+}
+$("#forgotten").addEventListener("click", async e => {
+  const b = e.target.closest("[data-f]"); if (!b) return;
+  const id = $("#forgotten").dataset.node, n = S.nodes.get(id);
+  if (b.dataset.f === "hide") { try { localStorage.setItem("cerveau:oublie-masque", today()); } catch {} $("#forgotten").hidden = true; }
+  else if (b.dataset.f === "see") select(id, true);
+  else if (b.dataset.f === "next") { S.forgottenSkip.push(id); renderForgotten(); }
+  else if (b.dataset.f === "why" && n) {
+    b.textContent = "…"; b.disabled = true;
+    try {
+      const d = Math.floor(daysSince(n.last_activity_at));
+      const out = await askJson(`Tu es le « Cerveau » de Yosh. Voici un projet ou une idée qu'il n'a pas touché depuis ${d} jours.
+Écris UNE phrase (max 30 mots, tutoiement, ton direct et motivant) qui donne une raison concrète d'y revenir, en t'appuyant uniquement sur ces informations.
+Réponds UNIQUEMENT avec un JSON : {"phrase":"…"}
+
+${describe(n)}`, (o, errs) => o && typeof o.phrase === "string" ? o.phrase : (errs.push("phrase manquante"), null), { modelTier: "quick", model: undefined });
+      await S.db.doc("meta/forgotten").set({ day: today(), node_id: id, sentence: out });
+    } catch (er) { toast(er.message, "err"); renderForgotten(); }
+  }
+});
+
+/* ---------- argent ---------- */
+function moneySummary(month) {
+  const items = [...S.nodes.values()].filter(n => n.type === "argent" && n.amount != null && String(n.occurred_at || n.created_at || "").slice(0, 7) === month)
+    .map(n => ({ id: n.id, title: n.title, amount: Math.abs(Number(n.amount) || 0), cur: String(n.currency || "CHF").toUpperCase(), dir: n.direction === "rentree" ? "rentree" : "depense", cat: (n.category || "").trim() || "autre", date: String(n.occurred_at || n.created_at).slice(0, 10) }))
+    .sort((a, b) => b.date.localeCompare(a.date));
+  const byCur = new Map();
+  for (const it of items) {
+    if (!byCur.has(it.cur)) byCur.set(it.cur, { currency: it.cur, dep: 0, ren: 0, cats: new Map() });
+    const c = byCur.get(it.cur); const key = it.cat.toLowerCase();
+    if (!c.cats.has(key)) c.cats.set(key, { name: it.cat, dep: 0, ren: 0 });
+    const k = c.cats.get(key);
+    if (it.dir === "rentree") { c.ren += it.amount; k.ren += it.amount; } else { c.dep += it.amount; k.dep += it.amount; }
+  }
+  const r2 = x => Math.round(x * 100) / 100;
+  return { month, items, currencies: [...byCur.values()].map(c => ({ currency: c.currency, dep: r2(c.dep), ren: r2(c.ren), solde: r2(c.ren - c.dep), cats: [...c.cats.values()].map(k => ({ ...k, dep: r2(k.dep), ren: r2(k.ren) })).sort((a, b) => (b.dep + b.ren) - (a.dep + a.ren)) })) };
+}
+function renderMoney() {
+  const s = moneySummary(S.moneyMonth);
+  const label = new Date(S.moneyMonth + "-15T12:00:00Z").toLocaleDateString("fr-CH", { month: "long", year: "numeric" });
+  let html = `<div class="inner"><div class="head"><button class="glass pill" data-m="close">← Carte</button><h1>ARGENT</h1></div>
+    <div class="month glass"><button data-m="prev" aria-label="Mois précédent">‹</button><span>${esc(label)}</span><button data-m="next" aria-label="Mois suivant">›</button></div>`;
+  if (!s.currencies.length) html += `<div class="card glass" style="text-align:center;color:var(--muted)">Aucun mouvement ce mois-ci. Écris par exemple « payé 40 CHF de resto » sur la carte.</div>`;
+  for (const c of s.currencies) {
+    const max = Math.max(1, ...c.cats.map(k => Math.max(k.dep, k.ren)));
+    html += `<div class="stats">
+      <div class="stat glass"><p>Dépenses · ${esc(c.currency)}</p><b style="color:var(--bad)">${fmtNum(c.dep)}</b></div>
+      <div class="stat glass"><p>Rentrées · ${esc(c.currency)}</p><b style="color:var(--good)">${fmtNum(c.ren)}</b></div>
+      <div class="stat glass"><p>Solde · ${esc(c.currency)}</p><b style="color:${c.solde >= 0 ? "var(--good)" : "var(--bad)"}">${fmtNum(c.solde)}</b></div></div>
+      <div class="card glass"><div class="sec" style="margin-top:0"><h4>Par catégorie · ${esc(c.currency)}</h4></div>
+      ${c.cats.map(k => `<div class="cat"><div class="row"><span>${esc(k.name)}</span><span class="vals">${k.dep ? `<span style="color:var(--bad)">−${fmtNum(k.dep)}</span>` : ""}${k.ren ? ` <span style="color:var(--good)">+${fmtNum(k.ren)}</span>` : ""}</span></div><div class="track">${k.dep ? `<i style="width:${k.dep / max * 100}%;background:var(--bad);box-shadow:0 0 10px var(--bad)"></i>` : ""}${k.ren ? `<i style="width:${k.ren / max * 100}%;background:var(--good);box-shadow:0 0 10px var(--good)"></i>` : ""}</div></div>`).join("")}</div>`;
+  }
+  if (s.items.length) html += `<div class="card glass"><div class="sec" style="margin-top:0"><h4>Mouvements</h4></div>${s.items.map(it => `<div class="mv"><span class="d">${it.date.slice(8, 10)}.${it.date.slice(5, 7)}</span><button class="t" data-open="${esc(it.id)}" style="text-align:left">${esc(it.title)} <span style="color:var(--muted);font-size:12px">· ${esc(it.cat)}</span></button><span class="v" style="color:${it.dir === "rentree" ? "var(--good)" : "var(--bad)"}">${it.dir === "rentree" ? "+" : "−"}${fmtNum(it.amount)} ${esc(it.cur)}</span></div>`).join("")}</div>`;
+  $("#money").innerHTML = html + "</div>";
+}
+$("#btn-money").onclick = () => { $("#money").hidden = false; renderMoney(); };
+$("#money").addEventListener("click", e => {
+  const b = e.target.closest("[data-m],[data-open]"); if (!b) return;
+  if (b.dataset.open) { $("#money").hidden = true; return select(b.dataset.open, true); }
+  const [y, mo] = S.moneyMonth.split("-").map(Number);
+  if (b.dataset.m === "close") $("#money").hidden = true;
+  else { S.moneyMonth = new Date(Date.UTC(y, mo - 1 + (b.dataset.m === "next" ? 1 : -1), 1)).toISOString().slice(0, 7); renderMoney(); }
+});
+
+/* ---------- menu : export / import ---------- */
+$("#btn-menu").onclick = e => {
+  const m = $("#menu"); m.hidden = !m.hidden; $("#btn-menu").setAttribute("aria-expanded", String(!m.hidden));
+  if (m.hidden) return;
+  m.innerHTML = `<button data-k="export">⬇ Exporter le cerveau (JSON)</button>
+    <label>⬆ Importer une sauvegarde (fusion)<input type="file" id="import-in" accept=".json,application/json" hidden></label>
+    <label>📎 Ajouter des fichiers…<input type="file" id="file-in-2" multiple accept=".pdf,.docx,.png,.jpg,.jpeg,.webp,.gif,.txt,.md,image/*" hidden></label>
+    <div class="note">Claude : ${S.sample ? "connecté" : "indisponible"} · fichiers : ${S.assets ? "copiés dans le cerveau" : "analysés sans copie"}<br>${S.nodes.size} neurones · ${S.edges.size} liens · ${S.sources.size} sources</div>`;
+  $("#import-in").onchange = ev => { const f = ev.target.files[0]; if (f) importJson(f); m.hidden = true; };
+  $("#file-in-2").onchange = ev => { handleFiles(ev.target.files); ev.target.value = ""; m.hidden = true; };
+  m.querySelector('[data-k="export"]').onclick = async () => { m.hidden = true; await exportJson(); };
+  e.stopPropagation();
+};
+document.addEventListener("click", e => { const m = $("#menu"); if (!m.hidden && !m.contains(e.target) && e.target !== $("#btn-menu")) m.hidden = true; });
+async function exportJson() {
+  const strip = map => [...map.values()];
+  const data = { format: "le-cerveau", version: 2, exported_at: nowIso(), nodes: strip(S.nodes), edges: strip(S.edges), sources: strip(S.sources) };
+  const dl = await window.claude?.use?.("downloads").catch(() => null);
+  if (!dl) return toast("Le téléchargement n'est pas disponible ici.", "err");
+  try { await dl.save({ filename: `cerveau-${today()}.json`, data: JSON.stringify(data, null, 1) }); toast("Sauvegarde prête"); }
+  catch (e) { if (e?.code !== "cancelled" && e?.code !== "declined") toast(`Export impossible : ${e?.message || e?.code}`, "err"); }
+}
+async function importJson(file) {
+  try {
+    const d = JSON.parse(await file.text());
+    const nodes = Array.isArray(d.nodes) ? d.nodes : [], edges = Array.isArray(d.edges) ? d.edges : [], sources = Array.isArray(d.sources) ? d.sources : [];
+    const now = nowIso(), ops = [];
+    for (const n of nodes) {
+      if (!n?.id || !n.title || !TYPES[n.type]) continue;
+      const ex = S.nodes.get(n.id);
+      if (ex && ex.user_edited) continue; // ne jamais écraser une modification manuelle
+      const { id, ...rest } = n;
+      const base = ex ? { ...ex } : {}; delete base.id;
+      ops.push(() => nodeRef(id).set({ summary: "", tags: [], url: null, origin: "import", user_edited: false, touch_count: 1, created_at: now, last_activity_at: now, ...base, ...rest }));
+    }
+    for (const e of edges) {
+      const [s, t, l] = Array.isArray(e) ? e : [e.source ?? e.source_id, e.target ?? e.target_id, e.label];
+      if (!s || !t || s === t || findEdge(s, t)) continue;
+      ops.push(() => edgeRef(e.id && !Array.isArray(e) ? e.id : rid("e")).set({ source: s, target: t, label: l || "lié à", weight: 1, created_at: e.created_at || now, last_activity_at: e.last_activity_at || now }));
+    }
+    for (const s of sources) { if (!s?.id || S.sources.has(s.id)) continue; const { id, ...rest } = s; ops.push(() => S.db.doc("sources/" + id).set({ kind: "import", node_ids: [], created_at: now, ...rest })); }
+    toast(`Import de ${ops.length} éléments…`);
+    await runWrites(ops);
+    toast("Import terminé");
+  } catch (e) { toast(`Import impossible : ${e.message}`, "err"); }
+}
+
+/* ---------- barre de commande ---------- */
+const input = $("#input"), send = $("#send");
+const PH = { saisie: "Jette une info… « payé 40 CHF de resto », « idée : coffrets de vin pour Noël »", question: "Demande à ton cerveau… « qu'est-ce que je sais sur le Standard de Liège ? »" };
+function setMode(m) {
+  S.mode = m;
+  document.querySelectorAll(".mode").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.mode === m)));
+  $("#bar-wrap").classList.toggle("q", m === "question");
+  input.placeholder = PH[m]; input.setAttribute("aria-label", m === "saisie" ? "Nouvelle info" : "Question");
+}
+function setBusy(b) {
+  S.busy = b; $("#bar-wrap").classList.toggle("busy", b);
+  send.innerHTML = b ? `<span class="spin"></span>` : `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6l6 6-6 6"/></svg>`;
+  send.disabled = b || !input.value.trim();
+}
+document.querySelectorAll(".mode").forEach(b => b.onclick = () => { setMode(b.dataset.mode); input.focus(); });
+input.addEventListener("input", () => { input.style.height = "auto"; input.style.height = Math.min(input.scrollHeight, 160) + "px"; send.disabled = S.busy || !input.value.trim(); });
+input.addEventListener("keydown", e => { if (e.key === "Enter" && !e.shiftKey && !e.isComposing) { e.preventDefault(); submit(); } });
+send.onclick = submit;
+document.addEventListener("keydown", e => {
+  if (["INPUT", "TEXTAREA", "SELECT"].includes(e.target.tagName)) return;
+  if (e.key === "/") { e.preventDefault(); setMode("saisie"); input.focus(); }
+  else if (e.key === "?") { e.preventDefault(); setMode("question"); input.focus(); }
+  else if (e.key === "Escape") { select(null); $("#money").hidden = true; }
+});
+$("#file-in").onchange = e => { handleFiles(e.target.files); e.target.value = ""; };
+
+function renderAnswer(question, res, loading) {
+  const el = $("#answer"); el.hidden = false;
+  let body;
+  if (loading) body = `<div class="thinking"><i></i>Je fouille ton cerveau…</div>`;
+  else {
+    const parts = res.answer.split(/(\[[a-z0-9][a-z0-9_-]*\])/gi).map(p => {
+      const m = /^\[([a-z0-9][a-z0-9_-]*)\]$/i.exec(p); if (!m) return esc(p);
+      const n = S.nodes.get(m[1]); if (!n || !res.cited.includes(n.id)) return "";
+      return `<button class="cite" data-open="${esc(n.id)}" style="background:${TYPES[n.type].color}22;color:${TYPES[n.type].color}">${esc(n.title)}</button>`;
+    }).join("");
+    body = `<div class="a">${parts}</div>` + (res.cited.length ? `<div class="cites"><span class="lbl">Neurones cités</span>${res.cited.map(id => { const n = S.nodes.get(id); return n ? `<button class="chip" data-open="${esc(id)}" style="border-color:${TYPES[n.type].color}66;color:${TYPES[n.type].color}">${TYPES[n.type].emoji} ${esc(n.title)}</button>` : ""; }).join("")}</div>` : "");
+  }
+  el.innerHTML = `<div class="q"><span style="color:var(--violet)">◈</span><span>${esc(question)}</span><button class="x" data-close aria-label="Fermer la réponse">✕</button></div>${body}`;
+}
+$("#answer").addEventListener("click", e => {
+  const o = e.target.closest("[data-open]"); if (o) return select(o.dataset.open, true);
+  if (e.target.closest("[data-close]")) { $("#answer").hidden = true; S.highlight.clear(); }
+});
+
+async function submit() {
+  const text = input.value.trim();
+  if (!text || S.busy) return;
+  if (!S.db) return toast("Ton cerveau n'est pas connecté.", "err");
+  setBusy(true);
+  try {
+    if (S.mode === "saisie") {
+      const r = await captureText(text);
+      input.value = ""; input.dispatchEvent(new Event("input"));
+      const parts = [];
+      if (r.created.length) parts.push(`${r.created.length} nouveau${r.created.length > 1 ? "x" : ""} neurone${r.created.length > 1 ? "s" : ""}`);
+      if (r.updated.length) parts.push(`${r.updated.length} enrichi${r.updated.length > 1 ? "s" : ""}`);
+      if (r.edges.length) parts.push(`${r.edges.length} lien${r.edges.length > 1 ? "s" : ""}`);
+      toast(parts.join(" · ") || "Rangé");
+      S.highlight = new Set([...r.created, ...r.updated]);
+      S.pendingFocus = r.created[0] || r.updated[0] || null;
+      if (S.pendingFocus && S.nodes.has(S.pendingFocus)) { focusNode(S.pendingFocus); S.pendingFocus = null; }
+      setTimeout(() => S.highlight.clear(), 4500);
+    } else {
+      select(null);
+      renderAnswer(text, null, true);
+      const r = await ask(text);
+      input.value = ""; input.dispatchEvent(new Event("input"));
+      renderAnswer(text, r, false);
+      S.highlight = new Set(r.cited);
+    }
+  } catch (e) {
+    toast(e.message, "err");
+    if (S.mode === "question") $("#answer").hidden = true;
+  } finally { setBusy(false); }
+}
+
+/* ---------- glisser-déposer ---------- */
+let dragDepth = 0;
+window.addEventListener("dragenter", e => { if (![...(e.dataTransfer?.types || [])].includes("Files")) return; dragDepth++; $("#drop").hidden = false; });
+window.addEventListener("dragleave", () => { dragDepth = Math.max(0, dragDepth - 1); if (!dragDepth) $("#drop").hidden = true; });
+window.addEventListener("dragover", e => e.preventDefault());
+window.addEventListener("drop", e => { e.preventDefault(); dragDepth = 0; $("#drop").hidden = true; if (e.dataTransfer?.files?.length) handleFiles(e.dataTransfer.files); });
+
+/* ---------- démarrage ---------- */
+setMode("saisie");
+initGraph();
+connect().catch(e => setState("ERREUR", e?.message || String(e)));
+</script>

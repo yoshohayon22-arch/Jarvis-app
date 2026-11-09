@@ -172,7 +172,7 @@
   .home{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));grid-template-rows:minmax(0,1.3fr) minmax(0,1.3fr) minmax(0,.75fr) auto;gap:10px;min-width:0;min-height:0}
   .tile{position:relative;display:flex;flex-direction:column;gap:10px;min-width:0;min-height:0;overflow:hidden;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px 16px;color:var(--ink);font:inherit;cursor:pointer;transition:border-color .15s, box-shadow .15s}
   .tile:hover{border-color:color-mix(in srgb, var(--ink) 28%, var(--line));box-shadow:0 6px 18px rgba(20,18,16,.07)}
-  .t-dash{grid-column:span 8} .t-valid{grid-column:span 4} .t-office{grid-column:span 5;cursor:pointer;padding:12px} .t-msgs{grid-column:span 3} .t-cre{grid-column:span 4} .t-ask{grid-column:span 9} .t-brain{grid-column:span 3;flex-direction:row;align-items:center;gap:12px} .t-sm{grid-column:span 3;gap:4px;justify-content:space-between;padding:12px 13px}
+  .t-dash{grid-column:span 8} .t-valid{grid-column:span 4} .t-office{grid-column:span 5;cursor:pointer;padding:12px} .t-msgs{grid-column:span 3} .t-cre{grid-column:span 4} .t-ask{grid-column:span 12} .tile.flat{cursor:default} .tile.flat:hover{box-shadow:none;border-color:var(--line)} .t-valid.hot.flat:hover{border-color:var(--warn)} .t-sm{grid-column:span 3;gap:4px;justify-content:space-between;padding:12px 13px}
   .t-top{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
   .t-name{font:600 12px var(--body);text-transform:uppercase;letter-spacing:.12em;color:var(--muted)}
   .t-n{font:800 34px/1 var(--display);font-variant-numeric:tabular-nums}
@@ -290,6 +290,12 @@
   .wa-empty b{font:800 24px var(--display);color:var(--ink)}
   .wa-empty p{max-width:420px;margin:0;line-height:1.5}
   .wa-back{display:none}
+  .t-valid .t-lines{flex:1;overflow:auto;gap:6px}
+  .vq{display:flex;gap:8px;align-items:center;min-width:0;font-size:13.5px;line-height:1.3}
+  .vq > span{flex:1;min-width:0;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+  .vq button{flex:none;width:30px;height:30px;border-radius:50%;border:1px solid var(--line);background:var(--surface);cursor:pointer;font:700 14px var(--body);color:var(--bad)}
+  .vq button.y{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+  #tValidAll{align-self:flex-start}
   .t-brain .t-n{font-size:26px} .t-brain small{color:var(--muted);font-size:13px}
   .t-office .stage-wrap{flex:1;min-height:0;width:100%}
   .t-office .stage{border-radius:10px;pointer-events:none}
@@ -416,7 +422,7 @@
 <header>
   <div class="brand"><div class="dot"></div><div><h1>QG Jarvis</h1><small>Ton équipe d’agents IA</small></div></div>
   <div class="stats" aria-label="Chiffres du jour">
-    <button class="stat" id="sValid" type="button" data-space="valid"><b id="kValid">0</b>à valider</button>
+    <span class="stat" id="sValid"><b id="kValid">0</b>à valider</span>
     <span class="stat"><b id="kRun">0</b>en cours</span>
     <span class="stat"><b id="kDone">0</b>livrés</span>
   </div>
@@ -426,14 +432,15 @@
 </header>
 
 <main class="dash" id="home" aria-label="Ton QG">
-  <button class="tile t-dash" type="button" data-space="day" aria-label="Ouvrir le Dashboard">
-    <span class="t-top"><span class="t-name">Dashboard</span><small id="dashDate"></small></span>
+  <section class="tile t-dash flat" aria-label="Chiffres clés">
+    <span class="t-top"><span class="t-name">Aujourd’hui</span><small id="dashDate"></small></span>
     <span class="kpis" id="dashK"></span>
-  </button>
-  <button class="tile t-valid" type="button" data-space="valid">
+  </section>
+  <section class="tile t-valid flat" aria-label="À valider">
     <span class="t-top"><span class="t-name">À valider</span><b class="t-n" id="tValidN">0</b></span>
     <span class="t-lines" id="tValidL"></span>
-  </button>
+    <button class="btn sm ok" id="tValidAll" type="button" hidden>Tout valider</button>
+  </section>
   <div class="tile t-office" id="officeTile" role="button" tabindex="0" data-space="office" aria-label="Agrandir l’open space">
     <span class="t-top"><span class="t-name">Open space</span><small id="tTeamS">au bureau</small></span>
     <section class="stage-wrap" id="stageWrap">
@@ -445,15 +452,14 @@
     <span class="t-lines" id="tMsgL"></span>
   </button>
   <button class="tile t-cre" type="button" data-space="cre">
-    <span class="t-top"><span class="t-name">Créations &amp; fichiers</span><b class="t-n" id="tCreN">0</b></span>
+    <span class="t-top"><span class="t-name">Résultats</span><b class="t-n" id="tCreN">0</b></span>
     <span class="t-cre-prev" id="tCreP"></span>
   </button>
   <form class="tile t-ask" id="ask">
       <label class="t-name" for="askText">Demander à un agent</label>
       <div class="ask-row"><select id="askAgent" aria-label="Agent"></select><input id="askText" placeholder="Ex. : trouve-moi un hôtel à Lyon samedi" required autocomplete="off"><button class="btn" type="submit">Envoyer</button></div>
     </form>
-  <button class="tile t-brain" type="button" data-space="mem"><span class="t-name">Cerveau</span><b class="t-n" id="tMemN">0</b><small id="tMemS">souvenirs</small></button>
-  <div hidden><b id="tFileN"></b><small id="tFileS"></small><b id="tTeamN"></b><b id="tDayN"></b><small id="tDayS"></small></div>
+  <div hidden><b id="tMemN"></b><small id="tMemS"></small><b id="tFileN"></b><small id="tFileS"></small><b id="tTeamN"></b><b id="tDayN"></b><small id="tDayS"></small></div>
 </main>
 
 <section class="space" id="space" role="dialog" aria-modal="true" aria-labelledby="spTitle" hidden>
@@ -461,12 +467,9 @@
     <button class="btn ghost" id="spBack" type="button">← Accueil</button>
     <h2 id="spTitle">À valider</h2>
     <nav class="sp-nav" id="spNav" aria-label="Espaces">
-      <button type="button" data-space="valid">À valider<b id="nValid" hidden></b></button>
       <button type="button" data-space="msgs">Messages<b id="nMsgs" hidden></b></button>
-      <button type="button" data-space="cre">Créations<b id="nCre" hidden></b></button>
-      <button type="button" data-space="mem">Cerveau</button>
-      <button type="button" data-space="day">Dashboard</button>
-      <button type="button" data-space="office">Open space</button><b id="nFiles" hidden></b>
+      <button type="button" data-space="cre">Résultats<b id="nCre" hidden></b></button>
+      <button type="button" data-space="office">Open space</button><b id="nValid" hidden></b><b id="nFiles" hidden></b>
     </nav>
   </div>
   <div class="sp-body" id="spBody">
@@ -1333,7 +1336,7 @@ async function initEngine() {
       try { const names = (await mcp.listTools()).servers.map(x => x.server); if (names.includes('Gmail')) ENGINE.mail = 'gmail'; if (names.includes('Google Calendar')) ENGINE.cal = true;
         if (names.includes('Firecrawl')) ENGINE.web = true; if (names.includes('Booking.com')) ENGINE.booking = true; if (names.includes('Google Drive')) ENGINE.drive = true;
         if (names.includes('Canva')) ENGINE.canva = true; if (names.includes('HyperFrames by HeyGen')) ENGINE.video = true; if (names.includes('Claude Code Remote')) ENGINE.cc = true; } catch (e) {}
-      if (sample) { try { ENGINE.tools = !!(await sample.limits()).tools; } catch (e) {} }
+      if (sample) { try { const lim = await sample.limits(); ENGINE.tools = !!lim.tools; ENGINE.maxTools = (lim.tools && lim.tools.maxCount) || 8; } catch (e) {} }
     }
   }
   if (!ENGINE.brain || !ENGINE.mail) {
@@ -1361,15 +1364,23 @@ function brainFailed(e) {
   if (e && e.code === 'rate_limited') { brainPauseUntil = Date.now() + 60000; log(AGENTS[0], 'Claude reçoit trop de demandes : le QG fait une pause d’une minute.'); renderEngine(); }
   if (e && ['not_granted', 'sampling_disabled', 'not_declared', 'capability_disabled', 'session_expired'].includes(e.code)) { ENGINE.blocked = e.code; ENGINE.brain = null; renderEngine(); renderPlan(); }
 }
-async function runBrain(prompt, { asJson = false, onText, tools } = {}) {
+// modèle le plus puissant pour les vraies tâches (si cette vue l'accepte), modèle normal pour discuter
+let TIERS = null;
+async function tierOpt(strong) {
+  if (!strong || ENGINE.brain !== 'claude') return {};
+  if (!TIERS) { try { TIERS = (await ENGINE.sample.limits()).modelTiers || ['default']; } catch (e) { TIERS = ['default']; } }
+  return TIERS.includes('complex') ? { modelTier: 'complex' } : {};
+}
+async function runBrain(prompt, { asJson = false, onText, tools, strong = false } = {}) {
+  const tier = await tierOpt(strong);
   if (tools) {
     if (ENGINE.brain !== 'claude') throw { code:'no_web' };
-    const r = await ENGINE.sample(prompt, { tools, onText: onText ? (u => onText(u.text)) : undefined });
+    const r = await ENGINE.sample(prompt, { ...tier, tools, onText: onText ? (u => onText(u.text)) : undefined });
     return r.text;
   }
   if (ENGINE.brain === 'claude') {
-    if (asJson) return ENGINE.sample.json(prompt, { cache: false });
-    const r = await ENGINE.sample(prompt, { cache: false, onText: onText ? (u => onText(u.text)) : undefined });
+    if (asJson) return ENGINE.sample.json(prompt, { ...tier, cache: false });
+    const r = await ENGINE.sample(prompt, { ...tier, cache: false, onText: onText ? (u => onText(u.text)) : undefined });
     return r.text;
   }
   if (ENGINE.brain === 'server') {
@@ -1557,6 +1568,25 @@ function mailTools(a) {
         await ENGINE.mcp.callTool('Gmail', 'create_draft', arg); HQ.drafts++; log(a, `Brouillon enregistré dans Gmail : ${arg.subject}`, true); return 'Brouillon enregistré dans Gmail. Rien n’a été envoyé.'; } },
   ];
 }
+// boîte à outils complète pour une tâche : collègues, cerveau, web et Drive (dans la limite d'outils de la vue)
+function agentTools(a) {
+  const out = teamTools(a);
+  if (ENGINE.web) out.push(
+    { name:'recherche_web', description:'Cherche sur internet : jusqu’à 6 résultats {titre, url, extrait}. Pour vérifier un fait, trouver un chiffre, une date, une actualité.',
+      inputSchema:{ type:'object', properties:{ requete:{ type:'string' } }, required:['requete'] },
+      execute: async inp => (((payloadOf(await ENGINE.mcp.callTool('Firecrawl', 'firecrawl_search', { query: String(inp.requete || '').slice(0, 300), limit: 6, sources:['web'], domainTools:false, objective: 'QG Jarvis : ' + a.role })).data || {}).web) || []).map(w => ({ titre: w.title, url: w.url, extrait: String(w.description || '').slice(0, 600) })) },
+    { name:'lire_page', description:'Lit le texte d’une page web à partir de son adresse https.',
+      inputSchema:{ type:'object', properties:{ url:{ type:'string' } }, required:['url'] },
+      execute: async inp => String(payloadOf(await ENGINE.mcp.callTool('Firecrawl', 'firecrawl_scrape', { url: String(inp.url), formats:['markdown'], onlyMainContent:true, objective: 'QG Jarvis : ' + a.role })).markdown || '').slice(0, 12000) || 'Page vide.' });
+  if (ENGINE.drive && !a.mailer) out.push(
+    { name:'chercher_drive', description:'Cherche des fichiers dans le Google Drive de Yosh par mots du titre ou du contenu. Renvoie {id, titre, extrait}.',
+      inputSchema:{ type:'object', properties:{ mots:{ type:'string' } }, required:['mots'] },
+      execute: async inp => (payloadOf(await ENGINE.mcp.callTool('Google Drive', 'search_files', { query: `fullText contains '${String(inp.mots || '').replace(/[\\']/g, ' ').slice(0, 80)}' and trashed = false`, pageSize: 6, snippetVerbosity:'BRIEF' })).files || []).map(f => ({ id: f.id, titre: f.title, extrait: String(f.contentSnippet || '').slice(0, 400), lien: f.viewUrl })) },
+    { name:'lire_fichier_drive', description:'Lit le contenu d’un fichier Google Drive à partir de son id.',
+      inputSchema:{ type:'object', properties:{ id:{ type:'string' } }, required:['id'] },
+      execute: async inp => String(payloadOf(await ENGINE.mcp.callTool('Google Drive', 'read_file_content', { fileId: String(inp.id) })).fileContent || '').slice(0, 14000) || 'Fichier vide.' });
+  return out.slice(0, ENGINE.maxTools || 8);
+}
 function teamTools(a) {
   return [...(a.mailer ? mailTools(a) : []),
     { name:'demander_a_un_collegue', description:`Pose une question à un collègue du QG et reçois sa réponse avec ses pièces (mails, fichiers, livrables, résultats). Collègues : ${AGENTS.filter(x => x !== a).map(x => `${x.name} (${x.role})`).join(', ')}. Max lit la boîte Gmail (contenu des mails, pièces jointes), Nora tient la mémoire (notes, fichiers, historiques Claude, Drive), chaque agent connaît ses propres livrables.`,
@@ -1584,10 +1614,10 @@ Nous sommes le ${todayLabel()}.
 ${CTX.calendar.length ? 'Agenda de Yosh pour les prochains jours :\n' + CTX.calendar.join('\n') + '\n' : ''}
 Ta tâche : ${t.title}
 ${t.brief ? (t.requested ? 'Ce que Yosh t’a demandé : ' : 'Précisions de Jarvis : ') + t.brief + '\n' : ''}${t.requested ? recentWork(a) : ''}${mem}
-Réalise cette tâche maintenant et rends directement le livrable final, prêt à être utilisé par Yosh : un texte, un brouillon, un plan, une liste ou un script selon la tâche.
-Règles : en français ; texte simple avec des titres courts et des listes à tirets${(t.format || '').includes('tableur') ? ' ; mets les données principales dans UN tableau Markdown (| colonne | colonne |, une ligne d’en-tête puis une ligne |---|), il deviendra une feuille Google Sheets' : ' (pas de tableau)'} ; 350 mots au maximum ; n’invente aucun fait sur Yosh, ses clients ou ses chiffres : écris [à compléter] quand une information te manque ; commence directement par le livrable, sans phrase d’introduction.`;
+Travaille comme un expert senior de ton domaine. Avant d’écrire : réfléchis à ce que Yosh veut vraiment obtenir, va chercher avec tes outils ce qui te manque (cerveau, collègues, web, Drive), vérifie les faits. Puis rends directement le livrable final, complet et prêt à être utilisé tel quel : pas un plan de ce que tu ferais, le travail fait. Relis-toi : précis, concret, sans remplissage.
+Règles : en français ; texte simple avec des titres courts et des listes à tirets${(t.format || '').includes('tableur') ? ' ; mets les données principales dans UN tableau Markdown (| colonne | colonne |, une ligne d’en-tête puis une ligne |---|), il deviendra une feuille Google Sheets' : ' (pas de tableau)'} ; aussi long que nécessaire pour être vraiment utile, sans remplissage ; n’invente aucun fait sur Yosh, ses clients ou ses chiffres : écris [à compléter] quand une information te manque ; commence directement par le livrable, sans phrase d’introduction.`;
   const withTools = ENGINE.brain === 'claude' && ENGINE.tools;
-  job.text = await brainAsk(prompt + (withTools ? '\nSi une information te manque, demande-la à un collègue (outil demander_a_un_collegue) ou à Nora (consulter_memoire) avant d’écrire [à compléter].' : ''), { onText: txt => { job.preview = txt; }, tools: withTools ? teamTools(a) : undefined });
+  job.text = await brainAsk(prompt + (withTools ? '\nSi une information te manque, demande-la à un collègue (outil demander_a_un_collegue) ou à Nora (consulter_memoire) avant d’écrire [à compléter].' : ''), { onText: txt => { job.preview = txt; }, tools: withTools ? agentTools(a) : undefined, strong: true });
   job.ok = true;
   })().catch(e => { job.error = e; }).finally(() => { job.settled = true; });
   return job;
@@ -1740,7 +1770,7 @@ Tu rends TOUJOURS un post fini. "texte" est le texte complet du post, prêt à p
 Pour un visuel MCI Sport, le brief impose : fond bleu nuit #292756, accents cyan #10F6F9, texte blanc.
 Choisis "image" pour un post, une story, une affiche ou une miniature, "video" pour une vidéo, un Reel ou un montage.
 Réponds uniquement avec un objet JSON :
-{"media":"image|video","reseau":"LinkedIn|Instagram|autre","texte":"le texte complet du post","format":"Instagram Post|Instagram Story|LinkedIn Post|Facebook Post|YouTube Thumbnail|Poster","brief":"brief détaillé pour l’outil : sujet, textes exacts à afficher, style, couleurs, ambiance, et pour une vidéo le déroulé scène par scène","legende":"légende prête à publier, avec hashtags","duree":30}`, { asJson: true });
+{"media":"image|video","reseau":"LinkedIn|Instagram|autre","texte":"le texte complet du post","format":"Instagram Post|Instagram Story|LinkedIn Post|Facebook Post|YouTube Thumbnail|Poster","brief":"brief détaillé pour l’outil : sujet, textes exacts à afficher, style, couleurs, ambiance, et pour une vidéo le déroulé scène par scène","legende":"légende prête à publier, avec hashtags","duree":30}`, { asJson: true, strong: true });
     const want = plan && plan.media === 'video' ? 'video' : 'image';
     const media = want === 'video' ? (ENGINE.video ? 'video' : 'image') : (ENGINE.canva ? 'image' : 'video');
     const brief = String((plan && plan.brief) || t.brief || t.title).slice(0, 3000);
@@ -1869,7 +1899,7 @@ Mène une vraie recherche approfondie avec tes outils avant de répondre :
 ${ENGINE.booking ? '3. Pour un hôtel ou un hébergement, utilise chercher_hebergements pour obtenir les prix et disponibilités réels.\n' : ''}4. Recoupe les sources et signale ce que tu n’as pas pu vérifier.
 Rends ensuite un rapport en français, en texte simple : un résumé en deux phrases ; tes recommandations classées (nom, pourquoi, chiffres et prix avec leur source, lien) ; les points de vigilance ; puis « Sources » avec la liste des liens consultés. 500 mots au maximum.${(t.format || '').includes('tableur') ? '\nAjoute UN tableau Markdown comparatif des options (| colonne | colonne |, ligne d’en-tête puis |---|) : il deviendra une feuille Google Sheets.' : ''}
 N’invente rien : chaque fait doit venir de tes outils. Si une information manque (dates, budget…), fais l’hypothèse la plus raisonnable et indique-la clairement en tête du rapport.`;
-    job.text = await brainAsk(prompt, { tools, onText: txt => { job.preview = txt; } });
+    job.text = await brainAsk(prompt, { tools, onText: txt => { job.preview = txt; }, strong: true });
     job.ok = true;
   })().catch(e => { job.error = e; }).finally(() => { job.settled = true; });
   return job;
@@ -2007,6 +2037,13 @@ async function loadCalendar() {
 }
 
 /* ---------- Jarvis planifie la journée ---------- */
+// à l'activation : pas de plan automatique, seulement l'agenda (contexte) et les mails non lus proposés à Max
+async function morning() {
+  try { CTX.calendar = await loadCalendar(); } catch (e) {}
+  let mails = [];
+  try { mails = ENGINE.mail ? await fetchInbox() : []; CTX.mailErr = null; } catch (e) { CTX.mailErr = e.code || 'erreur'; }
+  enqueueMails(mails); HQ.unread = mails.length; renderEngine(); refresh();
+}
 async function planDay() {
   if (HQ.planning) return;
   if (!ENGINE.brain) { renderPlan(); return; }
@@ -2289,12 +2326,12 @@ const TSTATUS = { proposee:'à valider', attente:'en attente', encours:'en cours
 /* ---------- Espaces plein écran ---------- */
 const SP = { view:null, agent:null, doc:null };
 const spEl = $('space');
-const TITLES = { valid:'À valider', msgs:'Messages', cre:'Créations & fichiers', files:'Fichiers', mem:'Cerveau', team:'Équipe', day:'Dashboard', office:'Open space' };
+const TITLES = { valid:'À valider', msgs:'Messages', cre:'Résultats', files:'Fichiers', mem:'Cerveau', team:'Équipe', day:'Dashboard', office:'Open space' };
 const PANES = ['valid', 'msgs', 'cre', 'files', 'mem', 'team', 'day', 'office'];
 function openSpace(view) {
   const wasClosed = spEl.hidden;
   if (view === 'files') { view = 'cre'; creFilter = 'files'; }
-  if (view === 'team') view = 'msgs';
+  if (view === 'team' || view === 'valid' || view === 'day') view = 'msgs';
   SP.view = view;
   spEl.style.top = document.querySelector('header').offsetHeight + 'px';
   (view === 'office' ? $('officeHold') : $('officeTile')).appendChild($('stageWrap')); spEl.classList.toggle('is-office', view === 'office');
@@ -2372,7 +2409,7 @@ function msgActs(m, a, d, t) {
   let h = '';
   if (t && t.status === 'proposee') h += `<button class="ok" type="button" data-ok="${esc(t.id)}">Valider</button><button class="no" type="button" data-no="${esc(t.id)}">Refuser</button>`;
   else if (t) h += `<em class="st ${t.status}">${TSTATUS[t.status] || ''}</em>`;
-  if (m.kind === 'val' && !t) { const n = HQ.tasks.filter(x => x.status === 'proposee').length; h += n ? `<button class="ok" type="button" data-go="valid">Voir (${n})</button>` : ''; }
+  
   if (d && d.reply && !d.draftSaved && ENGINE.mail) h += `<button type="button" data-draft="${esc(d.id)}">Brouillon Gmail</button>`;
   if (d && d.status === 'err' && d.spec) h += `<button type="button" data-retry="${esc(d.id)}">Relancer</button>`;
   if (d) filesOf(d).filter(f => f.url).slice(0, 3).forEach(f => { const [lbl, col] = FT[f.type] || FT.gdoc; h += `<a class="fchip" style="background:${col}" href="${esc(f.url)}" target="_blank" rel="noopener noreferrer" title="${esc(f.name)}">${lbl}</a>`; });
@@ -2472,6 +2509,8 @@ async function actClick(e) {
   if (row && !b) openThread(agentNamed(row.dataset.agent), row.dataset.deliv || null);
 }
 ['vAsk', 'chatLog'].forEach(id => $(id).addEventListener('click', actClick));
+$('tValidL').addEventListener('click', e => { const y = e.target.closest('[data-hok]'), n = e.target.closest('[data-hno]'); if (y) approve(taskById(y.dataset.hok)); if (n) refuse(taskById(n.dataset.hno)); });
+$('tValidAll').onclick = () => HQ.tasks.filter(t => t.status === 'proposee').forEach(approve);
 
 /* ---------- Accueil : les tuiles ---------- */
 /* ---------- Dashboard : mails, stage MCI Sport, travail des agents ---------- */
@@ -2509,9 +2548,9 @@ function renderTiles() {
   const n = props.length;
   $('tValidN').textContent = n; $('kValid').textContent = n; $('sValid').classList.toggle('hot', n > 0);
   document.querySelector('.t-valid').classList.toggle('hot', n > 0);
-  $('tValidL').innerHTML = n ? props.slice(0, 6).map(t => { const a = agentNamed(t.target); return `<span class="t-line"><i style="background:${a ? a.pole.color : '#64748b'}"></i><span><b>${esc(t.target || '')}</b> · ${esc(t.title)}</span></span>`; }).join('')
-      + (n > 6 ? `<span class="t-line dim"><span>et ${n - 6} autre${n > 7 ? 's' : ''}…</span></span>` : '')
-    : '<span class="t-line dim"><span>Rien à valider. Jarvis te soumet ici chaque tâche avant de la lancer : plan du jour, mails, tes demandes.</span></span>';
+  $('tValidL').innerHTML = n ? props.map(t => `<span class="vq"><span title="${esc(t.brief || t.title)}"><b>${esc(t.target || '')}</b> · ${esc(t.title)}</span><button class="y" type="button" data-hok="${esc(t.id)}" aria-label="Valider : ${esc(t.title)}">✓</button><button type="button" data-hno="${esc(t.id)}" aria-label="Refuser : ${esc(t.title)}">✕</button></span>`).join('')
+    : '<span class="t-line dim"><span>Rien à valider. Quand un agent te propose une tâche ou que Max voit un nouveau mail, tu valides ici d’un clic.</span></span>';
+  $('tValidAll').hidden = n < 2;
   $('tMsgN').textContent = unseen; document.querySelector('.t-msgs').classList.toggle('hot', unseen > 0);
   $('tMsgL').innerHTML = msgs.length ? msgs.slice(0, 6).map(({ m, a }) => `<span class="t-line ${m.seen ? '' : 'new'}"><i></i><span><b>${esc(a.name)}</b> · ${esc(m.line || shortLine(m.text))}</span></span>`).join('')
     : '<span class="t-line dim"><span>Les agents t’écrivent ici en une ligne, avec le bouton pour agir.</span></span>';
@@ -2598,7 +2637,7 @@ function renderChat() {
   if (c.messages.some(m => m.role === 'agent' && !m.seen)) { markMsgsSeen(x => x === a); contactsKey = ''; }
   $('thHead').innerHTML = `<button class="btn ghost sm wa-back" id="waBack" type="button" aria-label="Retour aux contacts">←</button>
     <div class="who"><span class="pf-av" style="--pc:${a.pole.color};width:40px;height:40px;background:${avatarBg(a)}"></span><div><b>${esc(a.name)}</b><small>${esc(a.role)} · <span style="color:${col}">${esc(st)}</span></small></div></div>
-    ${nd ? `<button class="btn ghost sm" id="chatDocs" type="button">Livrables (${nd})</button>` : ''}<button class="btn ghost sm" id="chatProfile" type="button">Sa fiche</button>`;
+    ${nd ? `<button class="btn ghost sm" id="chatDocs" type="button">Livrables (${nd})</button>` : ''}${a.memory ? '<button class="btn ghost sm" type="button" data-space="mem">Voir le cerveau</button>' : ''}<button class="btn ghost sm" id="chatProfile" type="button">Sa fiche</button>`;
   $('waBack').onclick = () => { SP.agent = null; SP.doc = null; contactsKey = ''; refresh(); };
   if ($('chatDocs')) $('chatDocs').onclick = () => { SP.doc = 'list'; docKey = ''; renderDoc(); };
   $('chatProfile').onclick = () => { closeSpace(); openProfile(a); };
@@ -3216,7 +3255,8 @@ function setActive(on, { plan = true } = {}) {
   if (on) {
     if (HQ.minutes > MIN(18)) HQ.minutes = MIN(9);
     arrive(); startMailWatch();
-    if (plan && HQ.plannedOn !== new Date().toDateString()) planDay();
+    // pas de plan automatique : les agents ne font que ce que Yosh demande (et Max signale les nouveaux mails)
+    morning();
   } else leave();
 }
 $('power').onclick = () => setActive(!HQ.active);

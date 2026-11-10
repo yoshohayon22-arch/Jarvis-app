@@ -495,7 +495,7 @@
     </div>
     <div class="sp-pane" id="sp-cre" hidden>
       <div class="sp-head"><p>Tout ce que tu as demandé arrive ici : posts, vidéos, fichiers et liens. Rien n’est publié : copie le texte, ouvre le visuel, ou demande une modification.</p></div>
-      <div class="mem-src" id="creFilters"></div>
+      <div class="sp-head"><div class="mem-src" id="creFilters" style="flex:1"></div><button class="btn sm no" id="creClear" type="button">Tout effacer</button></div>
       <div class="cre-grid" id="creGrid"></div>
       <div id="creFiles" hidden style="display:flex;flex-direction:column;gap:14px">
       <input class="fsearch" id="fSearch" type="search" placeholder="Chercher un fichier, un lien, un agent…" aria-label="Chercher dans les fichiers et les liens">
@@ -1086,6 +1086,8 @@ const LS_KEY = 'jarvis-hq-livrables-v2', CHAT_KEY = 'jarvis-hq-discussions-v2', 
 try { ['jarvis-hq-livrables', 'jarvis-hq-discussions', 'jarvis-hq-onglet'].forEach(k => localStorage.removeItem(k)); } catch (e) {}
 const STORE = { db:null, uid:null, dl:null, err:null };
 const CHATS = {};
+const RESULTS_RESET = 1;
+try { if (localStorage.getItem('jarvis-hq-resultats-vides') !== String(RESULTS_RESET)) { localStorage.removeItem(LS_KEY); localStorage.setItem('jarvis-hq-resultats-vides', String(RESULTS_RESET)); } } catch (e) {}
 try { HQ.deliverables = JSON.parse(localStorage.getItem(LS_KEY) || '[]').filter(d => d && d.id && typeof d.id === 'string'); } catch (e) { HQ.deliverables = []; }
 try { Object.assign(CHATS, JSON.parse(localStorage.getItem(CHAT_KEY) || '{}')); } catch (e) {}
 const MEM = [], MEMLOG = [], MEM_KEY = 'jarvis-hq-memoire-v1';
@@ -1175,7 +1177,12 @@ async function initStore() {
     if (!v || v.version !== STORE_VERSION) {
       const snap = await db.collection('data/users/' + uid).get();
       await Promise.all(snap.docs.filter(x => x.id !== 'meta').map(x => db.doc(`data/users/${uid}/${x.id}`).delete().catch(() => {})));
-      await db.doc(`data/users/${uid}/meta`).set({ kind:'meta', version: STORE_VERSION, resetAt: Date.now() });
+      await db.doc(`data/users/${uid}/meta`).set({ kind:'meta', version: STORE_VERSION, resetAt: Date.now(), results: RESULTS_RESET });
+    } else if (v.results !== RESULTS_RESET) {
+      // vidage unique des Résultats : seuls les livrables partent
+      const snap = await db.collection('data/users/' + uid).get();
+      await Promise.all(snap.docs.filter(x => x.id.startsWith('l_')).map(x => db.doc(`data/users/${uid}/${x.id}`).delete().catch(() => {})));
+      await db.doc(`data/users/${uid}/meta`).set({ ...v, results: RESULTS_RESET });
     }
   } catch (e) { STORE.err = e.code; }
   STORE.db = db; STORE.uid = uid;
@@ -3071,6 +3078,12 @@ function renderCreations() {
   $('creGrid').innerHTML = (creFilter === 'all' ? brewing.map(t => { const a = AGENTS.find(x => x.work === t); return `<article class="cre-card brewing"><header><span class="av" style="background:${a ? avatarBg(a) : '#ccc'}"></span><span><b>${esc(t.title)}</b><small>${a ? esc(a.name) + ' y travaille' : 'En préparation'}…</small></span></header><div class="cre-skel"></div><div class="cre-skel short"></div></article>`; }).join('') : '')
     + (list.length ? list.map(card).join('') : (brewing.length && creFilter === 'all' ? '' : `<div class="empty-big">${all.length ? 'Rien dans ce format.' : 'Ici s’affichent les posts que les agents créent pour toi : textes LinkedIn de Léa, scripts de Reels de Noah, visuels et vidéos de Zoé. Demande-leur un post depuis Messages.'}</div>`));
 }
+$('creClear').onclick = () => {
+  if (!HQ.deliverables.length || !confirm('Effacer tous les résultats (posts, vidéos, fichiers et liens) ? Les fichiers déjà créés dans Drive, Canva ou HeyGen ne sont pas touchés.')) return;
+  const gone = HQ.deliverables.splice(0);
+  save(); if (STORE.db) gone.forEach(d => STORE.db.doc(`data/users/${STORE.uid}/l_${d.id}`).delete().catch(() => {}));
+  creKey = fKey = tileKey = dashKey = ''; refresh();
+};
 $('creFilters').addEventListener('click', e => { const b = e.target.closest('[data-cf]'); if (b) { creFilter = b.dataset.cf; creKey = ''; renderCreations(); if (creFilter === 'files') markFilesSeen(); } });
 $('creGrid').addEventListener('click', async e => {
   const c = e.target.closest('.cre-card[data-key]'); if (!c) return;

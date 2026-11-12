@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chronos — Brumeval</title>
+  </head>
+  <body>
+    <canvas id="game"></canvas>
+
+    <div id="hud">
+      <div id="hud-clock"></div>
+      <div id="hud-speed"></div>
+    </div>
+    <div id="hud-district"></div>
+    <div id="hud-help">ZQSD / WASD se déplacer · Maj courir · Espace esquiver · Souris caméra · Molette zoom · T vitesse du temps · F3 debug · Échap pause</div>
+    <pre id="debug"></pre>
+
+    <div id="title" class="overlay">
+      <div class="card">
+        <h1>CHRONOS</h1>
+        <p class="sub">Brumeval, bourg-marché de la frontière</p>
+        <p class="pitch">
+          Tu es <strong>Kael</strong>, orphelin de Valdren — un royaume effacé en une seule nuit, dont nul ne se souvient.
+          Dans ta paume brille un éclat d'ambre. Ce matin, il s'est fissuré… et le temps a hésité.
+        </p>
+        <p class="cta">Cliquer pour entrer à Brumeval</p>
+      </div>
+    </div>
+    <div id="pause" class="overlay hidden">
+      <div class="card"><h2>Pause</h2><p class="cta">Cliquer pour reprendre</p></div>
+    </div>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

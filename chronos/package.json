@@ -1,0 +1,16 @@
+{
+  "name": "chronos",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "workspaces": ["shared", "client"],
+  "scripts": {
+    "dev": "npm run dev -w client",
+    "build": "npm run build -w client",
+    "preview": "npm run preview -w client",
+    "test": "npm run test -w client",
+    "typecheck": "npm run typecheck -w client",
+    "e2e": "node e2e/smoke.mjs"
+  },
+  "engines": { "node": ">=20" }
+}

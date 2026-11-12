@@ -1,0 +1,321 @@
+{
+ "$comment": "Maps the pack's simulation objects to glTF models under /assets. Paths are relative to assetsBase. Everything without a model falls back to a procedural placeholder.",
+ "assetsBase": "kaykit/",
+ "buildings": {
+  "well_square": {
+   "model": "buildings/well_red",
+   "scale": 7
+  },
+  "market_hall": {
+   "model": "buildings/market_red",
+   "scale": 8
+  },
+  "stall_sw": {
+   "model": "props/tent",
+   "scale": 6
+  },
+  "stall_se": {
+   "model": "props/tent",
+   "scale": 6
+  },
+  "tavern": {
+   "model": "buildings/tavern_red",
+   "scale": 9
+  },
+  "temple": {
+   "model": "buildings/church_yellow",
+   "scale": 10
+  },
+  "house_priest": {
+   "model": "buildings/home_B_yellow",
+   "scale": 9
+  },
+  "house_n2": {
+   "model": "buildings/home_A_red",
+   "scale": 9
+  },
+  "forge": {
+   "model": "buildings/blacksmith_red",
+   "scale": 8
+  },
+  "house_e1": {
+   "model": "buildings/home_B_red",
+   "scale": 9
+  },
+  "house_e2": {
+   "model": "buildings/home_A_yellow",
+   "scale": 9
+  },
+  "house_e3": {
+   "model": "buildings/home_B_yellow",
+   "scale": 9
+  },
+  "house_e4": {
+   "model": "buildings/home_A_red",
+   "scale": 9
+  },
+  "windmill": {
+   "model": "buildings/windmill_red",
+   "scale": 10
+  },
+  "barracks": {
+   "model": "buildings/barracks_blue",
+   "scale": 9
+  },
+  "watchtower": {
+   "model": "buildings/tower_B_blue",
+   "scale": 7
+  },
+  "archery": {
+   "model": "buildings/archeryrange_blue",
+   "scale": 7
+  },
+  "house_w1": {
+   "model": "buildings/home_A_blue",
+   "scale": 9
+  },
+  "shack_1": {
+   "model": "buildings/home_A_green",
+   "scale": 6
+  },
+  "shack_2": {
+   "model": "buildings/home_A_green",
+   "scale": 6
+  },
+  "shack_3": {
+   "model": "buildings/home_B_green",
+   "scale": 6
+  },
+  "shack_4": {
+   "model": "buildings/home_A_green",
+   "scale": 6
+  },
+  "shack_5": {
+   "model": "buildings/home_B_green",
+   "scale": 6
+  },
+  "shack_6": {
+   "model": "buildings/home_A_green",
+   "scale": 6
+  },
+  "ruin_1": {
+   "model": "buildings/destroyed",
+   "scale": 6
+  },
+  "ruin_2": {
+   "model": "buildings/stage_C",
+   "scale": 6
+  },
+  "shack_9": {
+   "model": "buildings/home_B_green",
+   "scale": 6
+  }
+ },
+ "props": {
+  "barrel": {
+   "models": [
+    "props/barrel"
+   ],
+   "scale": 5
+  },
+  "crate": {
+   "models": [
+    "props/crate_A_big",
+    "props/crate_B_big"
+   ],
+   "scale": 5
+  },
+  "wheelbarrow": {
+   "models": [
+    "props/wheelbarrow"
+   ],
+   "scale": 5
+  },
+  "sack": {
+   "models": [
+    "props/sack"
+   ],
+   "scale": 6
+  },
+  "lumber": {
+   "models": [
+    "props/resource_lumber"
+   ],
+   "scale": 4.5
+  },
+  "stone": {
+   "models": [
+    "props/resource_stone"
+   ],
+   "scale": 4.5
+  },
+  "weaponrack": {
+   "models": [
+    "props/weaponrack"
+   ],
+   "scale": 5.5
+  },
+  "target": {
+   "models": [
+    "props/target"
+   ],
+   "scale": 6
+  },
+  "bucket": {
+   "models": [
+    "props/bucket_water"
+   ],
+   "scale": 5
+  },
+  "flag": {
+   "variants": {
+    "blue": "props/flag_blue",
+    "red": "props/flag_red",
+    "yellow": "props/flag_yellow"
+   },
+   "scale": 10
+  },
+  "fence": {
+   "models": [
+    "buildings/fence_wood_straight"
+   ],
+   "scale": 2.6,
+   "yaw": 1.5708
+  },
+  "tree": {
+   "models": [
+    "nature/tree_single_A",
+    "nature/tree_single_B"
+   ],
+   "scale": [
+    5.5,
+    8
+   ]
+  },
+  "rock": {
+   "models": [
+    "nature/rock_single_A",
+    "nature/rock_single_B",
+    "nature/rock_single_C",
+    "nature/rock_single_E"
+   ],
+   "scale": [
+    5,
+    8
+   ]
+  },
+  "lantern": {
+   "placeholder": "lantern"
+  }
+ },
+ "wall": {
+  "segment": "buildings/wall_straight",
+  "gate": "buildings/wall_straight_gate",
+  "gateTower": "buildings/tower_A_blue",
+  "segments": 56,
+  "scale": 4.1,
+  "gateTowerScale": 4.2,
+  "gateScale": 6,
+  "gateNodeYaw": {
+   "wall_straight_gate_door_left": 1.75,
+   "wall_straight_gate_door_right": -1.75
+  }
+ },
+ "scenery": {
+  "forest": {
+   "models": [
+    "nature/trees_A_large",
+    "nature/trees_B_large",
+    "nature/trees_A_medium",
+    "nature/trees_B_medium"
+   ],
+   "count": 70,
+   "radius": [
+    104,
+    150
+   ],
+   "scale": [
+    8,
+    11
+   ]
+  },
+  "backdrop": {
+   "models": [
+    "nature/mountain_A_grass_trees",
+    "nature/mountain_B_grass_trees",
+    "nature/mountain_C_grass_trees",
+    "nature/hills_A_trees",
+    "nature/hills_B_trees",
+    "nature/hills_C_trees",
+    "nature/mountain_A",
+    "nature/mountain_B"
+   ],
+   "count": 30,
+   "radius": [
+    165,
+    240
+   ],
+   "scale": [
+    24,
+    42
+   ]
+  },
+  "clouds": {
+   "models": [
+    "nature/cloud_big",
+    "nature/cloud_small"
+   ],
+   "count": 16,
+   "radius": [
+    40,
+    280
+   ],
+   "height": [
+    75,
+    115
+   ],
+   "scale": [
+    7,
+    13
+   ]
+  },
+  "bushes": {
+   "models": [
+    "nature/waterplant_A",
+    "nature/waterplant_A",
+    "nature/rock_single_D",
+    "nature/tree_single_A_cut"
+   ],
+   "count": 420,
+   "radius": [
+    6,
+    96
+   ],
+   "scale": [
+    3.5,
+    6.5
+   ]
+  }
+ },
+ "characters": {
+  "kael": {
+   "model": "characters/Rogue_Hooded",
+   "height": 1.75,
+   "hiddenNodes": [
+    "Knife",
+    "Knife_Offhand",
+    "1H_Crossbow",
+    "2H_Crossbow",
+    "Throwable"
+   ],
+   "clips": {
+    "idle": "Idle",
+    "walk": "Walking_A",
+    "run": "Running_A",
+    "dodge": "Dodge_Forward"
+   },
+   "walkSpeed": 2.0,
+   "runSpeed": 5.6
+  }
+ }
+}

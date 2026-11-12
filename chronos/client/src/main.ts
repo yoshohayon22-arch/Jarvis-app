@@ -8,17 +8,22 @@ import { districtAt } from "./sim/districts";
 import { PLAYER_TUNING, createPlayer, playerSpeed, stepPlayer, type PlayerState } from "./sim/player";
 import { expandLayout } from "./sim/scenery";
 import { buildCollisionWorld } from "./sim/worldColliders";
+import { AnimatedCharacter } from "./render/animatedCharacter";
+import { AssetLibrary } from "./render/assets";
 import { CameraRig } from "./render/cameraRig";
 import { CharacterModel, KAEL_LOOK } from "./render/character";
+import { PostFx } from "./render/postfx";
+import { QUALITY, initialQuality, saveQuality, type QualityLevel } from "./render/quality";
 import { DayNightCycle } from "./render/sky";
-import { buildVillage } from "./render/village";
+import { buildWorldView, loadModel, type VisualsDef } from "./render/worldView";
 import { Hud } from "./ui/hud";
+import visualsJson from "../data/packs/medieval/visuals.json";
 
 const WORLD_SEED = 20261112;
 const PHYSICS_HZ = 60;
 const SIM_HZ = 10;
 const TIME_SCALES = [1, 10, 60, 0];
-const NIGHT_LIGHTS = 6;
+const visuals = visualsJson as unknown as VisualsDef;
 
 // ---------------------------------------------------------------- data & simulation
 const pack = loadDefaultPack();
@@ -29,30 +34,40 @@ const player = createPlayer(layout.spawn.pos[0], layout.spawn.pos[1], layout.spa
 const prevPlayer: PlayerState = { ...player };
 
 // ---------------------------------------------------------------- rendering
+let qualityLevel: QualityLevel = initialQuality();
+let quality = QUALITY[qualityLevel];
 const canvas = document.getElementById("game") as HTMLCanvasElement;
-const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: "high-performance" });
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: false, powerPreference: "high-performance", stencil: false });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, quality.maxPixelRatio));
 renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.05;
 renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.shadowMap.type = THREE.PCFShadowMap;
+renderer.info.autoReset = false; // count every pass of the post-processing chain
 
 const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+const camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 1200);
 const dayNight = new DayNightCycle(scene);
-const village = buildVillage(layout, WORLD_SEED);
-scene.add(village.group);
+dayNight.setShadowQuality(quality.shadowMapSize, quality.shadowRadius);
+const postfx = new PostFx(renderer, scene, camera, quality);
 
 const nightLights: THREE.PointLight[] = [];
-for (let i = 0; i < NIGHT_LIGHTS; i++) {
-  const l = new THREE.PointLight("#ffab55", 0, 16, 1.6);
-  scene.add(l);
-  nightLights.push(l);
+function rebuildNightLights(count: number): void {
+  for (const l of nightLights.splice(0)) scene.remove(l);
+  for (let i = 0; i < count; i++) {
+    const l = new THREE.PointLight("#ffab55", 0, 14, 1.7);
+    scene.add(l);
+    nightLights.push(l);
+  }
 }
+rebuildNightLights(quality.maxNightLights);
 
-const kael = new CharacterModel(KAEL_LOOK);
-scene.add(kael.root);
+// Placeholder hero, replaced by the glTF character once loaded.
+const placeholderKael = new CharacterModel(KAEL_LOOK);
+const playerRoot = new THREE.Group();
+playerRoot.add(placeholderKael.root);
+scene.add(playerRoot);
+let animatedKael: AnimatedCharacter | null = null;
+
 const rig = new CameraRig();
 rig.yaw = layout.spawn.facing + Math.PI; // start behind the player
 
@@ -63,6 +78,55 @@ window.addEventListener("resize", () => {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
+  postfx.setSize(window.innerWidth, window.innerHeight);
+});
+
+function setQuality(level: QualityLevel): void {
+  qualityLevel = level;
+  quality = QUALITY[level];
+  saveQuality(level);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, quality.maxPixelRatio));
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  dayNight.setShadowQuality(quality.shadowMapSize, quality.shadowRadius);
+  postfx.apply(quality);
+  rebuildNightLights(quality.maxNightLights);
+  hud.toast(quality.label);
+}
+
+// ---------------------------------------------------------------- assets
+const loadingEl = document.getElementById("loading") as HTMLElement;
+const ctaEl = document.getElementById("cta") as HTMLElement;
+const manager = new THREE.LoadingManager();
+manager.onProgress = (_url, loaded, total) => {
+  loadingEl.textContent = `Chargement de Brumeval… ${Math.round((loaded / Math.max(total, 1)) * 100)} %`;
+};
+const lib = new AssetLibrary(manager);
+let world: Awaited<ReturnType<typeof buildWorldView>> | null = null;
+let ready = false;
+
+const loading = (async () => {
+  const [view, kaelModel] = await Promise.all([
+    buildWorldView(layout, visuals, lib, WORLD_SEED),
+    loadModel(lib, visuals, visuals.characters.kael!.model),
+  ]);
+  world = view;
+  scene.add(view.group);
+  if (kaelModel) {
+    const kael = new AnimatedCharacter(kaelModel, visuals.characters.kael!, true);
+    if (kael.hasClips) {
+      playerRoot.remove(placeholderKael.root);
+      playerRoot.add(kael.root);
+      animatedKael = kael;
+    }
+  }
+  if (view.placeholders.length) console.warn("Missing models, using placeholders:", view.placeholders);
+  renderer.compile(scene, camera);
+  ready = true;
+  loadingEl.textContent = "";
+  ctaEl.classList.remove("hidden");
+})().catch((e) => {
+  console.error(e);
+  loadingEl.textContent = "Erreur de chargement — voir la console.";
 });
 
 // ---------------------------------------------------------------- title / pause
@@ -72,6 +136,7 @@ let started = false;
 let paused = true;
 
 function start(): void {
+  if (!ready) return;
   started = true;
   paused = false;
   title.classList.add("hidden");
@@ -111,9 +176,10 @@ function readMoveInput() {
 }
 
 function updateNightLights(): void {
-  const intensity = dayNight.night * 9;
-  const sorted = village.nightLightSpots
-    .map((p) => ({ p, d: (p.x - player.x) ** 2 + (p.z - player.z) ** 2 }))
+  const intensity = dayNight.night * 10;
+  const spots = world?.lightSpots ?? [];
+  const sorted = spots
+    .map((s) => ({ p: s.pos, d: (s.pos.x - player.x) ** 2 + (s.pos.z - player.z) ** 2 }))
     .sort((a, b) => a.d - b.d);
   nightLights.forEach((l, i) => {
     const s = sorted[i];
@@ -127,10 +193,12 @@ function updateNightLights(): void {
 }
 
 function frame(now: number): void {
+  renderer.info.reset();
   const dt = Math.min((now - last) / 1000, 0.25);
   last = now;
 
   if (input.wasPressed("F3")) hud.toggleDebug();
+  if (input.wasPressed("KeyG")) setQuality(qualityLevel === "high" ? "low" : "high");
   if (input.wasPressed("KeyT")) {
     timeScaleIndex = (timeScaleIndex + 1) % TIME_SCALES.length;
     clock.timeScale = TIME_SCALES[timeScaleIndex] ?? 1;
@@ -154,10 +222,11 @@ function frame(now: number): void {
   // Interpolated render state.
   const rx = prevPlayer.x + (player.x - prevPlayer.x) * alpha;
   const rz = prevPlayer.z + (player.z - prevPlayer.z) * alpha;
-  kael.root.position.set(rx, 0, rz);
-  kael.root.rotation.y = player.facing;
-  const dodgeProgress = 1 - player.dodgeTime / PLAYER_TUNING.dodgeDuration;
-  kael.animate(paused ? 0 : dt, playerSpeed(player), player.state, dodgeProgress);
+  playerRoot.position.set(rx, 0, rz);
+  playerRoot.rotation.y = player.facing;
+  const frameDt = paused ? 0 : dt;
+  if (animatedKael) animatedKael.update(frameDt, playerSpeed(player), player.state);
+  else placeholderKael.animate(frameDt, playerSpeed(player), player.state, 1 - player.dodgeTime / PLAYER_TUNING.dodgeDuration);
 
   rig.update({ x: rx, y: 0, z: rz }, dt, collision.boxes);
   camera.position.set(rig.position.x, rig.position.y, rig.position.z);
@@ -165,7 +234,13 @@ function frame(now: number): void {
 
   focus.set(rx, 0, rz);
   dayNight.update(clock, focus);
-  village.glowMaterial.emissiveIntensity = 0.15 + dayNight.night * 2.4;
+  if (world) {
+    for (const m of world.nightGlow) m.emissiveIntensity = 0.2 + dayNight.night * 6;
+    for (const [i, c] of world.clouds.entries()) {
+      c.position.x += dt * (0.6 + (i % 3) * 0.25) * (paused ? 0 : 1);
+      if (c.position.x > 300) c.position.x -= 600;
+    }
+  }
   updateNightLights();
 
   const district = districtAt(layout, player.x, player.z);
@@ -173,7 +248,8 @@ function frame(now: number): void {
   if (started && districtName && districtName !== lastDistrict) hud.showDistrict(districtName);
   lastDistrict = districtName;
 
-  renderer.render(scene, camera);
+  postfx.focus.set(rx, 1.4, rz);
+  postfx.render(dt);
   hud.update(clock, dt);
 
   fpsAcc += dt;
@@ -228,4 +304,15 @@ window.__chronos = {
     Object.assign(prevPlayer, player);
   },
   renderInfo: () => ({ calls: renderer.info.render.calls, triangles: renderer.info.render.triangles, fps }),
+  get ready() {
+    return ready;
+  },
+  get animated() {
+    return animatedKael !== null;
+  },
+  get placeholders() {
+    return world?.placeholders ?? [];
+  },
+  setQuality,
+  loading,
 };

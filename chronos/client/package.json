@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@chronos/shared": "0.1.0",
+    "postprocessing": "6.39.5",
     "three": "0.186.1"
   },
   "devDependencies": {

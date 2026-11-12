@@ -18,7 +18,7 @@
     22,
     22
    ],
-   "groundColor": "#b8a581"
+   "groundColor": "cobble"
   },
   {
    "id": "temple_hill",
@@ -29,7 +29,7 @@
     22,
     -22
    ],
-   "groundColor": "#7f9c5c"
+   "groundColor": "templeLawn"
   },
   {
    "id": "artisans",
@@ -40,7 +40,7 @@
     70,
     22
    ],
-   "groundColor": "#8d9b5d"
+   "groundColor": "grassLight"
   },
   {
    "id": "garrison",
@@ -51,7 +51,7 @@
     -22,
     22
    ],
-   "groundColor": "#8f9168"
+   "groundColor": "meadow"
   },
   {
    "id": "lowtown",
@@ -62,7 +62,7 @@
     70,
     70
    ],
-   "groundColor": "#7b6c4c"
+   "groundColor": "mud"
   }
  ],
  "buildings": [
@@ -76,37 +76,27 @@
     0
    ],
    "size": [
-    3,
-    3
-   ]
+    4.56,
+    5.25
+   ],
+   "rot": 0,
+   "height": 5.78
   },
   {
-   "id": "stall_nw",
+   "id": "market_hall",
    "kind": "stall",
-   "name": "Étal aux épices",
+   "name": "Halle aux marchands",
    "district": "market",
    "pos": [
-    -9,
-    -7
+    -11,
+    -10
    ],
    "size": [
-    4,
-    2.5
-   ]
-  },
-  {
-   "id": "stall_ne",
-   "kind": "stall",
-   "name": "Étal du drapier",
-   "district": "market",
-   "pos": [
-    9,
-    -7
+    14.39,
+    10.53
    ],
-   "size": [
-    4,
-    2.5
-   ]
+   "rot": 0,
+   "height": 7.81
   },
   {
    "id": "stall_sw",
@@ -115,13 +105,14 @@
    "district": "market",
    "pos": [
     -9,
-    7
+    8
    ],
    "size": [
-    4,
-    2.5
+    3.1,
+    3.1
    ],
-   "rot": 2
+   "rot": 2,
+   "height": 3.1
   },
   {
    "id": "stall_se",
@@ -130,13 +121,14 @@
    "district": "market",
    "pos": [
     9,
-    7
+    8
    ],
    "size": [
-    4,
-    2.5
+    3.1,
+    3.1
    ],
-   "rot": 2
+   "rot": 2,
+   "height": 3.1
   },
   {
    "id": "tavern",
@@ -144,15 +136,15 @@
    "name": "Taverne de la Chope Fêlée",
    "district": "market",
    "pos": [
-    16,
-    -16
+    13,
+    -13
    ],
    "size": [
-    12,
-    9
+    10.55,
+    11.99
    ],
    "rot": 0,
-   "height": 7
+   "height": 12.57
   },
   {
    "id": "temple",
@@ -164,10 +156,11 @@
     -46
    ],
    "size": [
-    14,
-    20
+    10.28,
+    11.55
    ],
-   "height": 11
+   "rot": 0,
+   "height": 16.45
   },
   {
    "id": "house_priest",
@@ -179,10 +172,11 @@
     -48
    ],
    "size": [
-    8,
-    7
+    7.88,
+    9.89
    ],
-   "rot": 3
+   "rot": 3,
+   "height": 11.52
   },
   {
    "id": "house_n2",
@@ -194,10 +188,11 @@
     -32
    ],
    "size": [
-    8,
-    7
+    7.13,
+    7.69
    ],
-   "rot": 3
+   "rot": 3,
+   "height": 8.37
   },
   {
    "id": "forge",
@@ -206,13 +201,14 @@
    "district": "artisans",
    "pos": [
     34,
-    9
+    10
    ],
    "size": [
-    9,
-    8
+    10.3,
+    9.96
    ],
-   "rot": 2
+   "rot": 2,
+   "height": 7.84
   },
   {
    "id": "house_e1",
@@ -224,9 +220,11 @@
     -12
    ],
    "size": [
-    8,
-    7
-   ]
+    7.88,
+    9.89
+   ],
+   "rot": 0,
+   "height": 11.52
   },
   {
    "id": "house_e2",
@@ -235,12 +233,14 @@
    "district": "artisans",
    "pos": [
     46,
-    -9
+    -10
    ],
    "size": [
-    7,
-    7
-   ]
+    7.13,
+    7.69
+   ],
+   "rot": 0,
+   "height": 8.37
   },
   {
    "id": "house_e3",
@@ -249,13 +249,14 @@
    "district": "artisans",
    "pos": [
     46,
-    12
+    13
    ],
    "size": [
-    8,
-    6
+    7.88,
+    9.89
    ],
-   "rot": 2
+   "rot": 2,
+   "height": 11.52
   },
   {
    "id": "house_e4",
@@ -264,13 +265,30 @@
    "district": "artisans",
    "pos": [
     34,
-    20
+    21
    ],
    "size": [
-    7,
-    7
+    7.13,
+    7.69
    ],
-   "rot": 2
+   "rot": 2,
+   "height": 8.37
+  },
+  {
+   "id": "windmill",
+   "kind": "mill",
+   "name": "Moulin des Brumes",
+   "district": "artisans",
+   "pos": [
+    40,
+    -42
+   ],
+   "size": [
+    11.26,
+    8.17
+   ],
+   "rot": 0,
+   "height": 14.58
   },
   {
    "id": "barracks",
@@ -279,13 +297,14 @@
    "district": "garrison",
    "pos": [
     -38,
-    -10
+    -12
    ],
    "size": [
-    16,
-    10
+    12.96,
+    14.09
    ],
-   "height": 7
+   "rot": 0,
+   "height": 14.76
   },
   {
    "id": "watchtower",
@@ -293,14 +312,31 @@
    "name": "Tour de guet",
    "district": "garrison",
    "pos": [
-    -44,
-    -26
+    -46,
+    -28
    ],
    "size": [
-    5,
-    5
+    8.39,
+    9.67
    ],
-   "height": 14
+   "rot": 0,
+   "height": 17.39
+  },
+  {
+   "id": "archery",
+   "kind": "yard",
+   "name": "Champ de tir de la garde",
+   "district": "garrison",
+   "pos": [
+    -50,
+    14
+   ],
+   "size": [
+    11.7,
+    10.85
+   ],
+   "rot": 2,
+   "height": 12.54
   },
   {
    "id": "house_w1",
@@ -312,25 +348,11 @@
     14
    ],
    "size": [
-    8,
-    7
+    7.13,
+    7.69
    ],
-   "rot": 2
-  },
-  {
-   "id": "house_w2",
-   "kind": "house",
-   "name": "Maison de l'armurier",
-   "district": "garrison",
-   "pos": [
-    -50,
-    12
-   ],
-   "size": [
-    7,
-    6
-   ],
-   "rot": 2
+   "rot": 2,
+   "height": 8.37
   },
   {
    "id": "shack_1",
@@ -342,9 +364,11 @@
     32
    ],
    "size": [
-    5,
-    4
-   ]
+    4.75,
+    5.12
+   ],
+   "rot": 0,
+   "height": 5.58
   },
   {
    "id": "shack_2",
@@ -356,10 +380,11 @@
     42
    ],
    "size": [
-    5,
-    5
+    4.75,
+    5.12
    ],
-   "rot": 1
+   "rot": 1,
+   "height": 5.58
   },
   {
    "id": "shack_3",
@@ -371,10 +396,11 @@
     34
    ],
    "size": [
-    4,
-    4
+    5.25,
+    6.59
    ],
-   "rot": 3
+   "rot": 3,
+   "height": 7.68
   },
   {
    "id": "shack_4",
@@ -386,9 +412,11 @@
     44
    ],
    "size": [
-    5,
-    4
-   ]
+    4.75,
+    5.12
+   ],
+   "rot": 0,
+   "height": 5.58
   },
   {
    "id": "shack_5",
@@ -400,10 +428,11 @@
     44
    ],
    "size": [
-    4,
-    5
+    5.25,
+    6.59
    ],
-   "rot": 1
+   "rot": 1,
+   "height": 7.68
   },
   {
    "id": "shack_6",
@@ -415,39 +444,43 @@
     52
    ],
    "size": [
-    5,
-    4
+    4.75,
+    5.12
    ],
-   "rot": 2
+   "rot": 2,
+   "height": 5.58
   },
   {
-   "id": "shack_7",
-   "kind": "shack",
-   "name": "Masure",
+   "id": "ruin_1",
+   "kind": "ruin",
+   "name": "Maison effondrée",
    "district": "lowtown",
    "pos": [
     24,
     30
    ],
    "size": [
-    5,
-    5
-   ]
+    9.23,
+    7.83
+   ],
+   "rot": 0,
+   "height": 5.88
   },
   {
-   "id": "shack_8",
-   "kind": "shack",
-   "name": "Masure",
+   "id": "ruin_2",
+   "kind": "ruin",
+   "name": "Chantier abandonné",
    "district": "lowtown",
    "pos": [
     -28,
     30
    ],
    "size": [
-    5,
-    4
+    6.96,
+    6.76
    ],
-   "rot": 3
+   "rot": 3,
+   "height": 5.88
   },
   {
    "id": "shack_9",
@@ -459,10 +492,11 @@
     54
    ],
    "size": [
-    5,
-    4
+    5.25,
+    6.59
    ],
-   "rot": 2
+   "rot": 2,
+   "height": 7.68
   }
  ],
  "props": [
@@ -559,14 +593,6 @@
    "pos": [
     3.5,
     60
-   ],
-   "solid": true
-  },
-  {
-   "kind": "lantern",
-   "pos": [
-    -12,
-    -12
    ],
    "solid": true
   },
@@ -685,7 +711,7 @@
   {
    "kind": "crate",
    "pos": [
-    39.6,
+    40.7,
     9
    ],
    "rot": 0.3,
@@ -694,7 +720,7 @@
   {
    "kind": "barrel",
    "pos": [
-    39.5,
+    40.6,
     11
    ],
    "solid": true
@@ -718,7 +744,7 @@
    "solid": true
   },
   {
-   "kind": "cart",
+   "kind": "wheelbarrow",
    "pos": [
     12,
     -1.5
@@ -754,8 +780,16 @@
   {
    "kind": "rock",
    "pos": [
-    44,
-    -44
+    52,
+    -30
+   ],
+   "solid": true
+  },
+  {
+   "kind": "lantern",
+   "pos": [
+    -20,
+    -17
    ],
    "solid": true
   },
@@ -763,7 +797,7 @@
    "kind": "fence",
    "pos": [
     -36,
-    -18.5
+    -22
    ],
    "rot": 0
   },
@@ -771,9 +805,94 @@
    "kind": "fence",
    "pos": [
     -40,
-    -18.5
+    -22
    ],
    "rot": 0
+  },
+  {
+   "kind": "sack",
+   "pos": [
+    -6.5,
+    8.5
+   ],
+   "solid": false
+  },
+  {
+   "kind": "crate",
+   "pos": [
+    11.6,
+    9.5
+   ],
+   "rot": 0.5,
+   "solid": true
+  },
+  {
+   "kind": "barrel",
+   "pos": [
+    -11.2,
+    9.6
+   ],
+   "solid": true
+  },
+  {
+   "kind": "lumber",
+   "pos": [
+    41,
+    19.5
+   ],
+   "rot": 0.2,
+   "solid": true
+  },
+  {
+   "kind": "weaponrack",
+   "pos": [
+    -30,
+    -19.5
+   ],
+   "rot": 0,
+   "solid": true
+  },
+  {
+   "kind": "target",
+   "pos": [
+    -56,
+    26
+   ],
+   "rot": 0.4,
+   "solid": true
+  },
+  {
+   "kind": "bucket",
+   "pos": [
+    2.6,
+    -1.8
+   ],
+   "solid": false
+  },
+  {
+   "kind": "flag",
+   "pos": [
+    -30.5,
+    -4.5
+   ],
+   "variant": "blue"
+  },
+  {
+   "kind": "flag",
+   "pos": [
+    7,
+    -6.2
+   ],
+   "variant": "red"
+  },
+  {
+   "kind": "stone",
+   "pos": [
+    30,
+    36.5
+   ],
+   "rot": 0.7,
+   "solid": true
   }
  ],
  "roads": [
@@ -824,7 +943,7 @@
   {
    "from": [
     -14,
-    -36
+    -40
    ],
    "to": [
     -14,

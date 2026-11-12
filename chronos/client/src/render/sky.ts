@@ -1,28 +1,12 @@
 import * as THREE from "three";
 import { clamp, lerp } from "../core/math";
 import type { WorldClock } from "../sim/clock";
+import { PALETTE, type SkyStop } from "./palette";
 
-interface PaletteStop {
-  e: number; // sun elevation
-  top: string;
-  horizon: string;
-  sun: string;
-  sunIntensity: number;
-  hemiSky: string;
-  hemiGround: string;
-  hemiIntensity: number;
-}
+type PaletteStop = SkyStop;
 
-/** Sky/light palette keyed by sun elevation (-1 midnight .. 1 noon). */
-const STOPS: PaletteStop[] = [
-  { e: -1, top: "#04060f", horizon: "#0b1124", sun: "#8fa8ff", sunIntensity: 0.4, hemiSky: "#2c3c6c", hemiGround: "#101119", hemiIntensity: 0.8 },
-  { e: -0.22, top: "#0a1130", horizon: "#272442", sun: "#8fa8ff", sunIntensity: 0.32, hemiSky: "#33407a", hemiGround: "#14121c", hemiIntensity: 0.8 },
-  { e: -0.1, top: "#1a2352", horizon: "#8a4f63", sun: "#c08aa0", sunIntensity: 0.12, hemiSky: "#4a4a80", hemiGround: "#1f1820", hemiIntensity: 0.7 },
-  { e: -0.02, top: "#27396b", horizon: "#e07a4f", sun: "#ff8a4a", sunIntensity: 0.05, hemiSky: "#5b5f8f", hemiGround: "#2a2018", hemiIntensity: 0.6 },
-  { e: 0.12, top: "#4a78b8", horizon: "#f6bf86", sun: "#ffc08a", sunIntensity: 1.6, hemiSky: "#a9b9d8", hemiGround: "#5c4a33", hemiIntensity: 0.85 },
-  { e: 0.4, top: "#3f7cc9", horizon: "#bcd8ef", sun: "#fff1dc", sunIntensity: 2.6, hemiSky: "#c4dcf2", hemiGround: "#6b5a3c", hemiIntensity: 1.0 },
-  { e: 1, top: "#3576c7", horizon: "#b4d4ee", sun: "#fff6e8", sunIntensity: 3.0, hemiSky: "#cfe4f6", hemiGround: "#6f5d40", hemiIntensity: 1.05 },
-];
+/** Sky/light palette keyed by sun elevation (-1 midnight .. 1 noon), from data/palette.json. */
+const STOPS: PaletteStop[] = [...PALETTE.sky].sort((a, b) => a.e - b.e);
 
 const ca = new THREE.Color();
 const cb = new THREE.Color();
@@ -59,7 +43,7 @@ export function samplePalette(e: number, out: SkySample): SkySample {
   return out;
 }
 
-const SKY_VERT = /* glsl */ `
+export const SKY_VERT = /* glsl */ `
 varying vec3 vDir;
 void main() {
   vDir = normalize(position);
@@ -150,32 +134,47 @@ export class DayNightCycle {
     sg.setAttribute("position", new THREE.Float32BufferAttribute(starPos, 3));
     this.stars = new THREE.Points(
       sg,
-      new THREE.PointsMaterial({ color: "#dfe7ff", size: 1.6, sizeAttenuation: false, transparent: true, opacity: 0, fog: false, depthWrite: false }),
+      new THREE.PointsMaterial({ color: PALETTE.light.stars, size: 1.6, sizeAttenuation: false, transparent: true, opacity: 0, fog: false, depthWrite: false }),
     );
     this.stars.frustumCulled = false;
     scene.add(this.stars);
 
     this.light.castShadow = true;
     this.light.shadow.mapSize.set(2048, 2048);
+    this.light.shadow.radius = 3;
     const s = this.light.shadow.camera;
-    s.left = -45;
-    s.right = 45;
-    s.top = 45;
-    s.bottom = -45;
+    s.left = -55;
+    s.right = 55;
+    s.top = 55;
+    s.bottom = -55;
     s.near = 1;
     s.far = 260;
     this.light.shadow.bias = -0.0006;
     this.light.shadow.normalBias = 0.04;
     scene.add(this.light, this.light.target, this.hemi);
 
-    this.fog = new THREE.Fog("#a0b8d0", 70, 330);
+    this.fog = new THREE.Fog("#d8d2ee", PALETTE.atmosphere.fogNear, PALETTE.atmosphere.fogFar);
     scene.fog = this.fog;
+  }
+
+  /** Applies a shadow-map resolution and blur radius (quality presets). */
+  setShadowQuality(mapSize: number, radius: number): void {
+    const sh = this.light.shadow;
+    if (sh.mapSize.x !== mapSize) {
+      sh.mapSize.set(mapSize, mapSize);
+      sh.map?.dispose();
+      sh.map = null;
+    }
+    sh.radius = radius;
   }
 
   update(clock: WorldClock, focus: THREE.Vector3): void {
     const e = clock.sunElevation;
     const a = clock.sunAzimuth;
-    this.sunDir.set(Math.cos(a), Math.sin(a), 0.35).normalize();
+    // The light keeps a low, golden angle all day (long shadows); the clock's own
+    // elevation still drives the sky palette and day phases.
+    const A = PALETTE.atmosphere;
+    this.sunDir.set(Math.cos(a), Math.sin(a) * A.sunElevationScale + 0.03, A.sunTilt).normalize();
     const p = samplePalette(e, this.sample);
 
     this.night = 1 - clock.daylight;
@@ -199,7 +198,7 @@ export class DayNightCycle {
     this.uniforms.uMoonVisible.value = clamp((-e + 0.05) * 6, 0, 1);
     (this.stars.material as THREE.PointsMaterial).opacity = clamp((this.night - 0.4) * 1.8, 0, 1);
 
-    this.fog.color.copy(p.horizon).lerp(p.top, 0.25);
+    this.fog.color.copy(p.horizon).lerp(p.top, 0.18);
     this.sky.position.copy(focus);
     this.stars.position.copy(focus);
   }

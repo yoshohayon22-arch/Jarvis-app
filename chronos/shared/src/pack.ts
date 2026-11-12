@@ -16,7 +16,10 @@ export type BuildingKind =
   | "shack"
   | "stall"
   | "well"
-  | "tower";
+  | "tower"
+  | "mill"
+  | "yard"
+  | "ruin";
 
 export interface BuildingDef {
   id: LocationId;
@@ -33,7 +36,23 @@ export interface BuildingDef {
 }
 
 export interface PropDef {
-  kind: "tree" | "lantern" | "barrel" | "crate" | "cart" | "rock" | "fence";
+  kind:
+    | "tree"
+    | "lantern"
+    | "barrel"
+    | "crate"
+    | "wheelbarrow"
+    | "rock"
+    | "fence"
+    | "sack"
+    | "lumber"
+    | "stone"
+    | "weaponrack"
+    | "target"
+    | "bucket"
+    | "flag";
+  /** Optional visual variant (e.g. flag color); the simulation ignores it. */
+  variant?: string;
   pos: [number, number];
   rot?: number;
   /** Props with `solid: true` block movement. */

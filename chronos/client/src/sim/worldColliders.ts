@@ -11,15 +11,22 @@ const DEFAULT_HEIGHT: Record<BuildingDef["kind"], number> = {
   stall: 2.6,
   well: 1.2,
   tower: 14,
+  mill: 12,
+  yard: 6,
+  ruin: 4,
 };
 
 const PROP_RADIUS: Partial<Record<PropDef["kind"], number>> = {
   tree: 0.55,
   lantern: 0.2,
-  barrel: 0.45,
-  crate: 0.55,
-  cart: 1.1,
+  barrel: 0.5,
+  crate: 0.6,
+  wheelbarrow: 1.1,
   rock: 0.9,
+  lumber: 1.4,
+  stone: 1.0,
+  weaponrack: 0.5,
+  target: 0.6,
 };
 
 const PROP_HEIGHT: Partial<Record<PropDef["kind"], number>> = {
@@ -27,8 +34,12 @@ const PROP_HEIGHT: Partial<Record<PropDef["kind"], number>> = {
   lantern: 3,
   barrel: 1,
   crate: 1,
-  cart: 1.4,
+  wheelbarrow: 1,
   rock: 1.2,
+  lumber: 1,
+  stone: 1.4,
+  weaponrack: 1.2,
+  target: 1.5,
 };
 
 /** Footprint of a building after its quarter-turn rotation. */
@@ -60,9 +71,10 @@ export function propCollider(p: PropDef): CircleCollider | null {
 
 /** Gates sit where roads cross the palisade (E, S, W, N). */
 export const GATE_ANGLES = [0, Math.PI / 2, Math.PI, -Math.PI / 2];
-export const GATE_HALF_WIDTH = 3.6;
-export const WALL_THICKNESS = 0.8;
-export const WALL_HEIGHT = 4.2;
+/** Half-width of the passable gate opening (matches the gate model at its visual scale). */
+export const GATE_HALF_WIDTH = 1.05;
+export const WALL_THICKNESS = 3.0;
+export const WALL_HEIGHT = 4.5;
 
 export function buildCollisionWorld(layout: WorldLayout): CollisionWorld {
   const circles = layout.props.map(propCollider).filter((c): c is CircleCollider => c !== null);

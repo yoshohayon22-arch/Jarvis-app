@@ -1,0 +1,57 @@
+{
+  "$comment": "Graphics presets. Toggle in game with G; the choice is remembered per browser.",
+  "low": {
+    "label": "Qualité basse",
+    "maxPixelRatio": 1,
+    "shadowMapSize": 1024,
+    "shadowRadius": 2,
+    "multisampling": 0,
+    "fxaa": true,
+    "ao": null,
+    "bloom": {
+      "intensity": 0.55,
+      "threshold": 0.82,
+      "smoothing": 0.25,
+      "radius": 0.6
+    },
+    "vignette": {
+      "offset": 0.3,
+      "darkness": 0.55
+    },
+    "maxNightLights": 4,
+    "dof": null
+  },
+  "high": {
+    "label": "Qualité haute",
+    "maxPixelRatio": 2,
+    "shadowMapSize": 4096,
+    "shadowRadius": 4,
+    "multisampling": 4,
+    "fxaa": false,
+    "ao": {
+      "intensity": 2.2,
+      "radius": 0.06,
+      "samples": 12,
+      "rings": 5,
+      "distanceThreshold": 0.97,
+      "distanceFalloff": 0.03,
+      "resolutionScale": 0.5
+    },
+    "bloom": {
+      "intensity": 0.75,
+      "threshold": 0.78,
+      "smoothing": 0.3,
+      "radius": 0.7
+    },
+    "vignette": {
+      "offset": 0.28,
+      "darkness": 0.6
+    },
+    "maxNightLights": 8,
+    "dof": {
+      "focusRange": 10,
+      "bokehScale": 1.4,
+      "resolutionScale": 0.5
+    }
+  }
+}

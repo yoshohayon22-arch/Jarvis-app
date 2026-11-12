@@ -8,13 +8,14 @@ import { createRequire } from "node:module";
 const require = createRequire(import.meta.url);
 const { chromium } = require("playwright");
 
-const PORT = 4173;
-const BASE_URL = `http://localhost:${PORT}/`;
+const PORT = Number(process.env.PORT ?? 4173);
+const QUALITY = process.env.QUALITY ?? "high";
+const BASE_URL = `http://localhost:${PORT}/?quality=${QUALITY}`;
 const OUT = new URL("./output/", import.meta.url).pathname;
 mkdirSync(OUT, { recursive: true });
 
-const server = spawn("npm", ["run", "preview", "-w", "client"], { stdio: ["ignore", "pipe", "pipe"] });
-const stop = () => server.kill("SIGTERM");
+const server = process.env.NO_SERVER ? null : spawn("npm", ["run", "preview", "-w", "client"], { stdio: ["ignore", "pipe", "pipe"] });
+const stop = () => server?.kill("SIGTERM");
 process.on("exit", stop);
 
 async function waitForServer() {
@@ -38,14 +39,19 @@ try {
   await waitForServer();
   const browser = await chromium.launch({ args: ["--use-angle=swiftshader", "--enable-unsafe-swiftshader", "--ignore-gpu-blocklist"] });
   const page = await browser.newPage({ viewport: { width: 1280, height: 720 } });
+  page.setDefaultTimeout(180000);
   const errors = [];
   page.on("console", (m) => m.type() === "error" && errors.push(m.text()));
   page.on("pageerror", (e) => errors.push(String(e)));
 
   await page.goto(BASE_URL);
   await page.waitForFunction(() => !!window.__chronos, null, { timeout: 30000 });
+  await page.waitForFunction(() => window.__chronos.ready, null, { timeout: 120000 });
   await page.waitForTimeout(1500);
   await page.screenshot({ path: OUT + "01-title.png" });
+  const placeholders = await page.evaluate(() => window.__chronos.placeholders);
+  check(placeholders.length === 0, `all glTF models loaded${placeholders.length ? " (missing: " + placeholders.join(", ") + ")" : ""}`);
+  check(await page.evaluate(() => window.__chronos.animated), "Kael is the animated glTF character");
 
   await page.evaluate(() => window.__chronos.start());
   const p0 = await page.evaluate(() => window.__chronos.player);
@@ -65,11 +71,12 @@ try {
 
   // Scenic shots at several times of day.
   const shots = [
-    ["02-morning-market", 9, [0, 14], [0.6, 0.35, 7]],
-    ["03-noon-temple", 12.5, [-6, -24], [2.6, 0.25, 8]],
-    ["04-dusk-tavern", 17.9, [14, -3], [2.9, 0.18, 7]],
-    ["05-night-lowtown", 23, [0, 30], [0.2, 0.3, 7]],
-    ["06-overview", 16, [0, 10], [0.4, 1.0, 10]],
+    ["02-morning-market", 9, [2, 14], [0.35, 0.3, 8]],
+    ["03-noon-temple", 12.5, [-14, -30], [0, 0.22, 9]],
+    ["04-dusk-tavern", 17.9, [4, -2], [-0.69, 0.2, 8]],
+    ["05-night-lowtown", 23, [0, 56], [0, 0.25, 7]],
+    ["06-north-gate", 10, [0, -58], [0, 0.18, 6]],
+    ["07-overview", 15, [0, 20], [0.5, 0.7, 10]],
   ];
   for (const [name, hour, [x, z], [yaw, pitch, dist]] of shots) {
     await page.evaluate(
@@ -81,14 +88,14 @@ try {
       },
       [hour, x, z, yaw, pitch, dist],
     );
-    await page.waitForTimeout(900);
-    await page.screenshot({ path: `${OUT}${name}.png` });
+    await page.waitForTimeout(1200);
+    await page.screenshot({ path: `${OUT}${QUALITY}-${name}.png` });
   }
 
   const clock = await page.evaluate(() => window.__chronos.clock);
-  check(clock.phase === "day", `clock phase after 16:00 is "${clock.phase}"`);
+  check(clock.phase === "day", `clock phase at 15:00 is "${clock.phase}"`);
   const info = await page.evaluate(() => window.__chronos.renderInfo());
-  check(info.calls > 0 && info.calls < 150, `draw calls per frame: ${info.calls}`);
+  check(info.calls > 0 && info.calls < 400, `draw calls per frame: ${info.calls}`);
   console.log(`  triangles: ${info.triangles}, headless fps: ${info.fps.toFixed(1)}`);
   check(errors.length === 0, `no console errors${errors.length ? ": " + errors.join(" | ") : ""}`);
 

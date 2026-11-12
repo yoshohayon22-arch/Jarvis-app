@@ -1,7 +1,8 @@
 import * as THREE from "three";
-import type { BuildingDef, PropDef, WorldLayout } from "@chronos/shared";
+import type { BuildingDef, PropDef } from "@chronos/shared";
 import { SeededRng } from "../core/rng";
 import { GATE_ANGLES, GATE_HALF_WIDTH, WALL_HEIGHT, buildingHeight } from "../sim/worldColliders";
+import { PALETTE } from "./palette";
 import { GeoBuilder, trs } from "./geoBuilder";
 
 /** Palette: warm, slightly desaturated storybook colors. */
@@ -19,7 +20,7 @@ const C = {
   roofSlate: "#4f5c74",
   thatch: "#b39352",
   door: "#4a2f1d",
-  iron: "#3a3a40",
+  iron: PALETTE.material.iron,
   leafA: "#4f7a3a",
   leafB: "#3f6a34",
   leafC: "#6b8f3e",
@@ -29,117 +30,18 @@ const C = {
   cloth: ["#b8423a", "#e4c35a", "#3f6fa3", "#6d9a4a", "#9b5aa0"],
 };
 
-export interface VillageMeshes {
-  group: THREE.Group;
-  /** Material for windows/flames: emissive intensity is driven by the day/night cycle. */
-  glowMaterial: THREE.MeshStandardMaterial;
-  /** Positions where real point lights are placed at night. */
-  nightLightSpots: THREE.Vector3[];
-}
-
-export function buildVillage(layout: WorldLayout, seed: number): VillageMeshes {
-  const rng = new SeededRng(seed ^ 0x9e3779b9);
-  const solid = new GeoBuilder();
-  const glow = new GeoBuilder();
-  const ground = new GeoBuilder();
-  const nightLightSpots: THREE.Vector3[] = [];
-
-  buildGround(ground, layout, rng);
-  for (const b of layout.buildings) buildBuilding(solid, glow, b, rng, nightLightSpots);
-  for (const p of layout.props) buildProp(solid, glow, p, rng);
-  buildPalisade(solid, glow, layout.wallRadius, rng);
-
-  const mainMaterial = new THREE.MeshStandardMaterial({ vertexColors: true, flatShading: true, roughness: 0.92, metalness: 0 });
-  const glowMaterial = new THREE.MeshStandardMaterial({
-    color: "#2b2a33",
-    emissive: "#ffb45e",
-    emissiveIntensity: 0,
-    flatShading: true,
-    roughness: 0.6,
-  });
-  const groundMaterial = new THREE.MeshStandardMaterial({ vertexColors: true, flatShading: true, roughness: 1 });
-
-  const group = new THREE.Group();
-  group.name = "village";
-
-  const groundMesh = new THREE.Mesh(ground.build(), groundMaterial);
-  groundMesh.receiveShadow = true;
-  groundMesh.name = "ground";
-  group.add(groundMesh);
-
-  const solidMesh = new THREE.Mesh(solid.build(), mainMaterial);
-  solidMesh.castShadow = true;
-  solidMesh.receiveShadow = true;
-  solidMesh.name = "architecture";
-  group.add(solidMesh);
-
-  const glowMesh = new THREE.Mesh(glow.build(), glowMaterial);
-  glowMesh.name = "glow";
-  group.add(glowMesh);
-
-  // Lantern spots get lights too (the closest ones are lit at night).
-  for (const p of layout.props) if (p.kind === "lantern") nightLightSpots.push(new THREE.Vector3(p.pos[0], 2.9, p.pos[1]));
-
-  return { group, glowMaterial, nightLightSpots };
-}
-
-// ---------------------------------------------------------------- ground
-
-function buildGround(g: GeoBuilder, layout: WorldLayout, rng: SeededRng): void {
-  // Grass: a grid of tiles with slight color jitter gives a low-poly patchwork.
-  const half = layout.size / 2 + 120;
-  const tile = 10;
-  const grass = new THREE.Color("#6f8f48");
-  const c = new THREE.Color();
-  for (let x = -half; x < half; x += tile) {
-    for (let z = -half; z < half; z += tile) {
-      c.copy(grass).offsetHSL(rng.range(-0.015, 0.015), rng.range(-0.05, 0.05), rng.range(-0.035, 0.03));
-      g.box(tile, 0.1, tile, x + tile / 2, -0.1, z + tile / 2, c.clone());
-    }
-  }
-  // Districts: the ground inside the palisade, clipped to the wall circle by tiles.
-  const dt = 2;
-  for (const d of layout.districts) {
-    const [x0, z0, x1, z1] = d.rect;
-    const base = new THREE.Color(d.groundColor);
-    for (let x = x0; x < x1; x += dt) {
-      for (let z = z0; z < z1; z += dt) {
-        const cx = x + dt / 2;
-        const cz = z + dt / 2;
-        if (Math.hypot(cx, cz) > layout.wallRadius - 0.6) continue;
-        c.copy(base).offsetHSL(0, rng.range(-0.02, 0.02), rng.range(-0.012, 0.012));
-        g.box(dt, 0.02, dt, cx, 0, cz, c.clone());
-      }
-    }
-  }
-  // Roads (oriented strips).
-  for (const r of layout.roads) {
-    const dx = r.to[0] - r.from[0];
-    const dz = r.to[1] - r.from[1];
-    const len = Math.hypot(dx, dz);
-    const ang = Math.atan2(dx, dz);
-    g.add(BOX_UNIT, C.road, trs((r.from[0] + r.to[0]) / 2, 0.035, (r.from[1] + r.to[1]) / 2, 0, ang, 0, r.width, 0.03, len));
-    // Cobble specks along the road for texture.
-    const n = Math.floor(len / 1.6);
-    for (let i = 0; i < n; i++) {
-      const t = (i + rng.next()) / n;
-      const side = rng.range(-r.width / 2 + 0.3, r.width / 2 - 0.3);
-      const px = r.from[0] + dx * t + Math.cos(ang) * side;
-      const pz = r.from[1] + dz * t - Math.sin(ang) * side;
-      g.box(rng.range(0.3, 0.6), 0.04, rng.range(0.3, 0.6), px, 0.04, pz, rng.next() < 0.5 ? "#958061" : "#ad9673", rng.range(0, 3));
-    }
-  }
-}
-
-const BOX_UNIT = new THREE.BoxGeometry(1, 1, 1);
+/**
+ * Procedural low-poly placeholders. Used only when a glTF model is missing or
+ * fails to load, and for the few objects the asset packs do not provide (lanterns).
+ */
 
 // ---------------------------------------------------------------- buildings
 
-function setBuildingBase(g: GeoBuilder, b: BuildingDef): void {
+export function setBuildingBase(g: GeoBuilder, b: BuildingDef): void {
   g.base.copy(trs(b.pos[0], 0, b.pos[1], 0, ((b.rot ?? 0) * Math.PI) / 2, 0, 1, 1, 1));
 }
 
-function buildBuilding(solid: GeoBuilder, glow: GeoBuilder, b: BuildingDef, rng: SeededRng, lights: THREE.Vector3[]): void {
+export function buildPlaceholderBuilding(solid: GeoBuilder, glow: GeoBuilder, b: BuildingDef, rng: SeededRng): void {
   setBuildingBase(solid, b);
   setBuildingBase(glow, b);
   // Local frame: width along x, depth along z, front facing +z.
@@ -147,29 +49,28 @@ function buildBuilding(solid: GeoBuilder, glow: GeoBuilder, b: BuildingDef, rng:
   const h = buildingHeight(b);
   switch (b.kind) {
     case "house":
+    case "mill":
+    case "yard":
       house(solid, glow, w, d, h, rng, rng.next() < 0.6 ? C.roofTile : C.thatch);
       break;
     case "tavern":
       house(solid, glow, w, d, h, rng, C.roofDark);
       tavernExtras(solid, glow, w, d);
-      lights.push(worldPoint(b, 0, 2.6, d / 2 + 1.2));
       break;
     case "forge":
       forge(solid, glow, w, d, h);
-      lights.push(worldPoint(b, 0, 1.6, d / 2 - 1));
       break;
     case "temple":
       temple(solid, glow, w, d, h);
-      lights.push(worldPoint(b, 0, 3, d / 2 + 2));
       break;
     case "barracks":
       barracks(solid, glow, w, d, h);
-      lights.push(worldPoint(b, 0, 2.5, d / 2 + 1.5));
       break;
     case "tower":
       tower(solid, glow, w, d, h);
       break;
     case "shack":
+    case "ruin":
       shack(solid, glow, w, d, h, rng);
       break;
     case "stall":
@@ -183,7 +84,7 @@ function buildBuilding(solid: GeoBuilder, glow: GeoBuilder, b: BuildingDef, rng:
   glow.base.identity();
 }
 
-function worldPoint(b: BuildingDef, x: number, y: number, z: number): THREE.Vector3 {
+export function worldPoint(b: BuildingDef, x: number, y: number, z: number): THREE.Vector3 {
   const a = ((b.rot ?? 0) * Math.PI) / 2;
   return new THREE.Vector3(b.pos[0] + x * Math.cos(a) + z * Math.sin(a), y, b.pos[1] - x * Math.sin(a) + z * Math.cos(a));
 }
@@ -362,7 +263,7 @@ function well(solid: GeoBuilder): void {
 
 // ---------------------------------------------------------------- props
 
-function buildProp(solid: GeoBuilder, glow: GeoBuilder, p: PropDef, rng: SeededRng): void {
+export function buildPlaceholderProp(solid: GeoBuilder, glow: GeoBuilder, p: PropDef, rng: SeededRng): void {
   const [x, z] = p.pos;
   const rot = p.rot ?? 0;
   switch (p.kind) {
@@ -400,7 +301,16 @@ function buildProp(solid: GeoBuilder, glow: GeoBuilder, p: PropDef, rng: SeededR
       solid.box(0.95, 0.9, 0.95, x, 0, z, C.woodLight, rot);
       solid.box(1, 0.1, 1, x, 0.42, z, C.timber, rot);
       break;
-    case "cart": {
+    case "sack":
+    case "bucket":
+    case "stone":
+    case "lumber":
+    case "weaponrack":
+    case "target":
+    case "flag":
+      solid.box(0.8, 0.8, 0.8, x, 0, z, C.woodLight, rot);
+      break;
+    case "wheelbarrow": {
       solid.box(2.2, 0.15, 1.3, x, 0.7, z, C.wood, rot);
       solid.box(2.2, 0.5, 0.08, x - Math.sin(rot) * 0.62, 0.85, z - Math.cos(rot) * 0.62, C.woodLight, rot);
       for (const side of [-1, 1]) {
@@ -422,7 +332,7 @@ const WHEEL = new THREE.CylinderGeometry(0.5, 0.5, 1, 8);
 
 // ---------------------------------------------------------------- palisade
 
-function buildPalisade(solid: GeoBuilder, glow: GeoBuilder, radius: number, rng: SeededRng): void {
+export function buildPlaceholderWall(solid: GeoBuilder, glow: GeoBuilder, radius: number, rng: SeededRng): void {
   const circumference = Math.PI * 2 * radius;
   const n = Math.floor(circumference / 0.56);
   for (let i = 0; i < n; i++) {

@@ -1,0 +1,157 @@
+{
+  "$comment": "Limited art-direction palette. Every hand-picked color in the renderer and UI comes from here.",
+  "ground": {
+    "grass": "#6f9446",
+    "grassDark": "#557a35",
+    "grassLight": "#8aa851",
+    "meadow": "#93a955",
+    "dirt": "#a07f55",
+    "dirtDark": "#7c6243",
+    "cobble": "#a4967b",
+    "cobbleDark": "#857963",
+    "mud": "#6f5d42",
+    "templeLawn": "#7c9f4d"
+  },
+  "sky": [
+    {
+      "e": -1,
+      "top": "#070a1f",
+      "horizon": "#1a1a3c",
+      "sun": "#a9b6ff",
+      "sunIntensity": 0.6,
+      "hemiSky": "#3f4590",
+      "hemiGround": "#1c1530",
+      "hemiIntensity": 0.95
+    },
+    {
+      "e": -0.22,
+      "top": "#0d1234",
+      "horizon": "#2f2752",
+      "sun": "#a9b6ff",
+      "sunIntensity": 0.5,
+      "hemiSky": "#45468d",
+      "hemiGround": "#1e1630",
+      "hemiIntensity": 0.9
+    },
+    {
+      "e": -0.1,
+      "top": "#2a2a68",
+      "horizon": "#a8607a",
+      "sun": "#e2a0b6",
+      "sunIntensity": 0.2,
+      "hemiSky": "#6b5fa6",
+      "hemiGround": "#2c1d36",
+      "hemiIntensity": 0.8
+    },
+    {
+      "e": -0.02,
+      "top": "#4a5aa6",
+      "horizon": "#f4a070",
+      "sun": "#ff9a52",
+      "sunIntensity": 0.35,
+      "hemiSky": "#9488c4",
+      "hemiGround": "#4a3355",
+      "hemiIntensity": 0.75
+    },
+    {
+      "e": 0.12,
+      "top": "#6a86d4",
+      "horizon": "#f6d2b0",
+      "sun": "#ffc68e",
+      "sunIntensity": 2.8,
+      "hemiSky": "#aeb0e6",
+      "hemiGround": "#5e4a72",
+      "hemiIntensity": 0.85
+    },
+    {
+      "e": 0.4,
+      "top": "#6e90df",
+      "horizon": "#e4ddf4",
+      "sun": "#ffe4bd",
+      "sunIntensity": 3.4,
+      "hemiSky": "#b8bdee",
+      "hemiGround": "#5f5079",
+      "hemiIntensity": 0.9
+    },
+    {
+      "e": 1,
+      "top": "#6890e0",
+      "horizon": "#e2dcf4",
+      "sun": "#ffe9c8",
+      "sunIntensity": 3.6,
+      "hemiSky": "#bec3f0",
+      "hemiGround": "#62537c",
+      "hemiIntensity": 0.92
+    }
+  ],
+  "light": {
+    "lantern": "#ffae58",
+    "door": "#ffb866",
+    "shard": "#ffb347",
+    "moon": "#b9c8ff",
+    "stars": "#dfe7ff"
+  },
+  "material": {
+    "iron": "#34343c",
+    "lanternGlass": "#ffcf8a",
+    "shardCore": "#ffd27f"
+  },
+  "vfx": {
+    "$comment": "One signature color per power (J5/J6). Hero and dark variants share the hue with a different accent.",
+    "time": {
+      "main": "#ffbf5e",
+      "hero": "#fff1c4",
+      "dark": "#b8742a"
+    },
+    "telekinesis": {
+      "main": "#7fd6ff",
+      "hero": "#d8f4ff",
+      "dark": "#3a6bd6"
+    },
+    "shadow": {
+      "main": "#6c4fa3",
+      "hero": "#b9a4e6",
+      "dark": "#2a1840"
+    },
+    "echo": {
+      "main": "#8ff0e0",
+      "hero": "#e0fff9",
+      "dark": "#2f9c8c"
+    },
+    "face": {
+      "main": "#e889c0",
+      "hero": "#ffd6ec",
+      "dark": "#8f2d6a"
+    }
+  },
+  "ui": {
+    "ink": "#f4ead6",
+    "inkDim": "rgba(244, 234, 214, 0.72)",
+    "panel": "rgba(20, 16, 12, 0.55)",
+    "accent": "#ffbf5e"
+  },
+  "grading": {
+    "$comment": "Cinematic split-toning applied after tone mapping: cool lavender shadows, warm golden highlights (inspired by the reference frame).",
+    "shadowTint": [
+      0.43,
+      0.41,
+      0.64
+    ],
+    "highlightTint": [
+      0.63,
+      0.53,
+      0.4
+    ],
+    "balance": 0.05,
+    "strength": 0.6,
+    "saturation": 1.12,
+    "contrast": 1.07
+  },
+  "atmosphere": {
+    "$comment": "Sun stays low for long shadows; haze distances in meters.",
+    "sunElevationScale": 0.62,
+    "sunTilt": 0.45,
+    "fogNear": 45,
+    "fogFar": 380
+  }
+}

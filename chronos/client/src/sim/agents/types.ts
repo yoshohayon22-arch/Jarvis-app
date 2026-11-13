@@ -61,6 +61,13 @@ export interface Agent {
   nextThinkAt: number;
   /** Seconds without progress toward the waypoint (stuck detection). */
   stuckTime: number;
+  /** Short symbol shown above the head ("!", "♥", "…") until `emoteUntil` (game minutes). */
+  emote: string;
+  emoteUntil: number;
+  /** Running (fleeing or rushing somewhere). */
+  hurry: boolean;
+  /** Temporarily reacting to an event; the schedule resumes at the next think. */
+  reacting: boolean;
   /** Per-agent PRNG state (mulberry32). */
   rng: number;
 }

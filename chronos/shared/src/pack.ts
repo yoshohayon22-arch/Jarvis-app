@@ -185,3 +185,39 @@ export interface ExtrasDef {
   /** Looks that read as feminine (picks the name list and the role label). */
   feminineLooks: string[];
 }
+
+// ---------------------------------------------------------------- acts & reputation (J3)
+
+export interface ActDef {
+  /** French verb phrase used in rumors: "<actor> <label> <target>". */
+  label: string;
+  /** 0..1: how memorable the act is (drives memory decay and gossip). */
+  importance: number;
+  /** Opinion change of an informed member of each faction (before modifiers). */
+  opinion: Record<FactionId, number>;
+  /** Opinion change of the target itself. */
+  target: number;
+  tags: string[];
+  reaction: "cheer" | "alarm";
+  /** Violent acts make the victim and fearful witnesses run away. */
+  violent?: boolean;
+}
+
+export interface ActsDef {
+  acts: Record<string, ActDef>;
+  tuning: {
+    /** Weight of first-hand knowledge vs. hearsay. */
+    witnessWeight: number;
+    rumorWeight: number;
+    /** Share of one person's opinion change that moves their faction's reputation. */
+    factionShare: number;
+    /** One event can move a faction by at most |opinion| × eventCap in total. */
+    eventCap: number;
+    /** Confidence multiplier per retelling. */
+    hopConfidence: number;
+    /** Minimum game minutes before someone repeats what they learned. */
+    retellDelay: number;
+    /** Base chance (per hop) that a detail gets distorted. */
+    distortion: number;
+  };
+}

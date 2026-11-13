@@ -165,6 +165,14 @@ export class AgentSystem {
   private arrive(a: Agent): void {
     a.path = [];
     a.pathIndex = 0;
+    a.hurry = false;
+    if (a.reacting) {
+      // Stay put (catching breath, confronting…) until the next think resumes the schedule.
+      a.enterOnArrival = null;
+      a.mode = "acting";
+      a.anim = "idle";
+      return;
+    }
     if (a.enterOnArrival) {
       a.insideOf = a.enterOnArrival;
       a.enterOnArrival = null;
@@ -191,7 +199,9 @@ export class AgentSystem {
   private think(a: Agent, minutes: number, hour: number): void {
     const want = this.desired(a, hour);
     const wantPlace = this.resolveAlias(a, want.place);
-    if (want.activity !== a.activity || wantPlace !== a.place) {
+    const resume = a.reacting;
+    a.reacting = false;
+    if (resume || want.activity !== a.activity || wantPlace !== a.place) {
       this.begin(a, want.activity, want.place, want.override);
     } else if (a.mode === "acting") {
       a.override = want.override;
@@ -206,6 +216,52 @@ export class AgentSystem {
       }
     }
     a.nextThinkAt = minutes + 4 + rand(a) * 6;
+  }
+
+  // ---------------------------------------------------------------- reactions
+
+  setEmote(a: Agent, emote: string, now: number, minutes: number): void {
+    a.emote = emote;
+    a.emoteUntil = now + minutes;
+  }
+
+  /**
+   * Makes an inhabitant react to something happening at (sx, sz):
+   * watch (turn toward it), cheer, flee (run away) or confront (guards rush in).
+   */
+  react(a: Agent, kind: "watch" | "cheer" | "flee" | "confront", sx: number, sz: number, now: number, emote: string): void {
+    if (a.insideOf) return;
+    this.setEmote(a, emote, now, kind === "flee" ? 6 : 4);
+    const dx = a.x - sx;
+    const dz = a.z - sz;
+    const d = Math.hypot(dx, dz) || 1;
+    if (kind === "watch" || kind === "cheer") {
+      if (a.mode === "acting") {
+        a.facing = Math.atan2(-dx, -dz);
+        a.anim = kind === "cheer" ? "cheer" : "idle";
+        a.nextThinkAt = Math.max(a.nextThinkAt, now + 3);
+      }
+      return;
+    }
+    const nav = this.places.nav;
+    let tx: number;
+    let tz: number;
+    if (kind === "flee") {
+      tx = a.x + (dx / d) * 16;
+      tz = a.z + (dz / d) * 16;
+    } else {
+      tx = sx + (dx / d) * 1.6;
+      tz = sz + (dz / d) * 1.6;
+    }
+    const cell = nav.nearestFree(tx, tz, 20);
+    if (cell < 0) return;
+    a.reacting = true;
+    this.goTo(a, { x: nav.cx(cell % nav.size), z: nav.cx((cell / nav.size) | 0) }, null);
+    if (a.mode === "moving") {
+      a.hurry = true;
+      a.anim = "run";
+    }
+    a.nextThinkAt = now + (kind === "flee" ? 12 : 8);
   }
 
   // ---------------------------------------------------------------- spatial queries
@@ -288,7 +344,8 @@ export class AgentSystem {
 
   private move(a: Agent, dt: number, fast: boolean, player: Point | null): void {
     const T = AGENT_TUNING;
-    let remaining = a.walkSpeed * dt;
+    const speed = a.walkSpeed * (a.hurry ? 2.1 : 1);
+    let remaining = speed * dt;
     const startX = a.x;
     const startZ = a.z;
     let dirX = 0;
@@ -343,7 +400,7 @@ export class AgentSystem {
 
       // Stuck detection: replan when not making progress.
       const moved = Math.hypot(a.x - startX, a.z - startZ);
-      a.stuckTime = moved < a.walkSpeed * dt * 0.25 ? a.stuckTime + dt : 0;
+      a.stuckTime = moved < speed * dt * 0.25 ? a.stuckTime + dt : 0;
       if (a.stuckTime > 2.5 && a.pathIndex < a.path.length) {
         const enter = a.enterOnArrival;
         this.goTo(a, { x: a.targetX, z: a.targetZ }, enter);

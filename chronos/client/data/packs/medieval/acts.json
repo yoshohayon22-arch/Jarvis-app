@@ -1,0 +1,46 @@
+{
+  "acts": {
+    "give_alms": {
+      "label": "a fait l'aumône à",
+      "importance": 0.35,
+      "opinion": { "villagers": 4, "royal_guard": 1, "thieves_guild": -1, "mages_order": 1 },
+      "target": 14,
+      "tags": ["kind", "public"],
+      "reaction": "cheer"
+    },
+    "pickpocket": {
+      "label": "a volé",
+      "importance": 0.55,
+      "opinion": { "villagers": -7, "royal_guard": -10, "thieves_guild": 5, "mages_order": -2 },
+      "target": -28,
+      "tags": ["crime", "theft"],
+      "reaction": "alarm"
+    },
+    "intimidate": {
+      "label": "a menacé",
+      "importance": 0.6,
+      "opinion": { "villagers": -6, "royal_guard": -8, "thieves_guild": 2, "mages_order": -3 },
+      "target": -22,
+      "tags": ["crime", "fear"],
+      "reaction": "alarm"
+    },
+    "assault": {
+      "label": "a frappé",
+      "importance": 0.85,
+      "opinion": { "villagers": -12, "royal_guard": -15, "thieves_guild": 0, "mages_order": -5 },
+      "target": -45,
+      "tags": ["crime", "violent", "fear"],
+      "reaction": "alarm",
+      "violent": true
+    }
+  },
+  "tuning": {
+    "witnessWeight": 1,
+    "rumorWeight": 0.5,
+    "factionShare": 0.08,
+    "eventCap": 1.5,
+    "hopConfidence": 0.85,
+    "retellDelay": 20,
+    "distortion": 0.12
+  }
+}

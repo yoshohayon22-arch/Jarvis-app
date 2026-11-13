@@ -111,6 +111,26 @@ try {
   await page.waitForTimeout(1500);
   const plate = await page.evaluate(() => document.getElementById("nameplate")?.textContent ?? "");
   check(/ · /.test(plate), `nameplate shown next to an inhabitant: "${plate}"`);
+  // J3: a public crime → witnesses, reactions, reputations, journal.
+  await page.evaluate(() => {
+    const c = window.__chronos;
+    c.setHour(10.5);
+    const a = c.agent("aldric");
+    c.teleport(a.x + 1.3, a.z + 0.6, 0);
+    c.setCamera(0.9, 0.42, 9);
+  });
+  await page.waitForTimeout(1500);
+  await page.keyboard.press("KeyJ");
+  await page.evaluate(() => window.__chronos.act("assault", "aldric"));
+  await page.waitForTimeout(2500);
+  const soc = await page.evaluate(() => window.__chronos.social);
+  check(soc.events === 1 && soc.informed[0] > 3, `assault seen by ${soc.informed[0]} people`);
+  check(soc.reputation.villagers < 0 && soc.reputation.royal_guard <= 0, `reputations moved: ${JSON.stringify(soc.reputation)}`);
+  check(soc.emotes > 0, `${soc.emotes} inhabitants show a reaction`);
+  const journal = await page.evaluate(() => document.getElementById("journal")?.textContent ?? "");
+  check(/Réputations/.test(journal) && /as frappé/.test(journal), "journal lists reputations and what people know");
+  await page.screenshot({ path: `${OUT}${QUALITY}-10-assault-witnesses.png` });
+  await page.keyboard.press("KeyJ");
   await page.evaluate(() => window.__chronos.setHour(3));
   await page.waitForTimeout(800);
   const night = await page.evaluate(() => window.__chronos.agents);

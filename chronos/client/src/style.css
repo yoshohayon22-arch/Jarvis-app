@@ -10,7 +10,7 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: #0b0d14; col
 #game { position: fixed; inset: 0; width: 100%; height: 100%; display: block; cursor: crosshair; }
 
 #hud { position: fixed; top: 16px; left: 16px; display: flex; flex-direction: column; gap: 6px; pointer-events: none; }
-#hud-clock, #hud-speed:not(:empty) {
+#hud-clock, #hud-coins, #hud-speed:not(:empty) {
   background: var(--panel); padding: 6px 12px; border-radius: 6px; font-size: 15px;
   letter-spacing: 0.02em; backdrop-filter: blur(4px); width: max-content;
   border: 1px solid rgba(255, 191, 94, 0.25);
@@ -73,3 +73,34 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: #0b0d14; col
 #nameplate span { font-size: 12px; color: var(--ink-dim); }
 #nameplate.key { border-color: rgba(255, 191, 94, 0.55); }
 #nameplate.key strong { color: var(--amber); }
+
+#hud-coins { color: var(--amber); }
+#nameplate em { font-size: 12px; font-style: italic; color: var(--ink); max-width: 340px; white-space: normal; text-align: center; }
+#nameplate small { font-size: 11px; color: var(--amber); margin-top: 2px; }
+#bubbles { position: fixed; inset: 0; pointer-events: none; }
+.bubble {
+  position: absolute; top: 0; left: 0; min-width: 22px; height: 22px; padding: 0 5px; border-radius: 11px;
+  display: grid; place-items: center; font: 700 15px/1 system-ui, sans-serif; background: rgba(250, 244, 230, 0.95); color: #33291f;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+}
+.bubble[data-kind="bad"] { background: #d9442f; color: #fff; }
+.bubble[data-kind="good"] { background: #f4ead6; color: #d6336c; }
+#journal {
+  position: fixed; top: 64px; right: 16px; width: min(360px, calc(100vw - 32px)); max-height: calc(100vh - 130px); overflow: auto;
+  background: rgba(20, 16, 12, 0.82); border: 1px solid rgba(255, 191, 94, 0.3); border-radius: 8px; padding: 12px 14px;
+  display: none; backdrop-filter: blur(6px); font-size: 13px;
+}
+#journal.visible { display: block; }
+#journal h3 { margin: 4px 0 6px; font-size: 13px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--amber); font-weight: 600; }
+#journal .portrait { margin: 0 0 10px; font-style: italic; line-height: 1.4; }
+#journal .rep { display: grid; grid-template-columns: 128px 1fr 34px; align-items: center; gap: 8px; margin: 5px 0; }
+#journal .bar { position: relative; height: 8px; background: rgba(255, 255, 255, 0.12); border-radius: 4px; }
+#journal .bar::after { content: ""; position: absolute; left: 50%; top: -2px; bottom: -2px; width: 1px; background: rgba(255, 255, 255, 0.5); }
+#journal .bar i { position: absolute; top: 0; bottom: 0; border-radius: 4px; }
+#journal .bar i.pos { background: #7fc27a; }
+#journal .bar i.neg { background: #d9634a; }
+#journal .rep b { text-align: right; font-variant-numeric: tabular-nums; }
+#journal ul { margin: 0 0 4px; padding: 0; list-style: none; }
+#journal li { padding: 5px 0 5px 9px; border-left: 2px solid rgba(255, 255, 255, 0.25); margin: 5px 0; line-height: 1.35; color: var(--ink-dim); }
+#journal li.bad { border-color: #d9634a; }
+#journal li.good { border-color: #7fc27a; }

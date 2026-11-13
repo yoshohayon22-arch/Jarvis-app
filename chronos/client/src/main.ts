@@ -3,7 +3,9 @@ import "./style.css";
 import { FixedStep } from "./core/fixedStep";
 import { Input } from "./core/input";
 import { loadDefaultPack } from "./pack";
-import type { CharacterDef, ExtrasDef } from "@chronos/shared";
+import type { ActsDef, CharacterDef, ExtrasDef } from "@chronos/shared";
+import { FACTIONS, FACTION_LABELS, PLAYER_ID, SocialSystem } from "./sim/social";
+import actsJson from "../data/packs/medieval/acts.json";
 import { ACTIVITY_LABELS, createAgentSystem, type Agent } from "./sim/agents";
 import { WorldClock } from "./sim/clock";
 import { resolveCircleCircle } from "./sim/collision";
@@ -42,10 +44,11 @@ const collision = buildCollisionWorld(layout);
 const clock = new WorldClock(pack.manifest.calendar.minutesPerGameDay, pack.manifest.calendar.startHour);
 const player = createPlayer(layout.spawn.pos[0], layout.spawn.pos[1], layout.spawn.facing);
 const prevPlayer: PlayerState = { ...player };
+const characterDefs = (charactersJson as unknown as { characters: CharacterDef[] }).characters;
 const agents = createAgentSystem(
   layout,
   collision,
-  (charactersJson as unknown as { characters: CharacterDef[] }).characters,
+  characterDefs,
   extrasJson as unknown as ExtrasDef,
   WORLD_SEED,
   clock,
@@ -125,6 +128,8 @@ let world: Awaited<ReturnType<typeof buildWorldView>> | null = null;
 let ready = false;
 
 const environment = new EnvironmentLighting();
+const social = new SocialSystem(agents, actsJson as unknown as ActsDef, characterDefs, WORLD_SEED);
+let coins = 10;
 let crowd: Crowd | null = null;
 let grass: GrassField | null = null;
 let grassMap: THREE.DataTexture | null = null;
@@ -258,13 +263,81 @@ function updateNameplate(px: number, pz: number): void {
   }
   const place = agents.places.label(a.place);
   const doing = a.mode === "moving" && a.activity !== "patrol" && a.activity !== "wander" ? "est en route" : ACTIVITY_LABELS[a.activity];
+  const known = social.topMemoryAbout(a, PLAYER_ID, clock.totalMinutes);
+  const op = social.reputation.opinion(a.id);
+  const mood = op <= -40 ? "te hait" : op <= -12 ? "se méfie de toi" : op >= 40 ? "t'admire" : op >= 12 ? "t'apprécie" : "";
+  const knows = known
+    ? `${known.kind === "heard" ? "A entendu dire que" : known.kind === "suffered" ? "N'oublie pas que" : "A vu que"} ${social.describe(known.claim, true)}`
+    : "";
+  const close = Math.hypot(a.x - player.x, a.z - player.z) < INTERACT_RANGE;
   hud.showNameplate(
     ((nameplatePos.x + 1) / 2) * window.innerWidth,
     ((1 - nameplatePos.y) / 2) * window.innerHeight,
     a.name,
     `${a.role} · ${doing}${place && a.mode !== "moving" ? " " + place : ""}`,
     a.key,
+    [mood, knows].filter(Boolean).join(" · "),
+    close ? "[E] aumône · [V] voler · [N] menacer · [B] frapper" : "",
   );
+}
+
+const INTERACT_RANGE = 2.4;
+const ACT_KEYS: Record<string, string> = { KeyE: "give_alms", KeyV: "pickpocket", KeyN: "intimidate", KeyB: "assault" };
+
+/** The player does something to an inhabitant. Everything that follows comes from the simulation. */
+function playerAct(actId: string, target: Agent): void {
+  if (actId === "give_alms") {
+    if (coins <= 0) {
+      hud.toast("Ta bourse est vide.");
+      return;
+    }
+    coins--;
+  }
+  // A pickpocket goes unnoticed by the victim when done from behind.
+  const toPlayerX = player.x - target.x;
+  const toPlayerZ = player.z - target.z;
+  const d = Math.hypot(toPlayerX, toPlayerZ) || 1;
+  const facingPlayer = (Math.sin(target.facing) * toPlayerX + Math.cos(target.facing) * toPlayerZ) / d > 0.2;
+  const before = { ...social.reputation.factions };
+  const result = social.commit(
+    actId,
+    target,
+    { actorId: PLAYER_ID, x: player.x, z: player.z, daylight: clock.daylight, targetNotices: actId === "pickpocket" ? facingPlayer : true },
+    clock.totalMinutes,
+  );
+  if (actId === "pickpocket") coins += 1 + Math.floor(social.rng.next() * 5);
+  const changes = FACTIONS.map((f) => ({ f, d: social.reputation.factions[f] - before[f] }))
+    .filter((c) => Math.abs(c.d) >= 0.05)
+    .map((c) => `${FACTION_LABELS[c.f]} ${c.d > 0 ? "+" : ""}${c.d.toFixed(1)}`);
+  const seen = result.witnesses.length + (result.targetNoticed ? 1 : 0);
+  hud.toast(seen === 0 ? "Personne n'a rien vu." : `${seen} témoin${seen > 1 ? "s" : ""}${changes.length ? " · " + changes.join(" · ") : ""}`);
+  hud.setCoins(coins);
+}
+
+function updateSocialUi(): void {
+  if (nameplateAgent && !paused && Math.hypot(nameplateAgent.x - player.x, nameplateAgent.z - player.z) < INTERACT_RANGE) {
+    for (const [code, actId] of Object.entries(ACT_KEYS)) if (input.wasPressed(code)) playerAct(actId, nameplateAgent);
+  }
+  if (input.wasPressed("KeyJ")) hud.toggleJournal();
+  hud.updateJournal(
+    FACTIONS.map((f) => ({ label: FACTION_LABELS[f], value: social.reputation.factions[f] })),
+    social.reputation.portrait(),
+    social.feed,
+  );
+  // Emote bubbles above nearby inhabitants.
+  if (!crowd) return;
+  const bubbles: { x: number; y: number; text: string }[] = [];
+  const now = clock.totalMinutes;
+  for (const a of agents.agents) {
+    if (a.insideOf || !a.emote || a.emoteUntil < now || bubbles.length >= 16) continue;
+    const ax = crowd.positions[a.index * 2] as number;
+    const az = crowd.positions[a.index * 2 + 1] as number;
+    if ((ax - player.x) ** 2 + (az - player.z) ** 2 > 40 * 40) continue;
+    nameplatePos.set(ax, 2.25 * a.scale, az).project(camera);
+    if (nameplatePos.z > 1 || Math.abs(nameplatePos.x) > 1.05 || Math.abs(nameplatePos.y) > 1.05) continue;
+    bubbles.push({ x: ((nameplatePos.x + 1) / 2) * window.innerWidth, y: ((1 - nameplatePos.y) / 2) * window.innerHeight, text: a.emote });
+  }
+  hud.showBubbles(bubbles);
 }
 
 function frame(now: number): void {
@@ -299,6 +372,7 @@ function frame(now: number): void {
     simAlpha = sim.advance(dt, (step) => {
       clock.advance(step);
       agents.step(step, clock, player);
+      social.step(clock.totalMinutes);
     });
   }
 
@@ -313,6 +387,7 @@ function frame(now: number): void {
 
   crowd?.update(frameDt * Math.min(clock.timeScale, 4), simAlpha);
   updateNameplate(rx, rz);
+  updateSocialUi();
 
   rig.update({ x: rx, y: 0, z: rz }, dt, collision.boxes);
   camera.position.set(rig.position.x, rig.position.y, rig.position.z);
@@ -389,6 +464,21 @@ window.__chronos = {
       total: agents.agents.length,
       rendered: crowd !== null,
       nameplate: nameplateAgent?.id ?? null,
+    };
+  },
+  act(actId: string, agentId: string) {
+    const a = agents.agents.find((x) => x.id === agentId);
+    if (a) playerAct(actId, a);
+  },
+  get social() {
+    return {
+      reputation: { ...social.reputation.factions },
+      portrait: social.reputation.portrait(),
+      events: social.log.events.length,
+      informed: [...social.informed.values()],
+      feed: social.feed.map((f) => f.text),
+      emotes: agents.agents.filter((a) => a.emote && a.emoteUntil >= clock.totalMinutes).length,
+      coins,
     };
   },
   agent(id: string) {

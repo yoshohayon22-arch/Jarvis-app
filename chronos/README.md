@@ -32,6 +32,14 @@ npm run preview    # sert le build sur http://localhost:4173
 - En s'approchant d'un habitant, une étiquette indique son nom, son rôle et ce qu'il fait.
 - Rendu : les animations sont précalculées dans des textures (un appel de dessin par type de personnage).
 
+## Mémoire, rumeurs et réputations (J3)
+- Chaque acte du joueur devient un **événement** dans le journal du monde (`sim/social/events.ts`), avec son vrai auteur et son auteur apparent.
+- **Témoins** : il faut être à portée (24 m le jour, 9 m la nuit), regarder dans la bonne direction (ou être à moins de 5 m), ne pas avoir de mur entre soi et la scène, et être éveillé et dehors.
+- **Mémoire** : chaque témoin garde un souvenir (importance 0 à 1). Les souvenirs s'effacent avec le temps, plus lentement chez les rancuniers ; les souvenirs importants de plus de 2 jours sont condensés en une impression durable.
+- **Rumeurs** : les habitants se racontent ce qu'ils savent quand ils sont côte à côte ou dans le même bâtiment, après un délai de 20 minutes de jeu. À chaque relais la confiance baisse (×0,85) et l'histoire peut être exagérée, perdre son lieu ou, rarement, accuser quelqu'un d'autre.
+- **Réputations** : quatre groupes de −100 à +100. Elles ne bougent que lorsque quelqu'un **apprend** l'acte : un méfait sans témoin ne change rien. Un même événement est plafonné par groupe.
+- Les règles (actes, poids, plafonds) sont dans `client/data/packs/medieval/acts.json`.
+
 ## Qualité graphique
 Deux préréglages (définis dans `client/data/quality.json`), touche **G** en jeu, mémorisé dans le navigateur :
 - **Qualité haute** (par défaut sur ordinateur) : ombres 4096, SSAO, flou de profondeur, herbe animée (60 000 brins), MSAA ×4.
@@ -77,6 +85,8 @@ Le test e2e utilise Playwright, qui doit être installé (`npx playwright instal
 | Espace | esquiver |
 | Souris | orienter la caméra (clic dans le jeu pour verrouiller le pointeur) |
 | Molette | zoom |
+| E / V / N / B | près d'un habitant : faire l'aumône / voler / menacer / frapper |
+| J | journal : réputations et ce que l'on sait de toi |
 | T | vitesse du temps : ×1 → ×10 → ×60 → figé |
 | G | qualité graphique basse / haute |
 | F3 | panneau debug (FPS, draw calls, position, habitants dehors / à l'intérieur) |
@@ -92,6 +102,7 @@ chronos/
 │  ├─ src/sim/      # simulation déterministe (horloge, joueur, collisions, carte)
 │  ├─ src/sim/agents/  # habitants : besoins, emplois du temps, décisions, déplacements
 │  ├─ src/sim/nav/     # grille de navigation + A*
+│  ├─ src/sim/social/  # événements, témoins, mémoire, rumeurs, réputations
 │  ├─ src/render/   # rendu Three.js (village procédural, personnage, caméra, ciel)
 │  ├─ src/ui/       # HUD
 │  ├─ data/         # palette, préréglages qualité, manifeste des modèles
@@ -106,7 +117,7 @@ Le proxy Node pour l'API Claude (`server/`) arrive au jalon J4.
 ## Avancement
 - [x] J1 : scène 3D, personnage jouable, déplacement, caméra, cycle jour/nuit
 - [x] J2 : habitants avec routines et foule légère (12 personnages clés + 102 figurants)
-- [ ] J3 : mémoire, rumeurs, réputations
+- [x] J3 : mémoire, rumeurs, réputations
 - [ ] J4 : dialogues IA via le proxy
 - [ ] J5 : pouvoirs (temps, télékinésie, ombre) et conséquences
 - [ ] J6 : écho du passé, changement de visage

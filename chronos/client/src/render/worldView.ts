@@ -7,6 +7,7 @@ import { GeoBuilder } from "./geoBuilder";
 import { instanceModel, type Placement } from "./instancing";
 import { PALETTE } from "./palette";
 import { buildPlaceholderBuilding, buildPlaceholderProp, buildPlaceholderWall, worldPoint } from "./placeholders";
+import { enhanceModelMaterial, type DetailTextures } from "./materials";
 import { buildTerrain, terrainHeight } from "./terrain";
 
 type Range = number | [number, number];
@@ -74,11 +75,12 @@ export async function buildWorldView(
   visuals: VisualsDef,
   lib: AssetLibrary,
   seed: number,
+  detail: DetailTextures | null = null,
 ): Promise<WorldView> {
   const rng = new SeededRng(seed ^ 0x5bd1e995);
   const group = new THREE.Group();
   group.name = "world";
-  group.add(buildTerrain(layout));
+  group.add(buildTerrain(layout, detail));
 
   const path = (p: string) => `${visuals.assetsBase}${p}.glb`;
   const batches = new Map<string, Placement[]>();
@@ -193,6 +195,9 @@ export async function buildWorldView(
   const models = await lib.loadMany(all);
   const failed = all.filter((p) => !models.get(p));
 
+  // Stylized-realistic surface detail on every model material.
+  if (detail) for (const m of models.values()) if (m) enhanceModel(m, detail);
+
   // Open the gate's door leaves (node-level tweak declared in the visuals data).
   const gateModel = models.get(path(W.gate));
   if (gateModel && W.gateNodeYaw) {
@@ -255,4 +260,16 @@ export async function buildWorldView(
 /** Loads the shared models needed by characters (separately so the title screen can show progress). */
 export async function loadModel(lib: AssetLibrary, visuals: VisualsDef, model: string): Promise<LoadedModel | null> {
   return lib.load(`${visuals.assetsBase}${model}.glb`).catch(() => null);
+}
+
+/** Applies the detail shader patch to every standard material of a model. */
+export function enhanceModel(model: LoadedModel, detail: DetailTextures): void {
+  model.scene.traverse((o) => {
+    const mesh = o as THREE.Mesh;
+    if (!mesh.isMesh) return;
+    for (const m of Array.isArray(mesh.material) ? mesh.material : [mesh.material]) {
+      if ((m as THREE.MeshStandardMaterial).isMeshStandardMaterial)
+        enhanceModelMaterial(m as THREE.MeshStandardMaterial, detail, { scale: 0.85, strength: 0.65 });
+    }
+  });
 }

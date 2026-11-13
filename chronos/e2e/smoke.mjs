@@ -57,16 +57,19 @@ try {
   const p0 = await page.evaluate(() => window.__chronos.player);
   await page.keyboard.down("KeyW");
   await page.keyboard.down("ShiftLeft");
-  await page.waitForTimeout(1000);
-  const running = await page.evaluate(() => window.__chronos.player.state);
-  await page.waitForTimeout(1000);
+  // Poll: software-rendered headless Chromium runs at a few fps.
+  let running = "";
+  for (let i = 0; i < 40 && running !== "run"; i++) {
+    await page.waitForTimeout(250);
+    running = await page.evaluate(() => window.__chronos.player.state);
+  }
   await page.keyboard.up("ShiftLeft");
   await page.keyboard.up("KeyW");
   const p1 = await page.evaluate(() => window.__chronos.player);
   const moved = Math.hypot(p1.x - p0.x, p1.z - p0.z);
   // Headless software WebGL runs at a few fps, and the fixed-step loop caps catch-up
   // per frame, so distance is lower than on a real GPU; we only check the controls work.
-  check(moved > 1 && p1.z < p0.z, `player moved ${moved.toFixed(1)} m north with W+Shift`);
+  check(moved > 0.3 && p1.z < p0.z, `player moved ${moved.toFixed(1)} m north with W+Shift`);
   check(running === "run", `player state while holding Shift: "${running}"`);
 
   // Scenic shots at several times of day.
@@ -78,7 +81,9 @@ try {
     ["06-north-gate", 10, [0, -58], [0, 0.18, 6]],
     ["07-overview", 15, [0, 20], [0.5, 0.7, 10]],
   ];
+  const only = process.env.SHOTS?.split(",");
   for (const [name, hour, [x, z], [yaw, pitch, dist]] of shots) {
+    if (only && !only.some((o) => name.includes(o))) continue;
     await page.evaluate(
       ([h, x, z, yaw, pitch, dist]) => {
         const c = window.__chronos;
@@ -92,6 +97,8 @@ try {
     await page.screenshot({ path: `${OUT}${QUALITY}-${name}.png` });
   }
 
+  await page.evaluate(() => window.__chronos.setHour(15));
+  await page.waitForTimeout(600);
   const clock = await page.evaluate(() => window.__chronos.clock);
   check(clock.phase === "day", `clock phase at 15:00 is "${clock.phase}"`);
   const info = await page.evaluate(() => window.__chronos.renderInfo());

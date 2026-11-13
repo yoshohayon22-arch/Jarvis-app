@@ -15,7 +15,11 @@ import { CharacterModel, KAEL_LOOK } from "./render/character";
 import { PostFx } from "./render/postfx";
 import { QUALITY, initialQuality, saveQuality, type QualityLevel } from "./render/quality";
 import { DayNightCycle } from "./render/sky";
-import { buildWorldView, loadModel, type VisualsDef } from "./render/worldView";
+import { buildWorldView, enhanceModel, loadModel, type VisualsDef } from "./render/worldView";
+import { EnvironmentLighting } from "./render/environment";
+import { GrassField } from "./render/grass";
+import { loadDetailTextures } from "./render/materials";
+import { buildGrassMap } from "./render/terrain";
 import { Hud } from "./ui/hud";
 import visualsJson from "../data/packs/medieval/visuals.json";
 
@@ -90,6 +94,7 @@ function setQuality(level: QualityLevel): void {
   dayNight.setShadowQuality(quality.shadowMapSize, quality.shadowRadius);
   postfx.apply(quality);
   rebuildNightLights(quality.maxNightLights);
+  applyGrass();
   hud.toast(quality.label);
 }
 
@@ -104,11 +109,36 @@ const lib = new AssetLibrary(manager);
 let world: Awaited<ReturnType<typeof buildWorldView>> | null = null;
 let ready = false;
 
+const environment = new EnvironmentLighting();
+let grass: GrassField | null = null;
+let grassMap: THREE.DataTexture | null = null;
+const GRASS_EXTENT = 200;
+
+function applyGrass(): void {
+  if (grass) {
+    scene.remove(grass.mesh);
+    grass.mesh.geometry.dispose();
+    grass = null;
+  }
+  if (quality.grass && grassMap) {
+    grass = new GrassField(grassMap, GRASS_EXTENT, quality.grass.count, quality.grass.patch);
+    scene.add(grass.mesh);
+  }
+}
+
 const loading = (async () => {
+  const detail = await loadDetailTextures(manager).catch((e) => {
+    console.warn("Detail textures unavailable, using plain materials", e);
+    return null;
+  });
   const [view, kaelModel] = await Promise.all([
-    buildWorldView(layout, visuals, lib, WORLD_SEED),
+    buildWorldView(layout, visuals, lib, WORLD_SEED, quality.detailMaterials ? detail : null),
     loadModel(lib, visuals, visuals.characters.kael!.model),
+    environment.load(renderer, manager).catch((e) => console.warn("HDRI lighting unavailable", e)),
   ]);
+  if (kaelModel && detail && quality.detailMaterials) enhanceModel(kaelModel, detail);
+  grassMap = buildGrassMap(layout, GRASS_EXTENT);
+  applyGrass();
   world = view;
   scene.add(view.group);
   if (kaelModel) {
@@ -234,6 +264,8 @@ function frame(now: number): void {
 
   focus.set(rx, 0, rz);
   dayNight.update(clock, focus);
+  environment.update(scene, clock);
+  grass?.update(paused ? 0 : dt, focus);
   if (world) {
     for (const m of world.nightGlow) m.emissiveIntensity = 0.2 + dayNight.night * 6;
     for (const [i, c] of world.clouds.entries()) {
@@ -249,6 +281,7 @@ function frame(now: number): void {
   lastDistrict = districtName;
 
   postfx.focus.set(rx, 1.4, rz);
+  postfx.exposureValue = 1 + dayNight.night * 1.1;
   postfx.render(dt);
   hud.update(clock, dt);
 

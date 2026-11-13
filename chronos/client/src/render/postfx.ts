@@ -37,6 +37,20 @@ void mainImage(const in vec4 inputColor, const in vec2 uv, out vec4 outputColor)
   outputColor = vec4(clamp(graded, 0.0, 1.0), inputColor.a);
 }`;
 
+/** Linear exposure before tone mapping (driven by the time of day). */
+export class ExposureEffect extends Effect {
+  constructor() {
+    super(
+      "ExposureEffect",
+      "uniform float exposure;\nvoid mainImage(const in vec4 inputColor, const in vec2 uv, out vec4 outputColor) { outputColor = vec4(inputColor.rgb * exposure, inputColor.a); }",
+      { uniforms: new Map<string, THREE.Uniform>([["exposure", new THREE.Uniform(1)]]) },
+    );
+  }
+  set value(v: number) {
+    this.uniforms.get("exposure")!.value = v;
+  }
+}
+
 /** Split-toning color grade (cool shadows, warm highlights) from data/palette.json. */
 export class ColorGradeEffect extends Effect {
   constructor() {
@@ -65,6 +79,11 @@ export class PostFx {
   private dof: DepthOfFieldEffect | null = null;
   /** World point kept in focus by the depth of field (the player's head). */
   readonly focus = new THREE.Vector3();
+  private readonly exposure = new ExposureEffect();
+  /** Exposure multiplier (1 = neutral). */
+  set exposureValue(v: number) {
+    this.exposure.value = v;
+  }
 
   constructor(
     private readonly renderer: THREE.WebGLRenderer,
@@ -130,7 +149,7 @@ export class PostFx {
     });
     const vignette = new VignetteEffect({ offset: p.vignette.offset, darkness: p.vignette.darkness });
     const toneMapping = new ToneMappingEffect({ mode: ToneMappingMode.ACES_FILMIC });
-    composer.addPass(new EffectPass(this.camera, bloom, toneMapping, new ColorGradeEffect(), vignette));
+    composer.addPass(new EffectPass(this.camera, this.exposure, bloom, toneMapping, new ColorGradeEffect(), vignette));
     if (p.fxaa) composer.addPass(new EffectPass(this.camera, new FXAAEffect()));
 
     const size = this.renderer.getSize(new THREE.Vector2());

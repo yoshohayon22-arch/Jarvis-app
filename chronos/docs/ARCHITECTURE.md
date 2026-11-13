@@ -15,7 +15,7 @@
 | Validation | `zod` (≈ 13 ko gzip) pour les schémas de missions, de dialogues et de sauvegardes | Plus léger et plus sûr que d'écrire un validateur maison |
 | Proxy | Node 22 avec `node:http` natif + `@anthropic-ai/sdk`. Pas d'Express | Moins de dépendances, et la surface est petite (4 routes) |
 | Physique | Moteur cinématique maison (gravité, collisions sphère/AABB, impulsions) | Suffisant pour la télékinésie et les objets légers. Pas besoin de cannon/rapier en V1 |
-| Assets 3D | Low-poly **généré en code** (primitives fusionnées, palettes de couleurs), animations procédurales | Zéro fichier binaire, dépôt léger, cohérence visuelle. Le format glTF reste possible plus tard |
+| Assets 3D | Modèles **glTF CC0** (KayKit) chargés depuis `/assets`, rendu **stylisé-réaliste** (détails de surface PBR, HDRI, post-traitement). Géométrie codée uniquement en placeholder | Décision révisée au J1 à la demande du joueur-commanditaire |
 | Tests | Vitest (simulation, IA, validateurs, sauvegarde) + Playwright (test de fumée de la démo à chaque jalon) | Chaque jalon a un test automatisé et une démo |
 | Langue | Code et identifiants en anglais, textes du jeu en français (fichiers de données) | Demandé, et prêt pour la localisation |
 
@@ -304,6 +304,8 @@ Pour la V1, trois **intentions** de mission guident la génération (enquête, p
 ---
 
 ## 7. Rendu
+
+> Mise à jour J1 : le village est construit à partir de `visuals.json` (modèles KayKit instanciés), d'un sol peint avec normal maps, d'un éclairage HDRI et d'une chaîne `postprocessing` (SSAO, DOF, bloom, ACES, étalonnage, vignette) avec préréglages basse/haute. Les lignes ci-dessous décrivent la version d'origine.
 
 - **Village procédural** à partir des données du pack : taverne, forge, temple, caserne, quartier pauvre, place du marché, remparts. Les bâtiments sont composés de primitives low-poly (flat shading), avec des palettes par quartier.
 - **Personnages** faits de primitives assemblées (tête, torse, membres) et animés en code (marche, course, idle, peur). Les figurants utilisent un `InstancedMesh` avec variations de couleur.

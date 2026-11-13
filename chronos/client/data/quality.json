@@ -19,7 +19,9 @@
       "darkness": 0.55
     },
     "maxNightLights": 4,
-    "dof": null
+    "dof": null,
+    "grass": null,
+    "detailMaterials": true
   },
   "high": {
     "label": "Qualité haute",
@@ -52,6 +54,11 @@
       "focusRange": 10,
       "bokehScale": 1.4,
       "resolutionScale": 0.5
-    }
+    },
+    "grass": {
+      "count": 60000,
+      "patch": 56
+    },
+    "detailMaterials": true
   }
 }

@@ -22,6 +22,8 @@ export interface QualityPreset {
   bloom: { intensity: number; threshold: number; smoothing: number; radius: number };
   vignette: { offset: number; darkness: number };
   maxNightLights: number;
+  grass: { count: number; patch: number } | null;
+  detailMaterials: boolean;
 }
 
 export const QUALITY = qualityJson as unknown as Record<QualityLevel, QualityPreset>;

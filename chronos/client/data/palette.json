@@ -18,20 +18,20 @@
       "top": "#070a1f",
       "horizon": "#1a1a3c",
       "sun": "#a9b6ff",
-      "sunIntensity": 0.6,
+      "sunIntensity": 0.9,
       "hemiSky": "#3f4590",
       "hemiGround": "#1c1530",
-      "hemiIntensity": 0.95
+      "hemiIntensity": 1.35
     },
     {
       "e": -0.22,
       "top": "#0d1234",
       "horizon": "#2f2752",
       "sun": "#a9b6ff",
-      "sunIntensity": 0.5,
+      "sunIntensity": 0.75,
       "hemiSky": "#45468d",
       "hemiGround": "#1e1630",
-      "hemiIntensity": 0.9
+      "hemiIntensity": 1.25
     },
     {
       "e": -0.1,
@@ -133,19 +133,19 @@
   "grading": {
     "$comment": "Cinematic split-toning applied after tone mapping: cool lavender shadows, warm golden highlights (inspired by the reference frame).",
     "shadowTint": [
-      0.43,
-      0.41,
-      0.64
+      0.46,
+      0.45,
+      0.58
     ],
     "highlightTint": [
-      0.63,
-      0.53,
-      0.4
+      0.58,
+      0.52,
+      0.44
     ],
     "balance": 0.05,
-    "strength": 0.6,
-    "saturation": 1.12,
-    "contrast": 1.07
+    "strength": 0.38,
+    "saturation": 1.0,
+    "contrast": 1.05
   },
   "atmosphere": {
     "$comment": "Sun stays low for long shadows; haze distances in meters.",

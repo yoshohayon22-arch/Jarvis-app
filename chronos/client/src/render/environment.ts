@@ -11,7 +11,7 @@ import { ASSET_ROOT } from "./assets";
 const SLOTS = [
   { key: "night", file: "night", from: -1, intensity: 0.6 },
   { key: "dawn", file: "sunrise", from: -0.12, intensity: 0.55 },
-  { key: "day", file: "park", from: 0.15, intensity: 0.75 },
+  { key: "day", file: "park", from: 0.15, intensity: 1.0 },
 ] as const;
 const DUSK = { file: "sunset", intensity: 0.55 };
 

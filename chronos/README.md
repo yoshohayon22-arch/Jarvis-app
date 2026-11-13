@@ -25,6 +25,13 @@ npm run build      # vérifie les types puis construit client/dist
 npm run preview    # sert le build sur http://localhost:4173
 ```
 
+## Habitants (J2)
+- 12 personnages clés (`client/data/packs/medieval/characters.json`) : traits, biographie, objectifs, inventaire, relations, secrets, emploi du temps.
+- 102 figurants générés à partir de 11 archétypes (`extras.json`) : marchands, artisans, paysans, gardes de jour et de nuit, miséreux, enfants, acolytes, mages, rôdeurs, habitués de la taverne.
+- Chaque habitant suit son emploi du temps (travail, repas, prière, discussions, patrouilles, sommeil à l'intérieur de sa maison). Trois besoins (faim, fatigue, compagnie) peuvent interrompre la routine quand ils deviennent urgents.
+- En s'approchant d'un habitant, une étiquette indique son nom, son rôle et ce qu'il fait.
+- Rendu : les animations sont précalculées dans des textures (un appel de dessin par type de personnage).
+
 ## Qualité graphique
 Deux préréglages (définis dans `client/data/quality.json`), touche **G** en jeu, mémorisé dans le navigateur :
 - **Qualité haute** (par défaut sur ordinateur) : ombres 4096, SSAO, flou de profondeur, herbe animée (60 000 brins), MSAA ×4.
@@ -72,7 +79,7 @@ Le test e2e utilise Playwright, qui doit être installé (`npx playwright instal
 | Molette | zoom |
 | T | vitesse du temps : ×1 → ×10 → ×60 → figé |
 | G | qualité graphique basse / haute |
-| F3 | panneau debug (FPS, draw calls, position) |
+| F3 | panneau debug (FPS, draw calls, position, habitants dehors / à l'intérieur) |
 | Échap | pause |
 
 ## Structure
@@ -83,6 +90,8 @@ chronos/
 ├─ client/          # le jeu (Vite + Three.js)
 │  ├─ src/core/     # boucle à pas fixe, RNG à graine, entrées
 │  ├─ src/sim/      # simulation déterministe (horloge, joueur, collisions, carte)
+│  ├─ src/sim/agents/  # habitants : besoins, emplois du temps, décisions, déplacements
+│  ├─ src/sim/nav/     # grille de navigation + A*
 │  ├─ src/render/   # rendu Three.js (village procédural, personnage, caméra, ciel)
 │  ├─ src/ui/       # HUD
 │  ├─ data/         # palette, préréglages qualité, manifeste des modèles
@@ -96,7 +105,7 @@ Le proxy Node pour l'API Claude (`server/`) arrive au jalon J4.
 
 ## Avancement
 - [x] J1 : scène 3D, personnage jouable, déplacement, caméra, cycle jour/nuit
-- [ ] J2 : habitants avec routines et foule légère
+- [x] J2 : habitants avec routines et foule légère (12 personnages clés + 102 figurants)
 - [ ] J3 : mémoire, rumeurs, réputations
 - [ ] J4 : dialogues IA via le proxy
 - [ ] J5 : pouvoirs (temps, télékinésie, ombre) et conséquences

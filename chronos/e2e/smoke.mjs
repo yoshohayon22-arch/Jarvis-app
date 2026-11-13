@@ -52,6 +52,8 @@ try {
   const placeholders = await page.evaluate(() => window.__chronos.placeholders);
   check(placeholders.length === 0, `all glTF models loaded${placeholders.length ? " (missing: " + placeholders.join(", ") + ")" : ""}`);
   check(await page.evaluate(() => window.__chronos.animated), "Kael is the animated glTF character");
+  const pop = await page.evaluate(() => window.__chronos.agents);
+  check(pop.total >= 100 && pop.rendered, `${pop.total} inhabitants simulated and rendered (${pop.outside} outside, ${pop.inside} indoors)`);
 
   await page.evaluate(() => window.__chronos.start());
   const p0 = await page.evaluate(() => window.__chronos.player);
@@ -74,7 +76,9 @@ try {
 
   // Scenic shots at several times of day.
   const shots = [
-    ["02-morning-market", 9, [2, 14], [0.35, 0.3, 8]],
+    ["02-morning-market", 10, [2, 15], [0.2, 0.32, 9]],
+    ["08-forge", 9, [36, -1], [3.5, 0.25, 7]],
+    ["09-tavern-evening", 19, [10, 2], [-0.3, 0.25, 9]],
     ["03-noon-temple", 12.5, [-14, -30], [0, 0.22, 9]],
     ["04-dusk-tavern", 17.9, [4, -2], [-0.69, 0.2, 8]],
     ["05-night-lowtown", 23, [0, 56], [0, 0.25, 7]],
@@ -97,6 +101,20 @@ try {
     await page.screenshot({ path: `${OUT}${QUALITY}-${name}.png` });
   }
 
+  // Nameplate: stand next to the blacksmith at work.
+  await page.evaluate(() => {
+    const c = window.__chronos;
+    c.setHour(9);
+    const b = c.agent("brann");
+    c.teleport(b.x + 0.7, b.z, 0);
+  });
+  await page.waitForTimeout(1500);
+  const plate = await page.evaluate(() => document.getElementById("nameplate")?.textContent ?? "");
+  check(/ · /.test(plate), `nameplate shown next to an inhabitant: "${plate}"`);
+  await page.evaluate(() => window.__chronos.setHour(3));
+  await page.waitForTimeout(800);
+  const night = await page.evaluate(() => window.__chronos.agents);
+  check(night.inside > night.total * 0.7, `at 3 am most inhabitants are indoors (${night.inside}/${night.total})`);
   await page.evaluate(() => window.__chronos.setHour(15));
   await page.waitForTimeout(600);
   const clock = await page.evaluate(() => window.__chronos.clock);

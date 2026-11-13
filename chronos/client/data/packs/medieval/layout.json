@@ -497,6 +497,22 @@
    ],
    "rot": 2,
    "height": 7.68
+  },
+  {
+   "id": "mage_tower",
+   "kind": "tower",
+   "name": "Tour de l'Ordre des Mages",
+   "district": "temple_hill",
+   "pos": [
+    12,
+    -60
+   ],
+   "size": [
+    6.96,
+    8.07
+   ],
+   "rot": 3,
+   "height": 15.34
   }
  ],
  "props": [
@@ -961,6 +977,351 @@
     -30
    ],
    "width": 3
+  }
+ ],
+ "spots": [
+  {
+   "id": "market_well",
+   "name": "autour du puits",
+   "pos": [
+    0,
+    4
+   ],
+   "radius": 4.5
+  },
+  {
+   "id": "market_hall",
+   "name": "devant la halle",
+   "pos": [
+    -10,
+    -2.5
+   ],
+   "radius": 3
+  },
+  {
+   "id": "market_stalls",
+   "name": "aux étals",
+   "pos": [
+    0,
+    11.5
+   ],
+   "radius": 5
+  },
+  {
+   "id": "market_east",
+   "name": "sur la place",
+   "pos": [
+    9,
+    1
+   ],
+   "radius": 4
+  },
+  {
+   "id": "tavern_front",
+   "name": "devant la taverne",
+   "pos": [
+    13,
+    -3.5
+   ],
+   "radius": 5
+  },
+  {
+   "id": "temple_front",
+   "name": "sur le parvis du temple",
+   "pos": [
+    -14,
+    -37
+   ],
+   "radius": 3
+  },
+  {
+   "id": "temple_lawn",
+   "name": "sur la pelouse du temple",
+   "pos": [
+    -2,
+    -36
+   ],
+   "radius": 5
+  },
+  {
+   "id": "mage_court",
+   "name": "au pied de la tour des mages",
+   "pos": [
+    5,
+    -59
+   ],
+   "radius": 2.5
+  },
+  {
+   "id": "forge_yard",
+   "name": "à la forge",
+   "pos": [
+    34,
+    3.8
+   ],
+   "radius": 1.8
+  },
+  {
+   "id": "artisan_street",
+   "name": "rue des Artisans",
+   "pos": [
+    40,
+    0
+   ],
+   "radius": 4
+  },
+  {
+   "id": "lumber_yard",
+   "name": "au dépôt de bois",
+   "pos": [
+    40,
+    23.5
+   ],
+   "radius": 2.5
+  },
+  {
+   "id": "mill_yard",
+   "name": "au moulin",
+   "pos": [
+    40,
+    -34
+   ],
+   "radius": 3
+  },
+  {
+   "id": "barracks_yard",
+   "name": "dans la cour de la caserne",
+   "pos": [
+    -36,
+    -1.5
+   ],
+   "radius": 3
+  },
+  {
+   "id": "training_ground",
+   "name": "au champ de tir",
+   "pos": [
+    -48,
+    23
+   ],
+   "radius": 3
+  },
+  {
+   "id": "lowtown_square",
+   "name": "au cœur des Bas-Fonds",
+   "pos": [
+    0,
+    40
+   ],
+   "radius": 3.5
+  },
+  {
+   "id": "lowtown_alley",
+   "name": "dans une ruelle",
+   "pos": [
+    15,
+    37
+   ],
+   "radius": 3
+  },
+  {
+   "id": "lowtown_west",
+   "name": "près des masures",
+   "pos": [
+    -22,
+    37
+   ],
+   "radius": 3.5
+  },
+  {
+   "id": "hideout_door",
+   "name": "près du repaire",
+   "pos": [
+    6,
+    47.5
+   ],
+   "radius": 1.8
+  },
+  {
+   "id": "gate_north",
+   "name": "à la porte nord",
+   "pos": [
+    2.2,
+    -64.5
+   ],
+   "radius": 1
+  },
+  {
+   "id": "gate_south",
+   "name": "à la porte sud",
+   "pos": [
+    -2.2,
+    64.5
+   ],
+   "radius": 1
+  },
+  {
+   "id": "gate_east",
+   "name": "à la porte est",
+   "pos": [
+    64.5,
+    2.2
+   ],
+   "radius": 1
+  },
+  {
+   "id": "gate_west",
+   "name": "à la porte ouest",
+   "pos": [
+    -64.5,
+    -2.2
+   ],
+   "radius": 1
+  },
+  {
+   "id": "fields_east",
+   "name": "aux champs de l'est",
+   "pos": [
+    84,
+    8
+   ],
+   "radius": 6
+  },
+  {
+   "id": "fields_south",
+   "name": "aux champs du sud",
+   "pos": [
+    -9,
+    86
+   ],
+   "radius": 6
+  },
+  {
+   "id": "woods_west",
+   "name": "à la lisière du bois",
+   "pos": [
+    -86,
+    -8
+   ],
+   "radius": 5
+  }
+ ],
+ "routes": [
+  {
+   "id": "patrol_market",
+   "name": "ronde du marché",
+   "points": [
+    [
+     -16,
+     -18
+    ],
+    [
+     5,
+     -19
+    ],
+    [
+     18,
+     -4
+    ],
+    [
+     17,
+     16
+    ],
+    [
+     -16,
+     17
+    ],
+    [
+     -18,
+     0
+    ]
+   ]
+  },
+  {
+   "id": "patrol_cross",
+   "name": "ronde des portes",
+   "points": [
+    [
+     0,
+     -60
+    ],
+    [
+     0,
+     -24
+    ],
+    [
+     60,
+     0
+    ],
+    [
+     24,
+     0
+    ],
+    [
+     0,
+     60
+    ],
+    [
+     0,
+     24
+    ],
+    [
+     -60,
+     0
+    ],
+    [
+     -24,
+     0
+    ]
+   ]
+  },
+  {
+   "id": "patrol_lowtown",
+   "name": "ronde des Bas-Fonds",
+   "points": [
+    [
+     -1.5,
+     26
+    ],
+    [
+     18,
+     36
+    ],
+    [
+     10,
+     58
+    ],
+    [
+     -10,
+     48
+    ],
+    [
+     -26,
+     38
+    ]
+   ]
+  },
+  {
+   "id": "patrol_garrison",
+   "name": "ronde de la garde",
+   "points": [
+    [
+     -28,
+     -3
+    ],
+    [
+     -52,
+     -3
+    ],
+    [
+     -52,
+     -34
+    ],
+    [
+     -30,
+     -30
+    ]
+   ]
   }
  ]
 }

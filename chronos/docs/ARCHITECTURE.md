@@ -135,6 +135,8 @@ chronos/
 
 Besoins V1 : faim, repos, social, travail, sécurité. Les routines sont décrites dans le pack (`06:00 forge`, `12:00 taverne`…). Les besoins urgents et les événements (fuir, appeler la garde) peuvent interrompre une routine.
 
+> Mise à jour J2 : implémenté dans `client/src/sim/agents/`. Tous les habitants utilisent la même IA d'utilité légère (emploi du temps + 3 besoins : faim, fatigue, compagnie) ; les personnages clés se distinguent par leur fiche complète. Il n'y a pas de LOD de simulation : 114 habitants à 10 Hz coûtent très peu. Le rendu de la foule passe par des textures d'animation de sommets (`render/crowd.ts`).
+
 ### 3.3 Événements, témoins et journal
 Chaque acte significatif produit un `WorldEvent` :
 ```ts

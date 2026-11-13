@@ -3,7 +3,10 @@ import "./style.css";
 import { FixedStep } from "./core/fixedStep";
 import { Input } from "./core/input";
 import { loadDefaultPack } from "./pack";
+import type { CharacterDef, ExtrasDef } from "@chronos/shared";
+import { ACTIVITY_LABELS, createAgentSystem, type Agent } from "./sim/agents";
 import { WorldClock } from "./sim/clock";
+import { resolveCircleCircle } from "./sim/collision";
 import { districtAt } from "./sim/districts";
 import { PLAYER_TUNING, createPlayer, playerSpeed, stepPlayer, type PlayerState } from "./sim/player";
 import { expandLayout } from "./sim/scenery";
@@ -21,7 +24,10 @@ import { GrassField } from "./render/grass";
 import { loadDetailTextures } from "./render/materials";
 import { buildGrassMap } from "./render/terrain";
 import { Hud } from "./ui/hud";
+import { Crowd } from "./render/crowd";
 import visualsJson from "../data/packs/medieval/visuals.json";
+import charactersJson from "../data/packs/medieval/characters.json";
+import extrasJson from "../data/packs/medieval/extras.json";
 
 const WORLD_SEED = 20261112;
 const PHYSICS_HZ = 60;
@@ -36,6 +42,14 @@ const collision = buildCollisionWorld(layout);
 const clock = new WorldClock(pack.manifest.calendar.minutesPerGameDay, pack.manifest.calendar.startHour);
 const player = createPlayer(layout.spawn.pos[0], layout.spawn.pos[1], layout.spawn.facing);
 const prevPlayer: PlayerState = { ...player };
+const agents = createAgentSystem(
+  layout,
+  collision,
+  (charactersJson as unknown as { characters: CharacterDef[] }).characters,
+  extrasJson as unknown as ExtrasDef,
+  WORLD_SEED,
+  clock,
+);
 
 // ---------------------------------------------------------------- rendering
 let qualityLevel: QualityLevel = initialQuality();
@@ -95,6 +109,7 @@ function setQuality(level: QualityLevel): void {
   postfx.apply(quality);
   rebuildNightLights(quality.maxNightLights);
   applyGrass();
+  crowd?.setShadows(quality.crowdShadows);
   hud.toast(quality.label);
 }
 
@@ -110,6 +125,7 @@ let world: Awaited<ReturnType<typeof buildWorldView>> | null = null;
 let ready = false;
 
 const environment = new EnvironmentLighting();
+let crowd: Crowd | null = null;
 let grass: GrassField | null = null;
 let grassMap: THREE.DataTexture | null = null;
 const GRASS_EXTENT = 200;
@@ -137,6 +153,9 @@ const loading = (async () => {
     environment.load(renderer, manager).catch((e) => console.warn("HDRI lighting unavailable", e)),
   ]);
   if (kaelModel && detail && quality.detailMaterials) enhanceModel(kaelModel, detail);
+  loadingEl.textContent = "Les habitants de Brumeval se réveillent…";
+  crowd = await Crowd.create(lib, visuals.assetsBase, visuals.looks, visuals.crowd, agents.agents, quality.crowdShadows);
+  scene.add(crowd.group);
   grassMap = buildGrassMap(layout, GRASS_EXTENT);
   applyGrass();
   world = view;
@@ -222,6 +241,32 @@ function updateNightLights(): void {
   });
 }
 
+const nameplatePos = new THREE.Vector3();
+let nameplateAgent: Agent | null = null;
+/** Shows who the closest inhabitant is and what they are doing. */
+function updateNameplate(px: number, pz: number): void {
+  const a = started && crowd ? agents.nearestTo(px, pz, 3.2) : null;
+  nameplateAgent = a;
+  if (!a || !crowd) {
+    hud.hideNameplate();
+    return;
+  }
+  nameplatePos.set(crowd.positions[a.index * 2] as number, 1.95 * a.scale, crowd.positions[a.index * 2 + 1] as number).project(camera);
+  if (nameplatePos.z > 1) {
+    hud.hideNameplate();
+    return;
+  }
+  const place = agents.places.label(a.place);
+  const doing = a.mode === "moving" && a.activity !== "patrol" && a.activity !== "wander" ? "est en route" : ACTIVITY_LABELS[a.activity];
+  hud.showNameplate(
+    ((nameplatePos.x + 1) / 2) * window.innerWidth,
+    ((1 - nameplatePos.y) / 2) * window.innerHeight,
+    a.name,
+    `${a.role} · ${doing}${place && a.mode !== "moving" ? " " + place : ""}`,
+    a.key,
+  );
+}
+
 function frame(now: number): void {
   renderer.info.reset();
   const dt = Math.min((now - last) / 1000, 0.25);
@@ -236,6 +281,7 @@ function frame(now: number): void {
   }
 
   let alpha = 1;
+  let simAlpha = 1;
   if (!paused) {
     rig.look(input.mouseDX, input.mouseDY);
     if (input.wheel) rig.zoom(input.wheel);
@@ -244,9 +290,16 @@ function frame(now: number): void {
     alpha = physics.advance(dt, (step) => {
       Object.assign(prevPlayer, player);
       stepPlayer(player, { ...move, dodge: move.dodge && !dodgeConsumed }, collision, step);
+      // Inhabitants are solid: the player slides around them.
+      agents.forNeighbors(player.x, player.z, 1.5, (a) => {
+        resolveCircleCircle(player, PLAYER_TUNING.radius, { x: a.x, z: a.z, r: 0.3, height: 1.7 });
+      });
       dodgeConsumed = true;
     });
-    sim.advance(dt, (step) => clock.advance(step));
+    simAlpha = sim.advance(dt, (step) => {
+      clock.advance(step);
+      agents.step(step, clock, player);
+    });
   }
 
   // Interpolated render state.
@@ -257,6 +310,9 @@ function frame(now: number): void {
   const frameDt = paused ? 0 : dt;
   if (animatedKael) animatedKael.update(frameDt, playerSpeed(player), player.state);
   else placeholderKael.animate(frameDt, playerSpeed(player), player.state, 1 - player.dodgeTime / PLAYER_TUNING.dodgeDuration);
+
+  crowd?.update(frameDt * Math.min(clock.timeScale, 4), simAlpha);
+  updateNameplate(rx, rz);
 
   rig.update({ x: rx, y: 0, z: rz }, dt, collision.boxes);
   camera.position.set(rig.position.x, rig.position.y, rig.position.z);
@@ -301,6 +357,7 @@ function frame(now: number): void {
     state: player.state,
     speed: playerSpeed(player),
     timeScale: clock.timeScale,
+    agents: agents.counts(),
   });
 
   input.endFrame();
@@ -324,6 +381,19 @@ window.__chronos = {
   },
   setHour(h: number) {
     clock.totalMinutes = (clock.day - 1) * 1440 + h * 60;
+    agents.settle(clock);
+  },
+  get agents() {
+    return {
+      ...agents.counts(),
+      total: agents.agents.length,
+      rendered: crowd !== null,
+      nameplate: nameplateAgent?.id ?? null,
+    };
+  },
+  agent(id: string) {
+    const a = agents.agents.find((x) => x.id === id);
+    return a ? { x: a.x, z: a.z, activity: a.activity, place: a.place, mode: a.mode, insideOf: a.insideOf, anim: a.anim } : null;
   },
   setCamera(yaw: number, pitch: number, distance: number) {
     rig.yaw = yaw;

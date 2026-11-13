@@ -109,6 +109,10 @@
   "shack_9": {
    "model": "buildings/home_B_green",
    "scale": 6
+  },
+  "mage_tower": {
+   "model": "buildings/tower_A_yellow",
+   "scale": 7
   }
  },
  "props": {
@@ -317,5 +321,86 @@
    "walkSpeed": 2.0,
    "runSpeed": 5.6
   }
+ },
+ "looks": {
+  "villager_a": {
+   "model": "characters/Rogue",
+   "accessories": [
+    "Rogue_Cape"
+   ],
+   "feminine": false
+  },
+  "villager_b": {
+   "model": "characters/Barbarian",
+   "accessories": [],
+   "feminine": false
+  },
+  "villager_c": {
+   "model": "characters/Mage",
+   "accessories": [
+    "Mage_Cape"
+   ],
+   "feminine": true
+  },
+  "villager_d": {
+   "model": "characters/Knight",
+   "accessories": [],
+   "feminine": false
+  },
+  "barbarian_hat": {
+   "model": "characters/Barbarian",
+   "accessories": [
+    "Barbarian_Hat",
+    "Barbarian_Cape"
+   ],
+   "feminine": false
+  },
+  "guard": {
+   "model": "characters/Knight",
+   "accessories": [
+    "Knight_Helmet",
+    "1H_Sword",
+    "Round_Shield"
+   ],
+   "feminine": false
+  },
+  "guard_captain": {
+   "model": "characters/Knight",
+   "accessories": [
+    "Knight_Cape",
+    "1H_Sword",
+    "Badge_Shield"
+   ],
+   "feminine": false
+  },
+  "mage": {
+   "model": "characters/Mage",
+   "accessories": [
+    "Mage_Hat",
+    "Mage_Cape",
+    "2H_Staff"
+   ],
+   "feminine": true
+  },
+  "thief": {
+   "model": "characters/Rogue_Hooded",
+   "accessories": [
+    "Rogue_Cape"
+   ],
+   "feminine": false
+  }
+ },
+ "crowd": {
+  "height": 1.72,
+  "clips": {
+   "idle": "Idle",
+   "walk": "Walking_A",
+   "run": "Running_A",
+   "interact": "Interact",
+   "sit": "Sit_Floor_Idle",
+   "cheer": "Cheer"
+  },
+  "sampleRate": 12,
+  "maxFrames": 24
  }
 }

@@ -11,6 +11,7 @@ export interface DebugInfo {
   state: string;
   speed: number;
   timeScale: number;
+  agents: { outside: number; inside: number; moving: number };
 }
 
 const $ = <T extends HTMLElement>(id: string) => {
@@ -46,6 +47,28 @@ export class Hud {
     this.districtTimer = 3;
   }
 
+  private readonly nameplateEl = $("nameplate");
+  private nameplateKey = "";
+  showNameplate(x: number, y: number, name: string, detail: string, key: boolean): void {
+    const k = `${name}|${detail}`;
+    if (k !== this.nameplateKey) {
+      this.nameplateKey = k;
+      this.nameplateEl.replaceChildren();
+      const n = document.createElement("strong");
+      n.textContent = name;
+      const d = document.createElement("span");
+      d.textContent = detail;
+      this.nameplateEl.append(n, d);
+      this.nameplateEl.classList.toggle("key", key);
+    }
+    this.nameplateEl.style.transform = `translate(${Math.round(x)}px, ${Math.round(y)}px) translate(-50%, -100%)`;
+    this.nameplateEl.classList.add("visible");
+  }
+
+  hideNameplate(): void {
+    this.nameplateEl.classList.remove("visible");
+  }
+
   private toastTimer: number | undefined;
   toast(text: string): void {
     const el = $("toast");
@@ -70,6 +93,7 @@ export class Hud {
       `FPS ${d.fps.toFixed(0)} · draw calls ${d.drawCalls} · tris ${(d.triangles / 1000).toFixed(1)}k\n` +
       `pos ${d.x.toFixed(1)}, ${d.z.toFixed(1)} · ${d.state} · ${d.speed.toFixed(1)} m/s\n` +
       `time scale ×${d.timeScale}\n` +
+      `habitants : ${d.agents.outside} dehors (${d.agents.moving} en marche) · ${d.agents.inside} à l'intérieur\n` +
       `[T] vitesse du temps · [G] qualité · [F3] debug`;
   }
 }

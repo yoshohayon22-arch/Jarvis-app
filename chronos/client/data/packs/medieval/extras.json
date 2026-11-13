@@ -1,0 +1,891 @@
+{
+ "archetypes": [
+  {
+   "id": "merchant",
+   "label": "Marchand",
+   "labelF": "Marchande",
+   "count": 14,
+   "faction": "villagers",
+   "looks": [
+    "villager_a",
+    "villager_c",
+    "villager_b"
+   ],
+   "tints": [
+    "#ffe9b8",
+    "#ffd0a8",
+    "#e8f0c8",
+    "#f6d8e8",
+    "#ffffff"
+   ],
+   "scale": [
+    0.94,
+    1.06
+   ],
+   "speed": [
+    1.2,
+    1.5
+   ],
+   "homes": [
+    "house_n2",
+    "house_e1",
+    "house_e2",
+    "house_e3",
+    "house_e4",
+    "house_w1",
+    "house_priest"
+   ],
+   "work": [
+    "spot:market_hall",
+    "spot:market_stalls",
+    "spot:market_east",
+    "spot:market_well"
+   ],
+   "jitter": 35,
+   "schedule": [
+    {
+     "from": 6.5,
+     "do": "work",
+     "at": "work"
+    },
+    {
+     "from": 12,
+     "do": "eat",
+     "at": "building:tavern"
+    },
+    {
+     "from": 13,
+     "do": "work",
+     "at": "work"
+    },
+    {
+     "from": 18.5,
+     "do": "socialize",
+     "at": "spot:tavern_front"
+    },
+    {
+     "from": 20,
+     "do": "eat",
+     "at": "home"
+    },
+    {
+     "from": 21.5,
+     "do": "sleep",
+     "at": "home"
+    }
+   ]
+  },
+  {
+   "id": "artisan",
+   "label": "Artisan",
+   "labelF": "Artisane",
+   "count": 12,
+   "faction": "villagers",
+   "looks": [
+    "villager_d",
+    "villager_b",
+    "barbarian_hat"
+   ],
+   "tints": [
+    "#ffffff",
+    "#e9dcc6",
+    "#d8c3a0",
+    "#c9b48f",
+    "#f1d7b0",
+    "#bfae9a",
+    "#dcd0c0"
+   ],
+   "scale": [
+    0.96,
+    1.08
+   ],
+   "speed": [
+    1.2,
+    1.45
+   ],
+   "homes": [
+    "house_n2",
+    "house_e1",
+    "house_e2",
+    "house_e3",
+    "house_e4",
+    "house_w1",
+    "house_priest"
+   ],
+   "work": [
+    "spot:artisan_street",
+    "spot:lumber_yard",
+    "spot:mill_yard",
+    "spot:forge_yard"
+   ],
+   "jitter": 30,
+   "schedule": [
+    {
+     "from": 6,
+     "do": "work",
+     "at": "work"
+    },
+    {
+     "from": 12,
+     "do": "eat",
+     "at": "spot:market_stalls"
+    },
+    {
+     "from": 13,
+     "do": "work",
+     "at": "work"
+    },
+    {
+     "from": 18,
+     "do": "socialize",
+     "at": "spot:tavern_front"
+    },
+    {
+     "from": 19.5,
+     "do": "eat",
+     "at": "building:tavern"
+    },
+    {
+     "from": 21,
+     "do": "sleep",
+     "at": "home"
+    }
+   ]
+  },
+  {
+   "id": "farmer",
+   "label": "Paysan",
+   "labelF": "Paysanne",
+   "count": 14,
+   "faction": "villagers",
+   "looks": [
+    "villager_b",
+    "villager_a",
+    "villager_c"
+   ],
+   "tints": [
+    "#e0d2a8",
+    "#cfc19a",
+    "#d9e0b0",
+    "#e8d8c0",
+    "#c8b890"
+   ],
+   "scale": [
+    0.95,
+    1.06
+   ],
+   "speed": [
+    1.25,
+    1.5
+   ],
+   "homes": [
+    "house_n2",
+    "house_e1",
+    "house_e2",
+    "house_e3",
+    "house_e4",
+    "house_w1",
+    "house_priest",
+    "shack_1",
+    "shack_2",
+    "shack_3"
+   ],
+   "work": [
+    "spot:fields_east",
+    "spot:fields_south",
+    "spot:woods_west",
+    "spot:mill_yard"
+   ],
+   "jitter": 40,
+   "schedule": [
+    {
+     "from": 5.5,
+     "do": "work",
+     "at": "work"
+    },
+    {
+     "from": 11.5,
+     "do": "eat",
+     "at": "spot:market_stalls"
+    },
+    {
+     "from": 12.5,
+     "do": "work",
+     "at": "work"
+    },
+    {
+     "from": 17.5,
+     "do": "socialize",
+     "at": "spot:market_well"
+    },
+    {
+     "from": 19,
+     "do": "eat",
+     "at": "home"
+    },
+    {
+     "from": 20.5,
+     "do": "sleep",
+     "at": "home"
+    }
+   ]
+  },
+  {
+   "id": "guard_day",
+   "label": "Garde",
+   "labelF": "Garde",
+   "count": 7,
+   "faction": "royal_guard",
+   "looks": [
+    "guard"
+   ],
+   "tints": [
+    "#e8eeff",
+    "#dfe6f5",
+    "#f2f2f2"
+   ],
+   "scale": [
+    1.0,
+    1.08
+   ],
+   "speed": [
+    1.35,
+    1.5
+   ],
+   "homes": [
+    "barracks"
+   ],
+   "work": [
+    "route:patrol_market",
+    "route:patrol_cross",
+    "route:patrol_garrison",
+    "spot:gate_north",
+    "spot:gate_east",
+    "spot:gate_west",
+    "spot:gate_south"
+   ],
+   "jitter": 15,
+   "schedule": [
+    {
+     "from": 6,
+     "do": "patrol",
+     "at": "work"
+    },
+    {
+     "from": 12,
+     "do": "eat",
+     "at": "building:barracks"
+    },
+    {
+     "from": 13,
+     "do": "patrol",
+     "at": "work"
+    },
+    {
+     "from": 19,
+     "do": "socialize",
+     "at": "spot:barracks_yard"
+    },
+    {
+     "from": 20.5,
+     "do": "sleep",
+     "at": "home"
+    }
+   ]
+  },
+  {
+   "id": "guard_night",
+   "label": "Garde de nuit",
+   "labelF": "Garde de nuit",
+   "count": 5,
+   "faction": "royal_guard",
+   "looks": [
+    "guard"
+   ],
+   "tints": [
+    "#c8d0e8",
+    "#d0d0dc"
+   ],
+   "scale": [
+    1.0,
+    1.08
+   ],
+   "speed": [
+    1.35,
+    1.5
+   ],
+   "homes": [
+    "barracks"
+   ],
+   "work": [
+    "route:patrol_market",
+    "route:patrol_cross",
+    "route:patrol_lowtown",
+    "spot:gate_north",
+    "spot:gate_east"
+   ],
+   "jitter": 15,
+   "schedule": [
+    {
+     "from": 0,
+     "do": "patrol",
+     "at": "work"
+    },
+    {
+     "from": 6.5,
+     "do": "eat",
+     "at": "building:barracks"
+    },
+    {
+     "from": 7.5,
+     "do": "sleep",
+     "at": "home"
+    },
+    {
+     "from": 16,
+     "do": "work",
+     "at": "spot:training_ground"
+    },
+    {
+     "from": 18.5,
+     "do": "eat",
+     "at": "building:tavern"
+    },
+    {
+     "from": 19.5,
+     "do": "patrol",
+     "at": "work"
+    }
+   ]
+  },
+  {
+   "id": "pauper",
+   "label": "Miséreux",
+   "labelF": "Miséreuse",
+   "count": 18,
+   "faction": "villagers",
+   "looks": [
+    "villager_c",
+    "villager_b",
+    "villager_a",
+    "villager_d"
+   ],
+   "tints": [
+    "#a89c8c",
+    "#b8a890",
+    "#9c9488",
+    "#b0a498",
+    "#c0b4a0"
+   ],
+   "scale": [
+    0.9,
+    1.03
+   ],
+   "speed": [
+    1.0,
+    1.3
+   ],
+   "homes": [
+    "shack_1",
+    "shack_2",
+    "shack_3",
+    "shack_4",
+    "shack_5",
+    "shack_6",
+    "shack_9"
+   ],
+   "work": [
+    "spot:lowtown_square",
+    "spot:lowtown_west",
+    "spot:lowtown_alley",
+    "spot:market_stalls",
+    "spot:temple_front"
+   ],
+   "jitter": 45,
+   "schedule": [
+    {
+     "from": 7,
+     "do": "wander",
+     "at": "district:lowtown"
+    },
+    {
+     "from": 9.5,
+     "do": "work",
+     "at": "work"
+    },
+    {
+     "from": 12.5,
+     "do": "eat",
+     "at": "spot:temple_lawn"
+    },
+    {
+     "from": 13.5,
+     "do": "wander",
+     "at": "district:market"
+    },
+    {
+     "from": 16,
+     "do": "work",
+     "at": "work"
+    },
+    {
+     "from": 19,
+     "do": "socialize",
+     "at": "spot:lowtown_square"
+    },
+    {
+     "from": 21.5,
+     "do": "sleep",
+     "at": "home"
+    }
+   ]
+  },
+  {
+   "id": "child",
+   "label": "Enfant",
+   "labelF": "Enfant",
+   "count": 10,
+   "faction": "villagers",
+   "looks": [
+    "villager_a",
+    "villager_c"
+   ],
+   "tints": [
+    "#ffe0b0",
+    "#d8f0d0",
+    "#f0d0e0",
+    "#d0e0ff",
+    "#fff0c0"
+   ],
+   "scale": [
+    0.55,
+    0.68
+   ],
+   "speed": [
+    1.7,
+    2.1
+   ],
+   "homes": [
+    "house_n2",
+    "house_e1",
+    "house_e2",
+    "house_e3",
+    "house_e4",
+    "house_w1",
+    "house_priest",
+    "shack_1",
+    "shack_2",
+    "shack_3",
+    "shack_4",
+    "shack_5",
+    "shack_6",
+    "shack_9"
+   ],
+   "work": [
+    "spot:temple_lawn",
+    "spot:market_well",
+    "spot:lowtown_square"
+   ],
+   "jitter": 30,
+   "schedule": [
+    {
+     "from": 7.5,
+     "do": "wander",
+     "at": "district:market"
+    },
+    {
+     "from": 10,
+     "do": "socialize",
+     "at": "work"
+    },
+    {
+     "from": 12,
+     "do": "eat",
+     "at": "home"
+    },
+    {
+     "from": 13,
+     "do": "wander",
+     "at": "district:temple_hill"
+    },
+    {
+     "from": 15.5,
+     "do": "socialize",
+     "at": "work"
+    },
+    {
+     "from": 18,
+     "do": "eat",
+     "at": "home"
+    },
+    {
+     "from": 19.5,
+     "do": "sleep",
+     "at": "home"
+    }
+   ]
+  },
+  {
+   "id": "acolyte",
+   "label": "Acolyte du temple",
+   "labelF": "Acolyte du temple",
+   "count": 6,
+   "faction": "villagers",
+   "looks": [
+    "villager_c",
+    "villager_a"
+   ],
+   "tints": [
+    "#fff6e0",
+    "#fff0d0"
+   ],
+   "scale": [
+    0.95,
+    1.03
+   ],
+   "speed": [
+    1.15,
+    1.3
+   ],
+   "homes": [
+    "house_priest",
+    "temple"
+   ],
+   "work": [
+    "spot:temple_front",
+    "spot:temple_lawn"
+   ],
+   "jitter": 20,
+   "schedule": [
+    {
+     "from": 5,
+     "do": "pray",
+     "at": "spot:temple_front"
+    },
+    {
+     "from": 7,
+     "do": "work",
+     "at": "work"
+    },
+    {
+     "from": 12,
+     "do": "eat",
+     "at": "home"
+    },
+    {
+     "from": 13,
+     "do": "wander",
+     "at": "district:lowtown"
+    },
+    {
+     "from": 16,
+     "do": "pray",
+     "at": "building:temple"
+    },
+    {
+     "from": 18,
+     "do": "work",
+     "at": "work"
+    },
+    {
+     "from": 20,
+     "do": "sleep",
+     "at": "home"
+    }
+   ]
+  },
+  {
+   "id": "mage",
+   "label": "Mage de l'Ordre",
+   "labelF": "Mage de l'Ordre",
+   "count": 5,
+   "faction": "mages_order",
+   "looks": [
+    "mage",
+    "villager_c"
+   ],
+   "tints": [
+    "#dfe6ff",
+    "#e8d8ff",
+    "#d0e8ff"
+   ],
+   "scale": [
+    0.97,
+    1.05
+   ],
+   "speed": [
+    1.15,
+    1.35
+   ],
+   "homes": [
+    "mage_tower"
+   ],
+   "work": [
+    "spot:mage_court",
+    "spot:temple_lawn",
+    "building:mage_tower"
+   ],
+   "jitter": 30,
+   "schedule": [
+    {
+     "from": 7.5,
+     "do": "work",
+     "at": "work"
+    },
+    {
+     "from": 11,
+     "do": "wander",
+     "at": "district:temple_hill"
+    },
+    {
+     "from": 12.5,
+     "do": "eat",
+     "at": "home"
+    },
+    {
+     "from": 14,
+     "do": "work",
+     "at": "building:mage_tower"
+    },
+    {
+     "from": 17,
+     "do": "wander",
+     "at": "district:market"
+    },
+    {
+     "from": 19,
+     "do": "eat",
+     "at": "building:tavern"
+    },
+    {
+     "from": 21,
+     "do": "work",
+     "at": "spot:mage_court"
+    },
+    {
+     "from": 23,
+     "do": "sleep",
+     "at": "home"
+    }
+   ]
+  },
+  {
+   "id": "thief",
+   "label": "Rôdeur",
+   "labelF": "Rôdeuse",
+   "count": 6,
+   "faction": "thieves_guild",
+   "looks": [
+    "thief"
+   ],
+   "tints": [
+    "#9c90b0",
+    "#a8a0a0",
+    "#8890a8"
+   ],
+   "scale": [
+    0.94,
+    1.04
+   ],
+   "speed": [
+    1.5,
+    1.8
+   ],
+   "homes": [
+    "shack_6",
+    "shack_4",
+    "shack_5"
+   ],
+   "work": [
+    "spot:lowtown_alley",
+    "spot:market_east",
+    "spot:market_stalls",
+    "spot:hideout_door"
+   ],
+   "jitter": 40,
+   "schedule": [
+    {
+     "from": 0,
+     "do": "wander",
+     "at": "district:lowtown"
+    },
+    {
+     "from": 2.5,
+     "do": "sleep",
+     "at": "home"
+    },
+    {
+     "from": 11,
+     "do": "eat",
+     "at": "spot:lowtown_square"
+    },
+    {
+     "from": 12,
+     "do": "work",
+     "at": "work"
+    },
+    {
+     "from": 17,
+     "do": "eat",
+     "at": "building:tavern"
+    },
+    {
+     "from": 19,
+     "do": "socialize",
+     "at": "spot:hideout_door"
+    },
+    {
+     "from": 21,
+     "do": "work",
+     "at": "work"
+    }
+   ]
+  },
+  {
+   "id": "regular",
+   "label": "Habitué de la taverne",
+   "labelF": "Habituée de la taverne",
+   "count": 5,
+   "faction": "villagers",
+   "looks": [
+    "villager_b",
+    "villager_d",
+    "barbarian_hat"
+   ],
+   "tints": [
+    "#ffffff",
+    "#e9dcc6",
+    "#d8c3a0",
+    "#c9b48f",
+    "#f1d7b0",
+    "#bfae9a",
+    "#dcd0c0"
+   ],
+   "scale": [
+    0.98,
+    1.1
+   ],
+   "speed": [
+    1.0,
+    1.25
+   ],
+   "homes": [
+    "house_n2",
+    "house_e1",
+    "house_e2",
+    "house_e3",
+    "house_e4",
+    "house_w1",
+    "house_priest",
+    "shack_1",
+    "shack_2"
+   ],
+   "work": [
+    "spot:tavern_front"
+   ],
+   "jitter": 40,
+   "schedule": [
+    {
+     "from": 9,
+     "do": "wander",
+     "at": "district:market"
+    },
+    {
+     "from": 11,
+     "do": "socialize",
+     "at": "work"
+    },
+    {
+     "from": 13,
+     "do": "eat",
+     "at": "building:tavern"
+    },
+    {
+     "from": 15,
+     "do": "socialize",
+     "at": "work"
+    },
+    {
+     "from": 19,
+     "do": "eat",
+     "at": "building:tavern"
+    },
+    {
+     "from": 23.5,
+     "do": "sleep",
+     "at": "home"
+    }
+   ]
+  }
+ ],
+ "names": {
+  "m": [
+   "Aubin",
+   "Bertrand",
+   "Colin",
+   "Denis",
+   "Émeric",
+   "Florent",
+   "Gauvain",
+   "Hugues",
+   "Isarn",
+   "Jehan",
+   "Lubin",
+   "Mahaut",
+   "Noël",
+   "Odilon",
+   "Perrin",
+   "Quentin",
+   "Renaud",
+   "Sévrin",
+   "Thibaut",
+   "Urbain",
+   "Vivien",
+   "Yvain",
+   "Anselme",
+   "Baudoin",
+   "Clovis",
+   "Eudes",
+   "Foulques",
+   "Guilhem",
+   "Lambert",
+   "Milon"
+  ],
+  "f": [
+   "Adèle",
+   "Blanche",
+   "Clémence",
+   "Douce",
+   "Ermeline",
+   "Flore",
+   "Guillemette",
+   "Héloïse",
+   "Isabeau",
+   "Jehanne",
+   "Liénor",
+   "Mahaut",
+   "Nicolette",
+   "Ode",
+   "Perrine",
+   "Reine",
+   "Sibylle",
+   "Thiphaine",
+   "Ysabel",
+   "Aalis",
+   "Bertille",
+   "Colombe",
+   "Éloïse",
+   "Gersende",
+   "Oriane",
+   "Pétronille",
+   "Rosalinde",
+   "Solène",
+   "Viviane",
+   "Yolande"
+  ]
+ },
+ "feminineLooks": [
+  "villager_c",
+  "mage"
+ ]
+}

@@ -24,6 +24,7 @@ export interface QualityPreset {
   maxNightLights: number;
   grass: { count: number; patch: number } | null;
   detailMaterials: boolean;
+  crowdShadows: boolean;
 }
 
 export const QUALITY = qualityJson as unknown as Record<QualityLevel, QualityPreset>;

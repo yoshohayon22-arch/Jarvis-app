@@ -21,7 +21,8 @@
     "maxNightLights": 4,
     "dof": null,
     "grass": null,
-    "detailMaterials": true
+    "detailMaterials": true,
+    "crowdShadows": false
   },
   "high": {
     "label": "Qualité haute",
@@ -59,6 +60,7 @@
       "count": 60000,
       "patch": 56
     },
-    "detailMaterials": true
+    "detailMaterials": true,
+    "crowdShadows": true
   }
 }

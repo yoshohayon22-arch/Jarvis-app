@@ -61,7 +61,7 @@
       "sunIntensity": 2.8,
       "hemiSky": "#aeb0e6",
       "hemiGround": "#5e4a72",
-      "hemiIntensity": 0.85
+      "hemiIntensity": 1.1
     },
     {
       "e": 0.4,
@@ -71,7 +71,7 @@
       "sunIntensity": 3.4,
       "hemiSky": "#b8bdee",
       "hemiGround": "#5f5079",
-      "hemiIntensity": 0.9
+      "hemiIntensity": 1.15
     },
     {
       "e": 1,
@@ -81,7 +81,7 @@
       "sunIntensity": 3.6,
       "hemiSky": "#bec3f0",
       "hemiGround": "#62537c",
-      "hemiIntensity": 0.92
+      "hemiIntensity": 1.17
     }
   ],
   "light": {

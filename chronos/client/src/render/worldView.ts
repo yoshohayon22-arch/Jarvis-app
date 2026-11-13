@@ -3,6 +3,7 @@ import type { BuildingDef, PropDef, WorldLayout } from "@chronos/shared";
 import { SeededRng } from "../core/rng";
 import { GATE_ANGLES } from "../sim/worldColliders";
 import { AssetLibrary, type LoadedModel } from "./assets";
+import type { CrowdDef, LookDef } from "./crowd";
 import { GeoBuilder } from "./geoBuilder";
 import { instanceModel, type Placement } from "./instancing";
 import { PALETTE } from "./palette";
@@ -35,6 +36,8 @@ export interface VisualsDef {
     { models: string[]; count: number; radius: [number, number]; scale: [number, number]; height?: [number, number] }
   >;
   characters: Record<string, CharacterVisual>;
+  looks: Record<string, LookDef>;
+  crowd: CrowdDef;
 }
 
 export interface CharacterVisual {

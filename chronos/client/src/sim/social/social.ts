@@ -154,7 +154,8 @@ export class SocialSystem {
     return `${actor} ${verb}${many && act?.reaction === "alarm" ? many : ""} ${target}${where ? ` (${where})` : ""}`.trim();
   }
 
-  private pushFeed(t: number, text: string, tone: FeedEntry["tone"]): void {
+  /** Adds a line to the player's journal feed. */
+  pushFeed(t: number, text: string, tone: FeedEntry["tone"]): void {
     this.feed.push({ t, text, tone });
     if (this.feed.length > 40) this.feed.shift();
   }

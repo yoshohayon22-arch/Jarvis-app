@@ -19,6 +19,39 @@ npm run dev
 ```
 Puis ouvrir http://localhost:5173 dans le navigateur.
 
+## Dialogues IA (J4)
+Le jeu parle à l'IA uniquement à travers le petit serveur `server/` (proxy). **La clé API reste côté serveur** ; le navigateur ne la voit jamais.
+
+```bash
+# Terminal 1 : le proxy (choisir UNE des trois lignes)
+ANTHROPIC_API_KEY=sk-ant-... npm run server   # IA réelle
+CHRONOS_MOCK=1 npm run server                 # IA simulée, gratuite (pour tester le circuit)
+npm run server                                # sans clé : le jeu utilise ses répliques locales
+
+# Terminal 2 : le jeu
+npm run dev
+```
+`npm run dev:all` lance les deux d'un coup (avec les mêmes variables d'environnement).
+Sans proxy du tout, le jeu fonctionne aussi : les personnages répondent avec des répliques locales.
+
+En jeu : approchez un **personnage clé** (nom en doré), touche **F**, écrivez, Entrée. Échap ou s'éloigner met fin à la conversation. Les figurants répondent par une courte réplique locale, sans IA.
+
+### Garde-fous
+- Le proxy charge lui-même la fiche du personnage et la bible du monde (`lore.md`) : le navigateur n'envoie qu'un identifiant et le contexte de la scène, tout borné et validé.
+- Le texte du joueur (300 caractères max) est nettoyé et placé dans un bloc délimité ; l'IA a pour consigne de le traiter comme une parole, jamais comme un ordre.
+- L'IA répond dans un format strict (réplique, humeur, intention, variation d'opinion, secret révélé). Elle ne fait que **proposer** : le code borne la variation d'opinion (±5 par réplique, ±12 par conversation) et n'accepte un secret que s'il existe et si la confiance est suffisante. Les secrets ne sont même pas envoyés au modèle en dessous du seuil de confiance (25).
+- L'IA ne peut rien donner, rien ouvrir, rien modifier d'autre. Si elle « appelle la garde », le jeu fait accourir les gardes proches.
+
+### Coût
+Réglages dans `server/config.json` :
+- `routes.dialogue.model` : `claude-opus-5-5` par défaut (4 $ / 20 $ par million de tokens). Pour réduire fortement le coût : `claude-haiku-5-5` (0,10 $ / 0,50 $) ou `claude-sonnet-5-5` (2 $ / 10 $). On peut aussi passer `CHRONOS_DIALOGUE_MODEL=claude-haiku-5-5` au lancement.
+- `routes.dialogue.maxTokens` (plafond de sortie par appel, réflexion comprise) et `effort`.
+- `budget.dailyLimitUsd` (2 $ par défaut) : au-delà, le proxy répond « budget atteint » et le jeu passe aux répliques locales jusqu'au lendemain.
+- `rateLimit.perMinute`, cache de réponses (`cacheTtlSeconds`), et le préfixe stable du prompt (bible + règles + fiche) est mis en cache côté API.
+- Le prix de lecture du cache pour Haiku 5.5 dans `pricesPerMTok` est une estimation (10 % du prix d'entrée), à ajuster si besoin.
+
+Le panneau **F3** affiche le mode (IA / simulée / repli), le modèle, les appels, les tokens et la dépense du jour.
+
 ## Build de production
 ```bash
 npm run build      # vérifie les types puis construit client/dist
@@ -70,7 +103,7 @@ Galerie des modèles (en développement) : http://localhost:5173/gallery.html?ca
 
 ## Tests
 ```bash
-npm test           # tests unitaires (Vitest) : horloge, boucle, collisions, contrôleur, caméra, carte, données visuelles
+npm test           # tests unitaires du jeu et du proxy (Vitest)
 npm run typecheck  # vérification TypeScript
 npm run build && npm run e2e   # test de fumée : lance le jeu dans Chromium headless + captures (e2e/output/)
 QUALITY=low npm run e2e        # idem en qualité basse (plus rapide sans GPU)
@@ -85,6 +118,7 @@ Le test e2e utilise Playwright, qui doit être installé (`npx playwright instal
 | Espace | esquiver |
 | Souris | orienter la caméra (clic dans le jeu pour verrouiller le pointeur) |
 | Molette | zoom |
+| F | parler à un habitant (texte libre avec les personnages clés) |
 | E / V / N / B | près d'un habitant : faire l'aumône / voler / menacer / frapper |
 | J | journal : réputations et ce que l'on sait de toi |
 | T | vitesse du temps : ×1 → ×10 → ×60 → figé |
@@ -97,6 +131,7 @@ Le test e2e utilise Playwright, qui doit être installé (`npx playwright instal
 chronos/
 ├─ shared/          # types communs (format des packs d'époque…)
 ├─ tools/           # import des assets CC0 (KayKit, @pmndrs/assets)
+├─ server/          # proxy Node pour l'API Claude (la clé ne quitte jamais ce processus)
 ├─ client/          # le jeu (Vite + Three.js)
 │  ├─ src/core/     # boucle à pas fixe, RNG à graine, entrées
 │  ├─ src/sim/      # simulation déterministe (horloge, joueur, collisions, carte)
@@ -112,13 +147,12 @@ chronos/
 ├─ e2e/             # test de fumée Playwright
 └─ docs/
 ```
-Le proxy Node pour l'API Claude (`server/`) arrive au jalon J4.
 
 ## Avancement
 - [x] J1 : scène 3D, personnage jouable, déplacement, caméra, cycle jour/nuit
 - [x] J2 : habitants avec routines et foule légère (12 personnages clés + 102 figurants)
 - [x] J3 : mémoire, rumeurs, réputations
-- [ ] J4 : dialogues IA via le proxy
+- [x] J4 : dialogues IA via le proxy
 - [ ] J5 : pouvoirs (temps, télékinésie, ombre) et conséquences
 - [ ] J6 : écho du passé, changement de visage
 - [ ] J7 : missions générées et validées

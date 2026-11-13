@@ -5,15 +5,18 @@
   "type": "module",
   "workspaces": [
     "shared",
-    "client"
+    "client",
+    "server"
   ],
   "scripts": {
     "dev": "npm run dev -w client",
     "build": "npm run build -w client",
     "preview": "npm run preview -w client",
-    "test": "npm run test -w client",
-    "typecheck": "npm run typecheck -w client",
-    "e2e": "node e2e/smoke.mjs"
+    "test": "npm run test -w client && npm run test -w server",
+    "typecheck": "npm run typecheck -w client && npm run typecheck -w server",
+    "e2e": "node e2e/smoke.mjs",
+    "server": "npm run start -w server",
+    "dev:all": "node tools/dev.mjs"
   },
   "engines": {
     "node": ">=20"

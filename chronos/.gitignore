@@ -3,3 +3,4 @@ dist/
 e2e/output/
 *.log
 .env
+server/.data/

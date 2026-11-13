@@ -264,6 +264,22 @@ export class AgentSystem {
     a.nextThinkAt = now + (kind === "flee" ? 12 : 8);
   }
 
+  /** Keeps an inhabitant in place, facing a point (while the player talks to them). */
+  hold(a: Agent, x: number, z: number, now: number, minutes = 3): void {
+    if (a.insideOf) return;
+    a.reacting = true;
+    a.hurry = false;
+    a.path = [];
+    a.pathIndex = 0;
+    a.enterOnArrival = null;
+    a.mode = "acting";
+    a.anim = "idle";
+    a.facing = Math.atan2(x - a.x, z - a.z);
+    a.targetX = a.x;
+    a.targetZ = a.z;
+    a.nextThinkAt = now + minutes;
+  }
+
   // ---------------------------------------------------------------- spatial queries
 
   private key(x: number, z: number): number {

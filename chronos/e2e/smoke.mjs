@@ -41,7 +41,9 @@ try {
   const page = await browser.newPage({ viewport: { width: 1280, height: 720 } });
   page.setDefaultTimeout(180000);
   const errors = [];
-  page.on("console", (m) => m.type() === "error" && errors.push(m.text()));
+  // Without a proxy, the browser itself logs the failed /api requests: expected in "local" mode.
+  const expectedNoise = (t) => process.env.EXPECT_AI === "local" && /Failed to load resource/.test(t);
+  page.on("console", (m) => m.type() === "error" && !expectedNoise(m.text()) && errors.push(m.text()));
   page.on("pageerror", (e) => errors.push(String(e)));
 
   await page.goto(BASE_URL);
@@ -127,10 +129,37 @@ try {
   check(soc.events === 1 && soc.informed[0] > 3, `assault seen by ${soc.informed[0]} people`);
   check(soc.reputation.villagers < 0 && soc.reputation.royal_guard <= 0, `reputations moved: ${JSON.stringify(soc.reputation)}`);
   check(soc.emotes > 0, `${soc.emotes} inhabitants show a reaction`);
+  await page.waitForFunction(() => /as frappé/.test(document.getElementById("journal")?.textContent ?? ""), null, { timeout: 15000 }).catch(() => {});
   const journal = await page.evaluate(() => document.getElementById("journal")?.textContent ?? "");
+  if (!/as frappé/.test(journal)) console.log("  journal:", JSON.stringify(journal), await page.evaluate(() => document.getElementById("journal").className));
   check(/Réputations/.test(journal) && /as frappé/.test(journal), "journal lists reputations and what people know");
   await page.screenshot({ path: `${OUT}${QUALITY}-10-assault-witnesses.png` });
   await page.keyboard.press("KeyJ");
+  // J4: free-text dialogue with a key character (AI via the proxy when available, local lines otherwise).
+  if (process.env.EXPECT_AI) {
+    await page.evaluate(() => {
+      const c = window.__chronos;
+      c.setHour(10);
+      const g = c.agent("garn");
+      c.teleport(g.x + 1.2, g.z + 0.4, 0);
+      c.setCamera(0.6, 0.3, 6);
+    });
+    await page.waitForTimeout(1200);
+    await page.evaluate(() => window.__chronos.talk("garn"));
+    await page.waitForTimeout(600);
+    await page.locator("#dialogue-input").fill("Bonjour Garn ! Que sais-tu de Valdren ?");
+    await page.keyboard.press("Enter");
+    await page.waitForFunction(() => window.__chronos.ai.turns.length >= 2, null, { timeout: 60000 });
+    await page.waitForTimeout(800);
+    const ai = await page.evaluate(() => window.__chronos.ai);
+    const expected = process.env.EXPECT_AI; // "mock", "ai" or "local"
+    // A repeated run may be served from the proxy's response cache: that still counts as an AI reply.
+    const got = expected === "local" ? ai.stats.localReplies : ai.stats.aiReplies + ai.stats.cachedReplies;
+    check(ai.open && ai.turns[1].speaker === "npc" && ai.turns[1].text.length > 3, `Garn answered: "${ai.turns[1].text}"`);
+    check(got === 1, `reply source is "${expected}" (stats ${JSON.stringify(ai.stats)})`);
+    await page.screenshot({ path: `${OUT}${QUALITY}-11-dialogue-${expected}.png` });
+    await page.evaluate(() => window.__chronos.closeDialogue());
+  }
   await page.evaluate(() => window.__chronos.setHour(3));
   await page.waitForTimeout(800);
   const night = await page.evaluate(() => window.__chronos.agents);

@@ -6,8 +6,13 @@ import { loadDefaultPack } from "./pack";
 import type { ActsDef, CharacterDef, ExtrasDef } from "@chronos/shared";
 import { FACTIONS, FACTION_LABELS, PLAYER_ID, SocialSystem } from "./sim/social";
 import actsJson from "../data/packs/medieval/acts.json";
+import fallbackJson from "../data/packs/medieval/dialogue_fallback.json";
+import { DIALOGUE_LIMITS, type BudgetStatus, type DialogueRequest } from "@chronos/shared";
+import { Conversation } from "./ai/conversation";
+import { bark, localReply, type FallbackData } from "./ai/fallback";
+import { AiGateway } from "./ai/gateway";
 import { ACTIVITY_LABELS, createAgentSystem, type Agent } from "./sim/agents";
-import { WorldClock } from "./sim/clock";
+import { PHASE_LABELS, WorldClock } from "./sim/clock";
 import { resolveCircleCircle } from "./sim/collision";
 import { districtAt } from "./sim/districts";
 import { PLAYER_TUNING, createPlayer, playerSpeed, stepPlayer, type PlayerState } from "./sim/player";
@@ -199,8 +204,11 @@ function start(): void {
 }
 title.addEventListener("click", start);
 pauseEl.addEventListener("click", start);
+canvas.addEventListener("click", () => {
+  if (started && !paused && !hud.dialogueOpen && !document.pointerLockElement) input.requestPointerLock();
+});
 document.addEventListener("pointerlockchange", () => {
-  if (started && !document.pointerLockElement) {
+  if (started && !document.pointerLockElement && !hud.dialogueOpen) {
     paused = true;
     pauseEl.classList.remove("hidden");
   }
@@ -250,7 +258,7 @@ const nameplatePos = new THREE.Vector3();
 let nameplateAgent: Agent | null = null;
 /** Shows who the closest inhabitant is and what they are doing. */
 function updateNameplate(px: number, pz: number): void {
-  const a = started && crowd ? agents.nearestTo(px, pz, 3.2) : null;
+  const a = started && crowd && !hud.dialogueOpen ? agents.nearestTo(px, pz, 3.2) : null;
   nameplateAgent = a;
   if (!a || !crowd) {
     hud.hideNameplate();
@@ -277,7 +285,7 @@ function updateNameplate(px: number, pz: number): void {
     `${a.role} · ${doing}${place && a.mode !== "moving" ? " " + place : ""}`,
     a.key,
     [mood, knows].filter(Boolean).join(" · "),
-    close ? "[E] aumône · [V] voler · [N] menacer · [B] frapper" : "",
+    close ? "[F] parler · [E] aumône · [V] voler · [N] menacer · [B] frapper" : "",
   );
 }
 
@@ -314,7 +322,134 @@ function playerAct(actId: string, target: Agent): void {
   hud.setCoins(coins);
 }
 
+// ---------------------------------------------------------------- dialogue (J4)
+const gateway = new AiGateway();
+const fallbackData = fallbackJson as unknown as FallbackData;
+const defsById = new Map(characterDefs.map((c) => [c.id, c]));
+let conversation: Conversation | null = null;
+let talkingTo: Agent | null = null;
+let aiStatus: BudgetStatus | null = null;
+let aiStatusAt = -Infinity;
+
+function refreshAiStatus(): void {
+  aiStatusAt = performance.now();
+  void gateway.budget().then((b) => (aiStatus = b));
+}
+
+function aiDebugLine(): string {
+  const g = gateway.stats;
+  if (!aiStatus) return `IA : proxy injoignable → répliques locales (${g.localReplies})`;
+  const mode = aiStatus.mode === "ai" ? `IA ${aiStatus.model}` : aiStatus.mode === "mock" ? "IA simulée" : "pas de clé → repli local";
+  return (
+    `${mode}${aiStatus.exceeded ? " · BUDGET ATTEINT → repli" : ""} · ${aiStatus.calls} appels · cache ${aiStatus.cacheHits}\n` +
+    `tokens ${aiStatus.inputTokens} entrée / ${aiStatus.outputTokens} sortie / ${aiStatus.cacheReadTokens} cache · ` +
+    `${aiStatus.spentTodayUsd.toFixed(4)} $ / ${aiStatus.dailyLimitUsd} $ aujourd'hui · locales ${g.localReplies}`
+  );
+}
+
+function openDialogue(a: Agent): void {
+  const def = defsById.get(a.id);
+  if (!def) {
+    // Extras never use AI: a short local line.
+    hud.toast(`${a.name} : « ${bark(fallbackData, a.faction, social.reputation.opinion(a.id), social.rng.next())} »`);
+    return;
+  }
+  talkingTo = a;
+  conversation = new Conversation(a.id, def.secrets ?? []);
+  agents.hold(a, player.x, player.z, clock.totalMinutes);
+  hud.openDialogue(a.name, a.role);
+  document.exitPointerLock();
+  refreshAiStatus();
+}
+
+function closeDialogue(): void {
+  if (!hud.dialogueOpen) return;
+  hud.closeDialogue();
+  if (talkingTo) talkingTo.nextThinkAt = clock.totalMinutes; // back to their day
+  talkingTo = null;
+  conversation = null;
+  input.requestPointerLock();
+}
+
+async function sayToNpc(text: string): Promise<void> {
+  const a = talkingTo;
+  const conv = conversation;
+  if (!a || !conv) return;
+  const opinion = social.reputation.opinion(a.id);
+  const now = clock.totalMinutes;
+  const memories = social.memory
+    .relevant(a.id, PLAYER_ID, now, a.traits.grudge, DIALOGUE_LIMITS.memoriesMax)
+    .map((m) => `${m.kind === "heard" ? "On t'a raconté que" : m.kind === "suffered" ? "Tu as subi ceci :" : "Tu as vu que"} ${social.describe(m.claim)}`.slice(0, 200));
+  let bystanders = 0;
+  let guardNearby = false;
+  agents.forNeighbors(a.x, a.z, 8, (o) => {
+    if (o === a) return;
+    bystanders++;
+    if (o.faction === "royal_guard") guardNearby = true;
+  });
+  const request: DialogueRequest = {
+    characterId: a.id,
+    playerText: text.slice(0, DIALOGUE_LIMITS.playerTextMax),
+    history: conv.history(),
+    context: {
+      opinion,
+      factionReputation: social.reputation.factions[a.faction],
+      memories,
+      scene: {
+        time: `${clock.format()} (${PHASE_LABELS[clock.phase].toLowerCase()})`,
+        place: agents.places.label(a.place).slice(0, 80),
+        activity: ACTIVITY_LABELS[a.activity],
+        bystanders,
+        guardNearby,
+      },
+    },
+  };
+  conv.addPlayer(request.playerText);
+  hud.addDialogueLine("player", request.playerText);
+  const pending = hud.addDialogueLine("pending", `${a.name} réfléchit…`);
+  hud.setDialogueBusy(true);
+  const firstTurn = conv.turns.length === 1;
+  const result = await gateway.dialogue(request, defsById.get(a.id)?.secrets?.length ?? 0, () =>
+    localReply(fallbackData, request.playerText, opinion, firstTurn, social.rng.next()),
+  );
+  pending.remove();
+  if (conversation !== conv) return; // the player walked away meanwhile
+  const effects = conv.apply(result.reply, opinion, result.source !== "local");
+  hud.addDialogueLine("npc", result.reply.line);
+  if (effects.opinionDelta !== 0) {
+    social.reputation.nudgeOpinion(a.id, effects.opinionDelta);
+    hud.addDialogueLine("system", `${a.name} ${effects.opinionDelta > 0 ? "t'apprécie un peu plus" : "t'apprécie un peu moins"} (${effects.opinionDelta > 0 ? "+" : ""}${effects.opinionDelta}).`);
+  }
+  if (effects.secret) {
+    social.pushFeed(now, `Secret confié par ${a.name} : ${effects.secret}`, "neutral");
+    hud.addDialogueLine("system", "Un secret a été noté dans ton journal (J).");
+  }
+  if (effects.callGuard) {
+    let called = 0;
+    for (const g of agents.agents) {
+      if (g.faction !== "royal_guard" || g.insideOf || Math.hypot(g.x - a.x, g.z - a.z) > 30) continue;
+      agents.react(g, "confront", player.x, player.z, now, "!");
+      called++;
+    }
+    agents.setEmote(a, "!", now, 4);
+    hud.addDialogueLine("system", called ? `${a.name} appelle la garde !` : `${a.name} appelle la garde, mais personne n'entend.`);
+  }
+  const label = result.source === "ai" ? "IA" : result.source === "cache" ? "IA (cache)" : result.source === "mock" ? "IA simulée" : `réplique locale — ${result.reason}`;
+  hud.setDialogueBusy(false, label);
+  refreshAiStatus();
+  if (effects.end) window.setTimeout(closeDialogue, 1800);
+}
+hud.bindDialogue((text) => void sayToNpc(text), closeDialogue);
+
 function updateSocialUi(): void {
+  if (hud.dialogueOpen && talkingTo) {
+    // The character stays with us; walking away ends the conversation.
+    agents.hold(talkingTo, player.x, player.z, clock.totalMinutes);
+    if (Math.hypot(talkingTo.x - player.x, talkingTo.z - player.z) > INTERACT_RANGE + 2.5) closeDialogue();
+  }
+  if (hud.debugVisible && performance.now() - aiStatusAt > 5000) refreshAiStatus();
+  if (nameplateAgent && !paused && !hud.dialogueOpen && input.wasPressed("KeyF") && Math.hypot(nameplateAgent.x - player.x, nameplateAgent.z - player.z) < INTERACT_RANGE)
+    openDialogue(nameplateAgent);
   if (nameplateAgent && !paused && Math.hypot(nameplateAgent.x - player.x, nameplateAgent.z - player.z) < INTERACT_RANGE) {
     for (const [code, actId] of Object.entries(ACT_KEYS)) if (input.wasPressed(code)) playerAct(actId, nameplateAgent);
   }
@@ -433,6 +568,7 @@ function frame(now: number): void {
     speed: playerSpeed(player),
     timeScale: clock.timeScale,
     agents: agents.counts(),
+    ai: aiDebugLine(),
   });
 
   input.endFrame();
@@ -465,6 +601,18 @@ window.__chronos = {
       rendered: crowd !== null,
       nameplate: nameplateAgent?.id ?? null,
     };
+  },
+  talk(agentId: string) {
+    const a = agents.agents.find((x) => x.id === agentId);
+    if (a) openDialogue(a);
+  },
+  say: (text: string) => sayToNpc(text),
+  closeDialogue,
+  get ai() {
+    return { stats: { ...gateway.stats }, status: aiStatus, open: hud.dialogueOpen, turns: conversation?.turns.map((t) => ({ ...t })) ?? [] };
+  },
+  setOpinion(agentId: string, value: number) {
+    social.reputation.opinions.set(`${agentId}|${PLAYER_ID}`, value);
   },
   act(actId: string, agentId: string) {
     const a = agents.agents.find((x) => x.id === agentId);

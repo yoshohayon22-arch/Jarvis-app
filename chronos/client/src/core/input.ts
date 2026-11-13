@@ -13,6 +13,9 @@ export class Input {
 
   constructor(private readonly element: HTMLElement) {
     window.addEventListener("keydown", (e) => {
+      // Typing in a text field (dialogue) must not move the hero.
+      const t = e.target as HTMLElement | null;
+      if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA")) return;
       if (e.code === "F3" || e.code === "Space" || e.code.startsWith("Arrow")) e.preventDefault();
       if (!this.down.has(e.code)) this.pressed.add(e.code);
       this.down.add(e.code);

@@ -79,6 +79,12 @@ export class Reputation {
     return delta;
   }
 
+  /** Bounded change of one person's opinion (dialogue outcomes). */
+  nudgeOpinion(holderId: string, delta: number, subjectId: string = PLAYER_ID): void {
+    const key = `${holderId}|${subjectId}`;
+    this.opinions.set(key, clamp((this.opinions.get(key) ?? 0) + delta, -100, 100));
+  }
+
   /** Direct adjustment (missions, powers…), always bounded. */
   adjust(faction: FactionId, delta: number): void {
     this.factions[faction] = clamp(this.factions[faction] + delta, -100, 100);

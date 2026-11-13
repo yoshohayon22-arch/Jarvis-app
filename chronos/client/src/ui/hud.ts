@@ -12,6 +12,7 @@ export interface DebugInfo {
   speed: number;
   timeScale: number;
   agents: { outside: number; inside: number; moving: number };
+  ai: string;
 }
 
 const $ = <T extends HTMLElement>(id: string) => {
@@ -170,6 +171,64 @@ export class Hud {
     el.append(list);
   }
 
+  // ---- dialogue
+  private readonly dialogueEl = $("dialogue");
+  private readonly dialogueLog = $("dialogue-log");
+  private readonly dialogueInput = $<HTMLInputElement>("dialogue-input");
+  dialogueOpen = false;
+
+  /** Wires the dialogue form once. `onSend` receives the player's text; `onClose` fires on Escape. */
+  bindDialogue(onSend: (text: string) => void, onClose: () => void): void {
+    $("dialogue-form").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const text = this.dialogueInput.value.trim();
+      if (!text || this.dialogueInput.disabled) return;
+      this.dialogueInput.value = "";
+      onSend(text);
+    });
+    this.dialogueInput.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        onClose();
+      }
+    });
+  }
+
+  openDialogue(name: string, role: string): void {
+    this.dialogueOpen = true;
+    $("dialogue-name").textContent = name;
+    $("dialogue-role").textContent = role;
+    $("dialogue-source").textContent = "";
+    this.dialogueLog.replaceChildren();
+    this.dialogueEl.classList.add("visible");
+    this.dialogueInput.disabled = false;
+    this.dialogueInput.value = "";
+    this.dialogueInput.focus();
+  }
+
+  closeDialogue(): void {
+    this.dialogueOpen = false;
+    this.dialogueEl.classList.remove("visible");
+    this.dialogueInput.blur();
+  }
+
+  addDialogueLine(kind: "player" | "npc" | "system" | "pending", text: string): HTMLElement {
+    const p = document.createElement("p");
+    p.className = kind;
+    p.textContent = text;
+    this.dialogueLog.append(p);
+    this.dialogueLog.scrollTop = this.dialogueLog.scrollHeight;
+    return p;
+  }
+
+  setDialogueBusy(busy: boolean, source = ""): void {
+    this.dialogueInput.disabled = busy;
+    if (!busy) {
+      this.dialogueInput.focus();
+      $("dialogue-source").textContent = source;
+    }
+  }
+
   private toastTimer: number | undefined;
   toast(text: string): void {
     const el = $("toast");
@@ -195,6 +254,7 @@ export class Hud {
       `pos ${d.x.toFixed(1)}, ${d.z.toFixed(1)} · ${d.state} · ${d.speed.toFixed(1)} m/s\n` +
       `time scale ×${d.timeScale}\n` +
       `habitants : ${d.agents.outside} dehors (${d.agents.moving} en marche) · ${d.agents.inside} à l'intérieur\n` +
+      `${d.ai}\n` +
       `[T] vitesse du temps · [G] qualité · [F3] debug`;
   }
 }

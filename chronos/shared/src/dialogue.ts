@@ -42,7 +42,8 @@ export const DialogueRequestSchema = z.object({
   context: z.object({
     opinion: z.number().min(-100).max(100),
     factionReputation: z.number().min(-100).max(100),
-    memories: z.array(z.string().max(200)).max(DIALOGUE_LIMITS.memoriesMax),
+    /** Raw memories (≤ 200 chars each) or one AI summary of them (≤ 320). */
+    memories: z.array(z.string().max(320)).max(DIALOGUE_LIMITS.memoriesMax),
     /** Set when the player wears someone's face: the character believes they are talking to that person. */
     speaker: z.object({ name: z.string().min(1).max(60) }).optional(),
     scene: z.object({
@@ -87,4 +88,21 @@ export function sanitizeReply(reply: DialogueReply, secretCount: number, secrets
     relationshipDelta: Math.max(-L.relationshipDeltaMax, Math.min(L.relationshipDeltaMax, delta)),
     revealSecret: secretsAllowed && idx >= 0 && idx < secretCount ? idx : -1,
   };
+}
+
+/** Memory summary: many memories about Kael condensed into one short paragraph (optional AI use). */
+export const SUMMARY_LIMITS = { memoriesMin: 5, memoriesMax: 12, summaryMax: 320 } as const;
+
+export const SummaryRequestSchema = z.object({
+  characterId: z.string().min(1).max(40),
+  memories: z.array(z.string().min(1).max(200)).min(SUMMARY_LIMITS.memoriesMin).max(SUMMARY_LIMITS.memoriesMax),
+});
+export type SummaryRequest = z.infer<typeof SummaryRequestSchema>;
+
+export const SummaryReplySchema = z.object({ summary: z.string() });
+
+export interface SummaryResponse {
+  summary: string;
+  source: "ai" | "cache" | "mock";
+  usage?: { inputTokens: number; outputTokens: number; cacheReadTokens: number; costUsd: number };
 }

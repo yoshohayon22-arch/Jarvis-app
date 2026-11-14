@@ -1,7 +1,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { betaZodOutputFormat } from "@anthropic-ai/sdk/helpers/beta/zod";
 import type { z } from "zod";
-import { DialogueReplySchema, MissionProposalSchema, type DialogueReply, type MissionProposal, type MissionRequest } from "@chronos/shared";
+import { DialogueReplySchema, MissionProposalSchema, SummaryReplySchema, type DialogueReply, type MissionProposal, type MissionRequest } from "@chronos/shared";
 import type { Usage } from "./budget.js";
 import type { RouteConfig } from "./config.js";
 
@@ -31,6 +31,7 @@ export interface DialogueLlm {
   readonly kind: "ai" | "mock";
   dialogue(system: string, user: string, route: RouteConfig, timeoutMs: number): Promise<LlmResult>;
   mission(system: string, user: string, route: RouteConfig, timeoutMs: number, req: MissionRequest): Promise<MissionLlmResult>;
+  summary(system: string, user: string, route: RouteConfig, timeoutMs: number): Promise<{ summary: string; usage: Usage; model: string }>;
 }
 
 /** Models that support server-side refusal fallbacks (see Anthropic docs). */
@@ -49,6 +50,11 @@ export class AnthropicLlm implements DialogueLlm {
   async mission(system: string, user: string, route: RouteConfig, timeoutMs: number): Promise<MissionLlmResult> {
     const r = await this.structured(MissionProposalSchema, system, user, route, timeoutMs);
     return { mission: r.output, usage: r.usage, model: r.model };
+  }
+
+  async summary(system: string, user: string, route: RouteConfig, timeoutMs: number): Promise<{ summary: string; usage: Usage; model: string }> {
+    const r = await this.structured(SummaryReplySchema, system, user, route, timeoutMs);
+    return { summary: r.output.summary, usage: r.usage, model: r.model };
   }
 
   /** One call, one schema-constrained answer. */
@@ -112,6 +118,13 @@ export class MockLlm implements DialogueLlm {
       usage: { inputTokens: Math.ceil(user.length / 4), outputTokens: 40, cacheReadTokens: 0, cacheWriteTokens: 0 },
       model: "mock",
     };
+  }
+
+  async summary(_system: string, user: string): Promise<{ summary: string; usage: Usage; model: string }> {
+    this.calls++;
+    const first = /^- (.*)$/m.exec(user)?.[1] ?? "";
+    const count = (user.match(/^- /gm) ?? []).length;
+    return { summary: `(simulation) En résumé, ${count} souvenirs de Kael, dont celui-ci : ${first}`, usage: { inputTokens: Math.ceil(user.length / 4), outputTokens: 60, cacheReadTokens: 0, cacheWriteTokens: 0 }, model: "mock" };
   }
 
   /** Set to make the first attempt invalid (unknown id), to exercise the game's regeneration loop. */

@@ -96,6 +96,43 @@ export class ConsequenceSystem {
    * caught in the act) or because the player wore their face. The guard takes them away
    * once a guard saw it or enough separate accusations pile up.
    */
+  save(): ConsequencesSave {
+    const fin = (v: number) => (Number.isFinite(v) ? v : null);
+    return structuredClone({
+      active: [...this.active],
+      flags: [...this.flags],
+      wantedLevel: this.wantedLevel,
+      terror: [...this.terror],
+      terrorized: [...this.terrorized],
+      allies: [...this.allies],
+      betrayers: [...this.betrayers],
+      accusations: [...this.accusations],
+      timers: { lastSeen: this.lastSeen, lastEval: fin(this.lastEval), lastDecay: this.lastDecay, lastChase: fin(this.lastChase) },
+    });
+  }
+
+  load(s: ConsequencesSave): void {
+    const fill = <T>(set: Set<T>, items: T[]) => {
+      set.clear();
+      for (const i of items) set.add(i);
+    };
+    fill(this.active, s.active);
+    fill(this.flags, s.flags);
+    fill(this.terrorized, s.terrorized);
+    fill(this.allies, s.allies);
+    fill(this.betrayers, s.betrayers);
+    this.wantedLevel = s.wantedLevel;
+    this.terror.clear();
+    for (const [k, v] of s.terror) this.terror.set(k, v);
+    this.accusations.clear();
+    for (const [k, v] of s.accusations) this.accusations.set(k, v);
+    this.notices.length = 0;
+    this.lastSeen = s.timers.lastSeen ? { ...s.timers.lastSeen } : null;
+    this.lastEval = s.timers.lastEval ?? -Infinity;
+    this.lastDecay = s.timers.lastDecay;
+    this.lastChase = s.timers.lastChase ?? -Infinity;
+  }
+
   private accuse(result: ActResult, tags: readonly string[]): void {
     const e = result.event;
     const accused = e.apparentActorId;
@@ -281,4 +318,16 @@ export class ConsequenceSystem {
     const d = districtAt(this.agents.places.layout, a.x, a.z);
     return !!d && this.terrorized.has(d.id);
   }
+}
+
+export interface ConsequencesSave {
+  active: string[];
+  flags: string[];
+  wantedLevel: number;
+  terror: [string, number][];
+  terrorized: string[];
+  allies: string[];
+  betrayers: string[];
+  accusations: [string, number][];
+  timers: { lastSeen: { x: number; z: number; t: number } | null; lastEval: number | null; lastDecay: number | null; lastChase: number | null };
 }

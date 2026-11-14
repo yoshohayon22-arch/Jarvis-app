@@ -50,10 +50,39 @@
         </p>
         <p id="loading" class="loading">Chargement de Brumeval…</p>
         <p id="cta" class="cta hidden">Cliquer pour entrer à Brumeval</p>
+        <div id="title-menu" class="menu hidden">
+          <button id="btn-continue" type="button"></button>
+          <button id="btn-new" type="button">Nouvelle partie</button>
+        </div>
       </div>
     </div>
     <div id="pause" class="overlay hidden">
-      <div class="card"><h2>Pause</h2><p class="cta">Cliquer pour reprendre</p></div>
+      <div class="card" id="pause-card">
+        <h2>Pause</h2>
+        <div class="menu">
+          <button id="btn-resume" type="button">Reprendre</button>
+          <button id="btn-save" type="button">Sauvegarder</button>
+        </div>
+        <h3>Charger</h3>
+        <div id="save-list" class="menu"></div>
+        <h3>Réglages</h3>
+        <div class="settings">
+          <label><input id="set-ai" type="checkbox" /> Utiliser l'IA (dialogues et missions). Décoché : tout reste local et gratuit.</label>
+          <label>Plafond de dépense IA pour cette session
+            <select id="set-cap">
+              <option value="">aucun (seule la limite du serveur s'applique)</option>
+              <option value="0.1">0,10 $</option>
+              <option value="0.5">0,50 $</option>
+              <option value="2">2 $</option>
+            </select>
+          </label>
+          <label>Qualité graphique
+            <select id="set-quality"><option value="low">basse</option><option value="high">haute</option></select>
+          </label>
+          <p id="set-spend"></p>
+        </div>
+        <div class="menu"><button id="btn-restart" type="button">Recommencer depuis le début</button></div>
+      </div>
     </div>
 
     <script type="module" src="/src/main.ts"></script>

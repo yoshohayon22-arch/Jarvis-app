@@ -3,9 +3,9 @@ import { SeededRng } from "../../core/rng";
 import type { Agent, AgentSystem } from "../agents";
 import { districtAt } from "../districts";
 import { EventLog, PLAYER_ID, type WorldEvent } from "./events";
-import { MemoryStore, memoryWeight, type Claim, type Memory } from "./memory";
+import { MemoryStore, memoryWeight, type Claim, type Memory, type MemorySummary } from "./memory";
 import { witnessesOf } from "./perception";
-import { Reputation } from "./reputation";
+import { Reputation, type ReputationSave } from "./reputation";
 import { retell, tellChance, tellable } from "./rumors";
 
 export interface ActContext {
@@ -188,6 +188,47 @@ export class SocialSystem {
     return `${actor} ${verb}${many && act?.reaction === "alarm" ? many : ""} ${target}${where ? ` (${where})` : ""}`.trim();
   }
 
+  /** Everything the social layer remembers, as plain data (save games). */
+  save(): SocialSave {
+    const fin = (v: number) => (Number.isFinite(v) ? v : null);
+    return structuredClone({
+      events: this.log.events,
+      nextEventId: this.log.nextId,
+      memories: [...this.memory.memories],
+      summaries: [...this.memory.summaries],
+      reputation: this.reputation.save(),
+      feed: this.feed,
+      rng: this.rng.state,
+      lastGossipMinute: fin(this.lastGossipMinute),
+      lastConsolidation: fin(this.lastConsolidation),
+      informed: [...this.informed],
+      announced: [...this.announced],
+      ledger: [...this.ledger],
+      moral: this.moral,
+    });
+  }
+
+  load(s: SocialSave): void {
+    const d = structuredClone(s);
+    this.log.events = d.events;
+    this.log.nextId = d.nextEventId;
+    this.memory.memories.clear();
+    for (const [k, v] of d.memories) this.memory.memories.set(k, v);
+    this.memory.summaries.clear();
+    for (const [k, v] of d.summaries) this.memory.summaries.set(k, v);
+    this.reputation.load(d.reputation);
+    this.feed.length = 0;
+    this.feed.push(...d.feed);
+    this.rng.state = d.rng;
+    this.lastGossipMinute = d.lastGossipMinute ?? -Infinity;
+    this.lastConsolidation = d.lastConsolidation ?? -Infinity;
+    this.informed.clear();
+    for (const [k, v] of d.informed) this.informed.set(k, v);
+    this.announced = new Map(d.announced);
+    this.ledger = new Map(d.ledger);
+    this.moral = { ...d.moral };
+  }
+
   /** Adds a line to the player's journal feed. */
   pushFeed(t: number, text: string, tone: FeedEntry["tone"]): void {
     this.feed.push({ t, text, tone });
@@ -281,4 +322,21 @@ export class SocialSystem {
   topMemoryAbout(agent: Agent, subjectId: string, now: number): Memory | null {
     return this.memory.relevant(agent.id, subjectId, now, agent.traits.grudge, 1)[0] ?? null;
   }
+}
+
+type LedgerEntry = { listener: string; subject: string; opinion: number; faction: FactionId; factionDelta: number };
+export interface SocialSave {
+  events: WorldEvent[];
+  nextEventId: number;
+  memories: [string, Memory[]][];
+  summaries: [string, MemorySummary[]][];
+  reputation: ReputationSave;
+  feed: FeedEntry[];
+  rng: number;
+  lastGossipMinute: number | null;
+  lastConsolidation: number | null;
+  informed: [number, number][];
+  announced: [number, number][];
+  ledger: [number, LedgerEntry[]][];
+  moral: { hero: number; dark: number };
 }

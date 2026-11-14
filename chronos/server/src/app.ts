@@ -4,10 +4,13 @@ import {
   DialogueReplySchema,
   MissionProposalSchema,
   MissionRequestSchema,
+  SUMMARY_LIMITS,
+  SummaryRequestSchema,
   sanitizeReply,
   type BudgetStatus,
   type DialogueResponse,
   type MissionResponse,
+  type SummaryResponse,
 } from "@chronos/shared";
 import { Budget, type Usage } from "./budget.js";
 import { ResponseCache, hashKey } from "./cache.js";
@@ -15,7 +18,7 @@ import type { ServerConfig } from "./config.js";
 import { LlmError, type DialogueLlm } from "./llm.js";
 import type { ServerPack } from "./pack.js";
 import { buildMissionPrompt } from "./missionPrompt.js";
-import { buildDialoguePrompt } from "./prompt.js";
+import { buildDialoguePrompt, buildSummaryPrompt } from "./prompt.js";
 import { RateLimiter } from "./rateLimit.js";
 
 export interface AppResult {
@@ -31,6 +34,7 @@ const err = (status: number, error: string, detail?: string): AppResult => ({ st
  */
 export class ChronosApp {
   readonly cache = new ResponseCache<DialogueResponse["reply"]>();
+  readonly summaryCache = new ResponseCache<string>();
   readonly limiter: RateLimiter;
 
   constructor(
@@ -95,6 +99,43 @@ export class ChronosApp {
         source: this.llm.kind,
         usage: { inputTokens: result.usage.inputTokens, outputTokens: result.usage.outputTokens, cacheReadTokens: result.usage.cacheReadTokens, costUsd: cost },
       };
+      return { status: 200, body };
+    } catch (e) {
+      if (e instanceof LlmError) {
+        const usage = (e as LlmError & { usage?: Usage }).usage;
+        if (usage) this.budget.record(usage, price);
+        return err(e.code === "rate_limited" ? 429 : 502, `model_${e.code}`);
+      }
+      return err(500, "internal_error");
+    }
+  }
+
+  /** Condenses a character's memories of the player into two sentences. Cached: the same memories are never summarized twice. */
+  async summary(raw: unknown, clientId: string): Promise<AppResult> {
+    if (!this.limiter.allow(clientId)) return err(429, "rate_limited");
+    const parsed = SummaryRequestSchema.safeParse(raw);
+    if (!parsed.success) return err(400, "invalid_request", parsed.error.issues[0]?.message);
+    const req = parsed.data;
+    const character = this.pack.characters.get(req.characterId);
+    if (!character) return err(404, "unknown_character");
+    if (!this.llm) return err(503, "no_api_key");
+    const route = this.config.routes.summary;
+    const prompt = buildSummaryPrompt(this.pack.lore, character, req);
+    const key = hashKey({ m: route.model, c: req.characterId, p: prompt.user });
+    const hit = this.summaryCache.get(key);
+    if (hit) {
+      this.budget.recordCacheHit();
+      return { status: 200, body: { summary: hit, source: "cache" } satisfies SummaryResponse };
+    }
+    if (this.budget.exceeded) return err(402, "budget_exceeded");
+    const price = this.config.pricesPerMTok[route.model] ?? { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 };
+    try {
+      const result = await this.llm.summary(prompt.system, prompt.user, route, this.config.requestTimeoutMs);
+      const cost = this.llm.kind === "mock" ? 0 : this.budget.record(result.usage, price);
+      const summary = String(result.summary ?? "").replace(/\s+/g, " ").trim().slice(0, SUMMARY_LIMITS.summaryMax);
+      if (!summary) return err(502, "invalid_model_output");
+      this.summaryCache.set(key, summary, route.cacheTtlSeconds);
+      const body: SummaryResponse = { summary, source: this.llm.kind, usage: { inputTokens: result.usage.inputTokens, outputTokens: result.usage.outputTokens, cacheReadTokens: result.usage.cacheReadTokens, costUsd: cost } };
       return { status: 200, body };
     } catch (e) {
       if (e instanceof LlmError) {

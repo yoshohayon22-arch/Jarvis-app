@@ -46,6 +46,17 @@ export function isMovable(p: PropDef): boolean {
 export class PropSystem {
   readonly props: DynamicProp[] = [];
   /** Called when a fast object hits someone. */
+  save(): DynamicProp[] {
+    return structuredClone(this.props);
+  }
+
+  load(saved: readonly DynamicProp[]): void {
+    for (const p of this.props) {
+      const s = saved.find((x) => x.id === p.id);
+      if (s) Object.assign(p, structuredClone(s), { held: false });
+    }
+  }
+
   onHit: ((prop: DynamicProp, agent: Agent, speed: number) => void) | null = null;
 
   constructor(

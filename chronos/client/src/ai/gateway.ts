@@ -6,6 +6,8 @@ import {
   type DialogueReply,
   type DialogueRequest,
   type MissionRequest,
+  SUMMARY_LIMITS,
+  type SummaryRequest,
 } from "@chronos/shared";
 
 export type ReplySource = "ai" | "cache" | "mock" | "local";
@@ -25,6 +27,14 @@ export interface GatewayStats {
   sessionCostUsd: number;
   lastReason: string;
   missionCalls: number;
+  summaryCalls: number;
+}
+
+export interface AiSettings {
+  /** Off: the game never calls the proxy (local lines and local missions only). */
+  enabled: boolean;
+  /** Stop calling once this much was spent in this browser session; null = only the server's daily limit applies. */
+  sessionCapUsd: number | null;
 }
 
 export type MissionDraft = { ok: true; mission: unknown; source: "ai" | "mock"; costUsd: number } | { ok: false; reason: string };
@@ -36,6 +46,8 @@ const REASONS: Record<string, string> = {
   network: "serveur IA injoignable",
   timeout: "réponse trop lente",
   invalid: "réponse IA invalide",
+  disabled: "IA désactivée dans les réglages",
+  session_cap: "plafond de dépense de la session atteint",
 };
 
 /**
@@ -43,7 +55,17 @@ const REASONS: Record<string, string> = {
  * why and returns a local line, so the game stays fully playable offline.
  */
 export class AiGateway {
-  readonly stats: GatewayStats = { aiReplies: 0, cachedReplies: 0, localReplies: 0, sessionCostUsd: 0, lastReason: "", missionCalls: 0 };
+  readonly stats: GatewayStats = { aiReplies: 0, cachedReplies: 0, localReplies: 0, sessionCostUsd: 0, lastReason: "", missionCalls: 0, summaryCalls: 0 };
+
+  /** The player's own limits, on top of the server's (settings menu). */
+  settings: AiSettings = { enabled: true, sessionCapUsd: null };
+
+  /** Why no call may be made right now, or null. Checked before every request: nothing leaves the browser otherwise. */
+  private blocked(): string | null {
+    if (!this.settings.enabled) return "disabled";
+    if (this.settings.sessionCapUsd !== null && this.stats.sessionCostUsd >= this.settings.sessionCapUsd) return "session_cap";
+    return null;
+  }
 
   constructor(
     private readonly base = "/api",
@@ -57,6 +79,8 @@ export class AiGateway {
       this.stats.lastReason = REASONS[code] ?? code;
       return { reply: fallback(), source: "local", reason: this.stats.lastReason };
     };
+    const block = this.blocked();
+    if (block) return local(block);
     const ctrl = new AbortController();
     const timer = setTimeout(() => ctrl.abort(), this.timeoutMs);
     try {
@@ -95,6 +119,8 @@ export class AiGateway {
       this.stats.lastReason = REASONS[code] ?? code;
       return { ok: false, reason: this.stats.lastReason };
     };
+    const block = this.blocked();
+    if (block) return fail(block);
     const ctrl = new AbortController();
     const timer = setTimeout(() => ctrl.abort(), this.timeoutMs * 2);
     try {
@@ -108,6 +134,25 @@ export class AiGateway {
       return { ok: true, mission: body.mission, source: body.source === "mock" ? "mock" : "ai", costUsd };
     } catch (e) {
       return fail((e as Error).name === "AbortError" ? "timeout" : "network");
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
+  /** Optional: condenses many memories into one line. Returns null on any failure (the game then uses the raw memories). */
+  async summary(req: SummaryRequest): Promise<string | null> {
+    if (this.blocked()) return null;
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), this.timeoutMs);
+    try {
+      const res = await this.fetchFn(`${this.base}/summary`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(req), signal: ctrl.signal });
+      const body = (await res.json().catch(() => null)) as { summary?: unknown; usage?: { costUsd?: number } } | null;
+      if (!res.ok || !body || typeof body.summary !== "string" || !body.summary.trim()) return null;
+      this.stats.summaryCalls++;
+      this.stats.sessionCostUsd += typeof body.usage?.costUsd === "number" ? body.usage.costUsd : 0;
+      return body.summary.replace(/\s+/g, " ").trim().slice(0, SUMMARY_LIMITS.summaryMax);
+    } catch {
+      return null;
     } finally {
       clearTimeout(timer);
     }

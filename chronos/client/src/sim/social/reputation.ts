@@ -102,6 +102,16 @@ export class Reputation {
     this.factions[faction] = clamp(this.factions[faction] + delta, -100, 100);
   }
 
+  save(): ReputationSave {
+    return structuredClone({ factions: this.factions, opinions: [...this.opinions], perEvent: [...this.perEvent] });
+  }
+
+  load(s: ReputationSave): void {
+    this.factions = { ...s.factions };
+    this.opinions = new Map(s.opinions);
+    this.perEvent = new Map(s.perEvent);
+  }
+
   /** One-line portrait of who the player is to this town, derived from the four reputations. */
   portrait(): string {
     const parts: string[] = [];
@@ -120,4 +130,10 @@ export class Reputation {
     const text = parts.join(", ");
     return text.charAt(0).toUpperCase() + text.slice(1) + ".";
   }
+}
+
+export interface ReputationSave {
+  factions: Record<FactionId, number>;
+  opinions: [string, number][];
+  perEvent: [number, Partial<Record<FactionId, number>>][];
 }

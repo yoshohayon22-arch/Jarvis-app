@@ -48,6 +48,11 @@ class FakeLlm implements DialogueLlm {
     private readonly produce: () => Partial<DialogueReply> | Error,
     private readonly produceMission: (req: MissionRequest) => unknown = () => new Error("no mission"),
   ) {}
+  async summary(system: string, user: string): Promise<{ summary: string; usage: LlmResult["usage"]; model: string }> {
+    this.calls++;
+    this.last = { system, user };
+    return { summary: `  Tu te souviens   que Kael t'a volé. ${"x".repeat(900)}`, usage: { inputTokens: 500, outputTokens: 50, cacheReadTokens: 0, cacheWriteTokens: 0 }, model: "claude-opus-5-5" };
+  }
   async mission(system: string, user: string, _r: unknown, _t: number, req: MissionRequest): Promise<MissionLlmResult> {
     this.calls++;
     this.last = { system, user };
@@ -352,5 +357,40 @@ describe("mission route", () => {
     expect((await app.mission(missionRequest(), "c")).status).toBe(402);
     const bad = makeApp(new FakeLlm(() => ({}), () => ({ title: "sans structure" })));
     expect((await bad.mission(missionRequest(), "c")).status).toBe(502);
+  });
+});
+
+describe("summary route", () => {
+  const memories = ["Tu as vu que Kael a frappé Aldric", "On t'a raconté que Kael a volé Brann", "Tu as subi ceci : Kael t'a menacé", "Tu as vu que Kael a fait l'aumône à Margaux", "Tu as vu que Kael a tordu le temps <script>"];
+
+  it("validates the request before spending and answers 503 without a key", async () => {
+    const llm = new FakeLlm(() => ({}));
+    const app = makeApp(llm);
+    expect((await app.summary({ characterId: "garn", memories: ["un seul"] }, "c")).status).toBe(400);
+    expect((await app.summary({ characterId: "dragon", memories }, "c")).status).toBe(404);
+    expect(llm.calls).toBe(0);
+    expect((await makeApp(null).summary({ characterId: "garn", memories }, "c")).status).toBe(503);
+  });
+
+  it("bounds the summary, strips markup from the prompt, and never pays twice for the same memories", async () => {
+    const llm = new FakeLlm(() => ({}));
+    const app = makeApp(llm);
+    const r = await app.summary({ characterId: "garn", memories }, "c");
+    const body = r.body as { summary: string; source: string };
+    expect(r.status).toBe(200);
+    expect(body.summary.length).toBeLessThanOrEqual(320);
+    expect(body.summary.startsWith("Tu te souviens que Kael")).toBe(true);
+    expect(llm.last.user).not.toContain("<script>");
+    expect(llm.last.user).toContain("- Tu as vu que Kael a frappé Aldric");
+    const again = await app.summary({ characterId: "garn", memories }, "c");
+    expect((again.body as { source: string }).source).toBe("cache");
+    expect(llm.calls).toBe(1);
+  });
+
+  it("works offline with the mock, at no cost", async () => {
+    const app = makeApp(new MockLlm());
+    const r = await app.summary({ characterId: "garn", memories }, "c");
+    expect((r.body as { summary: string }).summary).toContain("5 souvenirs");
+    expect(app.status().spentTodayUsd).toBe(0);
   });
 });

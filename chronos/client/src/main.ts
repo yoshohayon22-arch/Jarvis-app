@@ -13,6 +13,9 @@ import { ConsequenceSystem, type ConsequencesDef } from "./sim/consequences";
 import { MissionSystem, type Mission, type MissionsDef } from "./sim/missions";
 import missionsJson from "../data/packs/medieval/missions.json";
 import { generateMission, type GeneratedMission } from "./ai/missionGen";
+import { applySave, captureSave, checkSave, type SaveGame, type SaveWorld } from "./save/saveGame";
+import { IndexedDbBackend, MANUAL_SLOT, SaveStore } from "./save/store";
+import type { MissionsSave } from "./sim/missions";
 import { PropSystem } from "./sim/physics";
 import { PowerSystem, type CastContext, type PowersData } from "./sim/powers";
 import { ConsequenceView } from "./render/consequenceView";
@@ -20,7 +23,7 @@ import { PALETTE } from "./render/palette";
 import { PowerFxView } from "./render/powerFx";
 import { PropsView } from "./render/propsView";
 import fallbackJson from "../data/packs/medieval/dialogue_fallback.json";
-import { DIALOGUE_LIMITS, type BudgetStatus, type DialogueRequest } from "@chronos/shared";
+import { DIALOGUE_LIMITS, SUMMARY_LIMITS, type BudgetStatus, type DialogueRequest } from "@chronos/shared";
 import { Conversation } from "./ai/conversation";
 import { bark, localReply, type FallbackData } from "./ai/fallback";
 import { AiGateway } from "./ai/gateway";
@@ -160,9 +163,12 @@ const missions = new MissionSystem(agents, social, clock, missionsJson as unknow
 powers.echoPinned = () => missions.sceneEvents();
 const agentsById = new Map(agents.agents.map((a) => [a.id, a]));
 const nameOf = (id: string | null): string => (id === PLAYER_ID ? "Kael" : id ? agentsById.get(id)?.name ?? "quelqu'un" : "");
-powers.captureExtra = () => ({ coins });
+powers.captureExtra = () => ({ coins, missions: missions.save() });
 powers.restoreExtra = (e) => {
-  coins = (e as { coins: number } | null)?.coins ?? coins;
+  const x = e as { coins: number; missions: MissionsSave } | null;
+  coins = x?.coins ?? coins;
+  // A mission accepted or advanced during the rewound seconds goes back with them.
+  if (x?.missions) missions.load(x.missions);
 };
 powers.movePlayer = (x, z, facing) => {
   Object.assign(player, { x, z, facing, vx: 0, vz: 0 });
@@ -301,6 +307,7 @@ const loading = (async () => {
   ready = true;
   loadingEl.textContent = "";
   ctaEl.classList.remove("hidden");
+  void refreshTitle();
 })().catch((e) => {
   console.error(e);
   loadingEl.textContent = "Erreur de chargement — voir la console.";
@@ -320,15 +327,182 @@ function start(): void {
   pauseEl.classList.add("hidden");
   input.requestPointerLock();
 }
-title.addEventListener("click", start);
+function pauseGame(): void {
+  paused = true;
+  pauseEl.classList.remove("hidden");
+  refreshAiStatus();
+  refreshSettingsUi();
+  void refreshSaveList();
+}
+
+// ---------------------------------------------------------------- save / load / settings (J8)
+const saveWorld: SaveWorld = { packId: "medieval", seed: WORLD_SEED, clock, agents, social, props: dynamicProps, powers, consequences, ambient, missions };
+const saves = new SaveStore(new IndexedDbBackend());
+const AUTOSAVE_EVERY_MINUTES = 120;
+let lastAutosaveAt = clock.totalMinutes;
+let lastSaveInfo = "aucune";
+let saving = false;
+
+function snapshot(): SaveGame {
+  return captureSave(saveWorld, { x: player.x, z: player.z, facing: player.facing, coins }, [...aiSummaries]);
+}
+
+/** Writes the game to IndexedDB. Never throws: a full or blocked storage must not stop the game. */
+async function saveGame(kind: "manual" | "auto"): Promise<boolean> {
+  if (!started || saving) return false;
+  saving = true;
+  try {
+    const save = snapshot();
+    const slot = kind === "manual" ? (await saves.saveManual(save), MANUAL_SLOT) : await saves.saveAuto(save);
+    lastAutosaveAt = clock.totalMinutes;
+    lastSaveInfo = `${save.label} (${slot})`;
+    if (kind === "manual") hud.toast(`Partie sauvegardée — ${save.label}`);
+    return true;
+  } catch (e) {
+    console.warn("Save failed", e);
+    if (kind === "manual") hud.toast("Sauvegarde impossible : le stockage du navigateur est indisponible.");
+    return false;
+  } finally {
+    saving = false;
+  }
+}
+
+async function loadGame(slot: string): Promise<boolean> {
+  let raw: unknown;
+  try {
+    raw = await saves.load(slot);
+  } catch {
+    hud.toast("Chargement impossible : le stockage du navigateur est indisponible.");
+    return false;
+  }
+  // A save is outside data: checked like any other input before it touches the world.
+  const problem = checkSave(raw, saveWorld);
+  if (problem) {
+    hud.toast(`Chargement refusé : ${problem}.`);
+    return false;
+  }
+  const save = raw as SaveGame;
+  closeDialogue();
+  offer = null;
+  hud.showMissionOffer(null);
+  drafts.clear();
+  const p = applySave(save, saveWorld);
+  Object.assign(player, { x: p.x, z: p.z, facing: p.facing, vx: 0, vz: 0 });
+  Object.assign(prevPlayer, player);
+  coins = p.coins;
+  aiSummaries.clear();
+  for (const [k, v] of save.aiSummaries) aiSummaries.set(k, v);
+  lastAutosaveAt = clock.totalMinutes;
+  lastSaveInfo = `${save.label} (${slot})`;
+  hud.setCoins(coins);
+  hud.toast(`Partie chargée — ${save.label}`);
+  return true;
+}
+
+const SLOT_LABELS: Record<string, string> = { manual: "Sauvegarde manuelle", "auto-0": "Sauvegarde auto", "auto-1": "Sauvegarde auto", "auto-2": "Sauvegarde auto" };
+const el = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
+const stop = (e: Event) => e.stopPropagation();
+
+async function refreshSaveList(): Promise<void> {
+  const list = await saves.list().catch(() => []);
+  const box = el("save-list");
+  box.replaceChildren();
+  for (const s of list) {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.dataset.slot = s.slot;
+    b.textContent = s.label;
+    const small = document.createElement("small");
+    small.textContent = `${SLOT_LABELS[s.slot] ?? s.slot} · ${new Date(s.savedAt).toLocaleString("fr-FR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })}`;
+    b.append(small);
+    b.addEventListener("click", (e) => {
+      stop(e);
+      void loadGame(s.slot).then((ok) => ok && start());
+    });
+    box.append(b);
+  }
+}
+
+// Settings: the player's own limits on AI use, kept in this browser.
+const SETTINGS_KEY = "chronos.settings";
+function loadSettings(): void {
+  try {
+    const raw = JSON.parse(localStorage.getItem(SETTINGS_KEY) ?? "{}") as { aiEnabled?: unknown; sessionCapUsd?: unknown };
+    gateway.settings = {
+      enabled: raw.aiEnabled !== false,
+      sessionCapUsd: typeof raw.sessionCapUsd === "number" && raw.sessionCapUsd > 0 ? raw.sessionCapUsd : null,
+    };
+  } catch {
+    /* unreadable settings: keep defaults */
+  }
+}
+function storeSettings(): void {
+  try {
+    localStorage.setItem(SETTINGS_KEY, JSON.stringify({ aiEnabled: gateway.settings.enabled, sessionCapUsd: gateway.settings.sessionCapUsd }));
+  } catch {
+    /* private mode: settings last for the session only */
+  }
+}
+function refreshSettingsUi(): void {
+  el<HTMLInputElement>("set-ai").checked = gateway.settings.enabled;
+  el<HTMLSelectElement>("set-cap").value = gateway.settings.sessionCapUsd === null ? "" : String(gateway.settings.sessionCapUsd);
+  el<HTMLSelectElement>("set-quality").value = qualityLevel;
+  const g = gateway.stats;
+  const server = aiStatus ? `serveur : ${aiStatus.spentTodayUsd.toFixed(4)} $ sur ${aiStatus.dailyLimitUsd} $ aujourd'hui (${aiStatus.mode === "ai" ? aiStatus.model : aiStatus.mode === "mock" ? "IA simulée" : "pas de clé"})` : "serveur IA injoignable : tout est local";
+  el("set-spend").textContent = `Cette session : ${g.sessionCostUsd.toFixed(4)} $ · ${g.aiReplies} répliques, ${g.missionCalls} missions, ${g.summaryCalls} résumés · ${server}`;
+}
+el("pause-card").addEventListener("click", stop);
+el<HTMLInputElement>("set-ai").addEventListener("change", (e) => {
+  gateway.settings.enabled = (e.target as HTMLInputElement).checked;
+  storeSettings();
+});
+el<HTMLSelectElement>("set-cap").addEventListener("change", (e) => {
+  const v = Number((e.target as HTMLSelectElement).value);
+  gateway.settings.sessionCapUsd = v > 0 ? v : null;
+  storeSettings();
+});
+el<HTMLSelectElement>("set-quality").addEventListener("change", (e) => setQuality((e.target as HTMLSelectElement).value === "high" ? "high" : "low"));
+el("btn-resume").addEventListener("click", start);
+el("btn-save").addEventListener("click", () => void saveGame("manual").then(refreshSaveList));
+el("btn-restart").addEventListener("click", () => {
+  if (window.confirm("Recommencer depuis le début ? Les sauvegardes existantes sont conservées.")) window.location.reload();
+});
+el("btn-new").addEventListener("click", (e) => {
+  stop(e);
+  start();
+});
+el("btn-continue").addEventListener("click", (e) => {
+  stop(e);
+  const slot = (e.currentTarget as HTMLElement).dataset.slot;
+  if (slot) void loadGame(slot).then((ok) => ok && start());
+});
+/** Title screen: offer to continue when a save exists. */
+async function refreshTitle(): Promise<void> {
+  const latest = await saves.latest().catch(() => null);
+  if (!latest || started) return;
+  const b = el("btn-continue");
+  b.dataset.slot = latest.slot;
+  b.textContent = `Continuer — ${latest.label}`;
+  el("title-menu").classList.remove("hidden");
+  ctaEl.classList.add("hidden");
+  hasSave = true;
+}
+let hasSave = false;
+// Leaving the tab: keep what was played.
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "hidden") void saveGame("auto");
+});
+
+title.addEventListener("click", () => {
+  if (!hasSave) start();
+});
 pauseEl.addEventListener("click", start);
 canvas.addEventListener("click", () => {
   if (started && !paused && !hud.dialogueOpen && !document.pointerLockElement) input.requestPointerLock();
 });
 document.addEventListener("pointerlockchange", () => {
   if (started && !document.pointerLockElement && !hud.dialogueOpen) {
-    paused = true;
-    pauseEl.classList.remove("hidden");
+    pauseGame();
   }
 });
 
@@ -470,6 +644,7 @@ function playerAct(actId: string, target: Agent): void {
 
 // ---------------------------------------------------------------- dialogue (J4)
 const gateway = new AiGateway();
+loadSettings();
 const fallbackData = fallbackJson as unknown as FallbackData;
 const defsById = new Map(characterDefs.map((c) => [c.id, c]));
 let conversation: Conversation | null = null;
@@ -504,6 +679,25 @@ function opinionOfSpeaker(a: Agent): number {
   return Math.max(-100, Math.min(100, social.relation(a.id, who) + social.reputation.opinion(a.id, who)));
 }
 
+/** AI summaries of what a character remembers of Kael (optional; saved with the game so they are paid once). */
+const aiSummaries = new Map<string, { key: string; text: string }>();
+const memoryLine = (m: { kind: string; claim: Parameters<typeof social.describe>[0] }) =>
+  `${m.kind === "heard" ? "On t'a raconté que" : m.kind === "suffered" ? "Tu as subi ceci :" : "Tu as vu que"} ${social.describe(m.claim)}`.slice(0, 200);
+
+/** With many memories of Kael, asks once for a two-sentence summary; redone only after three new memories. */
+function requestSummary(a: Agent): void {
+  if (powers.disguise) return;
+  const mems = social.memory.relevant(a.id, PLAYER_ID, clock.totalMinutes, a.traits.grudge, SUMMARY_LIMITS.memoriesMax);
+  if (mems.length < SUMMARY_LIMITS.memoriesMin) return;
+  const ids = mems.map((m) => m.eventId).sort((x, y) => x - y);
+  const known = new Set((aiSummaries.get(a.id)?.key ?? "").split(",").filter(Boolean).map(Number));
+  if (known.size > 0 && ids.filter((id) => !known.has(id)).length < 3) return;
+  void gateway.summary({ characterId: a.id, memories: mems.map(memoryLine) }).then((text) => {
+    if (text) aiSummaries.set(a.id, { key: ids.join(","), text });
+    refreshAiStatus();
+  });
+}
+
 function openDialogue(a: Agent): void {
   if (powers.disguise?.agentId === a.id) {
     hud.toast(`${a.name} te dévisage : c'est son propre visage.`);
@@ -518,6 +712,7 @@ function openDialogue(a: Agent): void {
   }
   talkingTo = a;
   conversation = new Conversation(a.id, def.secrets ?? []);
+  requestSummary(a);
   agents.hold(a, player.x, player.z, clock.totalMinutes);
   hud.openDialogue(a.name, a.role);
   document.exitPointerLock();
@@ -540,9 +735,13 @@ async function sayToNpc(text: string): Promise<void> {
   const who = speakerId();
   const opinion = opinionOfSpeaker(a);
   const now = clock.totalMinutes;
-  const memories = social.memory
-    .relevant(a.id, who, now, a.traits.grudge, DIALOGUE_LIMITS.memoriesMax)
-    .map((m) => `${m.kind === "heard" ? "On t'a raconté que" : m.kind === "suffered" ? "Tu as subi ceci :" : "Tu as vu que"} ${social.describe(m.claim)}`.slice(0, 200));
+  const memories = social.memory.relevant(a.id, who, now, a.traits.grudge, DIALOGUE_LIMITS.memoriesMax).map(memoryLine);
+  // A summary stands for the long tail of memories; the freshest ones stay verbatim.
+  const summary = who === PLAYER_ID ? aiSummaries.get(a.id) : undefined;
+  if (summary) {
+    memories.length = Math.min(memories.length, DIALOGUE_LIMITS.memoriesMax - 1);
+    memories.unshift(summary.text);
+  }
   // A giver remembers the job they handed out (plain fact from the missions runtime).
   const given = who === PLAYER_ID ? missions.missions.find((m) => m.proposal.giverId === a.id) : undefined;
   if (given) {
@@ -717,7 +916,11 @@ function updateMissionsUi(dt: number): void {
       coins += n.gold;
       hud.setCoins(coins);
     }
+    if (n.kind === "done" || n.kind === "failed") void saveGame("auto");
   }
+  // The clock may have jumped back (debug, loaded save): restart the autosave period.
+  if (clock.totalMinutes < lastAutosaveAt) lastAutosaveAt = clock.totalMinutes;
+  if (started && !paused && clock.totalMinutes - lastAutosaveAt >= AUTOSAVE_EVERY_MINUTES) void saveGame("auto");
   const active = missions.active;
   hud.updateMissions(active.map((m) => ({ title: m.proposal.title, objective: missions.objective(m)?.text ?? "", left: timeLeft(m), choice: m.status === "choice" })));
   const target = active[0] ? missions.objective(active[0]) : null;
@@ -936,7 +1139,7 @@ function frame(now: number): void {
     speed: playerSpeed(player),
     timeScale: clock.timeScale,
     agents: agents.counts(),
-    ai: `${aiDebugLine()}\n${missionDebugLine()}`,
+    ai: `${aiDebugLine()}\n${missionDebugLine()}\nsauvegarde : ${lastSaveInfo} · IA ${gateway.settings.enabled ? "activée" : "désactivée"}${gateway.settings.sessionCapUsd !== null ? ` · plafond ${gateway.settings.sessionCapUsd} $` : ""} · session ${gateway.stats.sessionCostUsd.toFixed(4)} $`,
   });
 
   input.endFrame();
@@ -987,6 +1190,21 @@ window.__chronos = {
     if (a) playerAct(actId, a);
   },
   cast: (id: string) => castPower(id),
+  save: (kind: "manual" | "auto" = "manual") => saveGame(kind),
+  load: (slot: string) => loadGame(slot),
+  saves: () => saves.list(),
+  snapshot,
+  pause: pauseGame,
+  get settings() {
+    return { ...gateway.settings };
+  },
+  setAi(enabled: boolean, cap: number | null = null) {
+    gateway.settings = { enabled, sessionCapUsd: cap };
+    storeSettings();
+  },
+  get summaries() {
+    return [...aiSummaries];
+  },
   requestMission(giverId: string) {
     const a = agentsById.get(giverId);
     return a ? requestMission(a) : Promise.resolve(false);

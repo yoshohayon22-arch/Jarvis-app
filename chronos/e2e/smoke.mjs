@@ -397,6 +397,48 @@ try {
     await page.waitForTimeout(800);
     await shot("22-missions-done");
   }
+  // J8: save to IndexedDB, reload the page, continue; cost settings.
+  {
+    const until = (fn, arg) => page.waitForFunction(fn, arg, { timeout: 60000, polling: 250 }).then(() => true).catch(() => false);
+    const picture = () =>
+      page.evaluate(() => {
+        const c = window.__chronos;
+        const s = c.social;
+        return { day: c.clock.day, hour: c.clock.hour, rep: s.reputation, coins: s.coins, events: s.events, missions: c.missions.list.map((m) => `${m.title}:${m.status}`), unlocked: c.powers.unlocked.length, x: Math.round(c.player.x), z: Math.round(c.player.z) };
+      });
+    await page.evaluate(() => window.__chronos.act("give_alms", "garn"));
+    check(await page.evaluate(() => window.__chronos.save("manual")), "game saved to IndexedDB (manual slot)");
+    await page.evaluate(() => window.__chronos.save("auto"));
+    const before = await picture();
+    const slots = await page.evaluate(() => window.__chronos.saves());
+    check(slots.length >= 2 && slots.some((s) => s.slot === "manual"), `save slots listed: ${slots.map((s) => s.slot).join(", ")}`);
+    await page.evaluate(() => window.__chronos.pause());
+    await page.waitForTimeout(1500);
+    await page.screenshot({ path: `${OUT}${QUALITY}-23-pause-menu.png` });
+
+    await page.reload();
+    await page.waitForFunction(() => window.__chronos?.ready, null, { timeout: 180000 });
+    check(await until(() => /Continuer — Jour/.test(document.getElementById("btn-continue")?.textContent ?? "") && !document.getElementById("title-menu").classList.contains("hidden")), "after a page reload, the title screen offers to continue");
+    const fresh = await picture();
+    await page.screenshot({ path: `${OUT}${QUALITY}-24-title-continue.png` });
+    await page.click("#btn-continue");
+    await until((d) => window.__chronos.clock.day === d, before.day);
+    await page.waitForTimeout(500);
+    const after = await picture();
+    const same = JSON.stringify({ ...after, hour: 0 }) === JSON.stringify({ ...before, hour: 0 }) && Math.abs(after.hour - before.hour) <= 1;
+    check(same && JSON.stringify(fresh) !== JSON.stringify(before), `the loaded game matches the saved one (day ${after.day}, ${after.events} events, ${after.missions.length} missions, purse ${after.coins})`);
+    if (!same) console.log("   saved:", JSON.stringify(before), "\n  loaded:", JSON.stringify(after));
+
+    // Cost settings: with AI turned off, a mission comes from the local template and no request leaves the browser.
+    const requests = [];
+    page.on("request", (r) => /\/api\/(mission|dialogue|summary)/.test(r.url()) && requests.push(r.url()));
+    await page.evaluate(() => window.__chronos.setAi(false));
+    await page.evaluate(() => window.__chronos.requestMission("aldric"));
+    await until(() => window.__chronos.missions.offer !== null);
+    const offer = (await page.evaluate(() => window.__chronos.missions)).offer;
+    check(offer?.source === "template" && requests.length === 0, `AI switched off in settings: local mission "${offer?.title}", ${requests.length} request(s) sent`);
+    await page.evaluate(() => { window.__chronos.answerOffer(false); window.__chronos.setAi(true); });
+  }
   await page.evaluate(() => window.__chronos.setHour(3));
   await page.waitForTimeout(800);
   const night = await page.evaluate(() => window.__chronos.agents);

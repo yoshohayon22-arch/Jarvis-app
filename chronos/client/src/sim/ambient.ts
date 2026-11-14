@@ -31,6 +31,17 @@ export class AmbientSystem {
     this.rng = new SeededRng(seed ^ 0x3c6ef372);
   }
 
+  save(): AmbientSave {
+    return { rng: this.rng.state, lastCheck: this.lastCheck, meetings: [...this.meetings] };
+  }
+
+  load(s: AmbientSave): void {
+    this.rng.state = s.rng;
+    this.lastCheck = s.lastCheck;
+    this.meetings.clear();
+    for (const [k, v] of s.meetings) this.meetings.set(k, v);
+  }
+
   step(): void {
     const now = this.clock.totalMinutes;
     if (this.lastCheck === null || now < this.lastCheck) this.lastCheck = now;
@@ -72,4 +83,10 @@ export class AmbientSystem {
       }
     }
   }
+}
+
+export interface AmbientSave {
+  rng: number;
+  lastCheck: number | null;
+  meetings: [string, number][];
 }

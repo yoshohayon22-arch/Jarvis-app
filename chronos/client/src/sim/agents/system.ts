@@ -308,6 +308,26 @@ export class AgentSystem {
     a.nextThinkAt = now + minutes;
   }
 
+  /** Every inhabitant's full state (they are plain data by design). */
+  save(): Agent[] {
+    return structuredClone(this.agents);
+  }
+
+  /** Restores inhabitants by id. Fails without touching anything if the population differs. */
+  load(saved: readonly Agent[], now: number): void {
+    const byId = new Map(saved.map((a) => [a.id, a]));
+    if (saved.length !== this.agents.length || this.agents.some((a) => !byId.has(a.id))) throw new Error("save does not match this village's population");
+    for (const a of this.agents) {
+      const index = a.index;
+      Object.assign(a, structuredClone(byId.get(a.id)));
+      a.index = index;
+      a.held = false;
+    }
+    this.zones = [];
+    this.lastMinutes = now;
+    this.now = now;
+  }
+
   /** The guard takes someone away: they walk to the barracks and stay inside until released. */
   jail(a: Agent, until: number): void {
     a.jailedUntil = until;

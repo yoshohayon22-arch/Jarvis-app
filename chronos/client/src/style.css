@@ -179,3 +179,18 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: #0b0d14; col
 #mission-offer .keys { margin: 0; font-weight: 600; color: var(--amber); }
 #mission-offer em { position: absolute; right: 14px; top: 12px; font-size: 11px; opacity: 0.6; font-style: normal; }
 #mission-busy:not(:empty) { position: fixed; left: 50%; bottom: 130px; transform: translateX(-50%); background: var(--panel); border: 1px solid rgba(255, 191, 94, 0.4); border-radius: 6px; padding: 8px 14px; font-size: 14px; font-style: italic; }
+
+.menu { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin: 10px 0; }
+.menu.hidden { display: none; }
+.menu button {
+  font: inherit; font-size: 15px; color: var(--ink); background: rgba(20, 16, 12, 0.85); border: 1px solid rgba(255, 191, 94, 0.5);
+  border-radius: 6px; padding: 9px 16px; cursor: pointer; letter-spacing: 0.03em;
+}
+.menu button:hover, .menu button:focus-visible { border-color: var(--amber); color: var(--amber); outline: none; }
+.menu button small { display: block; font-size: 11px; opacity: 0.7; }
+#pause-card { cursor: default; max-height: calc(100vh - 32px); overflow: auto; background: rgba(12, 10, 8, 0.6); padding: 14px 22px; border-radius: 10px; }
+#pause-card h3 { margin: 14px 0 2px; font-size: 13px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--amber); font-weight: 600; }
+#save-list:empty::after { content: "Aucune sauvegarde."; opacity: 0.6; font-size: 14px; }
+.settings { display: flex; flex-direction: column; gap: 8px; text-align: left; font-size: 14px; margin-top: 8px; }
+.settings select { font: inherit; margin-left: 6px; background: #1a1510; color: var(--ink); border: 1px solid rgba(255, 191, 94, 0.4); border-radius: 4px; padding: 3px 6px; }
+#set-spend { margin: 0; opacity: 0.75; font-size: 13px; }

@@ -4,7 +4,8 @@
   "packDir": "../client/data/packs/medieval",
   "routes": {
     "dialogue": { "model": "claude-opus-5-5", "maxTokens": 1500, "effort": "low", "cacheTtlSeconds": 600 },
-    "mission": { "model": "claude-opus-5-5", "maxTokens": 4000, "effort": "medium", "cacheTtlSeconds": 0 }
+    "mission": { "model": "claude-opus-5-5", "maxTokens": 4000, "effort": "medium", "cacheTtlSeconds": 0 },
+    "summary": { "model": "claude-opus-5-5", "maxTokens": 800, "effort": "low", "cacheTtlSeconds": 3600 }
   },
   "budget": { "dailyLimitUsd": 2.0 },
   "rateLimit": { "perMinute": 20 },

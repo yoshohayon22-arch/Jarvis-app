@@ -61,7 +61,7 @@ const server = createServer(async (req, res) => {
     if (origin && !originAllowed(origin)) return send(res, origin, 403, { error: "origin_not_allowed" });
     if (req.method === "GET" && url === "/api/health") return send(res, origin, 200, { ok: true });
     if (req.method === "GET" && url === "/api/budget") return send(res, origin, 200, app.status());
-    if (req.method === "POST" && (url === "/api/dialogue" || url === "/api/mission")) {
+    if (req.method === "POST" && (url === "/api/dialogue" || url === "/api/mission" || url === "/api/summary")) {
       let body: unknown;
       try {
         body = await readBody(req, config.maxBodyBytes);
@@ -69,7 +69,7 @@ const server = createServer(async (req, res) => {
         return send(res, origin, (e as Error).message === "too_large" ? 413 : 400, { error: (e as Error).message });
       }
       const client = req.socket.remoteAddress ?? "local";
-      const r = url === "/api/mission" ? await app.mission(body, client) : await app.dialogue(body, client);
+      const r = url === "/api/mission" ? await app.mission(body, client) : url === "/api/summary" ? await app.summary(body, client) : await app.dialogue(body, client);
       return send(res, origin, r.status, r.body);
     }
     return send(res, origin, 404, { error: "not_found" });

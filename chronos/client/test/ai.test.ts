@@ -69,6 +69,30 @@ describe("AI gateway", () => {
       new Promise((_res, rej) => init.signal!.addEventListener("abort", () => rej(Object.assign(new Error("aborted"), { name: "AbortError" }))))) as unknown as typeof fetch;
     expect((await new AiGateway("/api", 20, slow).dialogue(req, 0, fb)).reason).toMatch(/lente/);
   });
+  it("makes no request at all when the player turned AI off, or once the session cap is reached", async () => {
+    let calls = 0;
+    const counting = ((...a: Parameters<typeof fetch>) => (calls++, respond(200, { reply: reply(), source: "ai", usage: { costUsd: 0.03 } })(...a))) as typeof fetch;
+    const g = new AiGateway("/api", 1000, counting);
+    g.settings = { enabled: false, sessionCapUsd: null };
+    expect((await g.dialogue(req, 0, fb)).reason).toMatch(/désactivée/);
+    expect(await g.mission({} as never)).toMatchObject({ ok: false });
+    expect(await g.summary({ characterId: "garn", memories: [] })).toBeNull();
+    expect(calls).toBe(0);
+    g.settings = { enabled: true, sessionCapUsd: 0.05 };
+    expect((await g.dialogue(req, 0, fb)).source).toBe("ai");
+    expect((await g.dialogue(req, 0, fb)).source).toBe("ai"); // 0.06 $ spent: the cap is now reached
+    expect((await g.dialogue(req, 0, fb)).reason).toMatch(/plafond/);
+    expect(calls).toBe(2);
+  });
+  it("returns a bounded memory summary, or null on any failure", async () => {
+    const g = new AiGateway("/api", 1000, respond(200, { summary: `  Tu te souviens ${"x".repeat(900)}`, usage: { costUsd: 0.001 } }));
+    const s = await g.summary({ characterId: "garn", memories: ["a", "b", "c", "d", "e"] });
+    expect(s!.length).toBeLessThanOrEqual(320);
+    expect(s!.startsWith("Tu te souviens")).toBe(true);
+    expect(g.stats).toMatchObject({ summaryCalls: 1, sessionCostUsd: 0.001 });
+    expect(await new AiGateway("/api", 1000, respond(503, { error: "no_api_key" })).summary({ characterId: "garn", memories: [] })).toBeNull();
+    expect(await new AiGateway("/api", 1000, respond(200, { summary: 42 })).summary({ characterId: "garn", memories: [] })).toBeNull();
+  });
   it("counts cached replies separately", async () => {
     const g = new AiGateway("/api", 1000, respond(200, { reply: reply(), source: "cache" }));
     await g.dialogue(req, 0, fb);

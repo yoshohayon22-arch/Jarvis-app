@@ -191,6 +191,20 @@ export class MissionSystem {
     return null;
   }
 
+  save(): MissionsSave {
+    return structuredClone({ missions: this.missions, nextId: this.nextId, lastEventId: this.lastEventId, rng: this.rng.state });
+  }
+
+  load(s: MissionsSave): void {
+    const d = structuredClone(s);
+    this.missions.length = 0;
+    this.missions.push(...d.missions);
+    this.nextId = d.nextId;
+    this.lastEventId = d.lastEventId;
+    this.rng.state = d.rng;
+    this.notices.length = 0;
+  }
+
   // ---------------------------------------------------------------- lifecycle
 
   /** Registers a mission. Refuses anything the validator rejects. */
@@ -464,4 +478,11 @@ export class MissionSystem {
     const p = s.placeId ? place(s.placeId) : at(s.targetId);
     return p ? { text: s.text, ...p } : null;
   }
+}
+
+export interface MissionsSave {
+  missions: Mission[];
+  nextId: number;
+  lastEventId: number;
+  rng: number;
 }

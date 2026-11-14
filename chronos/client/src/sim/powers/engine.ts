@@ -383,6 +383,39 @@ export class PowerSystem {
     });
   }
 
+  /** Lasting power state. Whatever is mid-air or mid-cast is let go first (saves happen between gestures). */
+  save(): PowersSave {
+    return structuredClone({
+      energy: this.energy,
+      unlocked: [...this.unlocked],
+      studied: [...this.studied],
+      leverage: [...this.leverage],
+      disguise: this.disguise,
+      cooldownUntil: [...this.cooldownUntil],
+    });
+  }
+
+  load(s: PowersSave): void {
+    this.energy = s.energy;
+    this.unlocked.clear();
+    for (const id of s.unlocked) this.unlocked.add(id);
+    this.studied.clear();
+    for (const [k, v] of s.studied) this.studied.set(k, v);
+    this.leverage.clear();
+    for (const id of s.leverage) this.leverage.add(id);
+    this.disguise = s.disguise ? { ...s.disguise } : null;
+    this.cooldownUntil.clear();
+    for (const [k, v] of s.cooldownUntil) this.cooldownUntil.set(k, v);
+    this.cloaked = false;
+    this.holding = null;
+    this.launched.length = 0;
+    this.loops.length = 0;
+    this.lastEcho = [];
+    this.fx.length = 0;
+    this.spottedBy = null;
+    this.history.clear();
+  }
+
   /** Drops the invisibility (ran out of energy, struck someone…). */
   reveal(): void {
     if (!this.cloaked) return;
@@ -608,4 +641,13 @@ export class PowerSystem {
   private clockPlayer = { x: 0, z: 0 };
   /** Who last saw through the false face (for the UI). */
   spottedBy: string | null = null;
+}
+
+export interface PowersSave {
+  energy: number;
+  unlocked: string[];
+  studied: [string, number][];
+  leverage: string[];
+  disguise: { agentId: string; until: number } | null;
+  cooldownUntil: [string, number][];
 }

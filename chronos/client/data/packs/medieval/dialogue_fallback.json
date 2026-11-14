@@ -1,0 +1,30 @@
+{
+  "$comment": "Local lines used when the AI is unavailable (no key, budget reached, error) and for extras, who never use AI. {name} = the speaker.",
+  "greeting": {
+    "hostile": ["Toi. Ne t'approche pas.", "Je n'ai rien à te dire. File.", "Garde tes distances, ou j'appelle la garde."],
+    "wary": ["Qu'est-ce que tu veux ?", "Hm. Fais vite, j'ai à faire.", "On raconte des choses sur toi…"],
+    "neutral": ["Bien le bonjour.", "Oui ? Je peux t'aider ?", "Belle journée pour Brumeval, non ?"],
+    "friendly": ["Ah, Kael ! Content de te voir.", "Te voilà ! Approche donc.", "Toujours un plaisir, mon garçon."]
+  },
+  "topics": [
+    { "keywords": ["valdren", "royaume", "disparu"], "lines": ["Valdren… Ce nom me met mal à l'aise. Parlons d'autre chose.", "On dit que ce royaume n'est plus. Je n'en sais pas davantage, et je préfère ça."] },
+    { "keywords": ["garde", "capitaine", "hadrien"], "lines": ["Le capitaine Vaux tient la ville d'une main ferme. Mieux vaut ne pas le contrarier.", "La garde ? Elle fait ce qu'elle peut. Enfin, celle de jour."] },
+    { "keywords": ["voleur", "guilde", "corneille"], "lines": ["Chut ! On ne parle pas de ces gens-là en plein jour.", "Des voleurs ? Garde ta bourse près de toi au marché, c'est tout ce que je dirai."] },
+    { "keywords": ["mage", "magie", "ordre", "tour"], "lines": ["Les mages restent dans leur tour, et c'est très bien ainsi.", "La magie, moins on en voit, mieux on se porte."] },
+    { "keywords": ["taverne", "bière", "manger", "boire"], "lines": ["La Chope Fêlée sert la meilleure soupe du bourg. La seule, aussi.", "Va voir Garn à la taverne, il sait tout ce qui se dit ici."] },
+    { "keywords": ["travail", "aide", "mission", "service"], "lines": ["Du travail ? Demande autour de la place, il y a toujours quelqu'un dans le besoin.", "Pas pour l'instant. Mais reviens me voir."] },
+    { "keywords": ["temps", "éclat", "ambre", "main"], "lines": ["Ta main… elle brille, ou c'est moi ? Non, ne me dis rien.", "J'ai eu une drôle d'impression tout à l'heure. Comme si j'avais déjà vécu ce moment."] }
+  ],
+  "default": {
+    "hostile": ["Je n'ai pas de temps à perdre avec toi.", "Va-t'en."],
+    "wary": ["Je ne sais pas. Demande à quelqu'un d'autre.", "Pourquoi tu veux savoir ça ?"],
+    "neutral": ["Ça, je ne saurais pas te dire.", "Hm. Possible. Qui sait ?", "Je ne suis pas la bonne personne pour ça."],
+    "friendly": ["Bonne question ! Je ne sais pas, mais je tendrai l'oreille pour toi.", "Si j'apprends quelque chose, tu seras le premier au courant."]
+  },
+  "barks": {
+    "villagers": ["Les prix montent encore…", "Tu as vu le temps qu'il fait ?", "Bien le bonjour !", "J'ai du travail, excuse-moi."],
+    "royal_guard": ["Circulez.", "Pas d'histoires dans mon secteur.", "La garde veille."],
+    "thieves_guild": ["Je ne t'ai pas vu, tu ne m'as pas vu.", "Jolie bourse que tu as là.", "…"],
+    "mages_order": ["Ne me dérange pas, je réfléchis.", "Fascinant… non, pas toi.", "L'Ordre n'a rien à déclarer."]
+  }
+}

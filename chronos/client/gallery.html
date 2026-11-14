@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chronos — galerie d'assets</title>
+    <style>
+      html, body { margin: 0; height: 100%; overflow: hidden; background: #cfd9e0; font: 13px system-ui, sans-serif; }
+      canvas { display: block; }
+      #labels { position: fixed; inset: 0; pointer-events: none; }
+      #labels span { position: absolute; transform: translate(-50%, 0); background: rgba(255,255,255,.85); padding: 1px 4px; border-radius: 3px; white-space: nowrap; font-size: 11px; }
+      #bar { position: fixed; top: 8px; left: 8px; z-index: 2; }
+    </style>
+  </head>
+  <body>
+    <div id="bar"></div>
+    <div id="labels"></div>
+    <script type="module" src="/src/tools/gallery.ts"></script>
+  </body>
+</html>

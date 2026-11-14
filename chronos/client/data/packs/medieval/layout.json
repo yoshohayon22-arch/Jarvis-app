@@ -1,0 +1,1327 @@
+{
+ "size": 200,
+ "wallRadius": 70,
+ "spawn": {
+  "pos": [
+   0,
+   10
+  ],
+  "facing": 3.14159
+ },
+ "districts": [
+  {
+   "id": "market",
+   "name": "Place du Marché",
+   "rect": [
+    -22,
+    -22,
+    22,
+    22
+   ],
+   "groundColor": "cobble"
+  },
+  {
+   "id": "temple_hill",
+   "name": "Colline du Temple",
+   "rect": [
+    -22,
+    -70,
+    22,
+    -22
+   ],
+   "groundColor": "templeLawn"
+  },
+  {
+   "id": "artisans",
+   "name": "Rue des Artisans",
+   "rect": [
+    22,
+    -70,
+    70,
+    22
+   ],
+   "groundColor": "grassLight"
+  },
+  {
+   "id": "garrison",
+   "name": "Quartier de la Garde",
+   "rect": [
+    -70,
+    -70,
+    -22,
+    22
+   ],
+   "groundColor": "meadow"
+  },
+  {
+   "id": "lowtown",
+   "name": "Les Bas-Fonds",
+   "rect": [
+    -70,
+    22,
+    70,
+    70
+   ],
+   "groundColor": "mud"
+  }
+ ],
+ "buildings": [
+  {
+   "id": "well_square",
+   "kind": "well",
+   "name": "Puits de la place",
+   "district": "market",
+   "pos": [
+    0,
+    0
+   ],
+   "size": [
+    4.56,
+    5.25
+   ],
+   "rot": 0,
+   "height": 5.78
+  },
+  {
+   "id": "market_hall",
+   "kind": "stall",
+   "name": "Halle aux marchands",
+   "district": "market",
+   "pos": [
+    -11,
+    -10
+   ],
+   "size": [
+    14.39,
+    10.53
+   ],
+   "rot": 0,
+   "height": 7.81
+  },
+  {
+   "id": "stall_sw",
+   "kind": "stall",
+   "name": "Étal du poissonnier",
+   "district": "market",
+   "pos": [
+    -9,
+    8
+   ],
+   "size": [
+    3.1,
+    3.1
+   ],
+   "rot": 2,
+   "height": 3.1
+  },
+  {
+   "id": "stall_se",
+   "kind": "stall",
+   "name": "Étal du boulanger",
+   "district": "market",
+   "pos": [
+    9,
+    8
+   ],
+   "size": [
+    3.1,
+    3.1
+   ],
+   "rot": 2,
+   "height": 3.1
+  },
+  {
+   "id": "tavern",
+   "kind": "tavern",
+   "name": "Taverne de la Chope Fêlée",
+   "district": "market",
+   "pos": [
+    13,
+    -13
+   ],
+   "size": [
+    10.55,
+    11.99
+   ],
+   "rot": 0,
+   "height": 12.57
+  },
+  {
+   "id": "temple",
+   "kind": "temple",
+   "name": "Temple de l'Aube",
+   "district": "temple_hill",
+   "pos": [
+    -14,
+    -46
+   ],
+   "size": [
+    10.28,
+    11.55
+   ],
+   "rot": 0,
+   "height": 16.45
+  },
+  {
+   "id": "house_priest",
+   "kind": "house",
+   "name": "Presbytère",
+   "district": "temple_hill",
+   "pos": [
+    12,
+    -48
+   ],
+   "size": [
+    7.88,
+    9.89
+   ],
+   "rot": 3,
+   "height": 11.52
+  },
+  {
+   "id": "house_n2",
+   "kind": "house",
+   "name": "Maison du scribe",
+   "district": "temple_hill",
+   "pos": [
+    16,
+    -32
+   ],
+   "size": [
+    7.13,
+    7.69
+   ],
+   "rot": 3,
+   "height": 8.37
+  },
+  {
+   "id": "forge",
+   "kind": "forge",
+   "name": "Forge de Brann",
+   "district": "artisans",
+   "pos": [
+    34,
+    10
+   ],
+   "size": [
+    10.3,
+    9.96
+   ],
+   "rot": 2,
+   "height": 7.84
+  },
+  {
+   "id": "house_e1",
+   "kind": "house",
+   "name": "Maison du tanneur",
+   "district": "artisans",
+   "pos": [
+    32,
+    -12
+   ],
+   "size": [
+    7.88,
+    9.89
+   ],
+   "rot": 0,
+   "height": 11.52
+  },
+  {
+   "id": "house_e2",
+   "kind": "house",
+   "name": "Maison du tisserand",
+   "district": "artisans",
+   "pos": [
+    46,
+    -10
+   ],
+   "size": [
+    7.13,
+    7.69
+   ],
+   "rot": 0,
+   "height": 8.37
+  },
+  {
+   "id": "house_e3",
+   "kind": "house",
+   "name": "Maison du marchand",
+   "district": "artisans",
+   "pos": [
+    46,
+    13
+   ],
+   "size": [
+    7.88,
+    9.89
+   ],
+   "rot": 2,
+   "height": 11.52
+  },
+  {
+   "id": "house_e4",
+   "kind": "house",
+   "name": "Maison du charpentier",
+   "district": "artisans",
+   "pos": [
+    34,
+    21
+   ],
+   "size": [
+    7.13,
+    7.69
+   ],
+   "rot": 2,
+   "height": 8.37
+  },
+  {
+   "id": "windmill",
+   "kind": "mill",
+   "name": "Moulin des Brumes",
+   "district": "artisans",
+   "pos": [
+    40,
+    -42
+   ],
+   "size": [
+    11.26,
+    8.17
+   ],
+   "rot": 0,
+   "height": 14.58
+  },
+  {
+   "id": "barracks",
+   "kind": "barracks",
+   "name": "Caserne de la Garde royale",
+   "district": "garrison",
+   "pos": [
+    -38,
+    -12
+   ],
+   "size": [
+    12.96,
+    14.09
+   ],
+   "rot": 0,
+   "height": 14.76
+  },
+  {
+   "id": "watchtower",
+   "kind": "tower",
+   "name": "Tour de guet",
+   "district": "garrison",
+   "pos": [
+    -46,
+    -28
+   ],
+   "size": [
+    8.39,
+    9.67
+   ],
+   "rot": 0,
+   "height": 17.39
+  },
+  {
+   "id": "archery",
+   "kind": "yard",
+   "name": "Champ de tir de la garde",
+   "district": "garrison",
+   "pos": [
+    -50,
+    14
+   ],
+   "size": [
+    11.7,
+    10.85
+   ],
+   "rot": 2,
+   "height": 12.54
+  },
+  {
+   "id": "house_w1",
+   "kind": "house",
+   "name": "Maison du capitaine",
+   "district": "garrison",
+   "pos": [
+    -32,
+    14
+   ],
+   "size": [
+    7.13,
+    7.69
+   ],
+   "rot": 2,
+   "height": 8.37
+  },
+  {
+   "id": "shack_1",
+   "kind": "shack",
+   "name": "Masure de la veuve",
+   "district": "lowtown",
+   "pos": [
+    -12,
+    32
+   ],
+   "size": [
+    4.75,
+    5.12
+   ],
+   "rot": 0,
+   "height": 5.58
+  },
+  {
+   "id": "shack_2",
+   "kind": "shack",
+   "name": "Masure",
+   "district": "lowtown",
+   "pos": [
+    -6,
+    42
+   ],
+   "size": [
+    4.75,
+    5.12
+   ],
+   "rot": 1,
+   "height": 5.58
+  },
+  {
+   "id": "shack_3",
+   "kind": "shack",
+   "name": "Masure",
+   "district": "lowtown",
+   "pos": [
+    8,
+    34
+   ],
+   "size": [
+    5.25,
+    6.59
+   ],
+   "rot": 3,
+   "height": 7.68
+  },
+  {
+   "id": "shack_4",
+   "kind": "shack",
+   "name": "Masure",
+   "district": "lowtown",
+   "pos": [
+    14,
+    44
+   ],
+   "size": [
+    4.75,
+    5.12
+   ],
+   "rot": 0,
+   "height": 5.58
+  },
+  {
+   "id": "shack_5",
+   "kind": "shack",
+   "name": "Masure",
+   "district": "lowtown",
+   "pos": [
+    -20,
+    44
+   ],
+   "size": [
+    5.25,
+    6.59
+   ],
+   "rot": 1,
+   "height": 7.68
+  },
+  {
+   "id": "shack_6",
+   "kind": "shack",
+   "name": "Repaire caché",
+   "district": "lowtown",
+   "pos": [
+    6,
+    52
+   ],
+   "size": [
+    4.75,
+    5.12
+   ],
+   "rot": 2,
+   "height": 5.58
+  },
+  {
+   "id": "ruin_1",
+   "kind": "ruin",
+   "name": "Maison effondrée",
+   "district": "lowtown",
+   "pos": [
+    24,
+    30
+   ],
+   "size": [
+    9.23,
+    7.83
+   ],
+   "rot": 0,
+   "height": 5.88
+  },
+  {
+   "id": "ruin_2",
+   "kind": "ruin",
+   "name": "Chantier abandonné",
+   "district": "lowtown",
+   "pos": [
+    -28,
+    30
+   ],
+   "size": [
+    6.96,
+    6.76
+   ],
+   "rot": 3,
+   "height": 5.88
+  },
+  {
+   "id": "shack_9",
+   "kind": "shack",
+   "name": "Masure du conteur",
+   "district": "lowtown",
+   "pos": [
+    -14,
+    54
+   ],
+   "size": [
+    5.25,
+    6.59
+   ],
+   "rot": 2,
+   "height": 7.68
+  },
+  {
+   "id": "mage_tower",
+   "kind": "tower",
+   "name": "Tour de l'Ordre des Mages",
+   "district": "temple_hill",
+   "pos": [
+    12,
+    -60
+   ],
+   "size": [
+    6.96,
+    8.07
+   ],
+   "rot": 3,
+   "height": 15.34
+  }
+ ],
+ "props": [
+  {
+   "kind": "lantern",
+   "pos": [
+    3.5,
+    -28
+   ],
+   "solid": true
+  },
+  {
+   "kind": "lantern",
+   "pos": [
+    -3.5,
+    -40
+   ],
+   "solid": true
+  },
+  {
+   "kind": "lantern",
+   "pos": [
+    3.5,
+    -58
+   ],
+   "solid": true
+  },
+  {
+   "kind": "lantern",
+   "pos": [
+    28,
+    3.5
+   ],
+   "solid": true
+  },
+  {
+   "kind": "lantern",
+   "pos": [
+    44,
+    -3.5
+   ],
+   "solid": true
+  },
+  {
+   "kind": "lantern",
+   "pos": [
+    58,
+    3.5
+   ],
+   "solid": true
+  },
+  {
+   "kind": "lantern",
+   "pos": [
+    -28,
+    -3.5
+   ],
+   "solid": true
+  },
+  {
+   "kind": "lantern",
+   "pos": [
+    -44,
+    3.5
+   ],
+   "solid": true
+  },
+  {
+   "kind": "lantern",
+   "pos": [
+    -58,
+    -3.5
+   ],
+   "solid": true
+  },
+  {
+   "kind": "lantern",
+   "pos": [
+    3.5,
+    30
+   ],
+   "solid": true
+  },
+  {
+   "kind": "lantern",
+   "pos": [
+    -3.5,
+    46
+   ],
+   "solid": true
+  },
+  {
+   "kind": "lantern",
+   "pos": [
+    3.5,
+    60
+   ],
+   "solid": true
+  },
+  {
+   "kind": "lantern",
+   "pos": [
+    12,
+    12
+   ],
+   "solid": true
+  },
+  {
+   "kind": "lantern",
+   "pos": [
+    -12,
+    12
+   ],
+   "solid": true
+  },
+  {
+   "kind": "tree",
+   "pos": [
+    -34,
+    -40
+   ],
+   "solid": true
+  },
+  {
+   "kind": "tree",
+   "pos": [
+    28,
+    -40
+   ],
+   "solid": true
+  },
+  {
+   "kind": "tree",
+   "pos": [
+    40,
+    -28
+   ],
+   "solid": true
+  },
+  {
+   "kind": "tree",
+   "pos": [
+    -55,
+    30
+   ],
+   "solid": true
+  },
+  {
+   "kind": "tree",
+   "pos": [
+    52,
+    30
+   ],
+   "solid": true
+  },
+  {
+   "kind": "tree",
+   "pos": [
+    -8,
+    -62
+   ],
+   "solid": true
+  },
+  {
+   "kind": "tree",
+   "pos": [
+    30,
+    -54
+   ],
+   "solid": true
+  },
+  {
+   "kind": "tree",
+   "pos": [
+    -50,
+    -36
+   ],
+   "solid": true
+  },
+  {
+   "kind": "tree",
+   "pos": [
+    -30,
+    52
+   ],
+   "solid": true
+  },
+  {
+   "kind": "tree",
+   "pos": [
+    30,
+    50
+   ],
+   "solid": true
+  },
+  {
+   "kind": "barrel",
+   "pos": [
+    23.5,
+    -14
+   ],
+   "solid": true
+  },
+  {
+   "kind": "barrel",
+   "pos": [
+    23.6,
+    -12.6
+   ],
+   "solid": true
+  },
+  {
+   "kind": "crate",
+   "pos": [
+    40.7,
+    9
+   ],
+   "rot": 0.3,
+   "solid": true
+  },
+  {
+   "kind": "barrel",
+   "pos": [
+    40.6,
+    11
+   ],
+   "solid": true
+  },
+  {
+   "kind": "crate",
+   "pos": [
+    -28,
+    -12
+   ],
+   "rot": 0.1,
+   "solid": true
+  },
+  {
+   "kind": "crate",
+   "pos": [
+    -28.2,
+    -13.4
+   ],
+   "rot": 0.6,
+   "solid": true
+  },
+  {
+   "kind": "wheelbarrow",
+   "pos": [
+    12,
+    -1.5
+   ],
+   "rot": 1.2,
+   "solid": true
+  },
+  {
+   "kind": "barrel",
+   "pos": [
+    -8.5,
+    31.5
+   ],
+   "solid": true
+  },
+  {
+   "kind": "crate",
+   "pos": [
+    17,
+    41.2
+   ],
+   "rot": 0.4,
+   "solid": true
+  },
+  {
+   "kind": "rock",
+   "pos": [
+    -40,
+    40
+   ],
+   "solid": true
+  },
+  {
+   "kind": "rock",
+   "pos": [
+    52,
+    -30
+   ],
+   "solid": true
+  },
+  {
+   "kind": "lantern",
+   "pos": [
+    -20,
+    -17
+   ],
+   "solid": true
+  },
+  {
+   "kind": "fence",
+   "pos": [
+    -36,
+    -22
+   ],
+   "rot": 0
+  },
+  {
+   "kind": "fence",
+   "pos": [
+    -40,
+    -22
+   ],
+   "rot": 0
+  },
+  {
+   "kind": "sack",
+   "pos": [
+    -6.5,
+    8.5
+   ],
+   "solid": false
+  },
+  {
+   "kind": "crate",
+   "pos": [
+    11.6,
+    9.5
+   ],
+   "rot": 0.5,
+   "solid": true
+  },
+  {
+   "kind": "barrel",
+   "pos": [
+    -11.2,
+    9.6
+   ],
+   "solid": true
+  },
+  {
+   "kind": "lumber",
+   "pos": [
+    41,
+    19.5
+   ],
+   "rot": 0.2,
+   "solid": true
+  },
+  {
+   "kind": "weaponrack",
+   "pos": [
+    -30,
+    -19.5
+   ],
+   "rot": 0,
+   "solid": true
+  },
+  {
+   "kind": "target",
+   "pos": [
+    -56,
+    26
+   ],
+   "rot": 0.4,
+   "solid": true
+  },
+  {
+   "kind": "bucket",
+   "pos": [
+    2.6,
+    -1.8
+   ],
+   "solid": false
+  },
+  {
+   "kind": "flag",
+   "pos": [
+    -30.5,
+    -4.5
+   ],
+   "variant": "blue"
+  },
+  {
+   "kind": "flag",
+   "pos": [
+    7,
+    -6.2
+   ],
+   "variant": "red"
+  },
+  {
+   "kind": "stone",
+   "pos": [
+    30,
+    36.5
+   ],
+   "rot": 0.7,
+   "solid": true
+  }
+ ],
+ "roads": [
+  {
+   "from": [
+    0,
+    -22
+   ],
+   "to": [
+    0,
+    -100
+   ],
+   "width": 5
+  },
+  {
+   "from": [
+    0,
+    22
+   ],
+   "to": [
+    0,
+    100
+   ],
+   "width": 5
+  },
+  {
+   "from": [
+    22,
+    0
+   ],
+   "to": [
+    100,
+    0
+   ],
+   "width": 5
+  },
+  {
+   "from": [
+    -22,
+    0
+   ],
+   "to": [
+    -100,
+    0
+   ],
+   "width": 5
+  },
+  {
+   "from": [
+    -14,
+    -40
+   ],
+   "to": [
+    -14,
+    -30
+   ],
+   "width": 3
+  },
+  {
+   "from": [
+    -15.5,
+    -30
+   ],
+   "to": [
+    -2.5,
+    -30
+   ],
+   "width": 3
+  }
+ ],
+ "spots": [
+  {
+   "id": "market_well",
+   "name": "autour du puits",
+   "pos": [
+    0,
+    4
+   ],
+   "radius": 4.5
+  },
+  {
+   "id": "market_hall",
+   "name": "devant la halle",
+   "pos": [
+    -10,
+    -2.5
+   ],
+   "radius": 3
+  },
+  {
+   "id": "market_stalls",
+   "name": "aux étals",
+   "pos": [
+    0,
+    11.5
+   ],
+   "radius": 5
+  },
+  {
+   "id": "market_east",
+   "name": "sur la place",
+   "pos": [
+    9,
+    1
+   ],
+   "radius": 4
+  },
+  {
+   "id": "tavern_front",
+   "name": "devant la taverne",
+   "pos": [
+    13,
+    -3.5
+   ],
+   "radius": 5
+  },
+  {
+   "id": "temple_front",
+   "name": "sur le parvis du temple",
+   "pos": [
+    -14,
+    -37
+   ],
+   "radius": 3
+  },
+  {
+   "id": "temple_lawn",
+   "name": "sur la pelouse du temple",
+   "pos": [
+    -2,
+    -36
+   ],
+   "radius": 5
+  },
+  {
+   "id": "mage_court",
+   "name": "au pied de la tour des mages",
+   "pos": [
+    5,
+    -59
+   ],
+   "radius": 2.5
+  },
+  {
+   "id": "forge_yard",
+   "name": "à la forge",
+   "pos": [
+    34,
+    3.8
+   ],
+   "radius": 1.8
+  },
+  {
+   "id": "artisan_street",
+   "name": "rue des Artisans",
+   "pos": [
+    40,
+    0
+   ],
+   "radius": 4
+  },
+  {
+   "id": "lumber_yard",
+   "name": "au dépôt de bois",
+   "pos": [
+    40,
+    23.5
+   ],
+   "radius": 2.5
+  },
+  {
+   "id": "mill_yard",
+   "name": "au moulin",
+   "pos": [
+    40,
+    -34
+   ],
+   "radius": 3
+  },
+  {
+   "id": "barracks_yard",
+   "name": "dans la cour de la caserne",
+   "pos": [
+    -36,
+    -1.5
+   ],
+   "radius": 3
+  },
+  {
+   "id": "training_ground",
+   "name": "au champ de tir",
+   "pos": [
+    -48,
+    23
+   ],
+   "radius": 3
+  },
+  {
+   "id": "lowtown_square",
+   "name": "au cœur des Bas-Fonds",
+   "pos": [
+    0,
+    40
+   ],
+   "radius": 3.5
+  },
+  {
+   "id": "lowtown_alley",
+   "name": "dans une ruelle",
+   "pos": [
+    15,
+    37
+   ],
+   "radius": 3
+  },
+  {
+   "id": "lowtown_west",
+   "name": "près des masures",
+   "pos": [
+    -22,
+    37
+   ],
+   "radius": 3.5
+  },
+  {
+   "id": "hideout_door",
+   "name": "près du repaire",
+   "pos": [
+    6,
+    47.5
+   ],
+   "radius": 1.8
+  },
+  {
+   "id": "gate_north",
+   "name": "à la porte nord",
+   "pos": [
+    2.2,
+    -64.5
+   ],
+   "radius": 1
+  },
+  {
+   "id": "gate_south",
+   "name": "à la porte sud",
+   "pos": [
+    -2.2,
+    64.5
+   ],
+   "radius": 1
+  },
+  {
+   "id": "gate_east",
+   "name": "à la porte est",
+   "pos": [
+    64.5,
+    2.2
+   ],
+   "radius": 1
+  },
+  {
+   "id": "gate_west",
+   "name": "à la porte ouest",
+   "pos": [
+    -64.5,
+    -2.2
+   ],
+   "radius": 1
+  },
+  {
+   "id": "fields_east",
+   "name": "aux champs de l'est",
+   "pos": [
+    84,
+    8
+   ],
+   "radius": 6
+  },
+  {
+   "id": "fields_south",
+   "name": "aux champs du sud",
+   "pos": [
+    -9,
+    86
+   ],
+   "radius": 6
+  },
+  {
+   "id": "woods_west",
+   "name": "à la lisière du bois",
+   "pos": [
+    -86,
+    -8
+   ],
+   "radius": 5
+  }
+ ],
+ "routes": [
+  {
+   "id": "patrol_market",
+   "name": "ronde du marché",
+   "points": [
+    [
+     -16,
+     -18
+    ],
+    [
+     5,
+     -19
+    ],
+    [
+     18,
+     -4
+    ],
+    [
+     17,
+     16
+    ],
+    [
+     -16,
+     17
+    ],
+    [
+     -18,
+     0
+    ]
+   ]
+  },
+  {
+   "id": "patrol_cross",
+   "name": "ronde des portes",
+   "points": [
+    [
+     0,
+     -60
+    ],
+    [
+     0,
+     -24
+    ],
+    [
+     60,
+     0
+    ],
+    [
+     24,
+     0
+    ],
+    [
+     0,
+     60
+    ],
+    [
+     0,
+     24
+    ],
+    [
+     -60,
+     0
+    ],
+    [
+     -24,
+     0
+    ]
+   ]
+  },
+  {
+   "id": "patrol_lowtown",
+   "name": "ronde des Bas-Fonds",
+   "points": [
+    [
+     -1.5,
+     26
+    ],
+    [
+     18,
+     36
+    ],
+    [
+     10,
+     58
+    ],
+    [
+     -10,
+     48
+    ],
+    [
+     -26,
+     38
+    ]
+   ]
+  },
+  {
+   "id": "patrol_garrison",
+   "name": "ronde de la garde",
+   "points": [
+    [
+     -28,
+     -3
+    ],
+    [
+     -52,
+     -3
+    ],
+    [
+     -52,
+     -34
+    ],
+    [
+     -30,
+     -30
+    ]
+   ]
+  }
+ ]
+}

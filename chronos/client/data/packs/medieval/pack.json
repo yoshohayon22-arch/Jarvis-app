@@ -1,0 +1,7 @@
+{
+  "id": "medieval",
+  "era": "medieval_fantasy",
+  "name": "Brumeval, bourg-marché de la frontière",
+  "version": "0.1.0",
+  "calendar": { "minutesPerGameDay": 24, "startHour": 7.5 }
+}

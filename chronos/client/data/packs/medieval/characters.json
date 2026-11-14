@@ -1,0 +1,1023 @@
+{
+ "characters": [
+  {
+   "id": "garn",
+   "name": "Garn Brassac",
+   "role": "Tavernier de la Chope Fêlée",
+   "faction": "villagers",
+   "look": "villager_b",
+   "tint": "#ffe2c4",
+   "scale": 1.06,
+   "speed": 1.35,
+   "home": "tavern",
+   "traits": {
+    "sociable": 0.9,
+    "brave": 0.5,
+    "honest": 0.6,
+    "greedy": 0.5,
+    "gossip": 0.95,
+    "grudge": 0.3,
+    "devout": 0.3
+   },
+   "bio": "Ancien mercenaire devenu tavernier. Sait tout ce qui se dit à Brumeval, et le répète volontiers contre une chope.",
+   "goals": [
+    "Garder la taverne pleine",
+    "Éviter les ennuis avec la garde"
+   ],
+   "inventory": [
+    {
+     "item": "ale_mug",
+     "qty": 12
+    },
+    {
+     "item": "coin",
+     "qty": 40
+    }
+   ],
+   "relations": [
+    {
+     "to": "brann",
+     "kind": "friend",
+     "value": 60
+    },
+    {
+     "to": "odon",
+     "kind": "wary",
+     "value": -20
+    },
+    {
+     "to": "theobald",
+     "kind": "friend",
+     "value": 45
+    }
+   ],
+   "schedule": [
+    {
+     "from": 6,
+     "do": "work",
+     "at": "spot:tavern_front"
+    },
+    {
+     "from": 14,
+     "do": "eat",
+     "at": "building:tavern"
+    },
+    {
+     "from": 15,
+     "do": "work",
+     "at": "spot:tavern_front"
+    },
+    {
+     "from": 23.5,
+     "do": "sleep",
+     "at": "home"
+    }
+   ]
+  },
+  {
+   "id": "brann",
+   "name": "Brann Ferrecœur",
+   "role": "Forgeron",
+   "faction": "villagers",
+   "look": "barbarian_hat",
+   "tint": "#ffd9b8",
+   "scale": 1.08,
+   "speed": 1.3,
+   "home": "forge",
+   "traits": {
+    "sociable": 0.5,
+    "brave": 0.8,
+    "honest": 0.9,
+    "greedy": 0.2,
+    "gossip": 0.3,
+    "grudge": 0.7,
+    "devout": 0.4
+   },
+   "bio": "Forgeron bourru au grand cœur, qui rate une lame sur trois et accuse le charbon. Loyal envers ceux qui le respectent.",
+   "goals": [
+    "Forger une lame digne de son père",
+    "Payer sa dette à Aldric"
+   ],
+   "inventory": [
+    {
+     "item": "hammer",
+     "qty": 1
+    },
+    {
+     "item": "iron_ingot",
+     "qty": 6
+    }
+   ],
+   "relations": [
+    {
+     "to": "garn",
+     "kind": "friend",
+     "value": 60
+    },
+    {
+     "to": "aldric",
+     "kind": "debtor",
+     "value": -25
+    },
+    {
+     "to": "hadrien",
+     "kind": "respect",
+     "value": 40
+    }
+   ],
+   "schedule": [
+    {
+     "from": 5.5,
+     "do": "work",
+     "at": "spot:forge_yard"
+    },
+    {
+     "from": 12,
+     "do": "eat",
+     "at": "building:tavern"
+    },
+    {
+     "from": 13,
+     "do": "work",
+     "at": "spot:forge_yard"
+    },
+    {
+     "from": 19,
+     "do": "socialize",
+     "at": "spot:tavern_front"
+    },
+    {
+     "from": 21.5,
+     "do": "sleep",
+     "at": "home"
+    }
+   ]
+  },
+  {
+   "id": "aveline",
+   "name": "Sœur Aveline",
+   "role": "Prêtresse de l'Aube",
+   "faction": "villagers",
+   "look": "villager_c",
+   "tint": "#fff6e0",
+   "scale": 1.0,
+   "speed": 1.25,
+   "home": "house_priest",
+   "traits": {
+    "sociable": 0.7,
+    "brave": 0.6,
+    "honest": 0.95,
+    "greedy": 0.05,
+    "gossip": 0.4,
+    "grudge": 0.1,
+    "devout": 1.0
+   },
+   "bio": "Prêtresse bavarde et bienveillante. Soigne les pauvres des Bas-Fonds et se méfie de la magie qui n'est pas bénie.",
+   "goals": [
+    "Protéger les démunis",
+    "Comprendre les 'plis' qu'elle sent dans le temps pendant ses prières"
+   ],
+   "inventory": [
+    {
+     "item": "healing_herbs",
+     "qty": 5
+    }
+   ],
+   "relations": [
+    {
+     "to": "margaux",
+     "kind": "protects",
+     "value": 70
+    },
+    {
+     "to": "orsan",
+     "kind": "rival",
+     "value": -15
+    },
+    {
+     "to": "pip",
+     "kind": "protects",
+     "value": 50
+    }
+   ],
+   "schedule": [
+    {
+     "from": 5,
+     "do": "pray",
+     "at": "spot:temple_front"
+    },
+    {
+     "from": 8,
+     "do": "work",
+     "at": "spot:temple_lawn"
+    },
+    {
+     "from": 12,
+     "do": "eat",
+     "at": "home"
+    },
+    {
+     "from": 13,
+     "do": "wander",
+     "at": "district:lowtown"
+    },
+    {
+     "from": 17,
+     "do": "pray",
+     "at": "building:temple"
+    },
+    {
+     "from": 20,
+     "do": "sleep",
+     "at": "home"
+    }
+   ]
+  },
+  {
+   "id": "hadrien",
+   "name": "Capitaine Hadrien Vaux",
+   "role": "Capitaine de la garde royale",
+   "faction": "royal_guard",
+   "look": "guard_captain",
+   "tint": "#e8eeff",
+   "scale": 1.08,
+   "speed": 1.5,
+   "home": "house_w1",
+   "traits": {
+    "sociable": 0.4,
+    "brave": 0.95,
+    "honest": 0.85,
+    "greedy": 0.1,
+    "gossip": 0.1,
+    "grudge": 0.8,
+    "devout": 0.5
+   },
+   "bio": "Capitaine intègre et rigide. Croit que l'ordre protège les faibles. Ne pardonne pas la trahison.",
+   "goals": [
+    "Maintenir l'ordre à Brumeval",
+    "Démanteler la guilde des voleurs"
+   ],
+   "inventory": [
+    {
+     "item": "sword",
+     "qty": 1
+    },
+    {
+     "item": "guard_seal",
+     "qty": 1
+    }
+   ],
+   "relations": [
+    {
+     "to": "odon",
+     "kind": "superior",
+     "value": 10
+    },
+    {
+     "to": "sylve",
+     "kind": "enemy",
+     "value": -80
+    },
+    {
+     "to": "brann",
+     "kind": "respect",
+     "value": 40
+    }
+   ],
+   "schedule": [
+    {
+     "from": 6,
+     "do": "work",
+     "at": "spot:barracks_yard"
+    },
+    {
+     "from": 9,
+     "do": "patrol",
+     "at": "route:patrol_cross"
+    },
+    {
+     "from": 12.5,
+     "do": "eat",
+     "at": "building:barracks"
+    },
+    {
+     "from": 13.5,
+     "do": "work",
+     "at": "spot:training_ground"
+    },
+    {
+     "from": 17,
+     "do": "patrol",
+     "at": "route:patrol_market"
+    },
+    {
+     "from": 20,
+     "do": "eat",
+     "at": "building:tavern"
+    },
+    {
+     "from": 22,
+     "do": "sleep",
+     "at": "home"
+    }
+   ]
+  },
+  {
+   "id": "odon",
+   "name": "Sergent Odon Malebranche",
+   "role": "Sergent de la garde",
+   "faction": "royal_guard",
+   "look": "villager_d",
+   "tint": "#d9d2c4",
+   "scale": 1.02,
+   "speed": 1.4,
+   "home": "barracks",
+   "traits": {
+    "sociable": 0.6,
+    "brave": 0.4,
+    "honest": 0.15,
+    "greedy": 0.95,
+    "gossip": 0.5,
+    "grudge": 0.5,
+    "devout": 0.1
+   },
+   "bio": "Sergent de nuit. Ferme les yeux contre quelques pièces. Rencontre la Corneille à minuit près du repaire.",
+   "goals": [
+    "S'enrichir sans se faire prendre",
+    "Quitter Brumeval fortune faite"
+   ],
+   "inventory": [
+    {
+     "item": "coin",
+     "qty": 85
+    },
+    {
+     "item": "sword",
+     "qty": 1
+    }
+   ],
+   "relations": [
+    {
+     "to": "sylve",
+     "kind": "accomplice",
+     "value": 35
+    },
+    {
+     "to": "hadrien",
+     "kind": "fears",
+     "value": -30
+    }
+   ],
+   "secrets": [
+    "Touche des pots-de-vin de la guilde des voleurs"
+   ],
+   "schedule": [
+    {
+     "from": 0,
+     "do": "socialize",
+     "at": "spot:hideout_door"
+    },
+    {
+     "from": 1.5,
+     "do": "patrol",
+     "at": "route:patrol_lowtown"
+    },
+    {
+     "from": 5,
+     "do": "sleep",
+     "at": "home"
+    },
+    {
+     "from": 14,
+     "do": "guard",
+     "at": "spot:gate_south"
+    },
+    {
+     "from": 20,
+     "do": "patrol",
+     "at": "route:patrol_lowtown"
+    }
+   ]
+  },
+  {
+   "id": "sylve",
+   "name": "Sylve « la Corneille »",
+   "role": "Maîtresse de la guilde des voleurs",
+   "faction": "thieves_guild",
+   "look": "thief",
+   "tint": "#b9a6d6",
+   "scale": 1.0,
+   "speed": 1.6,
+   "home": "shack_6",
+   "traits": {
+    "sociable": 0.5,
+    "brave": 0.8,
+    "honest": 0.2,
+    "greedy": 0.7,
+    "gossip": 0.2,
+    "grudge": 0.9,
+    "devout": 0.0
+   },
+   "bio": "Dirige la guilde depuis une masure des Bas-Fonds. Vole les riches, nourrit parfois les pauvres, n'oublie jamais une dette.",
+   "goals": [
+    "Tenir la garde à distance",
+    "Mettre la main sur le sceau du capitaine"
+   ],
+   "inventory": [
+    {
+     "item": "lockpicks",
+     "qty": 3
+    },
+    {
+     "item": "coin",
+     "qty": 120
+    }
+   ],
+   "relations": [
+    {
+     "to": "pip",
+     "kind": "mentor",
+     "value": 55
+    },
+    {
+     "to": "odon",
+     "kind": "accomplice",
+     "value": 20
+    },
+    {
+     "to": "hadrien",
+     "kind": "enemy",
+     "value": -70
+    },
+    {
+     "to": "aldric",
+     "kind": "target",
+     "value": -40
+    }
+   ],
+   "secrets": [
+    "Le repaire de la guilde est la masure au sud des Bas-Fonds"
+   ],
+   "schedule": [
+    {
+     "from": 0,
+     "do": "socialize",
+     "at": "spot:hideout_door"
+    },
+    {
+     "from": 3,
+     "do": "sleep",
+     "at": "home"
+    },
+    {
+     "from": 11,
+     "do": "wander",
+     "at": "district:lowtown"
+    },
+    {
+     "from": 14,
+     "do": "socialize",
+     "at": "spot:market_east"
+    },
+    {
+     "from": 17,
+     "do": "eat",
+     "at": "building:tavern"
+    },
+    {
+     "from": 19,
+     "do": "work",
+     "at": "spot:lowtown_alley"
+    }
+   ]
+  },
+  {
+   "id": "pip",
+   "name": "Pip",
+   "role": "Gamin des rues",
+   "faction": "thieves_guild",
+   "look": "villager_a",
+   "tint": "#e6d3a8",
+   "scale": 0.64,
+   "speed": 1.9,
+   "home": "shack_2",
+   "traits": {
+    "sociable": 0.8,
+    "brave": 0.7,
+    "honest": 0.3,
+    "greedy": 0.5,
+    "gossip": 0.8,
+    "grudge": 0.2,
+    "devout": 0.2
+   },
+   "bio": "Orphelin vif et moqueur. Vide les poches au marché pour la Corneille, mais partage son pain.",
+   "goals": [
+    "Manger à sa faim",
+    "Devenir un vrai membre de la guilde"
+   ],
+   "inventory": [
+    {
+     "item": "apple",
+     "qty": 2
+    },
+    {
+     "item": "coin",
+     "qty": 3
+    }
+   ],
+   "relations": [
+    {
+     "to": "sylve",
+     "kind": "mentor",
+     "value": 60
+    },
+    {
+     "to": "aveline",
+     "kind": "trust",
+     "value": 45
+    },
+    {
+     "to": "aldric",
+     "kind": "target",
+     "value": -20
+    }
+   ],
+   "schedule": [
+    {
+     "from": 7,
+     "do": "wander",
+     "at": "district:market"
+    },
+    {
+     "from": 12,
+     "do": "eat",
+     "at": "spot:market_stalls"
+    },
+    {
+     "from": 13,
+     "do": "work",
+     "at": "spot:market_stalls"
+    },
+    {
+     "from": 18,
+     "do": "socialize",
+     "at": "spot:hideout_door"
+    },
+    {
+     "from": 20,
+     "do": "wander",
+     "at": "district:lowtown"
+    },
+    {
+     "from": 22,
+     "do": "sleep",
+     "at": "home"
+    }
+   ]
+  },
+  {
+   "id": "orsan",
+   "name": "Maître Orsan Vell",
+   "role": "Mage de l'Ordre",
+   "faction": "mages_order",
+   "look": "mage",
+   "tint": "#dfe6ff",
+   "scale": 1.04,
+   "speed": 1.2,
+   "home": "mage_tower",
+   "traits": {
+    "sociable": 0.3,
+    "brave": 0.5,
+    "honest": 0.6,
+    "greedy": 0.3,
+    "gossip": 0.2,
+    "grudge": 0.6,
+    "devout": 0.2
+   },
+   "bio": "Mage hautain, obsédé par les anomalies du temps. Considère toute magie hors de l'Ordre comme un danger.",
+   "goals": [
+    "Étudier l'éclat d'ambre",
+    "Garder le monopole de la magie pour l'Ordre"
+   ],
+   "inventory": [
+    {
+     "item": "staff",
+     "qty": 1
+    },
+    {
+     "item": "star_chart",
+     "qty": 1
+    }
+   ],
+   "relations": [
+    {
+     "to": "lysa",
+     "kind": "mentor",
+     "value": 30
+    },
+    {
+     "to": "aveline",
+     "kind": "rival",
+     "value": -15
+    },
+    {
+     "to": "theobald",
+     "kind": "suspicious",
+     "value": -25
+    }
+   ],
+   "secrets": [
+    "Sait que Valdren n'a pas été détruit mais 'déplacé'"
+   ],
+   "schedule": [
+    {
+     "from": 7,
+     "do": "work",
+     "at": "spot:mage_court"
+    },
+    {
+     "from": 10,
+     "do": "wander",
+     "at": "district:temple_hill"
+    },
+    {
+     "from": 12,
+     "do": "eat",
+     "at": "home"
+    },
+    {
+     "from": 14,
+     "do": "work",
+     "at": "building:mage_tower"
+    },
+    {
+     "from": 18,
+     "do": "socialize",
+     "at": "spot:temple_lawn"
+    },
+    {
+     "from": 20,
+     "do": "eat",
+     "at": "building:tavern"
+    },
+    {
+     "from": 22,
+     "do": "sleep",
+     "at": "home"
+    }
+   ]
+  },
+  {
+   "id": "lysa",
+   "name": "Lysa Brumeclaire",
+   "role": "Apprentie mage",
+   "faction": "mages_order",
+   "look": "villager_c",
+   "tint": "#d9c8ff",
+   "scale": 0.93,
+   "speed": 1.55,
+   "home": "mage_tower",
+   "traits": {
+    "sociable": 0.85,
+    "brave": 0.6,
+    "honest": 0.8,
+    "greedy": 0.1,
+    "gossip": 0.6,
+    "grudge": 0.2,
+    "devout": 0.3
+   },
+   "bio": "Apprentie curieuse et maladroite. Admire les pouvoirs qu'elle ne comprend pas, au grand dam de son maître.",
+   "goals": [
+    "Réussir son premier sortilège sans rien brûler",
+    "Découvrir ce que cache maître Orsan"
+   ],
+   "inventory": [
+    {
+     "item": "spellbook",
+     "qty": 1
+    }
+   ],
+   "relations": [
+    {
+     "to": "orsan",
+     "kind": "student",
+     "value": 25
+    },
+    {
+     "to": "pip",
+     "kind": "friend",
+     "value": 40
+    },
+    {
+     "to": "brann",
+     "kind": "friend",
+     "value": 30
+    }
+   ],
+   "schedule": [
+    {
+     "from": 6.5,
+     "do": "work",
+     "at": "spot:mage_court"
+    },
+    {
+     "from": 9,
+     "do": "wander",
+     "at": "district:market"
+    },
+    {
+     "from": 11,
+     "do": "work",
+     "at": "spot:mage_court"
+    },
+    {
+     "from": 13,
+     "do": "eat",
+     "at": "spot:market_stalls"
+    },
+    {
+     "from": 14,
+     "do": "work",
+     "at": "building:mage_tower"
+    },
+    {
+     "from": 17,
+     "do": "socialize",
+     "at": "spot:market_well"
+    },
+    {
+     "from": 19.5,
+     "do": "wander",
+     "at": "district:temple_hill"
+    },
+    {
+     "from": 22.5,
+     "do": "sleep",
+     "at": "home"
+    }
+   ]
+  },
+  {
+   "id": "aldric",
+   "name": "Aldric Montclar",
+   "role": "Marchand prospère",
+   "faction": "villagers",
+   "look": "villager_a",
+   "tint": "#ffe08a",
+   "scale": 1.03,
+   "speed": 1.3,
+   "home": "house_e3",
+   "traits": {
+    "sociable": 0.7,
+    "brave": 0.2,
+    "honest": 0.4,
+    "greedy": 0.9,
+    "gossip": 0.6,
+    "grudge": 0.6,
+    "devout": 0.3
+   },
+   "bio": "Marchand le plus riche du bourg. Prête de l'argent à tout le monde et le rappelle à chacun.",
+   "goals": [
+    "Racheter la forge",
+    "Obtenir la protection de la garde"
+   ],
+   "inventory": [
+    {
+     "item": "coin",
+     "qty": 300
+    },
+    {
+     "item": "ledger",
+     "qty": 1
+    }
+   ],
+   "relations": [
+    {
+     "to": "brann",
+     "kind": "creditor",
+     "value": -10
+    },
+    {
+     "to": "hadrien",
+     "kind": "courts",
+     "value": 30
+    },
+    {
+     "to": "sylve",
+     "kind": "fears",
+     "value": -50
+    }
+   ],
+   "schedule": [
+    {
+     "from": 7,
+     "do": "work",
+     "at": "spot:market_hall"
+    },
+    {
+     "from": 12,
+     "do": "eat",
+     "at": "building:tavern"
+    },
+    {
+     "from": 13.5,
+     "do": "work",
+     "at": "spot:market_hall"
+    },
+    {
+     "from": 18,
+     "do": "socialize",
+     "at": "spot:tavern_front"
+    },
+    {
+     "from": 20,
+     "do": "eat",
+     "at": "home"
+    },
+    {
+     "from": 21.5,
+     "do": "sleep",
+     "at": "home"
+    }
+   ]
+  },
+  {
+   "id": "margaux",
+   "name": "Veuve Margaux",
+   "role": "Lavandière des Bas-Fonds",
+   "faction": "villagers",
+   "look": "villager_c",
+   "tint": "#b8b0a6",
+   "scale": 0.97,
+   "speed": 1.15,
+   "home": "shack_1",
+   "traits": {
+    "sociable": 0.6,
+    "brave": 0.5,
+    "honest": 0.8,
+    "greedy": 0.2,
+    "gossip": 0.7,
+    "grudge": 0.5,
+    "devout": 0.8
+   },
+   "bio": "Veuve d'un garde mort en service. Survit en lavant le linge des riches. Voit tout, de son seuil.",
+   "goals": [
+    "Nourrir les enfants de la ruelle",
+    "Savoir comment son mari est vraiment mort"
+   ],
+   "inventory": [
+    {
+     "item": "bread",
+     "qty": 1
+    }
+   ],
+   "relations": [
+    {
+     "to": "aveline",
+     "kind": "trust",
+     "value": 70
+    },
+    {
+     "to": "odon",
+     "kind": "suspicious",
+     "value": -45
+    },
+    {
+     "to": "pip",
+     "kind": "protects",
+     "value": 50
+    }
+   ],
+   "schedule": [
+    {
+     "from": 5.5,
+     "do": "work",
+     "at": "spot:market_well"
+    },
+    {
+     "from": 9,
+     "do": "work",
+     "at": "spot:lowtown_west"
+    },
+    {
+     "from": 12,
+     "do": "eat",
+     "at": "home"
+    },
+    {
+     "from": 13,
+     "do": "socialize",
+     "at": "spot:lowtown_square"
+    },
+    {
+     "from": 15,
+     "do": "work",
+     "at": "spot:market_stalls"
+    },
+    {
+     "from": 18,
+     "do": "pray",
+     "at": "spot:temple_front"
+    },
+    {
+     "from": 19.5,
+     "do": "eat",
+     "at": "home"
+    },
+    {
+     "from": 21,
+     "do": "sleep",
+     "at": "home"
+    }
+   ]
+  },
+  {
+   "id": "theobald",
+   "name": "Vieux Théobald",
+   "role": "Conteur",
+   "faction": "villagers",
+   "look": "villager_b",
+   "tint": "#c9c9c9",
+   "scale": 0.98,
+   "speed": 0.95,
+   "home": "shack_9",
+   "traits": {
+    "sociable": 0.9,
+    "brave": 0.4,
+    "honest": 0.5,
+    "greedy": 0.1,
+    "gossip": 0.9,
+    "grudge": 0.1,
+    "devout": 0.4
+   },
+   "bio": "Conteur à moitié aveugle. Ses histoires sur Valdren changent à chaque fois, sauf un détail qu'il répète toujours.",
+   "goals": [
+    "Trouver quelqu'un qui se souvienne de Valdren",
+    "Finir son histoire avant de mourir"
+   ],
+   "inventory": [
+    {
+     "item": "old_coin_valdren",
+     "qty": 1
+    }
+   ],
+   "relations": [
+    {
+     "to": "garn",
+     "kind": "friend",
+     "value": 45
+    },
+    {
+     "to": "pip",
+     "kind": "friend",
+     "value": 35
+    },
+    {
+     "to": "orsan",
+     "kind": "wary",
+     "value": -20
+    }
+   ],
+   "secrets": [
+    "A vécu la nuit où Valdren a disparu... deux fois"
+   ],
+   "schedule": [
+    {
+     "from": 8,
+     "do": "socialize",
+     "at": "spot:lowtown_square"
+    },
+    {
+     "from": 11,
+     "do": "wander",
+     "at": "district:market"
+    },
+    {
+     "from": 12.5,
+     "do": "eat",
+     "at": "building:tavern"
+    },
+    {
+     "from": 14,
+     "do": "work",
+     "at": "spot:market_well"
+    },
+    {
+     "from": 17,
+     "do": "socialize",
+     "at": "spot:tavern_front"
+    },
+    {
+     "from": 21,
+     "do": "wander",
+     "at": "district:lowtown"
+    },
+    {
+     "from": 22.5,
+     "do": "sleep",
+     "at": "home"
+    }
+   ]
+  }
+ ]
+}

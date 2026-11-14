@@ -105,6 +105,24 @@ Ces deux pouvoirs ne créent rien : ils lisent et écrivent dans le même journa
   - Voie héroïque, *Masque fidèle* : durée doublée. Voie sombre, *Masque parfait* : les proches doivent être tout près pour démasquer.
 - **Le village vit sans Kael** : les voleurs de la guilde font les poches là où ils « travaillent », et un garde qui s'attarde à discuter avec un membre de la guilde laisse la trace d'une rencontre secrète. Ces faits passent par le même journal : l'Écho a donc de vraies choses à révéler, et un voleur pris sur le fait finit au cachot.
 
+## Missions (J7)
+Six personnages clés peuvent confier une mission, chacun d'un genre : **enquête** (capitaine Hadrien, Aldric), **protection** (sœur Aveline, Garn), **infiltration** (Sylve, maître Orsan). Près d'eux, la touche **M** demande du travail ; **Entrée** accepte l'offre, **Retour arrière** la refuse. Trois missions au plus en même temps, une par donneur.
+
+Chaîne de génération (l'IA propose, le code décide) :
+1. Le jeu envoie au proxy (`POST /api/mission`) un résumé borné du monde et des **listes fermées** : personnages disponibles, lieux, titres déjà pris.
+2. L'IA renvoie une mission dans un format strict (`shared/src/mission.ts`).
+3. Le jeu la passe à son **validateur** : identifiants existants et disponibles (pas de personnage au cachot), structure propre au genre, étapes réalisables, or (0 à 200) et réputations (±25) bornés, délai borné, pas de doublon, deux issues différentes, pas d'issue « héroïque » criminelle.
+4. Refusée : le jeu redemande en renvoyant la liste des erreurs, **deux fois au plus**.
+5. Toujours refusée, ou pas d'IA (pas de clé, budget atteint, proxy éteint) : **modèle local** (`data/packs/medieval/missions.json`), rempli avec de vraies personnes et de vrais lieux, et validé lui aussi.
+
+Le déroulement est suivi par la simulation seule, sans IA :
+- **Enquête** : le vol dont parle le donneur est inscrit dans le journal du monde, sans témoin. Sur place, l'Écho du passé (8) le montre avec son véritable auteur. Ensuite, dire la vérité au donneur, ou faire chanter le coupable.
+- **Protection** : l'agresseur marche vers la victime. On réussit en lui faisant peur (menace, coup, poussée), en le faisant arrêter (par exemple avec un faux visage), ou en les tenant séparés 25 minutes de jeu (gel, bulle de temps, porter la victime). S'il l'atteint, il la frappe et la mission échoue.
+- **Infiltration** : atteindre le lieu sans être reconnu par la personne désignée ni par son groupe. Sous l'Ombre ou un faux visage, on passe ; à visage découvert sous leurs yeux, la mission échoue.
+- Chaque mission a un délai, et **deux issues** que l'on choisit par ses actes. L'issue donne de l'or, modifie les réputations et compte comme un acte héroïque ou sombre pour les branches de pouvoirs. Un échec coûte la confiance du donneur.
+
+Coût : `routes.mission` dans `server/config.json` (modèle, plafond de tokens), ou `CHRONOS_MISSION_MODEL=...` au lancement. Une offre déjà générée est gardée : redemander au même personnage ne coûte rien. `CHRONOS_MOCK=1 CHRONOS_MOCK_FLAKY=1 npm run server` simule une IA dont le premier jet est invalide, pour voir la régénération (panneau F3).
+
 ## Qualité graphique
 Deux préréglages (définis dans `client/data/quality.json`), touche **G** en jeu, mémorisé dans le navigateur :
 - **Qualité haute** (par défaut sur ordinateur) : ombres 4096, SSAO, flou de profondeur, herbe animée (60 000 brins), MSAA ×4.
@@ -157,6 +175,7 @@ Le test e2e utilise Playwright, qui doit être installé (`npx playwright instal
 | 8 | écho du passé : revoir ce qui s'est passé ici |
 | 9 | changer de visage : prendre celui de la personne visée (appuyer de nouveau pour l'ôter) |
 | F | parler à un habitant (texte libre avec les personnages clés) |
+| M | demander une mission à un personnage clé ; Entrée accepter, Retour arrière refuser |
 | E / V / N / B | près d'un habitant : faire l'aumône / voler / menacer (ou faire chanter) / frapper |
 | J | journal : réputations et ce que l'on sait de toi |
 | T | vitesse du temps : ×1 → ×10 → ×60 → figé |
@@ -195,5 +214,5 @@ chronos/
 - [x] J4 : dialogues IA via le proxy
 - [x] J5 : pouvoirs (temps, télékinésie, ombre) et conséquences
 - [x] J6 : écho du passé, changement de visage
-- [ ] J7 : missions générées et validées
+- [x] J7 : missions générées et validées
 - [ ] J8 : sauvegarde, réglages de coût, finitions

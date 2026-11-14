@@ -162,7 +162,7 @@ try {
   }
   // J5: powers and visible consequences. (Software rendering is very slow in crowded
   // places, so every step waits for a condition instead of a fixed delay.)
-  {
+  if (!process.env.ONLY) {
     const shot = (name) => page.screenshot({ path: `${OUT}${QUALITY}-${name}.png` });
     const until = (fn, arg) => page.waitForFunction(fn, arg, { timeout: 45000, polling: 250 }).then(() => true).catch(() => false);
     const powersState = () => page.evaluate(() => window.__chronos.powers);
@@ -254,7 +254,7 @@ try {
     await page.evaluate(() => window.__chronos.setReputation("royal_guard", 0));
   }
   // J6: echo of the past and false face, both wired to the event log and the rumors.
-  {
+  if (!process.env.ONLY) {
     const shot = (name) => page.screenshot({ path: `${OUT}${QUALITY}-${name}.png` });
     const until = (fn, arg) => page.waitForFunction(fn, arg, { timeout: 45000, polling: 250 }).then(() => true).catch(() => false);
     await page.evaluate(() => {

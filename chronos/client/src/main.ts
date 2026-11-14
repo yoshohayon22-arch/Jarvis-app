@@ -543,6 +543,13 @@ async function sayToNpc(text: string): Promise<void> {
   const memories = social.memory
     .relevant(a.id, who, now, a.traits.grudge, DIALOGUE_LIMITS.memoriesMax)
     .map((m) => `${m.kind === "heard" ? "On t'a raconté que" : m.kind === "suffered" ? "Tu as subi ceci :" : "Tu as vu que"} ${social.describe(m.claim)}`.slice(0, 200));
+  // A giver remembers the job they handed out (plain fact from the missions runtime).
+  const given = who === PLAYER_ID ? missions.missions.find((m) => m.proposal.giverId === a.id) : undefined;
+  if (given) {
+    const state = given.status === "done" ? "Kael l'a menée à bien" : given.status === "failed" ? "Kael a échoué" : "elle est en cours";
+    memories.unshift(`Tu as confié une mission à Kael (« ${given.proposal.title} ») : ${state}.`.slice(0, 200));
+    memories.length = Math.min(memories.length, DIALOGUE_LIMITS.memoriesMax);
+  }
   let bystanders = 0;
   let guardNearby = false;
   agents.forNeighbors(a.x, a.z, 8, (o) => {

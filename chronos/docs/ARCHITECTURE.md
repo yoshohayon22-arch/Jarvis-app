@@ -307,6 +307,8 @@ Mission {
 
 Pour la V1, trois **intentions** de mission guident la génération (enquête, protection, infiltration), ce qui garantit 3 missions jouables de genres différents.
 
+> Mise à jour J7 : implémenté dans `shared/src/mission.ts` (schéma, validateur, modèles locaux), `server/src/missionPrompt.ts` et la route `/api/mission`, `client/src/ai/missionGen.ts` (chaîne proposer → valider → redemander → modèle local) et `client/src/sim/missions.ts` (suivi). Écarts avec le format prévu : six types d'étapes observables par la simulation (`talk`, `goto`, `echo`, `protect`, `infiltrate`, `act`) au lieu de dix ; les deux issues sont toujours présentes et se choisissent par un acte ou une conversation ; les récompenses sont de l'or et des réputations (pas d'objets ni d'Essence) ; les conditions d'échec sont fixées par le genre (délai, victime frappée, héros reconnu). Le validateur vit dans `shared/` et tourne côté jeu, qui seul connaît l'état du monde ; le proxy vérifie la forme.
+
 ---
 
 ## 7. Rendu

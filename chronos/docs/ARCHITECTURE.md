@@ -238,6 +238,8 @@ Les V2 (`summon_dead`, `possession`, `portals`, `beast_mastery`) sont présents 
 - **Écho** : sur un lieu ou un objet, il interroge le journal global (`eventLog.query({ locationId | objectId, window })`) et rejoue les événements sous forme de silhouettes fantômes. Il n'y a **aucune invention par l'IA**. Il montre le vrai `actorId`, ce qui permet de démasquer un imitateur.
 - **Changement de visage** : il faut avoir observé la cible de près pendant X secondes. La durée est limitée. Un personnage clé intime de la personne imitée peut percer le déguisement (jet basé sur la relation). Les actes commis sous ce visage reçoivent `apparentActorId = cible`.
 
+> Mise à jour J6 : implémenté dans `sim/powers/engine.ts` (primitives `echoRead` et `disguise`), `sim/ambient.ts` (méfaits et rencontres des habitants eux-mêmes) et `sim/consequences.ts` (accusation et arrestation d'un habitant). Écarts avec le plan : l'écho interroge le journal par position et rayon, pas par objet ; le déguisement n'est pas percé par un jet de dés mais par une règle déterministe (la personne imitée ou un proche, relation > 30, qui voit Kael de face, sans obstacle, à portée) ; le dialogue sous déguisement envoie au proxy le nom de la personne imitée (`context.speaker`).
+
 ---
 
 ## 5. Couche IA

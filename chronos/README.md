@@ -90,6 +90,21 @@ Conséquences visibles (`client/data/packs/medieval/consequences.json`) :
 - **Trahison** : un personnage clé qui appréciait Kael et dont l'opinion s'effondre va le dénoncer à la garde.
 - **Marché en fête** : très aimé des villageois, Kael voit la place se pavoiser.
 
+## Écho du passé et faux visage (J6)
+Ces deux pouvoirs ne créent rien : ils lisent et écrivent dans le même journal d'événements que tout le reste du monde.
+
+- **Écho du passé (8)** : montre jusqu'à cinq scènes survenues dans un rayon de 12 m depuis 24 h. Chaque scène est lue telle quelle dans le journal, sans IA : le véritable auteur (même s'il portait un autre visage), les instants effacés par un rembobinage, et l'endroit où le temps s'est replié. Des silhouettes apparaissent là où la scène a eu lieu, et un panneau la décrit en clair.
+  - Voie héroïque, *Œil du témoin* : remonte deux jours en arrière et nomme les témoins.
+  - Voie sombre, *Secrets monnayables* : chaque méfait ou secret d'autrui vu dans l'écho devient un moyen de pression. La touche N près de cette personne devient « faire chanter » (15 pièces, une fois).
+- **Changer de visage (9)** : rester à moins de 4 m de quelqu'un pendant 3 s pour mémoriser son visage, puis le viser. Le masque tient 60 minutes de jeu.
+  - Tout acte commis sous ce visage est attribué à la personne imitée : souvenirs des témoins, rumeurs et opinions la visent elle, pas Kael.
+  - Deux accusations de crime, ou une seule devant un garde, et la garde l'emmène au cachot pour 18 h à la place de Kael.
+  - La personne imitée et ses proches démasquent Kael s'ils le voient de face à moins de 7 m. Se transformer à portée de voix fait se retourner les gens.
+  - La garde qui recherche Kael ne reconnaît pas ce visage.
+  - En dialogue, le personnage croit parler à la personne imitée et réagit selon ce qu'il pense d'elle.
+  - Voie héroïque, *Masque fidèle* : durée doublée. Voie sombre, *Masque parfait* : les proches doivent être tout près pour démasquer.
+- **Le village vit sans Kael** : les voleurs de la guilde font les poches là où ils « travaillent », et un garde qui s'attarde à discuter avec un membre de la guilde laisse la trace d'une rencontre secrète. Ces faits passent par le même journal : l'Écho a donc de vraies choses à révéler, et un voleur pris sur le fait finit au cachot.
+
 ## Qualité graphique
 Deux préréglages (définis dans `client/data/quality.json`), touche **G** en jeu, mémorisé dans le navigateur :
 - **Qualité haute** (par défaut sur ordinateur) : ombres 4096, SSAO, flou de profondeur, herbe animée (60 000 brins), MSAA ×4.
@@ -139,8 +154,10 @@ Le test e2e utilise Playwright, qui doit être installé (`npx playwright instal
 | 4 / 5 | télékinésie : saisir puis lancer l'objet visé / repousser la personne visée |
 | 6 | ombre : devenir invisible (appuyer de nouveau pour réapparaître) |
 | 7 | boucle cruelle (voie sombre, à débloquer) |
+| 8 | écho du passé : revoir ce qui s'est passé ici |
+| 9 | changer de visage : prendre celui de la personne visée (appuyer de nouveau pour l'ôter) |
 | F | parler à un habitant (texte libre avec les personnages clés) |
-| E / V / N / B | près d'un habitant : faire l'aumône / voler / menacer / frapper |
+| E / V / N / B | près d'un habitant : faire l'aumône / voler / menacer (ou faire chanter) / frapper |
 | J | journal : réputations et ce que l'on sait de toi |
 | T | vitesse du temps : ×1 → ×10 → ×60 → figé |
 | G | qualité graphique basse / haute |
@@ -177,6 +194,6 @@ chronos/
 - [x] J3 : mémoire, rumeurs, réputations
 - [x] J4 : dialogues IA via le proxy
 - [x] J5 : pouvoirs (temps, télékinésie, ombre) et conséquences
-- [ ] J6 : écho du passé, changement de visage
+- [x] J6 : écho du passé, changement de visage
 - [ ] J7 : missions générées et validées
 - [ ] J8 : sauvegarde, réglages de coût, finitions

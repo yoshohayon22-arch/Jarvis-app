@@ -329,6 +329,8 @@ Pour la V1, trois **intentions** de mission guident la génération (enquête, p
 - IndexedDB, avec un petit wrapper maison (pas de dépendance).
 - `SaveGame { version, packId, seed, rngState, worldTime, world, agents, memories, rumors, eventLog (fenêtre), reputations, powers, missions, flags }`.
 - Sauvegarde automatique toutes les 2 heures de jeu, à chaque fin de mission et à la fermeture de l'onglet (`visibilitychange`), sur 3 emplacements tournants. Chargement manuel depuis le menu.
+
+> Mise à jour J8 : implémenté dans `client/src/save/` (`saveGame.ts` : capture, vérification zod, application ; `store.ts` : IndexedDB, 1 emplacement manuel et 3 automatiques tournants). Chaque système expose `save()` / `load()` sur des données simples. Écarts : le journal d'événements est sauvegardé en entier (il est déjà plafonné à 2 000 entrées) ; pas d'état de générateur aléatoire global, chaque système garde le sien ; les réglages de coût du joueur vivent dans `localStorage` et ne peuvent que restreindre ce que le serveur autorise. Le résumé de mémoire par IA (`/api/summary`) est en place et facultatif.
 - Format versionné avec des migrations. Un test unitaire vérifie que `save → load → state` donne un état identique (comparaison profonde) et qu'une simulation rechargée suit exactement la même trajectoire grâce à la graine.
 
 ---

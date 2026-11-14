@@ -123,6 +123,22 @@ Le déroulement est suivi par la simulation seule, sans IA :
 
 Coût : `routes.mission` dans `server/config.json` (modèle, plafond de tokens), ou `CHRONOS_MISSION_MODEL=...` au lancement. Une offre déjà générée est gardée : redemander au même personnage ne coûte rien. `CHRONOS_MOCK=1 CHRONOS_MOCK_FLAKY=1 npm run server` simule une IA dont le premier jet est invalide, pour voir la régénération (panneau F3).
 
+## Sauvegarde, réglages de coût, résumés de mémoire (J8)
+**Sauvegarde** (IndexedDB du navigateur, rien n'est envoyé ailleurs) :
+- Menu **Pause** (Échap) : *Sauvegarder* (un emplacement manuel) et la liste *Charger*.
+- Sauvegarde automatique toutes les 2 heures de jeu, à la fin de chaque mission et quand on quitte l'onglet, sur 3 emplacements tournants : le plus ancien est remplacé.
+- Écran titre : **Continuer** reprend la sauvegarde la plus récente ; **Nouvelle partie** repart du début sans effacer les sauvegardes.
+- Une sauvegarde contient tout l'état de la simulation : heure, habitants, journal d'événements, souvenirs, rumeurs, réputations, pouvoirs débloqués, conséquences en cours, missions, bourse. Une partie rechargée se déroule ensuite exactement comme l'originale (c'est testé).
+- Au chargement, la sauvegarde est vérifiée comme n'importe quelle donnée extérieure (version, monde, habitants, format). Une sauvegarde abîmée ou étrangère est refusée sans toucher à la partie en cours.
+- Ce qui n'est pas sauvegardé : un geste en cours (objet tenu, bulle de temps, invisibilité) et les quelques secondes d'historique du rembobinage.
+
+**Réglages de coût** (menu Pause, mémorisés dans le navigateur) :
+- *Utiliser l'IA* : décoché, le jeu n'envoie plus aucune requête ; dialogues et missions restent locaux.
+- *Plafond de dépense pour la session* (0,10 $, 0,50 $, 2 $) : une fois atteint, le jeu repasse en local. Il s'ajoute à la limite journalière du serveur, qui reste l'autorité.
+- Le menu et le panneau F3 affichent la dépense de la session et celle du jour.
+
+**Résumé de mémoire par l'IA** (facultatif, `POST /api/summary`) : quand un personnage clé a au moins 5 souvenirs de Kael, le jeu demande une fois un résumé en deux phrases, qui remplace la longue liste dans le dialogue. Il n'est redemandé qu'après 3 nouveaux souvenirs, il est mis en cache par le serveur et il est sauvegardé avec la partie. Sans IA, le dialogue utilise les souvenirs bruts. Modèle et plafond : `routes.summary` dans `server/config.json`, ou `CHRONOS_SUMMARY_MODEL=...`.
+
 ## Qualité graphique
 Deux préréglages (définis dans `client/data/quality.json`), touche **G** en jeu, mémorisé dans le navigateur :
 - **Qualité haute** (par défaut sur ordinateur) : ombres 4096, SSAO, flou de profondeur, herbe animée (60 000 brins), MSAA ×4.
@@ -181,7 +197,7 @@ Le test e2e utilise Playwright, qui doit être installé (`npx playwright instal
 | T | vitesse du temps : ×1 → ×10 → ×60 → figé |
 | G | qualité graphique basse / haute |
 | F3 | panneau debug (FPS, draw calls, position, habitants dehors / à l'intérieur) |
-| Échap | pause |
+| Échap | pause : reprendre, sauvegarder, charger, réglages (IA, plafond de dépense, qualité) |
 
 ## Structure
 ```
@@ -215,4 +231,4 @@ chronos/
 - [x] J5 : pouvoirs (temps, télékinésie, ombre) et conséquences
 - [x] J6 : écho du passé, changement de visage
 - [x] J7 : missions générées et validées
-- [ ] J8 : sauvegarde, réglages de coût, finitions
+- [x] J8 : sauvegarde, réglages de coût, finitions

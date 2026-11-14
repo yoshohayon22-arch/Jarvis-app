@@ -5,6 +5,7 @@ import {
   type BudgetStatus,
   type DialogueReply,
   type DialogueRequest,
+  type MissionRequest,
 } from "@chronos/shared";
 
 export type ReplySource = "ai" | "cache" | "mock" | "local";
@@ -23,7 +24,10 @@ export interface GatewayStats {
   localReplies: number;
   sessionCostUsd: number;
   lastReason: string;
+  missionCalls: number;
 }
+
+export type MissionDraft = { ok: true; mission: unknown; source: "ai" | "mock"; costUsd: number } | { ok: false; reason: string };
 
 const REASONS: Record<string, string> = {
   no_api_key: "pas de clé API sur le serveur",
@@ -39,7 +43,7 @@ const REASONS: Record<string, string> = {
  * why and returns a local line, so the game stays fully playable offline.
  */
 export class AiGateway {
-  readonly stats: GatewayStats = { aiReplies: 0, cachedReplies: 0, localReplies: 0, sessionCostUsd: 0, lastReason: "" };
+  readonly stats: GatewayStats = { aiReplies: 0, cachedReplies: 0, localReplies: 0, sessionCostUsd: 0, lastReason: "", missionCalls: 0 };
 
   constructor(
     private readonly base = "/api",
@@ -77,6 +81,33 @@ export class AiGateway {
       return { reply, source, costUsd: cost };
     } catch (e) {
       return local((e as Error).name === "AbortError" ? "timeout" : "network");
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
+  /**
+   * Asks the proxy for a mission proposal. Returns the raw draft: the caller
+   * validates it against the live world (and may ask again with the errors).
+   */
+  async mission(req: MissionRequest): Promise<MissionDraft> {
+    const fail = (code: string): MissionDraft => {
+      this.stats.lastReason = REASONS[code] ?? code;
+      return { ok: false, reason: this.stats.lastReason };
+    };
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), this.timeoutMs * 2);
+    try {
+      const res = await this.fetchFn(`${this.base}/mission`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(req), signal: ctrl.signal });
+      const body = (await res.json().catch(() => null)) as { mission?: unknown; source?: string; error?: string; usage?: { costUsd?: number } } | null;
+      if (!res.ok || !body) return fail(body?.error ?? "network");
+      const costUsd = typeof body.usage?.costUsd === "number" ? body.usage.costUsd : 0;
+      this.stats.missionCalls++;
+      this.stats.sessionCostUsd += costUsd;
+      this.stats.lastReason = "";
+      return { ok: true, mission: body.mission, source: body.source === "mock" ? "mock" : "ai", costUsd };
+    } catch (e) {
+      return fail((e as Error).name === "AbortError" ? "timeout" : "network");
     } finally {
       clearTimeout(timer);
     }

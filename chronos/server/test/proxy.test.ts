@@ -1,11 +1,23 @@
 import { describe, expect, it } from "vitest";
 import { resolve } from "node:path";
-import { DIALOGUE_LIMITS, sanitizeReply, type DialogueReply, type DialogueRequest, type DialogueResponse } from "@chronos/shared";
+import {
+  DIALOGUE_LIMITS,
+  sanitizeReply,
+  validateMission,
+  type DialogueReply,
+  type DialogueRequest,
+  type DialogueResponse,
+  type MissionProposal,
+  type MissionRequest,
+  type MissionResponse,
+  type MissionWorld,
+} from "@chronos/shared";
 import { ChronosApp } from "../src/app";
 import { Budget, costUsd } from "../src/budget";
 import { ResponseCache, hashKey } from "../src/cache";
 import { SERVER_DIR, loadConfig } from "../src/config";
-import { LlmError, MockLlm, type DialogueLlm, type LlmResult } from "../src/llm";
+import { LlmError, MockLlm, type DialogueLlm, type LlmResult, type MissionLlmResult } from "../src/llm";
+import { buildMissionPrompt } from "../src/missionPrompt";
 import { loadPack } from "../src/pack";
 import { buildDialoguePrompt, sanitizePlayerText } from "../src/prompt";
 import { RateLimiter } from "../src/rateLimit";
@@ -32,7 +44,17 @@ class FakeLlm implements DialogueLlm {
   readonly kind = "ai" as const;
   calls = 0;
   last = { system: "", user: "" };
-  constructor(private readonly produce: () => Partial<DialogueReply> | Error) {}
+  constructor(
+    private readonly produce: () => Partial<DialogueReply> | Error,
+    private readonly produceMission: (req: MissionRequest) => unknown = () => new Error("no mission"),
+  ) {}
+  async mission(system: string, user: string, _r: unknown, _t: number, req: MissionRequest): Promise<MissionLlmResult> {
+    this.calls++;
+    this.last = { system, user };
+    const m = this.produceMission(req);
+    if (m instanceof Error) throw m;
+    return { mission: m as MissionProposal, usage: { inputTokens: 2000, outputTokens: 500, cacheReadTokens: 0, cacheWriteTokens: 0 }, model: "claude-opus-5-5" };
+  }
   async dialogue(system: string, user: string): Promise<LlmResult> {
     this.calls++;
     this.last = { system, user };
@@ -251,5 +273,84 @@ describe("proxy app", () => {
     const r = await app.dialogue(request(), "c");
     expect((r.body as DialogueResponse).source).toBe("mock");
     expect(app.status()).toMatchObject({ mode: "mock", spentTodayUsd: 0 });
+  });
+});
+
+describe("mission route", () => {
+  const chars = [...pack.characters.values()];
+  const missionRequest = (over: Partial<MissionRequest> = {}): MissionRequest => ({
+    intent: "investigate",
+    giverId: "hadrien",
+    attempt: 0,
+    previousErrors: [],
+    digest: { time: "Jour 1, 10:00", reputations: { villagers: 0, royal_guard: 0, thieves_guild: 0, mages_order: 0 }, recentEvents: ["Kael a volé Aldric Montclar"], tensions: [] },
+    allowed: {
+      characters: chars.map((c) => ({ id: c.id, name: c.name, role: c.role, faction: c.faction })),
+      places: [
+        { id: "market_stalls", name: "aux étals" },
+        { id: "barracks_yard", name: "dans la cour de la caserne" },
+      ],
+      takenTitles: [],
+    },
+    ...over,
+  });
+  const world: MissionWorld = {
+    characters: chars.map((c) => ({ id: c.id, name: c.name, role: c.role, faction: c.faction, key: true, available: true })),
+    places: missionRequest().allowed.places,
+    taken: [],
+  };
+
+  it("answers 503 without a key, 400 on a malformed request, 404 for an unknown giver — before spending", async () => {
+    expect((await makeApp(null).mission(missionRequest(), "c")).status).toBe(503);
+    const llm = new FakeLlm(() => ({}));
+    const app = makeApp(llm);
+    expect((await app.mission({ intent: "conquer" }, "c")).status).toBe(400);
+    expect((await app.mission(missionRequest({ giverId: "dragon" }), "c")).status).toBe(404);
+    expect(llm.calls).toBe(0);
+  });
+
+  it("builds a cacheable system prefix and lists only the allowed ids, with past errors", () => {
+    const a = buildMissionPrompt(pack.lore, pack.characters.get("hadrien")!, missionRequest());
+    const b = buildMissionPrompt(pack.lore, pack.characters.get("sylve")!, missionRequest({ intent: "infiltrate", giverId: "sylve", attempt: 1, previousErrors: ['culpritId "dragon" is not an allowed character id'] }));
+    expect(a.system).toBe(b.system);
+    expect(a.user).toContain("- market_stalls — aux étals");
+    expect(a.user).toContain("- pip — Pip");
+    expect(a.user).not.toContain("REFUSÉE");
+    expect(b.user).toContain("REFUSÉE");
+    expect(b.user).toContain("is not an allowed character id");
+  });
+
+  it("the offline mock proposes missions the game's validator accepts, for the three kinds", async () => {
+    const app = makeApp(new MockLlm());
+    for (const [intent, giverId] of [["investigate", "hadrien"], ["protect", "aveline"], ["infiltrate", "sylve"]] as const) {
+      const r = await app.mission(missionRequest({ intent, giverId }), "c");
+      expect(r.status).toBe(200);
+      const body = r.body as MissionResponse;
+      expect(body.source).toBe("mock");
+      expect(validateMission(body.mission, world, { intent, giverId })).toEqual([]);
+    }
+    expect(app.status().spentTodayUsd).toBe(0);
+  });
+
+  it("a flaky model's first draft is rejected by the validator, the retry passes", async () => {
+    const mock = new MockLlm();
+    mock.flaky = true;
+    const app = makeApp(mock);
+    const first = (await app.mission(missionRequest(), "c")).body as MissionResponse;
+    const errors = validateMission(first.mission, world);
+    expect(errors.join(" ")).toContain("dragon_noir");
+    const second = (await app.mission(missionRequest({ attempt: 1, previousErrors: errors }), "c")).body as MissionResponse;
+    expect(validateMission(second.mission, world)).toEqual([]);
+  });
+
+  it("records the cost of a real call, refuses a wrong shape, and stops at the daily budget", async () => {
+    const good = (await makeApp(new MockLlm()).mission(missionRequest(), "c")).body as MissionResponse;
+    const app = makeApp(new FakeLlm(() => ({}), () => good.mission), 0.01);
+    const r = await app.mission(missionRequest(), "c");
+    expect(r.status).toBe(200);
+    expect((r.body as MissionResponse).usage!.costUsd).toBeCloseTo((2000 * 4 + 500 * 20) / 1e6, 6);
+    expect((await app.mission(missionRequest(), "c")).status).toBe(402);
+    const bad = makeApp(new FakeLlm(() => ({}), () => ({ title: "sans structure" })));
+    expect((await bad.mission(missionRequest(), "c")).status).toBe(502);
   });
 });

@@ -10,6 +10,9 @@ import consequencesJson from "../data/packs/medieval/consequences.json";
 import powersJson from "../data/powers.json";
 import { AmbientSystem, type AmbientDef } from "./sim/ambient";
 import { ConsequenceSystem, type ConsequencesDef } from "./sim/consequences";
+import { MissionSystem, type Mission, type MissionsDef } from "./sim/missions";
+import missionsJson from "../data/packs/medieval/missions.json";
+import { generateMission, type GeneratedMission } from "./ai/missionGen";
 import { PropSystem } from "./sim/physics";
 import { PowerSystem, type CastContext, type PowersData } from "./sim/powers";
 import { ConsequenceView } from "./render/consequenceView";
@@ -153,6 +156,8 @@ const dynamicProps = new PropSystem(layout, collision);
 const powers = new PowerSystem(powersJson as unknown as PowersData, agents, dynamicProps, social, clock);
 const consequences = new ConsequenceSystem(consequencesJson as unknown as ConsequencesDef, agents, social, actsDef, clock);
 const ambient = new AmbientSystem(agents, social, (consequencesJson as unknown as { ambient: AmbientDef }).ambient, clock, WORLD_SEED);
+const missions = new MissionSystem(agents, social, clock, missionsJson as unknown as MissionsDef, WORLD_SEED);
+powers.echoPinned = () => missions.sceneEvents();
 const agentsById = new Map(agents.agents.map((a) => [a.id, a]));
 const nameOf = (id: string | null): string => (id === PLAYER_ID ? "Kael" : id ? agentsById.get(id)?.name ?? "quelqu'un" : "");
 powers.captureExtra = () => ({ coins });
@@ -218,6 +223,7 @@ function showEcho(): void {
     return { text: text + ".", tone: v.undone ? "undone" : v.masked ? "masked" : "" };
   });
   hud.showEcho(lines);
+  missions.noteEcho(visions);
   for (const l of lines.slice(0, 3)) social.pushFeed(clock.totalMinutes, `Écho : ${l.text}`, "neutral");
 }
 
@@ -399,6 +405,7 @@ function updateNameplate(px: number, pz: number): void {
     a.key,
     [mood, knows].filter(Boolean).join(" · "),
     [
+      close && started && !offer && !offerBusy && missions.offerOf(a.id) ? "[M] demander du travail" : "",
       close ? `[F] parler · [E] aumône · [V] voler · [N] ${powers.leverage.has(a.id) ? "faire chanter" : "menacer"} · [B] frapper` : "",
       powers.unlocked.has("disguise") && !mask ? (powers.studyLeft(a.id) <= 0 ? "visage mémorisé [9]" : `étude du visage… ${Math.ceil(powers.studyLeft(a.id))} s`) : "",
     ]
@@ -502,6 +509,7 @@ function openDialogue(a: Agent): void {
     hud.toast(`${a.name} te dévisage : c'est son propre visage.`);
     return;
   }
+  missions.noteTalk(a.id);
   const def = defsById.get(a.id);
   if (!def) {
     // Extras never use AI: a short local line.
@@ -598,6 +606,120 @@ async function sayToNpc(text: string): Promise<void> {
   if (effects.end) window.setTimeout(closeDialogue, 1800);
 }
 hud.bindDialogue((text) => void sayToNpc(text), closeDialogue);
+
+// ---------------------------------------------------------------- missions (J7)
+const INTENT_LABELS = { investigate: "enquête", protect: "protection", infiltrate: "infiltration" } as const;
+let offer: { giver: Agent; gen: GeneratedMission } | null = null;
+let offerBusy = false;
+let lastGen: GeneratedMission | null = null;
+/** Drafts already paid for: asking the same person again shows the same offer. */
+const drafts = new Map<string, GeneratedMission>();
+
+function sourceLabel(g: GeneratedMission): string {
+  if (g.source === "ai") return g.attempts > 1 ? `IA (${g.attempts} essais)` : "IA";
+  if (g.source === "mock") return g.attempts > 1 ? `IA simulée (${g.attempts} essais)` : "IA simulée";
+  return `mission locale — ${g.fallbackReason ?? "sans IA"}`;
+}
+
+async function requestMission(giver: Agent): Promise<boolean> {
+  const intent = missions.offerOf(giver.id);
+  if (!intent || offerBusy || offer) return false;
+  offerBusy = true;
+  hud.setMissionBusy(`${giver.name} réfléchit à ce qu'il pourrait te confier…`);
+  agents.hold(giver, player.x, player.z, clock.totalMinutes, 2);
+  let gen = drafts.get(giver.id) ?? null;
+  // A draft made earlier may no longer fit the world (someone was jailed since).
+  if (gen && missions.validate(gen.proposal, intent, giver.id).length) gen = null;
+  gen ??= await generateMission(missions, (req) => gateway.mission(req), intent, giver.id);
+  offerBusy = false;
+  hud.setMissionBusy("");
+  refreshAiStatus();
+  if (!gen) {
+    hud.toast(`${giver.name} n'a rien à te confier pour l'instant.`);
+    return false;
+  }
+  lastGen = gen;
+  drafts.set(giver.id, gen);
+  offer = { giver, gen };
+  const p = gen.proposal;
+  hud.showMissionOffer({ giver: `${giver.name} (${INTENT_LABELS[p.intent]})`, title: p.title, briefing: p.briefing, steps: p.steps.map((st) => st.text), hours: p.timeLimitHours, source: sourceLabel(gen) });
+  return true;
+}
+
+function answerOffer(accept: boolean): void {
+  if (!offer) return;
+  const { giver, gen } = offer;
+  offer = null;
+  hud.showMissionOffer(null);
+  if (!accept) {
+    hud.toast(`Tu déclines l'offre de ${giver.name}.`);
+    return;
+  }
+  // The world may have moved while the card was open: the validator has the last word.
+  const errors = missions.validate(gen.proposal, gen.proposal.intent, giver.id);
+  if (errors.length) {
+    drafts.delete(giver.id);
+    hud.toast(`${giver.name} se ravise : la situation a changé.`);
+    return;
+  }
+  drafts.delete(giver.id);
+  missions.accept(gen.proposal, gen.source);
+}
+
+function timeLeft(m: Mission): string {
+  const min = Math.max(0, m.deadline - clock.totalMinutes);
+  return min >= 120 ? `reste ${Math.round(min / 60)} h` : `reste ${Math.round(min)} min`;
+}
+
+const marker = new THREE.Group();
+{
+  const mat = new THREE.MeshBasicMaterial({ color: new THREE.Color(PALETTE.vfx.time?.main ?? "#ffbf5e").multiplyScalar(1.4), transparent: true, opacity: 0.35, depthWrite: false, blending: THREE.AdditiveBlending, fog: false, side: THREE.DoubleSide });
+  const beam = new THREE.Mesh(new THREE.CylinderGeometry(0.25, 0.6, 26, 12, 1, true), mat);
+  beam.position.y = 13;
+  const ring = new THREE.Mesh(new THREE.TorusGeometry(1.6, 0.06, 6, 40), mat);
+  ring.rotation.x = Math.PI / 2;
+  ring.position.y = 0.15;
+  marker.add(beam, ring);
+  marker.visible = false;
+  scene.add(marker);
+}
+
+function missionDebugLine(): string {
+  const all = missions.missions;
+  const count = (st: string) => all.filter((m) => m.status === st).length;
+  const g = lastGen;
+  return (
+    `missions : ${missions.active.length} en cours · ${count("done")} accomplies · ${count("failed")} échouées` +
+    (g ? `\ndernière génération : ${sourceLabel(g)} · ${g.rejections.length} refus du validateur · ${g.costUsd.toFixed(4)} $` + (g.rejections[0] ? `\n  refus : ${g.rejections[0].slice(0, 2).join(" ; ").slice(0, 160)}` : "") : "")
+  );
+}
+
+function updateMissionsUi(dt: number): void {
+  if (nameplateAgent && !paused && !hud.dialogueOpen && input.wasPressed("KeyM") && Math.hypot(nameplateAgent.x - player.x, nameplateAgent.z - player.z) < INTERACT_RANGE) {
+    if (missions.offerOf(nameplateAgent.id)) void requestMission(nameplateAgent);
+    else if (defsById.has(nameplateAgent.id)) hud.toast(`${nameplateAgent.name} n'a pas de travail pour toi.`);
+  }
+  if (offer && !hud.dialogueOpen) {
+    agents.hold(offer.giver, player.x, player.z, clock.totalMinutes, 2);
+    if (input.wasPressed("Enter") || input.wasPressed("NumpadEnter")) answerOffer(true);
+    else if (input.wasPressed("Backspace") || Math.hypot(offer.giver.x - player.x, offer.giver.z - player.z) > INTERACT_RANGE + 3) answerOffer(false);
+  }
+  for (const n of missions.notices.splice(0)) {
+    hud.toast(n.kind === "step" ? `Objectif : ${n.text}` : n.text);
+    if (n.kind === "done") {
+      coins += n.gold;
+      hud.setCoins(coins);
+    }
+  }
+  const active = missions.active;
+  hud.updateMissions(active.map((m) => ({ title: m.proposal.title, objective: missions.objective(m)?.text ?? "", left: timeLeft(m), choice: m.status === "choice" })));
+  const target = active[0] ? missions.objective(active[0]) : null;
+  marker.visible = target !== null && started;
+  if (target) {
+    marker.position.set(target.x, 0, target.z);
+    marker.rotation.y += dt * 0.8;
+  }
+}
 
 function updateSocialUi(): void {
   if (hud.dialogueOpen && talkingTo) {
@@ -740,6 +862,7 @@ function frame(now: number): void {
       powers.update(step, castContext());
       social.step(clock.totalMinutes);
       ambient.step();
+      missions.step({ x: player.x, z: player.z, unrecognizable: powers.unrecognizable, hidden: powers.cloaked });
       // A guard hunting Kael walks past a stranger's face.
       consequences.step({ x: player.x, z: player.z, hidden: powers.unrecognizable });
     });
@@ -759,6 +882,7 @@ function frame(now: number): void {
   updatePowersUi(frameDt, rx, rz);
   updateNameplate(rx, rz);
   updateSocialUi();
+  updateMissionsUi(frameDt);
 
   rig.update({ x: rx, y: 0, z: rz }, dt, collision.boxes);
   camera.position.set(rig.position.x, rig.position.y, rig.position.z);
@@ -805,7 +929,7 @@ function frame(now: number): void {
     speed: playerSpeed(player),
     timeScale: clock.timeScale,
     agents: agents.counts(),
-    ai: aiDebugLine(),
+    ai: `${aiDebugLine()}\n${missionDebugLine()}`,
   });
 
   input.endFrame();
@@ -856,6 +980,18 @@ window.__chronos = {
     if (a) playerAct(actId, a);
   },
   cast: (id: string) => castPower(id),
+  requestMission(giverId: string) {
+    const a = agentsById.get(giverId);
+    return a ? requestMission(a) : Promise.resolve(false);
+  },
+  answerOffer,
+  get missions() {
+    return {
+      offer: offer ? { giverId: offer.giver.id, title: offer.gen.proposal.title, source: offer.gen.source, attempts: offer.gen.attempts, rejections: offer.gen.rejections.length, proposal: offer.gen.proposal } : null,
+      list: missions.missions.map((m) => ({ id: m.id, title: m.proposal.title, intent: m.proposal.intent, status: m.status, step: m.stepIndex, outcome: m.outcome, failReason: m.failReason, source: m.source, objective: missions.objective(m), proposal: m.proposal })),
+      marker: marker.visible,
+    };
+  },
   aim(yaw: number) {
     rig.yaw = yaw;
   },

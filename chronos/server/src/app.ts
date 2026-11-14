@@ -1,9 +1,20 @@
-import { DIALOGUE_LIMITS, DialogueRequestSchema, DialogueReplySchema, sanitizeReply, type BudgetStatus, type DialogueResponse } from "@chronos/shared";
+import {
+  DIALOGUE_LIMITS,
+  DialogueRequestSchema,
+  DialogueReplySchema,
+  MissionProposalSchema,
+  MissionRequestSchema,
+  sanitizeReply,
+  type BudgetStatus,
+  type DialogueResponse,
+  type MissionResponse,
+} from "@chronos/shared";
 import { Budget, type Usage } from "./budget.js";
 import { ResponseCache, hashKey } from "./cache.js";
 import type { ServerConfig } from "./config.js";
 import { LlmError, type DialogueLlm } from "./llm.js";
 import type { ServerPack } from "./pack.js";
+import { buildMissionPrompt } from "./missionPrompt.js";
 import { buildDialoguePrompt } from "./prompt.js";
 import { RateLimiter } from "./rateLimit.js";
 
@@ -81,6 +92,45 @@ export class ChronosApp {
       this.cache.set(key, reply, route.cacheTtlSeconds);
       const body: DialogueResponse = {
         reply,
+        source: this.llm.kind,
+        usage: { inputTokens: result.usage.inputTokens, outputTokens: result.usage.outputTokens, cacheReadTokens: result.usage.cacheReadTokens, costUsd: cost },
+      };
+      return { status: 200, body };
+    } catch (e) {
+      if (e instanceof LlmError) {
+        const usage = (e as LlmError & { usage?: Usage }).usage;
+        if (usage) this.budget.record(usage, price);
+        return err(e.code === "rate_limited" ? 429 : 502, `model_${e.code}`);
+      }
+      return err(500, "internal_error");
+    }
+  }
+
+  /**
+   * Asks the model for a mission *proposal*. The proxy checks its shape; the game
+   * then validates it against the live world and may come back with the errors.
+   * Never cached: a mission is written for the world as it is now.
+   */
+  async mission(raw: unknown, clientId: string): Promise<AppResult> {
+    if (!this.limiter.allow(clientId)) return err(429, "rate_limited");
+    const parsed = MissionRequestSchema.safeParse(raw);
+    if (!parsed.success) return err(400, "invalid_request", parsed.error.issues[0]?.message);
+    const req = parsed.data;
+    const giver = this.pack.characters.get(req.giverId);
+    if (!giver) return err(404, "unknown_character");
+    if (!this.llm) return err(503, "no_api_key");
+    if (this.budget.exceeded) return err(402, "budget_exceeded");
+
+    const route = this.config.routes.mission;
+    const prompt = buildMissionPrompt(this.pack.lore, giver, req);
+    const price = this.config.pricesPerMTok[route.model] ?? { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 };
+    try {
+      const result = await this.llm.mission(prompt.system, prompt.user, route, this.config.requestTimeoutMs * 2, req);
+      const cost = this.llm.kind === "mock" ? 0 : this.budget.record(result.usage, price);
+      const checked = MissionProposalSchema.safeParse(result.mission);
+      if (!checked.success) return err(502, "invalid_model_output");
+      const body: MissionResponse = {
+        mission: checked.data,
         source: this.llm.kind,
         usage: { inputTokens: result.usage.inputTokens, outputTokens: result.usage.outputTokens, cacheReadTokens: result.usage.cacheReadTokens, costUsd: cost },
       };

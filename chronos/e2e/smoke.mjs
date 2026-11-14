@@ -310,6 +310,93 @@ try {
     await page.evaluate(() => window.__chronos.cast("disguise"));
     check(await until(() => window.__chronos.powers.disguise === null), "false face: dropped on demand");
   }
+  // J7: three generated missions, validated by the game, played to the end.
+  {
+    const shot = (name) => page.screenshot({ path: `${OUT}${QUALITY}-${name}.png` });
+    const until = (fn, arg) => page.waitForFunction(fn, arg, { timeout: 60000, polling: 250 }).then(() => true).catch(() => false);
+    const state = () => page.evaluate(() => window.__chronos.missions);
+    const mission = async (title) => (await state()).list.find((m) => m.title === title);
+    const offerFrom = async (giverId) => {
+      await page.evaluate((id) => {
+        const c = window.__chronos;
+        const g = c.agent(id);
+        c.teleport(g.x + 1.6, g.z, -Math.PI / 2);
+        c.setCamera(Math.PI / 2 + 0.5, 0.35, 7);
+      }, giverId);
+      await page.evaluate((id) => window.__chronos.requestMission(id), giverId);
+      await until(() => window.__chronos.missions.offer !== null);
+      return (await state()).offer;
+    };
+    const gotoObjective = (title) =>
+      page.evaluate((t) => {
+        const c = window.__chronos;
+        const o = c.missions.list.find((m) => m.title === t).objective;
+        c.teleport(o.x, o.z + 1, Math.PI);
+      }, title);
+    /** Ends a mission the way its proposal says: talk to someone, or do something to someone. */
+    const conclude = async (title, which) => {
+      const o = (await mission(title)).proposal[which];
+      if (o.type === "talk") {
+        await page.evaluate((id) => window.__chronos.talk(id), o.targetId);
+        await page.evaluate(() => window.__chronos.closeDialogue());
+      } else await page.evaluate(([act, id]) => window.__chronos.act(act, id), [o.actId, o.targetId]);
+      return until((t) => window.__chronos.missions.list.find((m) => m.title === t)?.status === "done", title);
+    };
+    await page.evaluate(() => window.__chronos.setHour(10));
+    const coins0 = (await page.evaluate(() => window.__chronos.social)).coins;
+
+    // 1. Investigation.
+    const o1 = await offerFrom("hadrien");
+    check(!!o1 && o1.proposal.intent === "investigate", `mission offered by Hadrien: "${o1?.title}" (source: ${o1?.source}, ${o1?.attempts} model call(s), ${o1?.rejections} draft(s) refused by the validator)`);
+    await page.waitForTimeout(1200);
+    await shot("19-mission-offer");
+    await page.keyboard.press("Enter");
+    check(await until(() => window.__chronos.missions.list.length === 1 && window.__chronos.missions.marker && document.getElementById("hud-missions")?.children.length === 1), "mission accepted: tracked on the HUD, objective marked in the world");
+    for (let i = 0; i < 4; i++) {
+      const m = await mission(o1.title);
+      const step = m.proposal.steps[m.step];
+      if (m.status !== "active" || !step) break;
+      if (step.type === "goto" || step.type === "echo") await gotoObjective(o1.title);
+      if (step.type === "echo") {
+        await until(() => window.__chronos.powers.energy >= 30);
+        await page.evaluate(() => window.__chronos.cast("echo"));
+      }
+      if (step.type === "talk") {
+        await page.evaluate((id) => window.__chronos.talk(id), step.targetId);
+        await page.evaluate(() => window.__chronos.closeDialogue());
+      }
+      if (step.type === "act") await page.evaluate(([act, id]) => window.__chronos.act(act, id), [step.actId, step.targetId]);
+      await until(([t, n]) => { const x = window.__chronos.missions.list.find((m) => m.title === t); return x.step > n || x.status !== "active"; }, [o1.title, m.step]);
+    }
+    check((await mission(o1.title)).status === "choice", "investigation: the echo revealed the staged theft, two endings are open");
+    await page.waitForTimeout(1500);
+    await shot("20-mission-echo-choice");
+    check(await conclude(o1.title, "hero"), "investigation finished the heroic way");
+
+    // 2. Protection: scare the aggressor off.
+    const o2 = await offerFrom("aveline");
+    await page.evaluate(() => window.__chronos.answerOffer(true));
+    await page.waitForTimeout(1200);
+    await shot("21-mission-protect");
+    await page.evaluate((id) => window.__chronos.act("intimidate", id), o2.proposal.culpritId);
+    check(await until((t) => window.__chronos.missions.list.find((m) => m.title === t)?.status === "choice", o2.title), `protection: "${o2.title}" — the aggressor was scared off`);
+    check(await conclude(o2.title, "dark"), "protection finished the dark way");
+
+    // 3. Infiltration under the Shadow.
+    const o3 = await offerFrom("sylve");
+    await page.evaluate(() => window.__chronos.answerOffer(true));
+    await until(() => window.__chronos.powers.energy >= 40);
+    await page.evaluate(() => window.__chronos.cast("cloak"));
+    await until(() => window.__chronos.powers.cloaked);
+    await gotoObjective(o3.title);
+    check(await until((t) => window.__chronos.missions.list.find((m) => m.title === t)?.status === "choice", o3.title), `infiltration: "${o3.title}" — reached unseen`);
+    await page.evaluate(() => window.__chronos.cast("cloak"));
+    check(await conclude(o3.title, "hero"), "infiltration finished");
+    const end = await page.evaluate(() => ({ m: window.__chronos.missions.list, coins: window.__chronos.social.coins }));
+    check(end.m.length === 3 && end.m.every((m) => m.status === "done") && end.coins > coins0, `three missions played to the end (${end.m.map((m) => `${m.intent}:${m.outcome}`).join(", ")}), purse ${coins0} → ${end.coins}`);
+    await page.waitForTimeout(800);
+    await shot("22-missions-done");
+  }
   await page.evaluate(() => window.__chronos.setHour(3));
   await page.waitForTimeout(800);
   const night = await page.evaluate(() => window.__chronos.agents);

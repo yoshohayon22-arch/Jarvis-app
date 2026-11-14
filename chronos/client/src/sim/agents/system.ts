@@ -291,6 +291,23 @@ export class AgentSystem {
     a.nextThinkAt = now + (kind === "flee" ? 12 : 8);
   }
 
+  /**
+   * Sends someone to a point, even from indoors (a mission's threat walking up to
+   * its victim). They wait there until their next think resumes the schedule.
+   */
+  sendTo(a: Agent, x: number, z: number, now: number, minutes = 6): void {
+    const nav = this.places.nav;
+    const cell = nav.nearestFree(x, z, 20);
+    if (cell < 0) return;
+    a.reacting = true;
+    this.goTo(a, { x: nav.cx(cell % nav.size), z: nav.cx((cell / nav.size) | 0) }, null);
+    if (a.mode === "moving") {
+      a.hurry = true;
+      a.anim = "run";
+    }
+    a.nextThinkAt = now + minutes;
+  }
+
   /** The guard takes someone away: they walk to the barracks and stay inside until released. */
   jail(a: Agent, until: number): void {
     a.jailedUntil = until;

@@ -160,3 +160,22 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: #0b0d14; col
 #echo p { margin: 5px 0; line-height: 1.4; padding-left: 9px; border-left: 2px solid rgba(143, 240, 224, 0.5); }
 #echo p.masked { border-color: #e889c0; }
 #echo p.undone { border-color: #ffbf5e; font-style: italic; opacity: 0.85; }
+
+#hud-missions { display: flex; flex-direction: column; gap: 6px; max-width: 340px; }
+#hud-missions .mission { background: var(--panel); border: 1px solid rgba(255, 191, 94, 0.35); border-left: 3px solid var(--amber); border-radius: 6px; padding: 6px 10px; font-size: 13px; display: flex; flex-direction: column; gap: 2px; }
+#hud-missions .mission.choice { border-left-color: #e889c0; }
+#hud-missions .mission strong { color: var(--amber); font-weight: 600; }
+#hud-missions .mission i { opacity: 0.7; font-size: 12px; font-style: normal; }
+#mission-offer {
+  position: fixed; left: 50%; bottom: 130px; transform: translateX(-50%); width: min(560px, calc(100vw - 32px)); padding: 14px 18px; border-radius: 10px;
+  background: rgba(20, 16, 12, 0.92); border: 1px solid rgba(255, 191, 94, 0.55); display: none; font-size: 14px; line-height: 1.45; pointer-events: none;
+}
+#mission-offer.visible { display: block; }
+#mission-offer small { letter-spacing: 0.1em; text-transform: uppercase; opacity: 0.7; font-size: 11px; }
+#mission-offer h3 { margin: 2px 0 8px; color: var(--amber); font-size: 19px; font-weight: 600; }
+#mission-offer .briefing { margin: 0 0 8px; font-style: italic; }
+#mission-offer ol { margin: 0 0 8px; padding-left: 20px; }
+#mission-offer .meta { margin: 0 0 6px; opacity: 0.8; font-size: 13px; }
+#mission-offer .keys { margin: 0; font-weight: 600; color: var(--amber); }
+#mission-offer em { position: absolute; right: 14px; top: 12px; font-size: 11px; opacity: 0.6; font-style: normal; }
+#mission-busy:not(:empty) { position: fixed; left: 50%; bottom: 130px; transform: translateX(-50%); background: var(--panel); border: 1px solid rgba(255, 191, 94, 0.4); border-radius: 6px; padding: 8px 14px; font-size: 14px; font-style: italic; }

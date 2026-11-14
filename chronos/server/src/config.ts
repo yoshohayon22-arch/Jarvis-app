@@ -21,7 +21,7 @@ export interface ServerConfig {
   port: number;
   allowedOrigins: string[];
   packDir: string;
-  routes: { dialogue: RouteConfig };
+  routes: { dialogue: RouteConfig; mission: RouteConfig };
   budget: { dailyLimitUsd: number };
   rateLimit: { perMinute: number };
   maxBodyBytes: number;
@@ -36,6 +36,7 @@ export function loadConfig(path = resolve(SERVER_DIR, "config.json")): ServerCon
   const cfg = JSON.parse(readFileSync(path, "utf8")) as ServerConfig;
   if (process.env.PORT) cfg.port = Number(process.env.PORT);
   if (process.env.CHRONOS_DIALOGUE_MODEL) cfg.routes.dialogue.model = process.env.CHRONOS_DIALOGUE_MODEL;
+  if (process.env.CHRONOS_MISSION_MODEL) cfg.routes.mission.model = process.env.CHRONOS_MISSION_MODEL;
   if (process.env.CHRONOS_DAILY_LIMIT_USD) cfg.budget.dailyLimitUsd = Number(process.env.CHRONOS_DAILY_LIMIT_USD);
   cfg.packDir = resolve(SERVER_DIR, cfg.packDir);
   return cfg;

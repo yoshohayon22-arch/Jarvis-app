@@ -262,6 +262,62 @@ export class Hud {
     }
   }
 
+  /** A mission being offered (null hides the card). Built with textContent: model text is never parsed as HTML. */
+  showMissionOffer(o: { giver: string; title: string; briefing: string; steps: string[]; hours: number; source: string } | null): void {
+    const el = $("mission-offer");
+    el.replaceChildren();
+    el.classList.toggle("visible", o !== null);
+    if (!o) return;
+    const add = (tag: string, text: string, cls = "") => {
+      const n = document.createElement(tag);
+      n.textContent = text;
+      if (cls) n.className = cls;
+      el.append(n);
+      return n;
+    };
+    add("small", `${o.giver} te propose`);
+    add("h3", o.title);
+    add("p", `« ${o.briefing} »`, "briefing");
+    const ol = document.createElement("ol");
+    for (const st of o.steps) {
+      const li = document.createElement("li");
+      li.textContent = st;
+      ol.append(li);
+    }
+    el.append(ol);
+    add("p", `Délai : ${o.hours} h de jeu · deux issues possibles, à toi de choisir par tes actes.`, "meta");
+    add("p", "[Entrée] accepter · [Retour arrière] refuser", "keys");
+    add("em", o.source);
+  }
+
+  /** "X réfléchit…" while a mission is being written. */
+  setMissionBusy(text: string): void {
+    const el = $("mission-busy");
+    if (el.textContent !== text) el.textContent = text;
+  }
+
+  private missionsKey = "";
+  /** Active missions with their current objective and time left. */
+  updateMissions(list: readonly { title: string; objective: string; left: string; choice: boolean }[]): void {
+    const key = JSON.stringify(list);
+    if (key === this.missionsKey) return;
+    this.missionsKey = key;
+    const el = $("hud-missions");
+    el.replaceChildren();
+    for (const m of list) {
+      const row = document.createElement("div");
+      row.className = m.choice ? "mission choice" : "mission";
+      const t = document.createElement("strong");
+      t.textContent = m.title;
+      const o = document.createElement("span");
+      o.textContent = m.objective;
+      const l = document.createElement("i");
+      l.textContent = m.left;
+      row.append(t, o, l);
+      el.append(row);
+    }
+  }
+
   /** What the Echo of the Past revealed (lines stay on screen for a while). */
   private echoTimer: number | undefined;
   showEcho(lines: readonly { text: string; tone: string }[]): void {

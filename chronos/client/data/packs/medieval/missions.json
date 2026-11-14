@@ -1,0 +1,229 @@
+{
+ "standoffMinutes": 25,
+ "engageRange": 9,
+ "strikeRange": 2.0,
+ "placeRadius": 4,
+ "detectRange": 11,
+ "failure": {
+  "giverOpinion": -10,
+  "factionReputation": -4
+ },
+ "givers": {
+  "hadrien": {
+   "intent": "investigate",
+   "culprits": [
+    "pip",
+    "sylve"
+   ],
+   "victims": [
+    "aldric",
+    "garn",
+    "brann"
+   ],
+   "places": [
+    "market_stalls",
+    "market_hall",
+    "tavern_front"
+   ]
+  },
+  "aldric": {
+   "intent": "investigate",
+   "culprits": [
+    "pip",
+    "odon"
+   ],
+   "victims": [
+    "garn",
+    "brann",
+    "margaux"
+   ],
+   "places": [
+    "market_east",
+    "artisan_street",
+    "forge_yard"
+   ]
+  },
+  "aveline": {
+   "intent": "protect",
+   "culprits": [
+    "sylve",
+    "pip",
+    "aldric"
+   ],
+   "victims": [
+    "margaux",
+    "theobald"
+   ],
+   "places": []
+  },
+  "garn": {
+   "intent": "protect",
+   "culprits": [
+    "sylve",
+    "pip"
+   ],
+   "victims": [
+    "theobald",
+    "lysa"
+   ],
+   "places": []
+  },
+  "sylve": {
+   "intent": "infiltrate",
+   "culprits": [
+    "odon",
+    "hadrien"
+   ],
+   "victims": [],
+   "places": [
+    "barracks_yard",
+    "training_ground"
+   ]
+  },
+  "orsan": {
+   "intent": "infiltrate",
+   "culprits": [
+    "sylve",
+    "pip"
+   ],
+   "victims": [],
+   "places": [
+    "hideout_door",
+    "lowtown_alley"
+   ]
+  }
+ },
+ "templates": [
+  {
+   "intent": "investigate",
+   "title": "Qui a volé {victim} ?",
+   "summary": "{victim} s'est fait dérober sa bourse {place}. {giver} veut le coupable.",
+   "briefing": "On a volé {victim} {place}, cette nuit, et personne n'a rien vu. Toi qui vois ce que les autres ne voient pas : va sur place et dis-moi qui a fait le coup.",
+   "steps": [
+    {
+     "type": "goto",
+     "text": "Se rendre {place}",
+     "place": true
+    },
+    {
+     "type": "echo",
+     "text": "Utiliser l'Écho du passé (8) {place} pour revoir le vol",
+     "place": true
+    }
+   ],
+   "hero": {
+    "label": "Dire la vérité à {giver}",
+    "type": "talk",
+    "target": "giver",
+    "actId": "",
+    "epilogue": "{culprit} devra répondre de son vol, et {victim} retrouve son bien.",
+    "gold": 20,
+    "reputation": {
+     "villagers": 8,
+     "royal_guard": 6,
+     "thieves_guild": -8,
+     "mages_order": 0
+    }
+   },
+   "dark": {
+    "label": "Faire chanter {culprit} (N) et garder le silence",
+    "type": "act",
+    "target": "culprit",
+    "actId": "intimidate",
+    "epilogue": "{culprit} a payé ton silence. {giver} n'en saura jamais rien.",
+    "gold": 60,
+    "reputation": {
+     "villagers": 0,
+     "royal_guard": -4,
+     "thieves_guild": 6,
+     "mages_order": 0
+    }
+   },
+   "timeLimitHours": 18
+  },
+  {
+   "intent": "protect",
+   "title": "Veiller sur {victim}",
+   "summary": "{culprit} en veut à {victim}. {giver} te demande de l'empêcher de lui faire du mal.",
+   "briefing": "{culprit} a juré de régler ses comptes avec {victim}, aujourd'hui même. Je ne peux pas être partout. Reste près de {victim} et fais en sorte qu'il ne lui arrive rien.",
+   "steps": [
+    {
+     "type": "protect",
+     "text": "Protéger {victim} : tenir {culprit} à distance, ou lui faire passer l'envie",
+     "target": "victim"
+    }
+   ],
+   "hero": {
+    "label": "Rassurer {giver}",
+    "type": "talk",
+    "target": "giver",
+    "actId": "",
+    "epilogue": "{victim} est sain et sauf. {giver} ne l'oubliera pas.",
+    "gold": 15,
+    "reputation": {
+     "villagers": 10,
+     "royal_guard": 3,
+     "thieves_guild": 0,
+     "mages_order": 0
+    }
+   },
+   "dark": {
+    "label": "Faire payer sa protection à {victim} (N)",
+    "type": "act",
+    "target": "victim",
+    "actId": "intimidate",
+    "epilogue": "{victim} a compris que ta protection avait un prix.",
+    "gold": 45,
+    "reputation": {
+     "villagers": -8,
+     "royal_guard": 0,
+     "thieves_guild": 5,
+     "mages_order": 0
+    }
+   },
+   "timeLimitHours": 12
+  },
+  {
+   "intent": "infiltrate",
+   "title": "Sans être vu {place}",
+   "summary": "{giver} veut savoir ce qui se trame {place}. {culprit} et les siens ne doivent pas te reconnaître.",
+   "briefing": "J'ai besoin d'yeux {place}. Mais si {culprit} ou l'un des siens te reconnaît, tout est perdu. Ombre ou faux visage, peu m'importe : entre, regarde, et reviens.",
+   "steps": [
+    {
+     "type": "infiltrate",
+     "text": "Atteindre {place} sans être reconnu (Ombre 6 ou faux visage 9)",
+     "place": true
+    }
+   ],
+   "hero": {
+    "label": "Prévenir {culprit} de ce qui se prépare",
+    "type": "talk",
+    "target": "culprit",
+    "actId": "",
+    "epilogue": "Tu as tout dit à {culprit}. {giver} l'apprendra tôt ou tard.",
+    "gold": 10,
+    "reputation": {
+     "villagers": 4,
+     "royal_guard": 0,
+     "thieves_guild": 0,
+     "mages_order": 0
+    }
+   },
+   "dark": {
+    "label": "Rapporter ce que tu as vu à {giver}",
+    "type": "talk",
+    "target": "giver",
+    "actId": "",
+    "epilogue": "{giver} sait maintenant ce qui se passe {place}, et te paie pour cela.",
+    "gold": 50,
+    "reputation": {
+     "villagers": 0,
+     "royal_guard": 0,
+     "thieves_guild": 0,
+     "mages_order": 0
+    }
+   },
+   "timeLimitHours": 24
+  }
+ ]
+}

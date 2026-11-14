@@ -68,6 +68,8 @@ export class PowerSystem {
   private readonly launched: Launched[] = [];
   private readonly loops: Loop[] = [];
   readonly history: History;
+  /** Events the Echo must show whenever they are in reach (a mission's scene). */
+  echoPinned: () => ReadonlySet<number> = () => new Set();
   /** Lets the game snapshot/restore state the engine does not own (coins…). */
   captureExtra: () => unknown = () => null;
   restoreExtra: (extra: unknown) => void = () => undefined;
@@ -347,11 +349,13 @@ export class PowerSystem {
    */
   private readEcho(p: PlayerRef, e: EffectDef): EchoVision[] {
     const now = this.clock.totalMinutes;
-    const events = this.social.log
+    const inReach = this.social.log
       .query({ near: { x: p.x, z: p.z, radius: e.radius ?? 12 }, since: now - (e.window ?? 24) * 60, includeUndone: true })
       .filter((ev) => ev.act !== "power_echo")
-      .sort((a, b) => b.t - a.t || b.id - a.id)
-      .slice(0, e.maxVisions ?? 5);
+      .sort((a, b) => b.t - a.t || b.id - a.id);
+    // Scenes someone asked the hero to look for are never crowded out by newer ones.
+    const pinned = this.echoPinned();
+    const events = inReach.filter((ev, i) => i < (e.maxVisions ?? 5) || pinned.has(ev.id));
     const acts = this.social.acts.acts;
     return events.map((ev) => {
       // Dark upgrade: other people's crimes and secrets become leverage over them.

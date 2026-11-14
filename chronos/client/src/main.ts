@@ -328,6 +328,7 @@ function start(): void {
   input.requestPointerLock();
 }
 function pauseGame(): void {
+  if (document.pointerLockElement) document.exitPointerLock();
   paused = true;
   pauseEl.classList.remove("hidden");
   refreshAiStatus();
@@ -501,7 +502,7 @@ canvas.addEventListener("click", () => {
   if (started && !paused && !hud.dialogueOpen && !document.pointerLockElement) input.requestPointerLock();
 });
 document.addEventListener("pointerlockchange", () => {
-  if (started && !document.pointerLockElement && !hud.dialogueOpen) {
+  if (started && !paused && !document.pointerLockElement && !hud.dialogueOpen) {
     pauseGame();
   }
 });

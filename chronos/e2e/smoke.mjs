@@ -413,7 +413,7 @@ try {
     const slots = await page.evaluate(() => window.__chronos.saves());
     check(slots.length >= 2 && slots.some((s) => s.slot === "manual"), `save slots listed: ${slots.map((s) => s.slot).join(", ")}`);
     await page.evaluate(() => window.__chronos.pause());
-    await page.waitForTimeout(1500);
+    check(await until(() => Number(getComputedStyle(document.getElementById("pause")).opacity) > 0.95 && document.getElementById("save-list").children.length >= 2), "pause menu shows the save slots and the cost settings");
     await page.screenshot({ path: `${OUT}${QUALITY}-23-pause-menu.png` });
 
     await page.reload();

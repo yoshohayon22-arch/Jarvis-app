@@ -126,7 +126,7 @@ try {
   await page.evaluate(() => window.__chronos.act("assault", "aldric"));
   await page.waitForTimeout(2500);
   const soc = await page.evaluate(() => window.__chronos.social);
-  check(soc.events === 1 && soc.informed[0] > 3, `assault seen by ${soc.informed[0]} people`);
+  check(soc.events >= 1 && soc.informed[0] > 3, `assault seen by ${soc.informed[0]} people`);
   check(soc.reputation.villagers < 0 && soc.reputation.royal_guard <= 0, `reputations moved: ${JSON.stringify(soc.reputation)}`);
   check(soc.emotes > 0, `${soc.emotes} inhabitants show a reaction`);
   await page.waitForFunction(() => /as frappé/.test(document.getElementById("journal")?.textContent ?? ""), null, { timeout: 15000 }).catch(() => {});

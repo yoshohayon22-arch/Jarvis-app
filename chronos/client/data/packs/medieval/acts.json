@@ -71,7 +71,7 @@
       "moral": "dark"
     },
     "power_time": {
-      "label": "a tordu le temps devant",
+      "label": "a tordu le temps en public",
       "importance": 0.5,
       "opinion": {
         "villagers": -2,
@@ -88,7 +88,7 @@
       "moral": "neutral"
     },
     "power_telekinesis": {
-      "label": "a déplacé des choses par la pensée devant",
+      "label": "a déplacé des choses par la pensée",
       "importance": 0.45,
       "opinion": {
         "villagers": -2,
@@ -104,7 +104,7 @@
       "moral": "neutral"
     },
     "power_shadow": {
-      "label": "a disparu sous les yeux de",
+      "label": "a disparu sous les yeux de tous",
       "importance": 0.45,
       "opinion": {
         "villagers": -2,

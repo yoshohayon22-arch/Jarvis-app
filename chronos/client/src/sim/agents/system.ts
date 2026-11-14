@@ -9,7 +9,7 @@ import type { Agent, AgentAnim } from "./types";
 export const AGENT_TUNING = {
   radius: 0.35,
   /** Needs change per game hour. */
-  hungerRate: 0.045,
+  hungerRate: 0.04,
   energyRate: 0.05,
   socialRate: 0.06,
   eatRecovery: 2.5,
@@ -48,9 +48,23 @@ const ACTING_ANIM: Record<ActivityKind, AgentAnim> = {
  * Deterministic simulation of every inhabitant: needs, schedule, navigation
  * and local avoidance. No rendering, no AI — runs headless in tests.
  */
+export interface TimeZone {
+  x: number;
+  z: number;
+  radius: number;
+  /** Flow of time inside the zone (0.25 = four times slower). */
+  scale: number;
+  /** Game minute at which the zone ends. */
+  until: number;
+}
+
 export class AgentSystem {
   private readonly hash = new Map<number, Agent[]>();
   private lastMinutes: number | null = null;
+  /** Bubbles of altered time (time powers). */
+  zones: TimeZone[] = [];
+  /** Districts inhabitants currently avoid (terrorized): they stay home instead. */
+  avoidDistrict: (districtId: string) => boolean = () => false;
 
   constructor(
     readonly agents: Agent[],
@@ -87,7 +101,12 @@ export class AgentSystem {
 
   /** Starts an activity: picks a destination and plans the path. */
   private begin(a: Agent, activity: ActivityKind, placeRef: PlaceRef, override: boolean): void {
-    const place = this.resolveAlias(a, placeRef);
+    let place = this.resolveAlias(a, placeRef);
+    // A terrorized district empties: its visitors stay home (the guard still does its rounds).
+    if (a.faction !== "royal_guard" && activity !== "sleep") {
+      const d = this.places.districtOf(place);
+      if (d && this.avoidDistrict(d)) place = `building:${a.home}`;
+    }
     a.activity = activity;
     a.place = place;
     a.override = override;
@@ -198,7 +217,11 @@ export class AgentSystem {
   /** Periodic re-evaluation: follow the schedule, or vary behavior within the activity. */
   private think(a: Agent, minutes: number, hour: number): void {
     const want = this.desired(a, hour);
-    const wantPlace = this.resolveAlias(a, want.place);
+    let wantPlace = this.resolveAlias(a, want.place);
+    if (a.faction !== "royal_guard" && want.activity !== "sleep") {
+      const d = this.places.districtOf(wantPlace);
+      if (d && this.avoidDistrict(d)) wantPlace = `building:${a.home}`;
+    }
     const resume = a.reacting;
     a.reacting = false;
     if (resume || want.activity !== a.activity || wantPlace !== a.place) {
@@ -445,13 +468,20 @@ export class AgentSystem {
     const moveDt = dt * clock.timeScale;
     const fast = clock.timeScale > AGENT_TUNING.fastForwardScale;
 
+    this.zones = this.zones.filter((z) => z.until > minutes);
     this.rebuildHash();
     for (const a of this.agents) {
       a.prevX = a.x;
       a.prevZ = a.z;
       this.updateNeeds(a, hours);
+      // Local flow of time: frozen, slowed inside a time bubble, or normal.
+      let factor = 1;
+      if (a.frozenUntil > minutes) factor = 0;
+      else for (const z of this.zones) if ((a.x - z.x) ** 2 + (a.z - z.z) ** 2 < z.radius * z.radius) factor = Math.min(factor, z.scale);
+      a.timeFactor = factor;
+      if (a.held || factor === 0) continue;
       if (minutes >= a.nextThinkAt) this.think(a, minutes, hour);
-      if (a.mode === "moving" && moveDt > 0) this.move(a, moveDt, fast, player);
+      if (a.mode === "moving" && moveDt > 0) this.move(a, moveDt * factor, fast, player);
     }
   }
 

@@ -11,13 +11,15 @@ import { ASSET_ROOT } from "./assets";
 const SLOTS = [
   { key: "night", file: "night", from: -1, intensity: 0.6 },
   { key: "dawn", file: "sunrise", from: -0.12, intensity: 0.55 },
-  { key: "day", file: "park", from: 0.15, intensity: 1.0 },
+  { key: "day", file: "park", from: 0.15, intensity: 0.6 },
 ] as const;
 const DUSK = { file: "sunset", intensity: 0.55 };
 
 export class EnvironmentLighting {
   private readonly maps = new Map<string, THREE.Texture>();
   private current: string | null = null;
+  /** True only once every map is ready: selecting a map earlier would latch onto a missing one. */
+  private ready = false;
 
   async load(renderer: THREE.WebGLRenderer, manager?: THREE.LoadingManager): Promise<void> {
     const pmrem = new THREE.PMREMGenerator(renderer);
@@ -32,10 +34,11 @@ export class EnvironmentLighting {
       }),
     );
     pmrem.dispose();
+    this.ready = true;
   }
 
   get loaded(): boolean {
-    return this.maps.size > 0;
+    return this.ready;
   }
 
   update(scene: THREE.Scene, clock: WorldClock): void {
@@ -46,7 +49,9 @@ export class EnvironmentLighting {
     for (const s of SLOTS) if (e >= s.from) slot = s;
     if (slot.file === "sunrise" && evening) slot = DUSK;
     if (this.current !== slot.file) {
-      scene.environment = this.maps.get(slot.file) ?? null;
+      // Never go back to "no environment": that would recompile every material.
+      const map = this.maps.get(slot.file);
+      if (map) scene.environment = map;
       this.current = slot.file;
     }
     // Ease intensity around the switch points so changes are not noticeable.

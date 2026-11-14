@@ -63,7 +63,11 @@ export function buildingAabb(b: BuildingDef): Aabb {
   };
 }
 
+/** Kinds handled by the dynamic prop system (telekinesis): not part of the static world. */
+const DYNAMIC_KINDS: ReadonlySet<PropDef["kind"]> = new Set(["barrel", "crate", "sack", "bucket"]);
+
 export function propCollider(p: PropDef): CircleCollider | null {
+  if (DYNAMIC_KINDS.has(p.kind)) return null;
   const r = PROP_RADIUS[p.kind];
   if (!p.solid || r === undefined) return null;
   return { x: p.pos[0], z: p.pos[1], r, height: PROP_HEIGHT[p.kind] ?? 1 };

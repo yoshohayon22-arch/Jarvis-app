@@ -6,6 +6,15 @@ import { loadDefaultPack } from "./pack";
 import type { ActsDef, CharacterDef, ExtrasDef } from "@chronos/shared";
 import { FACTIONS, FACTION_LABELS, PLAYER_ID, SocialSystem } from "./sim/social";
 import actsJson from "../data/packs/medieval/acts.json";
+import consequencesJson from "../data/packs/medieval/consequences.json";
+import powersJson from "../data/powers.json";
+import { ConsequenceSystem, type ConsequencesDef } from "./sim/consequences";
+import { PropSystem } from "./sim/physics";
+import { PowerSystem, type CastContext, type PowersData } from "./sim/powers";
+import { ConsequenceView } from "./render/consequenceView";
+import { PALETTE } from "./render/palette";
+import { PowerFxView } from "./render/powerFx";
+import { PropsView } from "./render/propsView";
 import fallbackJson from "../data/packs/medieval/dialogue_fallback.json";
 import { DIALOGUE_LIMITS, type BudgetStatus, type DialogueRequest } from "@chronos/shared";
 import { Conversation } from "./ai/conversation";
@@ -136,6 +145,66 @@ const environment = new EnvironmentLighting();
 const social = new SocialSystem(agents, actsJson as unknown as ActsDef, characterDefs, WORLD_SEED);
 let coins = 10;
 let crowd: Crowd | null = null;
+
+// ---------------------------------------------------------------- powers & consequences (J5)
+const actsDef = actsJson as unknown as ActsDef;
+const dynamicProps = new PropSystem(layout, collision);
+const powers = new PowerSystem(powersJson as unknown as PowersData, agents, dynamicProps, social, clock);
+const consequences = new ConsequenceSystem(consequencesJson as unknown as ConsequencesDef, agents, social, actsDef, clock);
+powers.captureExtra = () => ({ coins });
+powers.restoreExtra = (e) => {
+  coins = (e as { coins: number } | null)?.coins ?? coins;
+};
+powers.movePlayer = (x, z, facing) => {
+  Object.assign(player, { x, z, facing, vx: 0, vz: 0 });
+  Object.assign(prevPlayer, player);
+};
+consequences.onArrest = () => {
+  // Fined, jailed until dawn, released in the barracks yard.
+  coins = 0;
+  powers.reveal();
+  const yard = agents.places.spots.get("barracks_yard");
+  if (yard) powers.movePlayer(yard.pos[0], yard.pos[1], 0);
+  const jail = consequencesDef.wanted.jailUntilHour;
+  const day = Math.floor(clock.totalMinutes / 1440);
+  let release = day * 1440 + jail * 60;
+  if (release <= clock.totalMinutes) release += 1440;
+  clock.totalMinutes = release;
+  agents.settle(clock);
+};
+const consequencesDef = consequencesJson as unknown as ConsequencesDef;
+let propsView: PropsView | null = null;
+let consequenceView: ConsequenceView | null = null;
+const powerFx = new PowerFxView();
+const POWER_SLOTS = powers.castable().map((c) => ({ id: c.ability.id, code: c.ability.key as string, vfx: c.power.vfx ?? "time" }));
+
+function castContext(): CastContext {
+  const b = rig.basis();
+  return { player: { x: player.x, z: player.z, facing: player.facing, speed: playerSpeed(player) }, aimX: b.fx, aimZ: b.fz, daylight: clock.daylight };
+}
+
+const CAST_FAILURES: Record<string, string> = {
+  cooldown: "Ce pouvoir n'est pas encore prêt.",
+  energy: "Pas assez d'énergie.",
+  locked: "Tu n'as pas encore éveillé ce pouvoir.",
+  no_target: "Rien à portée dans cette direction.",
+};
+
+function castPower(id: string): void {
+  const before = { ...social.reputation.factions };
+  const r = powers.cast(id, castContext());
+  if (!r.ok) {
+    if (r.reason === "no_target" && id === "rewind") hud.toast("Le temps n'a encore rien à rendre.");
+    else hud.toast(CAST_FAILURES[r.reason ?? ""] ?? "Impossible.");
+    return;
+  }
+  if (id === "rewind") hud.flash("time");
+  const changes = FACTIONS.map((f) => ({ f, d: social.reputation.factions[f] - before[f] }))
+    .filter((c) => Math.abs(c.d) >= 0.05)
+    .map((c) => `${FACTION_LABELS[c.f]} ${c.d > 0 ? "+" : ""}${c.d.toFixed(1)}`);
+  if (changes.length) hud.toast(`${r.ability?.name} · ${changes.join(" · ")}`);
+  hud.setCoins(coins);
+}
 let grass: GrassField | null = null;
 let grassMap: THREE.DataTexture | null = null;
 const GRASS_EXTENT = 200;
@@ -166,6 +235,13 @@ const loading = (async () => {
   loadingEl.textContent = "Les habitants de Brumeval se réveillent…";
   crowd = await Crowd.create(lib, visuals.assetsBase, visuals.looks, visuals.crowd, agents.agents, quality.crowdShadows);
   scene.add(crowd.group);
+  crowd.frozenTint.set(PALETTE.vfx.time?.hero ?? "#bfe6ff");
+  [propsView, consequenceView] = await Promise.all([
+    PropsView.create(layout, visuals, lib, dynamicProps.props),
+    ConsequenceView.create(agents.places, visuals, lib, WORLD_SEED),
+  ]);
+  if (detail && quality.detailMaterials) for (const m of lib.loaded()) enhanceModel(m, detail);
+  scene.add(propsView.group, consequenceView.group, powerFx.group);
   grassMap = buildGrassMap(layout, GRASS_EXTENT);
   applyGrass();
   world = view;
@@ -179,6 +255,8 @@ const loading = (async () => {
     }
   }
   if (view.placeholders.length) console.warn("Missing models, using placeholders:", view.placeholders);
+  // Pick the environment map before compiling, so shaders are built once with it.
+  environment.update(scene, clock);
   renderer.compile(scene, camera);
   ready = true;
   loadingEl.textContent = "";
@@ -310,10 +388,20 @@ function playerAct(actId: string, target: Agent): void {
   const result = social.commit(
     actId,
     target,
-    { actorId: PLAYER_ID, x: player.x, z: player.z, daylight: clock.daylight, targetNotices: actId === "pickpocket" ? facingPlayer : true },
+    {
+      actorId: PLAYER_ID,
+      x: player.x,
+      z: player.z,
+      daylight: clock.daylight,
+      hidden: powers.cloaked,
+      // Unseen hands: under the Shadow, the victim never notices a theft.
+      targetNotices: actId === "pickpocket" ? facingPlayer && !powers.cloaked : true,
+    },
     clock.totalMinutes,
   );
-  if (actId === "pickpocket") coins += 1 + Math.floor(social.rng.next() * 5);
+  if (actId === "pickpocket") coins += (1 + Math.floor(social.rng.next() * 5)) * powers.theftMultiplier;
+  // Striking or threatening someone breaks the Shadow.
+  if (actId === "assault" || actId === "intimidate") powers.reveal();
   const changes = FACTIONS.map((f) => ({ f, d: social.reputation.factions[f] - before[f] }))
     .filter((c) => Math.abs(c.d) >= 0.05)
     .map((c) => `${FACTION_LABELS[c.f]} ${c.d > 0 ? "+" : ""}${c.d.toFixed(1)}`);
@@ -475,6 +563,57 @@ function updateSocialUi(): void {
   hud.showBubbles(bubbles);
 }
 
+const handPos = new THREE.Vector3();
+const heldPos = new THREE.Vector3();
+const shadowTint = new THREE.Color(PALETTE.vfx.shadow?.main ?? "#6c4fa3");
+let lastWanted = 0;
+
+/** Everything the player sees of powers and consequences. */
+function updatePowersUi(dt: number, rx: number, rz: number): void {
+  const now = clock.totalMinutes;
+  for (const fx of powers.fx.splice(0)) {
+    // Cloak/uncloak cues carry no position: they happen on the hero.
+    if (fx.kind === "cloak" || fx.kind === "uncloak") powerFx.spawn({ ...fx, x: rx, z: rz });
+    else powerFx.spawn(fx);
+  }
+  const h = powers.holding;
+  let held: THREE.Vector3 | null = null;
+  if (h && "prop" in h) held = heldPos.set(h.prop.x, h.prop.y + 0.5, h.prop.z);
+  else if (h && crowd) held = heldPos.set(crowd.positions[h.agent.index * 2] as number, h.agent.y + 0.9, crowd.positions[h.agent.index * 2 + 1] as number);
+  handPos.set(rx + Math.sin(player.facing) * 0.35, 1.15, rz + Math.cos(player.facing) * 0.35);
+  powerFx.update(dt, handPos, held);
+  propsView?.update(now);
+  animatedKael?.setGhost(powers.cloaked, shadowTint);
+  hud.setVeil(powers.cloaked ? "shadow" : "");
+
+  for (const a of powers.updateUnlocks()) {
+    const path = a.path === "hero" ? "Voie héroïque" : "Voie sombre";
+    hud.toast(`${path} — ${a.name} éveillé`);
+    social.pushFeed(now, `${path} : « ${a.name} ». ${a.description}`, a.path === "hero" ? "good" : "bad");
+  }
+  for (const n of consequences.notices.splice(0)) {
+    hud.toast(n.text);
+    if (n.kind !== "betrayal" && n.kind !== "arrest") social.pushFeed(now, n.text, n.kind === "district_recovered" ? "good" : n.kind === "rule_off" ? "neutral" : "bad");
+    if (n.kind === "arrest") hud.setCoins(coins);
+  }
+  if (consequences.wantedLevel !== lastWanted) {
+    lastWanted = consequences.wantedLevel;
+    hud.setWanted(lastWanted);
+  }
+  consequenceView?.update(consequences);
+
+  const slots = powers.castable().map((c) => ({
+    key: (c.ability.key ?? "").replace("Digit", ""),
+    name: c.ability.name,
+    cost: c.ability.cost ?? 0,
+    cooldown: powers.cooldownLeft(c.ability.id, now),
+    locked: !c.unlocked,
+    active: (c.ability.id === "cloak" && powers.cloaked) || (c.ability.id === "grab" && powers.holding !== null),
+    vfx: c.power.vfx ?? "time",
+  }));
+  hud.updatePowers(powers.energy, powers.data.energy.max, slots);
+}
+
 function frame(now: number): void {
   renderer.info.reset();
   const dt = Math.min((now - last) / 1000, 0.25);
@@ -482,6 +621,7 @@ function frame(now: number): void {
 
   if (input.wasPressed("F3")) hud.toggleDebug();
   if (input.wasPressed("KeyG")) setQuality(qualityLevel === "high" ? "low" : "high");
+  if (started && !paused && !hud.dialogueOpen) for (const slot of POWER_SLOTS) if (input.wasPressed(slot.code)) castPower(slot.id);
   if (input.wasPressed("KeyT")) {
     timeScaleIndex = (timeScaleIndex + 1) % TIME_SCALES.length;
     clock.timeScale = TIME_SCALES[timeScaleIndex] ?? 1;
@@ -498,16 +638,24 @@ function frame(now: number): void {
     alpha = physics.advance(dt, (step) => {
       Object.assign(prevPlayer, player);
       stepPlayer(player, { ...move, dodge: move.dodge && !dodgeConsumed }, collision, step);
-      // Inhabitants are solid: the player slides around them.
+      // Inhabitants are solid: the player slides around them (unless they are up in the air).
       agents.forNeighbors(player.x, player.z, 1.5, (a) => {
-        resolveCircleCircle(player, PLAYER_TUNING.radius, { x: a.x, z: a.z, r: 0.3, height: 1.7 });
+        if (a.y < 1) resolveCircleCircle(player, PLAYER_TUNING.radius, { x: a.x, z: a.z, r: 0.3, height: 1.7 });
       });
+      for (const p of dynamicProps.props) {
+        if (!p.held && p.y < 0.8 && Math.abs(p.x - player.x) < 2 && Math.abs(p.z - player.z) < 2)
+          resolveCircleCircle(player, PLAYER_TUNING.radius, { x: p.x, z: p.z, r: p.radius, height: 1 });
+      }
       dodgeConsumed = true;
     });
     simAlpha = sim.advance(dt, (step) => {
       clock.advance(step);
-      agents.step(step, clock, player);
+      // An invisible hero is not there as far as the inhabitants are concerned.
+      agents.step(step, clock, powers.cloaked ? null : player);
+      dynamicProps.step(step * Math.min(clock.timeScale, 4), clock.totalMinutes, agents.agents, powers.timeFactorAt);
+      powers.update(step, castContext());
       social.step(clock.totalMinutes);
+      consequences.step({ x: player.x, z: player.z, hidden: powers.cloaked });
     });
   }
 
@@ -521,6 +669,7 @@ function frame(now: number): void {
   else placeholderKael.animate(frameDt, playerSpeed(player), player.state, 1 - player.dodgeTime / PLAYER_TUNING.dodgeDuration);
 
   crowd?.update(frameDt * Math.min(clock.timeScale, 4), simAlpha);
+  updatePowersUi(frameDt, rx, rz);
   updateNameplate(rx, rz);
   updateSocialUi();
 
@@ -543,7 +692,8 @@ function frame(now: number): void {
 
   const district = districtAt(layout, player.x, player.z);
   const districtName = district?.name ?? (Math.hypot(player.x, player.z) > layout.wallRadius ? "Hors les murs" : "");
-  if (started && districtName && districtName !== lastDistrict) hud.showDistrict(districtName);
+  if (started && districtName && districtName !== lastDistrict)
+    hud.showDistrict(district && consequences.terrorized.has(district.id) ? `${districtName} — la peur règne` : districtName);
   lastDistrict = districtName;
 
   postfx.focus.set(rx, 1.4, rz);
@@ -618,6 +768,38 @@ window.__chronos = {
     const a = agents.agents.find((x) => x.id === agentId);
     if (a) playerAct(actId, a);
   },
+  cast: (id: string) => castPower(id),
+  aim(yaw: number) {
+    rig.yaw = yaw;
+  },
+  get powers() {
+    return {
+      energy: powers.energy,
+      cloaked: powers.cloaked,
+      holding: powers.holding ? ("prop" in powers.holding ? "prop" : "agent") : null,
+      unlocked: [...powers.unlocked],
+      zones: agents.zones.length,
+      frozen: agents.agents.filter((a) => a.frozenUntil > clock.totalMinutes).length,
+      props: dynamicProps.props.map((p) => ({ x: p.x, y: p.y, z: p.z, held: p.held })),
+    };
+  },
+  get consequences() {
+    return {
+      wanted: consequences.wantedLevel,
+      terror: Object.fromEntries(consequences.terror),
+      terrorized: [...consequences.terrorized],
+      flags: [...consequences.flags],
+      pursuing: agents.agents.filter((a) => a.pursuing).length,
+    };
+  },
+  setReputation(faction: string, value: number) {
+    const f = faction as keyof typeof social.reputation.factions;
+    social.reputation.adjust(f, value - social.reputation.factions[f]);
+  },
+  setMoral(hero: number, dark: number) {
+    social.moral.hero = hero;
+    social.moral.dark = dark;
+  },
   get social() {
     return {
       reputation: { ...social.reputation.factions },
@@ -644,7 +826,7 @@ window.__chronos = {
     if (facing !== undefined) player.facing = facing;
     Object.assign(prevPlayer, player);
   },
-  renderInfo: () => ({ calls: renderer.info.render.calls, triangles: renderer.info.render.triangles, fps }),
+  renderInfo: () => ({ calls: renderer.info.render.calls, triangles: renderer.info.render.triangles, fps, programs: renderer.info.programs?.length ?? 0, env: scene.environment ? scene.environment.uuid.slice(0, 4) : null, envI: scene.environmentIntensity, geometries: renderer.info.memory.geometries, textures: renderer.info.memory.textures }),
   get ready() {
     return ready;
   },

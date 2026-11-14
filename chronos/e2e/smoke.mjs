@@ -160,6 +160,99 @@ try {
     await page.screenshot({ path: `${OUT}${QUALITY}-11-dialogue-${expected}.png` });
     await page.evaluate(() => window.__chronos.closeDialogue());
   }
+  // J5: powers and visible consequences. (Software rendering is very slow in crowded
+  // places, so every step waits for a condition instead of a fixed delay.)
+  {
+    const shot = (name) => page.screenshot({ path: `${OUT}${QUALITY}-${name}.png` });
+    const until = (fn, arg) => page.waitForFunction(fn, arg, { timeout: 45000, polling: 250 }).then(() => true).catch(() => false);
+    const powersState = () => page.evaluate(() => window.__chronos.powers);
+    // The forge yard: a few people at work, far from the market crowd.
+    await page.evaluate(() => {
+      const c = window.__chronos;
+      c.setHour(10);
+      const b = c.agent("brann");
+      c.teleport(b.x - 3, b.z + 0.5, Math.PI / 2);
+      c.setCamera(-Math.PI / 2 + 0.5, 0.4, 9);
+    });
+    await page.waitForTimeout(1500);
+    await page.keyboard.press("Digit1");
+    check(await until(() => window.__chronos.powers.zones === 1 && window.__chronos.powers.energy < 100), "slow time: bubble active, energy spent");
+    await page.waitForTimeout(1500);
+    await shot("12-power-time-bubble");
+    await page.evaluate(() => window.__chronos.cast("freeze"));
+    check(await until(() => window.__chronos.powers.frozen > 0), `freeze: ${(await powersState()).frozen} inhabitants frozen`);
+    await page.waitForTimeout(1200);
+    await shot("13-power-freeze");
+
+    // Telekinesis: lift a barrel beside the tavern, then throw it.
+    await page.evaluate(() => {
+      const c = window.__chronos;
+      const p = c.powers.props[0];
+      c.teleport(p.x + 4, p.z + 1, -Math.PI / 2);
+      c.setCamera(Math.PI / 2, 0.3, 7); // camera east of the hero, aiming west at the prop
+    });
+    await page.waitForTimeout(1500);
+    await page.evaluate(() => window.__chronos.cast("grab"));
+    check(await until(() => window.__chronos.powers.holding === "prop" && window.__chronos.powers.props.some((p) => p.held && p.y > 1)), "telekinesis: an object is lifted and carried");
+    await page.waitForTimeout(800);
+    await shot("14-power-telekinesis");
+    await page.evaluate(() => window.__chronos.cast("grab"));
+    check(await until(() => window.__chronos.powers.holding === null && window.__chronos.powers.props.every((p) => !p.held && p.y === 0)), "telekinesis: the object was thrown and landed");
+
+    // Shadow.
+    await until(() => window.__chronos.powers.energy >= 30);
+    await page.keyboard.press("Digit6");
+    check(await until(() => window.__chronos.powers.cloaked), "shadow: the hero is invisible");
+    await page.waitForTimeout(1200);
+    await shot("15-power-shadow");
+    await page.evaluate(() => window.__chronos.cast("cloak"));
+    check(await until(() => !window.__chronos.powers.cloaked), "shadow: dropped on demand");
+
+    // Rewind undoes a crime.
+    await page.evaluate(() => {
+      const c = window.__chronos;
+      const b = c.agent("brann");
+      c.teleport(b.x - 1.5, b.z, Math.PI / 2);
+      c.setCamera(-Math.PI / 2, 0.35, 7);
+    });
+    await until(() => window.__chronos.powers.energy >= 45);
+    await page.waitForTimeout(2500); // let the history buffer fill at this spot
+    const eventsBefore = (await page.evaluate(() => window.__chronos.social)).events;
+    await page.evaluate(() => window.__chronos.act("assault", "brann"));
+    await page.waitForTimeout(600);
+    await page.evaluate(() => window.__chronos.cast("rewind"));
+    const feed = (await page.evaluate(() => window.__chronos.social)).feed;
+    check(feed.some((t) => /n'a jamais eu lieu/.test(t)), `rewind: the assault is erased from the world (events ${eventsBefore} → log keeps it as undone)`);
+
+    // Branches unlock from deeds.
+    await page.evaluate(() => window.__chronos.setMoral(3, 3));
+    check(
+      await until(() => ["time_loop", "guardian_stasis", "crush", "helping_hand", "watcher", "light_fingers"].every((id) => window.__chronos.powers.unlocked.includes(id))),
+      "hero and dark branches unlock from the player's deeds",
+    );
+
+    // Consequences: a hated player is hunted by the guard, caught and jailed until dawn.
+    await page.evaluate(() => {
+      const c = window.__chronos;
+      c.setHour(10);
+      c.setReputation("royal_guard", -45);
+      for (let i = 1; i < 8; i++) {
+        const g = c.agent("guard_day_" + i);
+        if (g && !g.insideOf) {
+          c.teleport(g.x + 9, g.z, 0);
+          c.setCamera(Math.PI / 2, 0.35, 9);
+          break;
+        }
+      }
+    });
+    check(await until(() => window.__chronos.consequences.wanted === 1 && /RECHERCHÉ/.test(document.getElementById("hud-wanted")?.textContent ?? "")), "wanted by the guard, shown on the HUD");
+    await page.waitForTimeout(1000);
+    await shot("16-consequence-wanted");
+    const arrested = await until(() => window.__chronos.social.feed.some((t) => /Arrêté/.test(t)));
+    const after = await page.evaluate(() => ({ clock: window.__chronos.clock, coins: window.__chronos.social.coins, cq: window.__chronos.consequences }));
+    check(arrested && after.coins === 0 && after.clock.hour === 6 && after.cq.wanted === 0, `arrested: purse emptied, released at ${after.clock.hour}:00, no longer wanted`);
+    await page.evaluate(() => window.__chronos.setReputation("royal_guard", 0));
+  }
   await page.evaluate(() => window.__chronos.setHour(3));
   await page.waitForTimeout(800);
   const night = await page.evaluate(() => window.__chronos.agents);

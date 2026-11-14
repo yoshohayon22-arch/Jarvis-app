@@ -234,6 +234,9 @@ export class Crowd {
     for (const b of this.batches) b.mesh.castShadow = enabled;
   }
 
+  /** Tint applied to people frozen in time. */
+  frozenTint = new THREE.Color("#bfe6ff");
+
   /**
    * @param dt     frame time scaled by the world's time scale (animation speed)
    * @param alpha  interpolation factor between the last two simulation ticks
@@ -262,13 +265,17 @@ export class Crowd {
         }
         // Walk cycles follow the actual stride (speed and body size).
         const rate = a.anim === "walk" ? a.walkSpeed / (1.5 * a.scale) : 1;
-        this.phase[i] = ((this.phase[i] as number) + (dt * rate) / clip.duration) % 1;
+        // Local time: frozen people stop mid-gesture, slowed people move in slow motion.
+        this.phase[i] = ((this.phase[i] as number) + (dt * rate * a.timeFactor) / clip.duration) % 1;
 
-        tmpP.set(x, 0, z);
+        tmpP.set(x, a.y, z);
         tmpQ.setFromAxisAngle(UP, this.facing[i] as number);
         tmpS.setScalar(a.scale);
         b.mesh.setMatrixAt(n, tmpM.compose(tmpP, tmpQ, tmpS));
-        b.mesh.setColorAt(n, tmpC.set(a.tint));
+        tmpC.set(a.tint);
+        if (a.timeFactor === 0) tmpC.lerp(this.frozenTint, 0.75);
+        else if (a.timeFactor < 1) tmpC.lerp(this.frozenTint, 0.3);
+        b.mesh.setColorAt(n, tmpC);
         b.anim.setXYZ(n, clip.start, clip.frames, this.phase[i] as number);
         n++;
       }

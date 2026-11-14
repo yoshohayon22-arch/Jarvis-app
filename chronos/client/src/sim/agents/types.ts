@@ -68,6 +68,16 @@ export interface Agent {
   hurry: boolean;
   /** Temporarily reacting to an event; the schedule resumes at the next think. */
   reacting: boolean;
+  /** Height above the ground (lifted by telekinesis). */
+  y: number;
+  /** Frozen in time until this game minute. */
+  frozenUntil: number;
+  /** Local flow of time for this tick: 1 normal, 0 frozen, in between when slowed. */
+  timeFactor: number;
+  /** Carried by telekinesis: the simulation leaves them alone. */
+  held: boolean;
+  /** A guard chasing the player. */
+  pursuing: boolean;
   /** Per-agent PRNG state (mulberry32). */
   rng: number;
 }

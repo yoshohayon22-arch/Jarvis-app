@@ -1,0 +1,92 @@
+{
+  "$comment": "Every power is data: abilities are compositions of engine primitives. Add or tune powers here without touching the engine. Durations/cooldowns in seconds, ranges in meters.",
+  "energy": { "max": 100, "regenPerSecond": 4, "regenRestingBonus": 3 },
+  "paths": {
+    "$comment": "Hero/dark branches unlock from what the player actually does (counted from acts' moral tag).",
+    "hero": { "label": "Voie héroïque" },
+    "dark": { "label": "Voie sombre" }
+  },
+  "powers": [
+    {
+      "id": "time_control",
+      "name": "Contrôle du temps",
+      "enabled": true,
+      "vfx": "time",
+      "witnessAct": "power_time",
+      "abilities": [
+        { "id": "slow", "name": "Ralentir", "key": "Digit1", "path": "base", "cost": 20, "cooldown": 8, "duration": 6,
+          "description": "Tout ralentit autour de toi, sauf toi.",
+          "effects": [{ "primitive": "timeScaleZone", "radius": 9, "scale": 0.25 }] },
+        { "id": "freeze", "name": "Geler", "key": "Digit2", "path": "base", "cost": 30, "cooldown": 10, "duration": 4,
+          "description": "Fige quelques secondes les personnes et les objets proches.",
+          "effects": [{ "primitive": "freezeTargets", "radius": 8, "maxTargets": 3 }] },
+        { "id": "rewind", "name": "Rembobiner", "key": "Digit3", "path": "base", "cost": 40, "cooldown": 14,
+          "description": "Ramène les environs quelques secondes en arrière : ce qui vient de s'y passer n'a jamais eu lieu.",
+          "effects": [{ "primitive": "rewindLocal", "radius": 10, "window": 4 }] },
+        { "id": "guardian_stasis", "name": "Stase protectrice", "path": "hero", "upgrades": "freeze",
+          "unlock": { "heroActs": 3 },
+          "description": "Voie héroïque : le gel touche plus de monde et dure plus longtemps, pour protéger une foule.",
+          "set": { "duration": 6, "effects": [{ "primitive": "freezeTargets", "radius": 10, "maxTargets": 8 }] } },
+        { "id": "time_loop", "name": "Boucle cruelle", "key": "Digit7", "path": "dark", "cost": 35, "cooldown": 16, "duration": 4.5,
+          "unlock": { "darkActs": 3 },
+          "description": "Voie sombre : force une personne à revivre trois fois le même instant.",
+          "act": "time_torment",
+          "effects": [{ "primitive": "timeLoop", "range": 10, "loops": 3 }] }
+      ]
+    },
+    {
+      "id": "telekinesis",
+      "name": "Télékinésie",
+      "enabled": true,
+      "vfx": "telekinesis",
+      "witnessAct": "power_telekinesis",
+      "abilities": [
+        { "id": "grab", "name": "Saisir / lancer", "key": "Digit4", "path": "base", "cost": 10, "cooldown": 1, "drainPerSecond": 4,
+          "description": "Soulève l'objet visé ; appuie de nouveau pour le lancer.",
+          "effects": [{ "primitive": "grab", "range": 12, "throwSpeed": 14 }] },
+        { "id": "shove", "name": "Repousser", "key": "Digit5", "path": "base", "cost": 15, "cooldown": 4,
+          "description": "Repousse la personne visée.",
+          "act": "tk_shove",
+          "effects": [{ "primitive": "shove", "range": 9, "distance": 5 }] },
+        { "id": "helping_hand", "name": "Main secourable", "path": "hero", "upgrades": "grab",
+          "unlock": { "heroActs": 3 },
+          "description": "Voie héroïque : tu peux soulever une personne et la déposer sans lui faire de mal.",
+          "set": { "effects": [{ "primitive": "grab", "range": 14, "throwSpeed": 14, "people": "gentle" }] } },
+        { "id": "crush", "name": "Écraser", "path": "dark", "upgrades": "grab",
+          "unlock": { "darkActs": 3 },
+          "description": "Voie sombre : tu peux soulever une personne et la projeter. Tes projectiles frappent plus fort.",
+          "set": { "effects": [{ "primitive": "grab", "range": 12, "throwSpeed": 19, "people": "violent" }] } }
+      ]
+    },
+    {
+      "id": "shadow",
+      "name": "Ombre",
+      "enabled": true,
+      "vfx": "shadow",
+      "witnessAct": "power_shadow",
+      "abilities": [
+        { "id": "cloak", "name": "Se fondre dans l'ombre", "key": "Digit6", "path": "base", "cost": 15, "cooldown": 3, "drainPerSecond": 6,
+          "description": "Invisible tant que l'énergie tient. Frapper ou courir contre quelqu'un te révèle.",
+          "effects": [{ "primitive": "invisibility" }] },
+        { "id": "watcher", "name": "Veilleur", "path": "hero", "upgrades": "cloak",
+          "unlock": { "heroActs": 3 },
+          "description": "Voie héroïque : immobile, l'ombre ne coûte presque rien — idéal pour surveiller.",
+          "set": { "drainPerSecond": 6, "effects": [{ "primitive": "invisibility", "stillDrainFactor": 0.2 }] } },
+        { "id": "light_fingers", "name": "Main leste", "path": "dark", "upgrades": "cloak",
+          "unlock": { "darkActs": 3 },
+          "description": "Voie sombre : sous l'ombre, tes vols rapportent le double.",
+          "set": { "effects": [{ "primitive": "invisibility", "theftMultiplier": 2 }] } }
+      ]
+    },
+    { "id": "echo", "name": "Écho du passé", "enabled": false, "vfx": "echo", "planned": "J6", "abilities": [] },
+    { "id": "false_face", "name": "Changement de visage", "enabled": false, "vfx": "face", "planned": "J6", "abilities": [] },
+    { "id": "summon_dead", "name": "Appel des morts", "enabled": false, "planned": "V2",
+      "description": "Interroger ou lever les morts d'un lieu. Primitives prévues : summonSpirit, bindSpirit.", "abilities": [] },
+    { "id": "possession", "name": "Possession", "enabled": false, "planned": "V2",
+      "description": "Prendre le contrôle d'un habitant. Primitive prévue : possess.", "abilities": [] },
+    { "id": "portals", "name": "Portails", "enabled": false, "planned": "V2",
+      "description": "Relier deux lieux (puis deux époques). Primitive prévue : portal.", "abilities": [] },
+    { "id": "beast_mastery", "name": "Maîtrise des bêtes", "enabled": false, "planned": "V2",
+      "description": "Commander aux animaux. Primitive prévue : commandBeast.", "abilities": [] }
+  ]
+}

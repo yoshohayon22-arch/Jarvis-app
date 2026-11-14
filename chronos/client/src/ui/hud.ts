@@ -229,6 +229,56 @@ export class Hud {
     }
   }
 
+  // ---- powers
+  private powerKey = "";
+  private energyPct = -1;
+  /** Energy gauge + one slot per castable ability (key, name, cooldown, lock). */
+  updatePowers(energy: number, max: number, slots: readonly { key: string; name: string; cost: number; cooldown: number; locked: boolean; active: boolean; vfx: string }[]): void {
+    // Only touch the DOM when the gauge moves by a visible amount (cheap to composite: transform only).
+    const pct = Math.round(Math.max(0, Math.min(100, (energy / max) * 100)));
+    if (pct !== this.energyPct) {
+      this.energyPct = pct;
+      ($("energy-fill") as HTMLElement).style.transform = `scaleX(${pct / 100})`;
+    }
+    const k = slots.map((s) => `${s.key}${s.name}${s.locked}${s.active}${Math.ceil(s.cooldown)}${energy < s.cost}`).join("|");
+    if (k === this.powerKey) return;
+    this.powerKey = k;
+    const bar = $("powers");
+    bar.replaceChildren();
+    for (const s of slots) {
+      const el = document.createElement("div");
+      el.className = `slot ${s.vfx}${s.locked ? " locked" : ""}${s.active ? " active" : ""}${!s.locked && (s.cooldown > 0 || energy < s.cost) ? " unavailable" : ""}`;
+      const key = document.createElement("kbd");
+      key.textContent = s.key;
+      const name = document.createElement("span");
+      name.textContent = s.locked ? "verrouillé" : s.name;
+      el.append(key, name);
+      if (!s.locked && s.cooldown > 0) {
+        const cd = document.createElement("b");
+        cd.textContent = `${Math.ceil(s.cooldown)}`;
+        el.append(cd);
+      }
+      bar.append(el);
+    }
+  }
+
+  setWanted(level: number): void {
+    const el = $("hud-wanted");
+    el.textContent = level >= 2 ? "★★ CHASSE À L'HOMME" : level === 1 ? "★ RECHERCHÉ PAR LA GARDE" : "";
+  }
+
+  /** Full-screen tint for a power (time flash, shadow veil). */
+  setVeil(kind: "" | "shadow"): void {
+    $("veil").className = kind;
+  }
+
+  flash(kind: "time"): void {
+    const el = $("flash");
+    el.className = "";
+    void el.offsetWidth; // restart the animation
+    el.className = kind;
+  }
+
   private toastTimer: number | undefined;
   toast(text: string): void {
     const el = $("toast");

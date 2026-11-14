@@ -232,6 +232,8 @@ Les V2 (`summon_dead`, `possession`, `portals`, `beast_mastery`) sont présents 
   - rembobiner + écho : rembobiner une scène écrit un « pli temporel » dans le journal, que l'écho peut révéler (accroche pour le mystère).
 - **Rembobinage local** : un tampon circulaire de snapshots (5 s à 10 Hz) pour les entités de la zone : positions, vitesses, PV, état des objets. Le monde lointain n'est pas rembobiné ; la cohérence est garantie en n'annulant que les événements de la zone et de la fenêtre (ils sont marqués `undone` dans le journal, et les témoins de la zone « oublient »).
 
+> Mise à jour J5 : implémenté dans `client/src/sim/powers/` (moteur), `sim/physics.ts` (objets mobiles) et `sim/consequences.ts` (règles). Écarts avec le plan : les branches se débloquent directement par les actes (3 actes héroïques ou sombres), sans points d'Essence pour l'instant (ils arriveront avec les missions) ; la primitive `fear` est remplacée par l'indice de terreur des quartiers ; le rembobinage restaure aussi la position du joueur et sa bourse.
+
 ### 4.4 Écho du passé et changement de visage (J6)
 - **Écho** : sur un lieu ou un objet, il interroge le journal global (`eventLog.query({ locationId | objectId, window })`) et rejoue les événements sous forme de silhouettes fantômes. Il n'y a **aucune invention par l'IA**. Il montre le vrai `actorId`, ce qui permet de démasquer un imitateur.
 - **Changement de visage** : il faut avoir observé la cible de près pendant X secondes. La durée est limitée. Un personnage clé intime de la personne imitée peut percer le déguisement (jet basé sur la relation). Les actes commis sous ce visage reçoivent `apparentActorId = cible`.

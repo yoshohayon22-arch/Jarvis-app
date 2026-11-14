@@ -3,35 +3,215 @@
     "give_alms": {
       "label": "a fait l'aumône à",
       "importance": 0.35,
-      "opinion": { "villagers": 4, "royal_guard": 1, "thieves_guild": -1, "mages_order": 1 },
+      "opinion": {
+        "villagers": 4,
+        "royal_guard": 1,
+        "thieves_guild": -1,
+        "mages_order": 1
+      },
       "target": 14,
-      "tags": ["kind", "public"],
-      "reaction": "cheer"
+      "tags": [
+        "kind",
+        "public"
+      ],
+      "reaction": "cheer",
+      "moral": "hero"
     },
     "pickpocket": {
       "label": "a volé",
       "importance": 0.55,
-      "opinion": { "villagers": -7, "royal_guard": -10, "thieves_guild": 5, "mages_order": -2 },
+      "opinion": {
+        "villagers": -7,
+        "royal_guard": -10,
+        "thieves_guild": 5,
+        "mages_order": -2
+      },
       "target": -28,
-      "tags": ["crime", "theft"],
-      "reaction": "alarm"
+      "tags": [
+        "crime",
+        "theft"
+      ],
+      "reaction": "alarm",
+      "moral": "dark"
     },
     "intimidate": {
       "label": "a menacé",
       "importance": 0.6,
-      "opinion": { "villagers": -6, "royal_guard": -8, "thieves_guild": 2, "mages_order": -3 },
+      "opinion": {
+        "villagers": -6,
+        "royal_guard": -8,
+        "thieves_guild": 2,
+        "mages_order": -3
+      },
       "target": -22,
-      "tags": ["crime", "fear"],
-      "reaction": "alarm"
+      "tags": [
+        "crime",
+        "fear"
+      ],
+      "reaction": "alarm",
+      "moral": "dark"
     },
     "assault": {
       "label": "a frappé",
       "importance": 0.85,
-      "opinion": { "villagers": -12, "royal_guard": -15, "thieves_guild": 0, "mages_order": -5 },
+      "opinion": {
+        "villagers": -12,
+        "royal_guard": -15,
+        "thieves_guild": 0,
+        "mages_order": -5
+      },
       "target": -45,
-      "tags": ["crime", "violent", "fear"],
+      "tags": [
+        "crime",
+        "violent",
+        "fear"
+      ],
       "reaction": "alarm",
+      "violent": true,
+      "moral": "dark"
+    },
+    "power_time": {
+      "label": "a tordu le temps devant",
+      "importance": 0.5,
+      "opinion": {
+        "villagers": -2,
+        "royal_guard": -2,
+        "thieves_guild": 1,
+        "mages_order": -7
+      },
+      "target": -4,
+      "tags": [
+        "magic",
+        "time"
+      ],
+      "reaction": "alarm",
+      "moral": "neutral"
+    },
+    "power_telekinesis": {
+      "label": "a déplacé des choses par la pensée devant",
+      "importance": 0.45,
+      "opinion": {
+        "villagers": -2,
+        "royal_guard": -2,
+        "thieves_guild": 1,
+        "mages_order": -6
+      },
+      "target": -4,
+      "tags": [
+        "magic"
+      ],
+      "reaction": "alarm",
+      "moral": "neutral"
+    },
+    "power_shadow": {
+      "label": "a disparu sous les yeux de",
+      "importance": 0.45,
+      "opinion": {
+        "villagers": -2,
+        "royal_guard": -3,
+        "thieves_guild": 2,
+        "mages_order": -5
+      },
+      "target": -4,
+      "tags": [
+        "magic"
+      ],
+      "reaction": "alarm",
+      "moral": "neutral"
+    },
+    "tk_shove": {
+      "label": "a repoussé par magie",
+      "importance": 0.6,
+      "opinion": {
+        "villagers": -5,
+        "royal_guard": -7,
+        "thieves_guild": 1,
+        "mages_order": -6
+      },
+      "target": -18,
+      "tags": [
+        "crime",
+        "magic",
+        "fear"
+      ],
+      "reaction": "alarm",
+      "moral": "dark"
+    },
+    "tk_strike": {
+      "label": "a blessé d'un projectile",
+      "importance": 0.8,
+      "opinion": {
+        "villagers": -11,
+        "royal_guard": -14,
+        "thieves_guild": 0,
+        "mages_order": -8
+      },
+      "target": -40,
+      "tags": [
+        "crime",
+        "magic",
+        "violent",
+        "fear"
+      ],
+      "reaction": "alarm",
+      "moral": "dark",
       "violent": true
+    },
+    "tk_crush": {
+      "label": "a projeté dans les airs",
+      "importance": 0.95,
+      "opinion": {
+        "villagers": -15,
+        "royal_guard": -18,
+        "thieves_guild": -1,
+        "mages_order": -10
+      },
+      "target": -55,
+      "tags": [
+        "crime",
+        "magic",
+        "violent",
+        "fear"
+      ],
+      "reaction": "alarm",
+      "moral": "dark",
+      "violent": true
+    },
+    "time_torment": {
+      "label": "a enfermé dans une boucle de temps",
+      "importance": 0.9,
+      "opinion": {
+        "villagers": -12,
+        "royal_guard": -12,
+        "thieves_guild": -2,
+        "mages_order": -14
+      },
+      "target": -50,
+      "tags": [
+        "crime",
+        "magic",
+        "time",
+        "fear"
+      ],
+      "reaction": "alarm",
+      "moral": "dark"
+    },
+    "tk_rescue": {
+      "label": "a porté en lieu sûr",
+      "importance": 0.5,
+      "opinion": {
+        "villagers": 5,
+        "royal_guard": 3,
+        "thieves_guild": 0,
+        "mages_order": -1
+      },
+      "target": 16,
+      "tags": [
+        "kind",
+        "magic"
+      ],
+      "reaction": "cheer",
+      "moral": "hero"
     }
   },
   "tuning": {

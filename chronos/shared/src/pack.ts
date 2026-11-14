@@ -201,6 +201,8 @@ export interface ActDef {
   reaction: "cheer" | "alarm";
   /** Violent acts make the victim and fearful witnesses run away. */
   violent?: boolean;
+  /** Which path the act feeds (unlocks hero or dark power branches). */
+  moral?: "hero" | "dark" | "neutral";
 }
 
 export interface ActsDef {

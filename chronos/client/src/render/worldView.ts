@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import type { BuildingDef, PropDef, WorldLayout } from "@chronos/shared";
 import { SeededRng } from "../core/rng";
+import { isMovable } from "../sim/physics";
 import { GATE_ANGLES } from "../sim/worldColliders";
 import { AssetLibrary, type LoadedModel } from "./assets";
 import type { CrowdDef, LookDef } from "./crowd";
@@ -113,6 +114,7 @@ export async function buildWorldView(
   // Props (hand-placed + generated scenery).
   const propModel = new Map<PropDef, string>();
   layout.props.forEach((p) => {
+    if (isMovable(p)) return; // rendered by PropsView, moved by the physics
     const v = visuals.props[p.kind];
     const model = v?.variants ? v.variants[p.variant ?? ""] ?? Object.values(v.variants)[0] : v?.models ? rng.pick(v.models) : undefined;
     if (!v || !model) {
@@ -235,6 +237,7 @@ export async function buildWorldView(
     if (!m || !models.get(m)) buildPlaceholderBuilding(solid, glow, b, rng);
   }
   for (const p of layout.props) {
+    if (isMovable(p)) continue;
     const m = propModel.get(p);
     if (!m || !models.get(m)) buildPlaceholderProp(solid, glow, p, rng);
   }

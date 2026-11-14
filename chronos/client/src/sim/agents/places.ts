@@ -85,6 +85,18 @@ export class Places {
     return { x: this.nav.cx(cell % this.nav.size), z: this.nav.cx((cell / this.nav.size) | 0) };
   }
 
+  /** District a place reference belongs to (null for routes, which cross several). */
+  districtOf(ref: string): string | null {
+    const [kind, id] = ref.split(":");
+    if (!id) return null;
+    if (kind === "district") return id;
+    const pos = kind === "spot" ? this.spots.get(id)?.pos : kind === "building" ? this.buildings.get(id)?.pos : undefined;
+    if (!pos) return null;
+    if (Math.hypot(pos[0], pos[1]) > this.layout.wallRadius) return null;
+    for (const d of this.layout.districts) if (pos[0] >= d.rect[0] && pos[0] < d.rect[2] && pos[1] >= d.rect[1] && pos[1] < d.rect[3]) return d.id;
+    return null;
+  }
+
   /** Validates a place reference against the pack; returns an error message or null. */
   checkRef(ref: string): string | null {
     if (ref === "home" || ref === "work") return null;

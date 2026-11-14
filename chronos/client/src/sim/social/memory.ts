@@ -80,6 +80,17 @@ export class MemoryStore {
     return true;
   }
 
+  /** Erases every memory of an event (it was undone by a time rewind). Returns how many people forgot. */
+  forgetEvent(eventId: number): number {
+    let n = 0;
+    for (const [id, list] of this.memories) {
+      const keep = list.filter((m) => m.eventId !== eventId);
+      n += list.length - keep.length;
+      this.memories.set(id, keep);
+    }
+    return n;
+  }
+
   /**
    * Forgets faded memories and condenses old important ones into summaries.
    * @param sentimentOf opinion impact of a memory for its owner (used for the summary's sign)

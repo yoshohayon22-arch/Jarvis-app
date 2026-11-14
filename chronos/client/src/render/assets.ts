@@ -43,12 +43,20 @@ export class AssetLibrary {
             }
           }
         });
-        return { scene, animations: gltf.animations, box: new THREE.Box3().setFromObject(scene) };
+        const model = { scene, animations: gltf.animations, box: new THREE.Box3().setFromObject(scene) };
+        this.resolved.push(model);
+        return model;
       });
       p.catch(() => this.failed.add(path));
       this.cache.set(path, p);
     }
     return p;
+  }
+
+  private readonly resolved: LoadedModel[] = [];
+  /** Every model loaded so far (to apply material enhancements to late arrivals). */
+  loaded(): readonly LoadedModel[] {
+    return this.resolved;
   }
 
   async loadMany(paths: readonly string[]): Promise<Map<string, LoadedModel | null>> {

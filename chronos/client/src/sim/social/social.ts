@@ -52,6 +52,12 @@ export class SocialSystem {
   /** Event id → number of people who know about it. */
   readonly informed = new Map<number, number>();
   private announced = new Map<number, number>();
+  /** Everything each event changed, so a rewind can undo it exactly. */
+  private ledger = new Map<number, { listener: string; subject: string; opinion: number; faction: FactionId; factionDelta: number }[]>();
+  /** How many heroic / dark acts the player has committed, seen or not (drives power branches). */
+  moral = { hero: 0, dark: 0 };
+  /** Called after every committed act (consequences listen here). */
+  onCommit: ((result: ActResult, actId: string) => void) | null = null;
 
   constructor(
     readonly agents: AgentSystem,
@@ -76,7 +82,10 @@ export class SocialSystem {
   private learn(listener: Agent, m: Memory, weight: number): boolean {
     if (!this.memory.add(listener.id, m)) return false;
     this.informed.set(m.eventId, (this.informed.get(m.eventId) ?? 0) + 1);
-    this.reputation.inform(listener, m.claim, m.eventId, weight * m.confidence, this.factionOf(m.claim.targetId));
+    const r = this.reputation.inform(listener, m.claim, m.eventId, weight * m.confidence, this.factionOf(m.claim.targetId));
+    let entries = this.ledger.get(m.eventId);
+    if (!entries) this.ledger.set(m.eventId, (entries = []));
+    entries.push({ listener: listener.id, subject: m.claim.actorId, opinion: r.opinion, faction: listener.faction, factionDelta: r.faction });
     return true;
   }
 
@@ -139,7 +148,32 @@ export class SocialSystem {
       );
       this.announced.set(event.id, seen);
     }
-    return { event, witnesses, targetNoticed };
+    if (ctx.actorId === PLAYER_ID && act.moral === "hero") this.moral.hero++;
+    if (ctx.actorId === PLAYER_ID && act.moral === "dark") this.moral.dark++;
+    const result = { event, witnesses, targetNoticed };
+    this.onCommit?.(result, actId);
+    return result;
+  }
+
+  /**
+   * Erases an event from the world (time rewind): it is marked undone in the log,
+   * everyone forgets it and every opinion and reputation change it caused is reverted.
+   */
+  undo(eventId: number, now: number): boolean {
+    const e = this.log.get(eventId);
+    if (!e || e.undone) return false;
+    e.undone = true;
+    for (const l of this.ledger.get(eventId) ?? []) this.reputation.revert(l.listener, l.subject, l.opinion, l.faction, l.factionDelta, eventId);
+    this.ledger.delete(eventId);
+    this.memory.forgetEvent(eventId);
+    this.informed.delete(eventId);
+    this.announced.delete(eventId);
+    const act = this.acts.acts[e.act];
+    if (e.actorId === PLAYER_ID && act?.moral === "hero") this.moral.hero = Math.max(0, this.moral.hero - 1);
+    if (e.actorId === PLAYER_ID && act?.moral === "dark") this.moral.dark = Math.max(0, this.moral.dark - 1);
+    const claim: Claim = { actorId: e.apparentActorId, act: e.act, targetId: e.targetId, districtId: null, severity: 1 };
+    if (e.actorId === PLAYER_ID) this.pushFeed(now, `Le temps s'est replié : « ${this.describe(claim, true)} » n'a jamais eu lieu.`, "neutral");
+    return true;
   }
 
   /** French sentence for a claim: "Kael a volé Aldric Montclar (Place du Marché)". */
@@ -220,6 +254,9 @@ export class SocialSystem {
 
   /** Advances rumors (once per game minute) and memory upkeep (once per game hour). */
   step(now: number): void {
+    // Stay correct if the clock ever moves backwards (debug time jump, loaded save).
+    if (now < this.lastGossipMinute) this.lastGossipMinute = now - 1;
+    if (now < this.lastConsolidation) this.lastConsolidation = now;
     if (now - this.lastGossipMinute >= 1) {
       // After a time jump, catch up with a bounded number of rounds.
       const gap = now - this.lastGossipMinute;

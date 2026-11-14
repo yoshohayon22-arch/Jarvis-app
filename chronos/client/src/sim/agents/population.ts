@@ -6,7 +6,7 @@ import type { Agent } from "./types";
 function baseAgent(index: number, seed: number): Pick<
   Agent,
   | "index" | "x" | "z" | "prevX" | "prevZ" | "facing" | "needs" | "activity" | "place" | "override" | "mode" | "anim"
-  | "insideOf" | "emote" | "emoteUntil" | "hurry" | "reacting" | "path" | "pathIndex" | "targetX" | "targetZ" | "enterOnArrival" | "routeIndex" | "nextThinkAt" | "stuckTime" | "rng"
+  | "insideOf" | "emote" | "emoteUntil" | "hurry" | "reacting" | "y" | "frozenUntil" | "timeFactor" | "held" | "pursuing" | "path" | "pathIndex" | "targetX" | "targetZ" | "enterOnArrival" | "routeIndex" | "nextThinkAt" | "stuckTime" | "rng"
 > {
   return {
     index,
@@ -34,6 +34,11 @@ function baseAgent(index: number, seed: number): Pick<
     emoteUntil: 0,
     hurry: false,
     reacting: false,
+    y: 0,
+    frozenUntil: 0,
+    timeFactor: 1,
+    held: false,
+    pursuing: false,
     rng: (seed ^ Math.imul(index + 1, 0x9e3779b1)) >>> 0,
   };
 }

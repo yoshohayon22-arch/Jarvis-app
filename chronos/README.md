@@ -73,6 +73,23 @@ npm run preview    # sert le build sur http://localhost:4173
 - **Réputations** : quatre groupes de −100 à +100. Elles ne bougent que lorsque quelqu'un **apprend** l'acte : un méfait sans témoin ne change rien. Un même événement est plafonné par groupe.
 - Les règles (actes, poids, plafonds) sont dans `client/data/packs/medieval/acts.json`.
 
+## Pouvoirs et conséquences (J5)
+Tout est décrit dans `client/data/powers.json` : chaque capacité est une combinaison de briques du moteur (bulle de temps, gel, rembobinage, saisie, poussée, invisibilité), avec son coût, son délai et sa portée. On ajoute ou on règle un pouvoir sans toucher au moteur. Les quatre pouvoirs V2 y figurent, désactivés.
+
+- **Énergie** : une jauge commune (100), qui se recharge seule, plus vite à l'arrêt. L'ombre et la télékinésie la consomment tant qu'elles sont actives.
+- **Temps** : ralentir (bulle où tout va quatre fois moins vite, sauf Kael), geler (3 personnes et les objets proches, 4 s), rembobiner (les environs reviennent 4 s en arrière : positions, souvenirs, réputations et bourse ; l'événement reste dans le journal du monde, marqué « annulé »).
+- **Télékinésie** : saisir un objet (tonneau, caisse, sac, seau), le porter, le lancer ; repousser quelqu'un. Un objet lancé qui touche quelqu'un est une agression.
+- **Ombre** : invisible pour les habitants et la garde ; frapper ou menacer révèle Kael.
+- **Interactions** : un objet gelé garde en réserve la poussée reçue et la libère au dégel ; un objet lancé ralentit dans une bulle de temps ; un vol sous l'ombre n'a aucun témoin.
+- **Deux voies** : trois actes héroïques (aumône) ou trois actes sombres (vol, menace, coup…) débloquent la branche correspondante de chaque pouvoir. Les deux voies ne s'excluent pas.
+- **Devant témoins** : utiliser un pouvoir en public est un événement comme un autre ; il inquiète les villageois et surtout l'Ordre des mages.
+
+Conséquences visibles (`client/data/packs/medieval/consequences.json`) :
+- **Garde** : en dessous de −30, les gardes qui voient Kael le poursuivent ; en dessous de −60, toute la garde s'y met. Rattrapé, il perd sa bourse et passe la nuit au cachot.
+- **Peur** : les actes qui font peur terrorisent le quartier où ils ont lieu. Au-delà d'un seuil, les habitants restent chez eux, fuient à l'approche de Kael, et le quartier se couvre de caisses renversées. La peur retombe avec le temps.
+- **Trahison** : un personnage clé qui appréciait Kael et dont l'opinion s'effondre va le dénoncer à la garde.
+- **Marché en fête** : très aimé des villageois, Kael voit la place se pavoiser.
+
 ## Qualité graphique
 Deux préréglages (définis dans `client/data/quality.json`), touche **G** en jeu, mémorisé dans le navigateur :
 - **Qualité haute** (par défaut sur ordinateur) : ombres 4096, SSAO, flou de profondeur, herbe animée (60 000 brins), MSAA ×4.
@@ -118,6 +135,10 @@ Le test e2e utilise Playwright, qui doit être installé (`npx playwright instal
 | Espace | esquiver |
 | Souris | orienter la caméra (clic dans le jeu pour verrouiller le pointeur) |
 | Molette | zoom |
+| 1 / 2 / 3 | temps : ralentir / geler / rembobiner |
+| 4 / 5 | télékinésie : saisir puis lancer l'objet visé / repousser la personne visée |
+| 6 | ombre : devenir invisible (appuyer de nouveau pour réapparaître) |
+| 7 | boucle cruelle (voie sombre, à débloquer) |
 | F | parler à un habitant (texte libre avec les personnages clés) |
 | E / V / N / B | près d'un habitant : faire l'aumône / voler / menacer / frapper |
 | J | journal : réputations et ce que l'on sait de toi |
@@ -138,6 +159,8 @@ chronos/
 │  ├─ src/sim/agents/  # habitants : besoins, emplois du temps, décisions, déplacements
 │  ├─ src/sim/nav/     # grille de navigation + A*
 │  ├─ src/sim/social/  # événements, témoins, mémoire, rumeurs, réputations
+│  ├─ src/sim/powers/  # moteur de pouvoirs (données → briques), historique pour le rembobinage
+│  ├─ src/sim/physics.ts, consequences.ts  # objets mobiles ; règles de conséquences
 │  ├─ src/render/   # rendu Three.js (village procédural, personnage, caméra, ciel)
 │  ├─ src/ui/       # HUD
 │  ├─ data/         # palette, préréglages qualité, manifeste des modèles
@@ -153,7 +176,7 @@ chronos/
 - [x] J2 : habitants avec routines et foule légère (12 personnages clés + 102 figurants)
 - [x] J3 : mémoire, rumeurs, réputations
 - [x] J4 : dialogues IA via le proxy
-- [ ] J5 : pouvoirs (temps, télékinésie, ombre) et conséquences
+- [x] J5 : pouvoirs (temps, télékinésie, ombre) et conséquences
 - [ ] J6 : écho du passé, changement de visage
 - [ ] J7 : missions générées et validées
 - [ ] J8 : sauvegarde, réglages de coût, finitions

@@ -55,13 +55,16 @@ export class Reputation {
 
   /**
    * Applies what a listener just learned. `weight` is 1 for witnesses and lower for hearsay.
-   * Returns the listener's opinion change.
+   * Returns what actually changed, so it can be undone if time is rewound.
    */
-  inform(listener: Agent, claim: Claim, eventId: number, weight: number, targetFaction: FactionId | null): number {
+  inform(listener: Agent, claim: Claim, eventId: number, weight: number, targetFaction: FactionId | null): { opinion: number; faction: number } {
     const delta = this.opinionDelta(listener, claim, targetFaction) * weight;
-    if (delta === 0) return 0;
+    if (delta === 0) return { opinion: 0, faction: 0 };
     const key = `${listener.id}|${claim.actorId}`;
-    this.opinions.set(key, clamp((this.opinions.get(key) ?? 0) + delta, -100, 100));
+    const prev = this.opinions.get(key) ?? 0;
+    const next = clamp(prev + delta, -100, 100);
+    this.opinions.set(key, next);
+    let factionMoved = 0;
 
     // Only the player has group reputations.
     if (claim.actorId === PLAYER_ID) {
@@ -74,9 +77,18 @@ export class Reputation {
       const before = acc[listener.faction] ?? 0;
       const after = clamp(before + delta * T.factionShare, -cap, cap);
       acc[listener.faction] = after;
-      this.factions[listener.faction] = clamp(this.factions[listener.faction] + (after - before), -100, 100);
+      const f0 = this.factions[listener.faction];
+      this.factions[listener.faction] = clamp(f0 + (after - before), -100, 100);
+      factionMoved = this.factions[listener.faction] - f0;
     }
-    return delta;
+    return { opinion: next - prev, faction: factionMoved };
+  }
+
+  /** Reverts one recorded effect (time rewind). */
+  revert(holderId: string, subjectId: string, opinion: number, faction: FactionId, factionDelta: number, eventId: number): void {
+    this.nudgeOpinion(holderId, -opinion, subjectId);
+    this.factions[faction] = clamp(this.factions[faction] - factionDelta, -100, 100);
+    this.perEvent.delete(eventId);
   }
 
   /** Bounded change of one person's opinion (dialogue outcomes). */

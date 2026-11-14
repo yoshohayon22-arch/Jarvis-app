@@ -70,6 +70,35 @@ export class AnimatedCharacter {
     }
   }
 
+  private ghost = false;
+  private shardDimmed = false;
+  private readonly ghostMaterials = new Map<THREE.Material, THREE.Material>();
+
+  /** Shadow power: the hero becomes a translucent violet silhouette that casts no shadow. */
+  setGhost(on: boolean, tint: THREE.ColorRepresentation): void {
+    if (on === this.ghost) return;
+    this.ghost = on;
+    this.root.traverse((o) => {
+      const m = o as THREE.Mesh;
+      if (!m.isMesh) return;
+      m.castShadow = !on;
+      const original = (m.userData.solidMaterial as THREE.Material | undefined) ?? (m.material as THREE.Material);
+      m.userData.solidMaterial = original;
+      if (!on) {
+        m.material = original;
+        return;
+      }
+      let g = this.ghostMaterials.get(original);
+      if (!g) {
+        g = new THREE.MeshBasicMaterial({ color: tint, transparent: true, opacity: 0.28, depthWrite: false, fog: true });
+        this.ghostMaterials.set(original, g);
+      }
+      m.material = g;
+    });
+    // Dim instead of hiding: changing the number of lights would recompile every material.
+    this.shardDimmed = on;
+  }
+
   get hasClips(): boolean {
     return this.actions.size > 0;
   }
@@ -103,7 +132,7 @@ export class AnimatedCharacter {
       if (a && key === "idle") a.timeScale = 1;
     }
     this.mixer.update(dt);
-    if (this.shardLight) this.shardLight.intensity = 0.7 + Math.sin(this.time * 2.3) * 0.2;
+    if (this.shardLight) this.shardLight.intensity = this.shardDimmed ? 0 : 0.7 + Math.sin(this.time * 2.3) * 0.2;
   }
 }
 

@@ -10,7 +10,7 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: #0b0d14; col
 #game { position: fixed; inset: 0; width: 100%; height: 100%; display: block; cursor: crosshair; }
 
 #hud { position: fixed; top: 16px; left: 16px; display: flex; flex-direction: column; gap: 6px; pointer-events: none; }
-#hud-clock, #hud-coins, #hud-speed:not(:empty) {
+#hud-clock, #hud-coins, #hud-wanted:not(:empty), #hud-speed:not(:empty) {
   background: var(--panel); padding: 6px 12px; border-radius: 6px; font-size: 15px;
   letter-spacing: 0.02em; backdrop-filter: blur(4px); width: max-content;
   border: 1px solid rgba(255, 191, 94, 0.25);
@@ -126,3 +126,24 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: #0b0d14; col
   color: var(--ink); font: inherit; font-size: 15px; outline: none;
 }
 #dialogue-input:focus { border-color: var(--amber); }
+
+#hud-wanted:not(:empty) { color: #fff; background: rgba(190, 40, 30, 0.85); border-color: #ff8a7a; font-weight: 700; letter-spacing: 0.06em; animation: pulse 1.4s ease-in-out infinite; }
+#power-hud { position: fixed; left: 50%; bottom: 44px; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 6px; pointer-events: none; }
+#energy { width: 280px; height: 8px; border-radius: 4px; background: rgba(0, 0, 0, 0.55); border: 1px solid rgba(255, 191, 94, 0.45); overflow: hidden; }
+#energy-fill { display: block; height: 100%; width: 100%; background: linear-gradient(90deg, #c9852f, #ffcf7a); transform-origin: left center; will-change: transform; }
+#powers { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; max-width: calc(100vw - 24px); }
+#powers .slot { display: flex; align-items: center; gap: 6px; background: rgba(20, 16, 12, 0.78); border: 1px solid rgba(244, 234, 214, 0.25); border-radius: 6px; padding: 4px 8px; font-size: 12px; }
+#powers .slot kbd { font: 700 12px system-ui, sans-serif; background: rgba(255, 255, 255, 0.16); border-radius: 4px; padding: 1px 6px; }
+#powers .slot.time { border-color: rgba(255, 191, 94, 0.7); }
+#powers .slot.telekinesis { border-color: rgba(127, 214, 255, 0.7); }
+#powers .slot.shadow { border-color: rgba(160, 130, 220, 0.8); }
+#powers .slot.unavailable { opacity: 0.45; }
+#powers .slot.locked { opacity: 0.3; font-style: italic; }
+#powers .slot.active { background: rgba(255, 255, 255, 0.22); box-shadow: 0 0 10px rgba(255, 255, 255, 0.35); }
+#powers .slot b { color: var(--amber); font-variant-numeric: tabular-nums; }
+#veil { position: fixed; inset: 0; pointer-events: none; opacity: 0; transition: opacity 0.5s; }
+#veil.shadow { opacity: 1; background: radial-gradient(ellipse at center, rgba(60, 30, 110, 0) 35%, rgba(42, 24, 64, 0.72) 100%); box-shadow: inset 0 0 120px rgba(108, 79, 163, 0.5); }
+#flash { position: fixed; inset: 0; pointer-events: none; opacity: 0; }
+#flash.time { animation: timeflash 0.9s ease-out; background: radial-gradient(ellipse at center, rgba(255, 241, 196, 0.85), rgba(255, 191, 94, 0.35) 55%, rgba(184, 116, 42, 0) 100%); }
+@keyframes timeflash { 0% { opacity: 0.95; transform: scale(1.25); } 100% { opacity: 0; transform: scale(1); } }
+@media (max-width: 700px) { #powers .slot span { display: none; } #energy { width: 180px; } }

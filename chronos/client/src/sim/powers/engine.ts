@@ -160,17 +160,25 @@ export class PowerSystem {
 
   // ---------------------------------------------------------------- targeting
 
-  private aimAgent(ctx: CastContext, range: number): Agent | null {
+  /**
+   * The person the player is aiming at: the closest one in the aim cone. With `accept`,
+   * only those people count and the one closest to the aim line wins (picking a face in a crowd).
+   */
+  private aimAgent(ctx: CastContext, range: number, accept?: (a: Agent) => boolean): Agent | null {
     let best: Agent | null = null;
-    let bestD = range;
+    let bestScore = Infinity;
     for (const a of this.agents.agents) {
       if (a.insideOf || a.held) continue;
       const dx = a.x - ctx.player.x;
       const dz = a.z - ctx.player.z;
       const d = Math.hypot(dx, dz);
-      if (d > bestD) continue;
-      if (d > 1.2 && (dx * ctx.aimX + dz * ctx.aimZ) / d < 0.6) continue;
-      bestD = d;
+      if (d > range) continue;
+      const along = d > 1e-6 ? (dx * ctx.aimX + dz * ctx.aimZ) / d : 1;
+      if (d > 1.2 && along < 0.6) continue;
+      if (accept && !accept(a)) continue;
+      const score = accept ? (1 - along) * 10 + d * 0.005 : d;
+      if (score >= bestScore) continue;
+      bestScore = score;
       best = a;
     }
     return best;
@@ -283,9 +291,9 @@ export class PowerSystem {
             seen = false;
             break;
           }
-          target = this.aimAgent(ctx, e.range ?? 8);
-          if (!target) return { ok: false, reason: "no_target", ability };
-          if ((this.studied.get(target.id) ?? 0) < (e.studySeconds ?? 3)) return { ok: false, reason: "not_studied", ability };
+          // In a crowd, the mask goes to a face already learnt rather than to whoever stands closest.
+          target = this.aimAgent(ctx, e.range ?? 8, (a) => (this.studied.get(a.id) ?? 0) >= (e.studySeconds ?? 3));
+          if (!target) return { ok: false, reason: this.aimAgent(ctx, e.range ?? 8) ? "not_studied" : "no_target", ability };
           // People see him change *before* the new face settles (unless he is hidden).
           this.witness(entry.power, null, ctx);
           seen = false;
@@ -502,7 +510,8 @@ export class PowerSystem {
         if (a.insideOf) continue;
         const near = (a.x - p.x) ** 2 + (a.z - p.z) ** 2 < studyR2;
         const cur = this.studied.get(a.id) ?? 0;
-        if (near) this.studied.set(a.id, Math.min(cur + dt * scale, 30));
+        // Once learnt, a face stays learnt for a good while (it then fades slowly, like any memory).
+        if (near) this.studied.set(a.id, cur + dt * scale >= (dis.studySeconds ?? 3) ? 30 : cur + dt * scale);
         else if (cur > 0) this.studied.set(a.id, Math.max(0, cur - dt * scale * 0.05)); // fades slowly
       }
       const d = this.disguise;

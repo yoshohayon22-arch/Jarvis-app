@@ -231,11 +231,12 @@ function castPower(id: string): void {
   }
   if (id === "rewind") hud.flash("time");
   if (id === "echo") showEcho();
-  if (id === "disguise" && powers.disguise) hud.toast(`Tu portes le visage de ${nameOf(powers.disguise.agentId)}. Évite cette personne et ses proches.`);
   const changes = FACTIONS.map((f) => ({ f, d: social.reputation.factions[f] - before[f] }))
     .filter((c) => Math.abs(c.d) >= 0.05)
     .map((c) => `${FACTION_LABELS[c.f]} ${c.d > 0 ? "+" : ""}${c.d.toFixed(1)}`);
-  if (changes.length) hud.toast(`${r.ability?.name} · ${changes.join(" · ")}`);
+  if (id === "disguise" && powers.disguise)
+    hud.toast(`Tu portes le visage de ${nameOf(powers.disguise.agentId)} : évite cette personne et ses proches.${changes.length ? " On t'a vu changer · " + changes.join(" · ") : ""}`);
+  else if (changes.length) hud.toast(`${r.ability?.name} · ${changes.join(" · ")}`);
   hud.setCoins(coins);
 }
 let grass: GrassField | null = null;

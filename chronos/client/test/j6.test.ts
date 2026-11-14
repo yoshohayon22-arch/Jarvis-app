@@ -177,6 +177,19 @@ describe("false face", () => {
     expect(e.apparentActorId).toBe(PLAYER_ID);
   });
 
+  it("picks the learnt face in a crowd, even with a stranger standing closer", () => {
+    const w = world();
+    const pip = w.isolate("pip", 2);
+    w.run(3.5);
+    // A stranger steps in between, slightly off the aim line; the player backs off.
+    const stranger = w.sys.agents.find((a) => !a.key && a.id !== "pip")!;
+    Object.assign(stranger, { x: pip.x + 0.5, z: pip.z + 2, prevX: pip.x + 0.5, prevZ: pip.z + 2, mode: "acting", path: [], pathIndex: 0, insideOf: null, facing: Math.PI, nextThinkAt: w.clock.totalMinutes + 1e6 });
+    w.player.z = pip.z + 5;
+    expect(w.powers.studyLeft(stranger.id)).toBeGreaterThan(0);
+    expect(w.powers.cast("disguise", w.ctx()).ok).toBe(true);
+    expect(w.powers.disguise!.agentId).toBe("pip");
+  });
+
   it("can be dropped at will, and wears off", () => {
     const w = world(3);
     const g = w.sys.agents.find((a) => !a.insideOf)!;

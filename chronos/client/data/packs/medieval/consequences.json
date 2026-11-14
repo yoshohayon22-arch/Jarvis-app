@@ -92,5 +92,16 @@
         "flag": "mages_hostile"
       }
     }
-  ]
+  ],
+  "framing": {
+    "$comment": "Someone blamed for a crime (false face, confused rumor) is arrested by the guard once enough people believe it.",
+    "accusationsToArrest": 2,
+    "jailHours": 18
+  },
+  "ambient": {
+    "$comment": "Things inhabitants do on their own, so the world log has more than the player's deeds (Echo of the Past, investigations).",
+    "pickpocketChancePerCheck": 0.12,
+    "checkEveryMinutes": 20,
+    "meetingRange": 3.5
+  }
 }

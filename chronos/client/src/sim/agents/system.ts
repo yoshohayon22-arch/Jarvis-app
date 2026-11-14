@@ -61,6 +61,8 @@ export interface TimeZone {
 export class AgentSystem {
   private readonly hash = new Map<number, Agent[]>();
   private lastMinutes: number | null = null;
+  /** Current game minute (updated every step). */
+  now = 0;
   /** Bubbles of altered time (time powers). */
   zones: TimeZone[] = [];
   /** Districts inhabitants currently avoid (terrorized): they stay home instead. */
@@ -76,6 +78,8 @@ export class AgentSystem {
   /** Activity the agent should be doing now: urgent needs first, then the schedule. */
   desired(a: Agent, hour: number): { activity: ActivityKind; place: PlaceRef; override: boolean } {
     const T = AGENT_TUNING;
+    // Locked up: nothing else matters until release.
+    if (a.jailedUntil > this.now) return { activity: "sleep", place: "building:barracks", override: true };
     const block = blockAt(a.schedule, hour);
     const n = a.needs;
     // Keep satisfying an urgent need until it is really gone.
@@ -287,6 +291,15 @@ export class AgentSystem {
     a.nextThinkAt = now + (kind === "flee" ? 12 : 8);
   }
 
+  /** The guard takes someone away: they walk to the barracks and stay inside until released. */
+  jail(a: Agent, until: number): void {
+    a.jailedUntil = until;
+    a.pursuing = false;
+    a.reacting = false;
+    a.nextThinkAt = this.now;
+    this.setEmote(a, "!", this.now, 5);
+  }
+
   /** Keeps an inhabitant in place, facing a point (while the player talks to them). */
   hold(a: Agent, x: number, z: number, now: number, minutes = 3): void {
     if (a.insideOf) return;
@@ -460,6 +473,7 @@ export class AgentSystem {
    */
   step(dt: number, clock: WorldClock, player: Point | null = null): void {
     const minutes = clock.totalMinutes;
+    this.now = minutes;
     const hour = clock.minuteOfDay / 60;
     const elapsedMin = this.lastMinutes === null ? 0 : Math.max(0, minutes - this.lastMinutes);
     this.lastMinutes = minutes;
@@ -491,6 +505,7 @@ export class AgentSystem {
    */
   settle(clock: WorldClock): void {
     const minutes = clock.totalMinutes;
+    this.now = minutes;
     const hour = clock.minuteOfDay / 60;
     this.lastMinutes = minutes;
     for (const a of this.agents) {

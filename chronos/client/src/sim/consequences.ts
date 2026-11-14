@@ -8,6 +8,7 @@ export interface ConsequencesDef {
   terror: { perFearAct: number; perWitness: number; violentBonus: number; decayPerHour: number; threshold: number };
   wanted: { giveUpMinutes: number; catchDistance: number; fineAll: boolean; jailUntilHour: number; reputationAfterJail: number };
   betrayal: { allyAbove: number; betrayBelow: number; guardPenalty: number };
+  framing: { accusationsToArrest: number; jailHours: number };
   rules: {
     id: string;
     label: string;
@@ -27,7 +28,8 @@ export type ConsequenceNotice =
   | { kind: "rule_on" | "rule_off"; text: string }
   | { kind: "district_terrorized" | "district_recovered"; text: string; districtId: string }
   | { kind: "betrayal"; text: string; agentId: string }
-  | { kind: "arrest"; text: string };
+  | { kind: "arrest"; text: string }
+  | { kind: "framed"; text: string; agentId: string };
 
 /**
  * Turns reputations and deeds into visible changes of the world:
@@ -44,6 +46,8 @@ export class ConsequenceSystem {
   /** Key characters who liked the player enough to feel betrayed later. */
   readonly allies = new Set<string>();
   readonly betrayers = new Set<string>();
+  /** How many crimes each inhabitant has been blamed for (rightly or not). */
+  readonly accusations = new Map<string, number>();
   /** Notices for the UI (drained by the game). */
   readonly notices: ConsequenceNotice[] = [];
   private lastSeen: { x: number; z: number; t: number } | null = null;
@@ -76,6 +80,7 @@ export class ConsequenceSystem {
   private onAct(result: ActResult, actId: string): void {
     const act = this.acts.acts[actId];
     const e = result.event;
+    if (act) this.accuse(result, act.tags);
     if (!act || e.actorId !== PLAYER_ID || !act.tags.includes("fear")) return;
     const district = e.districtId ?? districtAt(this.agents.places.layout, e.x, e.z)?.id;
     if (!district) return;
@@ -84,6 +89,33 @@ export class ConsequenceSystem {
     if (seen === 0) return;
     const add = T.perFearAct + T.perWitness * Math.min(seen, 10) + (act.violent ? T.violentBonus : 0);
     this.terror.set(district, Math.min(1, (this.terror.get(district) ?? 0) + add));
+  }
+
+  /**
+   * Someone other than the player is believed guilty of a crime — truly (a thief
+   * caught in the act) or because the player wore their face. The guard takes them away
+   * once a guard saw it or enough separate accusations pile up.
+   */
+  private accuse(result: ActResult, tags: readonly string[]): void {
+    const e = result.event;
+    const accused = e.apparentActorId;
+    if (accused === PLAYER_ID || !tags.includes("crime")) return;
+    const seen = result.witnesses.length + (result.targetNoticed ? 1 : 0);
+    if (seen === 0) return;
+    const agent = this.agents.agents.find((a) => a.id === accused);
+    if (!agent || agent.faction === "royal_guard") return;
+    const now = this.clock.totalMinutes;
+    const count = (this.accusations.get(accused) ?? 0) + 1;
+    this.accusations.set(accused, count);
+    const guardSaw = result.witnesses.some((w) => w.faction === "royal_guard");
+    if (agent.jailedUntil > now || (!guardSaw && count < this.def.framing.accusationsToArrest)) return;
+    this.agents.jail(agent, now + this.def.framing.jailHours * 60);
+    this.accusations.set(accused, 0);
+    if (e.actorId === PLAYER_ID) {
+      const text = `${agent.name} est arrêté à ta place : tu portais son visage.`;
+      this.social.pushFeed(now, text, "bad");
+      this.notices.push({ kind: "framed", agentId: accused, text });
+    }
   }
 
   /** Called every simulation tick. */

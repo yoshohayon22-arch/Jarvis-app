@@ -253,6 +253,63 @@ try {
     check(arrested && after.coins === 0 && after.clock.hour === 6 && after.cq.wanted === 0, `arrested: purse emptied, released at ${after.clock.hour}:00, no longer wanted`);
     await page.evaluate(() => window.__chronos.setReputation("royal_guard", 0));
   }
+  // J6: echo of the past and false face, both wired to the event log and the rumors.
+  {
+    const shot = (name) => page.screenshot({ path: `${OUT}${QUALITY}-${name}.png` });
+    const until = (fn, arg) => page.waitForFunction(fn, arg, { timeout: 45000, polling: 250 }).then(() => true).catch(() => false);
+    await page.evaluate(() => {
+      const c = window.__chronos;
+      c.setHour(10);
+      const b = c.agent("brann");
+      c.teleport(b.x - 1.5, b.z, Math.PI / 2);
+      c.setCamera(-Math.PI / 2 + 0.4, 0.4, 8);
+    });
+    await page.evaluate(() => window.__chronos.act("pickpocket", "brann"));
+    await until(() => window.__chronos.powers.energy >= 30);
+    await page.keyboard.press("Digit8");
+    const echoOk = await until(() => window.__chronos.powers.echo.length > 0 && document.getElementById("echo")?.classList.contains("visible"));
+    const echo = (await page.evaluate(() => window.__chronos.powers)).echo;
+    const panel = await page.evaluate(() => document.getElementById("echo")?.textContent ?? "");
+    check(echoOk && echo.some((v) => v.act === "pickpocket" && v.actorId === "player") && /Kael a volé/.test(panel), `echo: ${echo.length} scene(s) read from the log, the theft is shown with its true author`);
+    await page.waitForTimeout(1500);
+    await shot("17-power-echo");
+
+    // False face: study Brann from close by, step behind him, take his face.
+    check(await until(() => (window.__chronos.powers.studied.brann ?? 0) >= 3), "false face: a face is learnt by staying close");
+    await until(() => window.__chronos.powers.energy >= 35);
+    await page.evaluate(() => {
+      const c = window.__chronos;
+      const b = c.agent("brann");
+      c.teleport(b.x - Math.sin(b.facing) * 6, b.z - Math.cos(b.facing) * 6, b.facing);
+      c.setCamera(Math.atan2(-Math.sin(b.facing), -Math.cos(b.facing)), 0.35, 6);
+    });
+    await page.waitForTimeout(600);
+    await page.evaluate(() => window.__chronos.cast("disguise"));
+    const worn = await until(() => window.__chronos.powers.disguise === "brann" && /Visage : Brann/.test(document.getElementById("hud-disguise")?.textContent ?? ""));
+    check(worn, "false face: the hero wears Brann's face, shown on the HUD");
+    // Far from Brann, commit two crimes: the witnesses blame Brann, and the guard takes him.
+    const victim = await page.evaluate(() => {
+      const c = window.__chronos;
+      const b = c.agent("brann");
+      const v = c.outdoors().find((a) => !a.key && a.faction === "villagers" && Math.hypot(a.x - b.x, a.z - b.z) > 35);
+      if (v) {
+        c.teleport(v.x + 1.4, v.z, -Math.PI / 2);
+        c.setCamera(Math.PI / 2, 0.35, 6);
+      }
+      return v?.id ?? null;
+    });
+    await page.waitForTimeout(1500);
+    await shot("18-power-false-face");
+    const repBefore = (await page.evaluate(() => window.__chronos.social)).reputation;
+    await page.evaluate((id) => window.__chronos.act("assault", id), victim);
+    await page.evaluate((id) => window.__chronos.act("assault", id), victim);
+    const framed = await until(() => window.__chronos.powers.jailed.includes("brann") && window.__chronos.social.feed.some((t) => /arrêté à ta place/.test(t)));
+    const repAfter = (await page.evaluate(() => window.__chronos.social)).reputation;
+    check(framed, "false face: the crimes are pinned on Brann, who is arrested in the hero's place");
+    check(repAfter.villagers >= repBefore.villagers - 0.01, `false face: the hero's own reputation is untouched (villagers ${repBefore.villagers.toFixed(1)} → ${repAfter.villagers.toFixed(1)})`);
+    await page.evaluate(() => window.__chronos.cast("disguise"));
+    check(await until(() => window.__chronos.powers.disguise === null), "false face: dropped on demand");
+  }
   await page.evaluate(() => window.__chronos.setHour(3));
   await page.waitForTimeout(800);
   const night = await page.evaluate(() => window.__chronos.agents);

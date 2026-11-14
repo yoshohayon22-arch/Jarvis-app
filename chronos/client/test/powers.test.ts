@@ -54,9 +54,9 @@ function world(hour = 10) {
 }
 
 describe("powers data", () => {
-  it("defines the three J5 powers with a hero and a dark branch each, and V2 placeholders", () => {
+  it("defines the five V1 powers with a hero and a dark branch each, and V2 placeholders", () => {
     const active = data.powers.filter((p) => p.enabled).map((p) => p.id);
-    expect(active).toEqual(["time_control", "telekinesis", "shadow"]);
+    expect(active).toEqual(["time_control", "telekinesis", "shadow", "echo", "false_face"]);
     for (const p of data.powers.filter((x) => x.enabled)) {
       expect(p.abilities.some((a) => a.path === "hero"), p.id).toBe(true);
       expect(p.abilities.some((a) => a.path === "dark"), p.id).toBe(true);
@@ -89,10 +89,10 @@ describe("energy, costs and cooldowns", () => {
     const w = world();
     expect(w.powers.cast("time_loop", w.ctx())).toMatchObject({ ok: false, reason: "locked" });
     w.social.moral.dark = 3;
-    expect(w.powers.updateUnlocks().map((a) => a.id).sort()).toEqual(["crush", "light_fingers", "time_loop"]);
+    expect(w.powers.updateUnlocks().map((a) => a.id).sort()).toEqual(["crush", "leverage", "light_fingers", "perfect_mask", "time_loop"]);
     expect(w.powers.updateUnlocks()).toEqual([]);
     w.social.moral.hero = 3;
-    expect(w.powers.updateUnlocks().map((a) => a.id).sort()).toEqual(["guardian_stasis", "helping_hand", "watcher"]);
+    expect(w.powers.updateUnlocks().map((a) => a.id).sort()).toEqual(["faithful_mask", "guardian_stasis", "helping_hand", "watcher", "witness_eye"]);
     // The hero upgrade changes how the base ability works, from data alone.
     expect(w.powers.resolved("freeze")).toMatchObject({ duration: 6, effects: [{ primitive: "freezeTargets", maxTargets: 8 }] });
   });

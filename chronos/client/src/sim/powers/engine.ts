@@ -1,9 +1,9 @@
 import type { Agent, AgentSystem } from "../agents";
 import type { WorldClock } from "../clock";
 import type { DynamicProp, PropSystem } from "../physics";
-import { PLAYER_ID, type SocialSystem } from "../social";
+import { PLAYER_ID, hasLineOfSight, type SocialSystem } from "../social";
 import { History } from "./history";
-import type { AbilityDef, CastResult, EffectDef, PowerDef, PowerFx, PowersData } from "./types";
+import type { AbilityDef, CastResult, EchoVision, EffectDef, PowerDef, PowerFx, PowersData } from "./types";
 
 export interface PlayerRef {
   x: number;
@@ -53,6 +53,14 @@ export class PowerSystem {
   readonly unlocked = new Set<string>();
   cloaked = false;
   holding: { prop: DynamicProp } | { agent: Agent } | null = null;
+  /** False face: whose appearance the player wears, and until when (game minutes). */
+  disguise: { agentId: string; until: number } | null = null;
+  /** Seconds each inhabitant has been observed from close by (needed before imitating them). */
+  readonly studied = new Map<string, number>();
+  /** What the last Echo of the Past showed. */
+  lastEcho: EchoVision[] = [];
+  /** People the player holds a secret over (dark Echo upgrade). */
+  readonly leverage = new Set<string>();
   /** Visual cues for the renderer (drained every frame). */
   readonly fx: PowerFx[] = [];
   private readonly cooldownUntil = new Map<string, number>();
@@ -79,6 +87,22 @@ export class PowerSystem {
     const rate = clock.gameMinutesPerRealSecond;
     this.history = new History(6 * rate, 0.2 * rate);
     props.onHit = (prop, agent, speed) => this.onPropHit(prop, agent, speed);
+  }
+
+  /** Who witnesses believe they are looking at. */
+  get apparentId(): string {
+    return this.disguise ? this.disguise.agentId : PLAYER_ID;
+  }
+
+  /** Nobody recognizes the player: invisible, or wearing someone else's face. */
+  get unrecognizable(): boolean {
+    return this.cloaked || this.disguise !== null;
+  }
+
+  /** Seconds of close observation still needed before this person can be imitated (0 = ready). */
+  studyLeft(agentId: string): number {
+    const need = this.resolved("disguise")?.effects?.find((e) => e.primitive === "disguise")?.studySeconds ?? 3;
+    return Math.max(0, need - (this.studied.get(agentId) ?? 0));
   }
 
   /** Game minutes for a duration in seconds. */
@@ -168,7 +192,7 @@ export class PowerSystem {
     if (!this.unlocked.has(id)) return { ok: false, reason: "locked" };
     const ability = this.resolved(id) as AbilityDef;
     const now = this.clock.totalMinutes;
-    const toggleOff = (id === "cloak" && this.cloaked) || (id === "grab" && this.holding !== null);
+    const toggleOff = (id === "cloak" && this.cloaked) || (id === "grab" && this.holding !== null) || (id === "disguise" && this.disguise !== null);
     if (!toggleOff) {
       if ((this.cooldownUntil.get(id) ?? 0) > now) return { ok: false, reason: "cooldown", ability };
       if (this.energy < (ability.cost ?? 0)) return { ok: false, reason: "energy", ability };
@@ -246,6 +270,30 @@ export class PowerSystem {
           this.fx.push({ kind: "shove", vfx, x: target.x, z: target.z });
           break;
         }
+        case "echoRead": {
+          const visions = this.readEcho(p, e);
+          if (visions.length === 0) return { ok: false, reason: "nothing_here", ability };
+          this.lastEcho = visions;
+          this.fx.push({ kind: "echo", vfx, x: p.x, z: p.z, radius: e.radius ?? 12, duration: 9 });
+          break;
+        }
+        case "disguise": {
+          if (this.disguise) {
+            this.dropDisguise();
+            seen = false;
+            break;
+          }
+          target = this.aimAgent(ctx, e.range ?? 8);
+          if (!target) return { ok: false, reason: "no_target", ability };
+          if ((this.studied.get(target.id) ?? 0) < (e.studySeconds ?? 3)) return { ok: false, reason: "not_studied", ability };
+          // People see him change *before* the new face settles (unless he is hidden).
+          this.witness(entry.power, null, ctx);
+          seen = false;
+          this.disguise = { agentId: target.id, until: now + this.min(ability.duration ?? 60) };
+          this.fx.push({ kind: "mask", vfx, x: p.x, z: p.z });
+          target = null; // imitating someone is not an act against them
+          break;
+        }
         case "invisibility": {
           if (this.cloaked) {
             this.reveal();
@@ -267,7 +315,7 @@ export class PowerSystem {
       this.cooldownUntil.set(id, now + this.min(ability.cooldown ?? 0));
     }
     if (ability.act && target) {
-      this.social.commit(ability.act, target, { actorId: PLAYER_ID, x: p.x, z: p.z, daylight: ctx.daylight, hidden: this.cloaked }, now);
+      this.social.commit(ability.act, target, { actorId: PLAYER_ID, apparentActorId: this.apparentId, x: p.x, z: p.z, daylight: ctx.daylight, hidden: this.cloaked }, now);
     } else if (seen) this.witness(entry.power, null, ctx);
     return { ok: true, ability };
   }
@@ -275,7 +323,52 @@ export class PowerSystem {
   /** Using a power in front of people is itself an event they remember. */
   private witness(power: PowerDef, target: Agent | null, ctx: CastContext): void {
     if (!power.witnessAct) return;
-    this.social.commit(power.witnessAct, target, { actorId: PLAYER_ID, x: ctx.player.x, z: ctx.player.z, daylight: ctx.daylight, hidden: this.cloaked }, this.clock.totalMinutes);
+    this.social.commit(power.witnessAct, target, { actorId: PLAYER_ID, apparentActorId: this.apparentId, x: ctx.player.x, z: ctx.player.z, daylight: ctx.daylight, hidden: this.cloaked }, this.clock.totalMinutes);
+  }
+
+  /** Ends the false face. */
+  dropDisguise(): void {
+    if (!this.disguise) return;
+    this.disguise = null;
+    this.fx.push({ kind: "unmask", vfx: "face", x: 0, z: 0 });
+  }
+
+  /**
+   * Echo of the Past: what the world log holds about this place. No AI, no
+   * invention: true authors (even masked), erased moments and time folds included.
+   */
+  private readEcho(p: PlayerRef, e: EffectDef): EchoVision[] {
+    const now = this.clock.totalMinutes;
+    const events = this.social.log
+      .query({ near: { x: p.x, z: p.z, radius: e.radius ?? 12 }, since: now - (e.window ?? 24) * 60, includeUndone: true })
+      .filter((ev) => ev.act !== "power_echo")
+      .sort((a, b) => b.t - a.t || b.id - a.id)
+      .slice(0, e.maxVisions ?? 5);
+    const acts = this.social.acts.acts;
+    return events.map((ev) => {
+      // Dark upgrade: other people's crimes and secrets become leverage over them.
+      if (e.leverage && !ev.undone) {
+        const tags = acts[ev.act]?.tags ?? [];
+        if (ev.actorId !== PLAYER_ID && (tags.includes("crime") || tags.includes("secret"))) {
+          this.leverage.add(ev.actorId);
+          if (tags.includes("secret") && ev.targetId) this.leverage.add(ev.targetId);
+        }
+      }
+      return {
+        eventId: ev.id,
+        age: now - ev.t,
+        act: ev.act,
+        actorId: ev.actorId,
+        apparentActorId: ev.apparentActorId,
+        targetId: ev.targetId,
+        x: ev.x,
+        z: ev.z,
+        undone: !!ev.undone,
+        fold: ev.act === "time_fold",
+        masked: ev.actorId !== ev.apparentActorId,
+        witnessIds: e.showWitnesses ? [...ev.witnessIds] : [],
+      };
+    });
   }
 
   /** Drops the invisibility (ran out of energy, struck someone…). */
@@ -329,11 +422,11 @@ export class PowerSystem {
     const now = this.clock.totalMinutes;
     a.nextThinkAt = now + this.min(1.5);
     this.agents.hold(a, a.x, a.z + 1, now, this.min(1.5));
-    if (act) this.social.commit(act, a, { actorId: PLAYER_ID, x: a.x, z: a.z, daylight: this.clock.daylight, hidden: this.cloaked }, now);
+    if (act) this.social.commit(act, a, { actorId: PLAYER_ID, apparentActorId: this.apparentId, x: a.x, z: a.z, daylight: this.clock.daylight, hidden: this.cloaked }, now);
   }
 
   private onPropHit(prop: DynamicProp, agent: Agent, _speed: number): void {
-    this.social.commit("tk_strike", agent, { actorId: PLAYER_ID, x: prop.x, z: prop.z, daylight: this.clock.daylight, hidden: this.cloaked }, this.clock.totalMinutes);
+    this.social.commit("tk_strike", agent, { actorId: PLAYER_ID, apparentActorId: this.apparentId, x: prop.x, z: prop.z, daylight: this.clock.daylight, hidden: this.cloaked }, this.clock.totalMinutes);
   }
 
   /**
@@ -401,6 +494,45 @@ export class PowerSystem {
       if (this.holding) this.release(ctx, { primitive: "grab", throwSpeed: 0 });
     }
 
+    // False face: study people from close by; a worn face expires, and close ones can see through it.
+    const dis = this.resolved("disguise")?.effects?.find((e) => e.primitive === "disguise");
+    if (dis && this.unlocked.has("disguise")) {
+      const studyR2 = (dis.studyRange ?? 4) ** 2;
+      for (const a of this.agents.agents) {
+        if (a.insideOf) continue;
+        const near = (a.x - p.x) ** 2 + (a.z - p.z) ** 2 < studyR2;
+        const cur = this.studied.get(a.id) ?? 0;
+        if (near) this.studied.set(a.id, Math.min(cur + dt * scale, 30));
+        else if (cur > 0) this.studied.set(a.id, Math.max(0, cur - dt * scale * 0.05)); // fades slowly
+      }
+      const d = this.disguise;
+      if (d) {
+        if (now >= d.until) this.dropDisguise();
+        else if (!this.cloaked) {
+          const spot2 = (dis.spotRange ?? 7) ** 2;
+          const world = this.agents.places.collision;
+          for (const a of this.agents.agents) {
+            if ((a.x - p.x) ** 2 + (a.z - p.z) ** 2 > spot2) continue;
+            // The person themself, or someone close to them, is not fooled — if they get a good look:
+            // they must be awake, outdoors, facing the impostor, with nothing in between.
+            const close = a.id === d.agentId || this.social.relation(a.id, d.agentId) > 30 || this.social.relation(d.agentId, a.id) > 30;
+            if (!close || a.insideOf || a.activity === "sleep" || a.frozenUntil > now) continue;
+            const dx = p.x - a.x;
+            const dz = p.z - a.z;
+            const dist = Math.hypot(dx, dz) || 1;
+            if ((Math.sin(a.facing) * dx + Math.cos(a.facing) * dz) / dist < 0.3) continue;
+            if (!hasLineOfSight(world, a.x, a.z, p.x, p.z)) continue;
+            this.dropDisguise();
+            const victim = this.agents.agents.find((x) => x.id === d.agentId) ?? null;
+            this.agents.setEmote(a, "?", now, this.min(4));
+            this.social.commit("impersonation", victim, { actorId: PLAYER_ID, x: p.x, z: p.z, daylight: ctx.daylight, targetNotices: a.id === d.agentId }, now);
+            this.spottedBy = a.id;
+            break;
+          }
+        }
+      }
+    }
+
     // Carried object or person follows a point in front of the caster.
     const h = this.holding;
     if (h) {
@@ -461,4 +593,6 @@ export class PowerSystem {
   }
 
   private clockPlayer = { x: 0, z: 0 };
+  /** Who last saw through the false face (for the UI). */
+  spottedBy: string | null = null;
 }

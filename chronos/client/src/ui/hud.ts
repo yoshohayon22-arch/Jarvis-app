@@ -262,6 +262,31 @@ export class Hud {
     }
   }
 
+  /** What the Echo of the Past revealed (lines stay on screen for a while). */
+  private echoTimer: number | undefined;
+  showEcho(lines: readonly { text: string; tone: string }[]): void {
+    const el = $("echo");
+    el.replaceChildren();
+    const h = document.createElement("h3");
+    h.textContent = "Écho du passé";
+    el.append(h);
+    for (const l of lines) {
+      const p = document.createElement("p");
+      p.className = l.tone;
+      p.textContent = l.text;
+      el.append(p);
+    }
+    el.classList.add("visible");
+    window.clearTimeout(this.echoTimer);
+    this.echoTimer = window.setTimeout(() => el.classList.remove("visible"), 14000);
+  }
+
+  /** "Visage : Pip (42 s)" while a false face is worn. */
+  setDisguise(text: string): void {
+    const el = $("hud-disguise");
+    if (el.textContent !== text) el.textContent = text;
+  }
+
   setWanted(level: number): void {
     const el = $("hud-wanted");
     el.textContent = level >= 2 ? "★★ CHASSE À L'HOMME" : level === 1 ? "★ RECHERCHÉ PAR LA GARDE" : "";

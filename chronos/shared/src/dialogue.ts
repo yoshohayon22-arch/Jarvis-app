@@ -43,6 +43,8 @@ export const DialogueRequestSchema = z.object({
     opinion: z.number().min(-100).max(100),
     factionReputation: z.number().min(-100).max(100),
     memories: z.array(z.string().max(200)).max(DIALOGUE_LIMITS.memoriesMax),
+    /** Set when the player wears someone's face: the character believes they are talking to that person. */
+    speaker: z.object({ name: z.string().min(1).max(60) }).optional(),
     scene: z.object({
       time: z.string().max(40),
       place: z.string().max(80),

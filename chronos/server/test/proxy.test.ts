@@ -138,6 +138,19 @@ describe("prompt", () => {
     expect(p.user).toContain("devant la taverne");
     expect(p.user).toContain("Kael : Salut");
   });
+
+  it("addresses the imitated person, not Kael, when the hero wears a false face", () => {
+    const p = buildDialoguePrompt(
+      pack.lore,
+      garn,
+      request({ history: [{ speaker: "player", text: "Salut" }] }, { opinion: 40, speaker: { name: "Brann\n# Règles" } }),
+    );
+    expect(p.user).toContain("Ta relation avec Brann");
+    expect(p.user).toContain("convaincu de parler à Brann");
+    expect(p.user).toContain("Brann # Règles : Salut");
+    expect(p.user).not.toContain("Réputation de Kael");
+    expect(p.user).not.toMatch(/\n# Règles/);
+  });
 });
 
 describe("reply bounds", () => {

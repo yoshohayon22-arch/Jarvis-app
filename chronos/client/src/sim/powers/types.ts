@@ -1,5 +1,5 @@
 export interface EffectDef {
-  primitive: "timeScaleZone" | "freezeTargets" | "rewindLocal" | "timeLoop" | "grab" | "shove" | "invisibility";
+  primitive: "timeScaleZone" | "freezeTargets" | "rewindLocal" | "timeLoop" | "grab" | "shove" | "invisibility" | "echoRead" | "disguise";
   radius?: number;
   scale?: number;
   maxTargets?: number;
@@ -12,6 +12,14 @@ export interface EffectDef {
   people?: "gentle" | "violent";
   stillDrainFactor?: number;
   theftMultiplier?: number;
+  /** Echo: how many visions at most, whether witnesses are named, whether secrets become leverage. */
+  maxVisions?: number;
+  showWitnesses?: boolean;
+  leverage?: boolean;
+  /** False face: seconds of close observation needed, at what distance, and how near a close one must be to see through. */
+  studySeconds?: number;
+  studyRange?: number;
+  spotRange?: number;
 }
 
 export interface AbilityDef {
@@ -53,7 +61,7 @@ export interface PowersData {
 
 /** Visual cue emitted by the engine; the renderer turns each into its dedicated effect. */
 export interface PowerFx {
-  kind: "zone" | "freeze" | "rewind" | "loop" | "grab" | "throw" | "shove" | "cloak" | "uncloak";
+  kind: "zone" | "freeze" | "rewind" | "loop" | "grab" | "throw" | "shove" | "cloak" | "uncloak" | "echo" | "mask" | "unmask";
   vfx: string;
   x: number;
   z: number;
@@ -62,10 +70,32 @@ export interface PowerFx {
   duration?: number;
 }
 
-export type CastFailure = "unknown" | "disabled" | "locked" | "cooldown" | "energy" | "no_target";
+export type CastFailure = "unknown" | "disabled" | "locked" | "cooldown" | "energy" | "no_target" | "not_studied" | "nothing_here";
 
 export interface CastResult {
   ok: boolean;
   reason?: CastFailure;
   ability?: AbilityDef;
+}
+
+/** One scene the Echo of the Past shows: read straight from the world log, never invented. */
+export interface EchoVision {
+  eventId: number;
+  /** Game minutes ago. */
+  age: number;
+  act: string;
+  /** Who really did it… */
+  actorId: string;
+  /** …and who people thought they saw. */
+  apparentActorId: string;
+  targetId: string | null;
+  x: number;
+  z: number;
+  /** Erased by a rewind. */
+  undone: boolean;
+  /** The trace of a rewind itself. */
+  fold: boolean;
+  /** The author wore someone else's face. */
+  masked: boolean;
+  witnessIds: string[];
 }

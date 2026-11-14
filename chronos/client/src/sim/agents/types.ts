@@ -78,6 +78,8 @@ export interface Agent {
   held: boolean;
   /** A guard chasing the player. */
   pursuing: boolean;
+  /** Held in the barracks jail until this game minute. */
+  jailedUntil: number;
   /** Per-agent PRNG state (mulberry32). */
   rng: number;
 }

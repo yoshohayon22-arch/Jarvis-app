@@ -10,7 +10,7 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: #0b0d14; col
 #game { position: fixed; inset: 0; width: 100%; height: 100%; display: block; cursor: crosshair; }
 
 #hud { position: fixed; top: 16px; left: 16px; display: flex; flex-direction: column; gap: 6px; pointer-events: none; }
-#hud-clock, #hud-coins, #hud-wanted:not(:empty), #hud-speed:not(:empty) {
+#hud-clock, #hud-coins, #hud-wanted:not(:empty), #hud-disguise:not(:empty), #hud-speed:not(:empty) {
   background: var(--panel); padding: 6px 12px; border-radius: 6px; font-size: 15px;
   letter-spacing: 0.02em; backdrop-filter: blur(4px); width: max-content;
   border: 1px solid rgba(255, 191, 94, 0.25);
@@ -147,3 +147,16 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: #0b0d14; col
 #flash.time { animation: timeflash 0.9s ease-out; background: radial-gradient(ellipse at center, rgba(255, 241, 196, 0.85), rgba(255, 191, 94, 0.35) 55%, rgba(184, 116, 42, 0) 100%); }
 @keyframes timeflash { 0% { opacity: 0.95; transform: scale(1.25); } 100% { opacity: 0; transform: scale(1); } }
 @media (max-width: 700px) { #powers .slot span { display: none; } #energy { width: 180px; } }
+
+#hud-disguise:not(:empty) { color: #ffd6ec; border-color: rgba(232, 137, 192, 0.8); }
+#powers .slot.echo { border-color: rgba(143, 240, 224, 0.75); }
+#powers .slot.face { border-color: rgba(232, 137, 192, 0.8); }
+#echo {
+  position: fixed; left: 16px; bottom: 120px; width: min(420px, calc(100vw - 32px)); padding: 10px 14px; border-radius: 8px;
+  background: rgba(8, 26, 28, 0.82); border: 1px solid rgba(143, 240, 224, 0.5); opacity: 0; transition: opacity 0.6s; pointer-events: none; font-size: 13px;
+}
+#echo.visible { opacity: 1; }
+#echo h3 { margin: 0 0 6px; font-size: 13px; letter-spacing: 0.12em; text-transform: uppercase; color: #8ff0e0; font-weight: 600; }
+#echo p { margin: 5px 0; line-height: 1.4; padding-left: 9px; border-left: 2px solid rgba(143, 240, 224, 0.5); }
+#echo p.masked { border-color: #e889c0; }
+#echo p.undone { border-color: #ffbf5e; font-style: italic; opacity: 0.85; }

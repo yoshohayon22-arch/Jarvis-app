@@ -60,12 +60,18 @@ export function buildDialoguePrompt(lore: string, c: CharacterDef, req: Dialogue
   const secretsIncluded = ctx.opinion >= DIALOGUE_LIMITS.secretTrust && (c.secrets?.length ?? 0) > 0;
   const system = `${lore.trim()}\n\n${RULES}\n\n${sheet(c)}`;
 
+  // Under a false face, the character believes it is talking to someone else: every
+  // mention of the interlocutor uses that name, and the numbers sent are about that person.
+  const who = ctx.speaker ? sanitizePlayerText(ctx.speaker.name).slice(0, 60) || "Kael" : "Kael";
   const parts: string[] = [];
-  parts.push(`# Ta relation avec Kael\nOpinion ${Math.round(ctx.opinion)} sur une échelle de -100 à 100 : ${opinionWord(ctx.opinion)}. Réputation de Kael auprès de ton groupe : ${Math.round(ctx.factionReputation)}.`);
+  parts.push(
+    `# Ta relation avec ${who}\nOpinion ${Math.round(ctx.opinion)} sur une échelle de -100 à 100 : ${opinionWord(ctx.opinion)}.` +
+      (ctx.speaker ? ` Tu es convaincu de parler à ${who} en personne.` : ` Réputation de Kael auprès de ton groupe : ${Math.round(ctx.factionReputation)}.`),
+  );
   parts.push(
     ctx.memories.length
-      ? `# Ce que tu sais de Kael\n${ctx.memories.map((m) => `- ${sanitizePlayerText(m)}`).join("\n")}`
-      : "# Ce que tu sais de Kael\nRien de particulier.",
+      ? `# Ce que tu sais de ${who}\n${ctx.memories.map((m) => `- ${sanitizePlayerText(m)}`).join("\n")}`
+      : `# Ce que tu sais de ${who}\nRien de particulier.`,
   );
   if (secretsIncluded) parts.push(`# Tes secrets (numérotés)\n${(c.secrets ?? []).map((s, i) => `${i}. ${s}`).join("\n")}`);
   const s = ctx.scene;
@@ -76,10 +82,10 @@ export function buildDialoguePrompt(lore: string, c: CharacterDef, req: Dialogue
     parts.push(
       `# La conversation jusqu'ici\n${req.history
         .slice(-DIALOGUE_LIMITS.historyTurns * 2)
-        .map((h) => `${h.speaker === "player" ? "Kael" : c.name} : ${sanitizePlayerText(h.text)}`)
+        .map((h) => `${h.speaker === "player" ? who : c.name} : ${sanitizePlayerText(h.text)}`)
         .join("\n")}`,
     );
   }
-  parts.push(`# Kael te dit\n<joueur>${sanitizePlayerText(req.playerText)}</joueur>`);
+  parts.push(`# ${who} te dit\n<joueur>${sanitizePlayerText(req.playerText)}</joueur>`);
   return { system, user: parts.join("\n\n"), secretsIncluded };
 }

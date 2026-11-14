@@ -198,7 +198,7 @@ export interface ActDef {
   /** Opinion change of the target itself. */
   target: number;
   tags: string[];
-  reaction: "cheer" | "alarm";
+  reaction: "cheer" | "alarm" | "none";
   /** Violent acts make the victim and fearful witnesses run away. */
   violent?: boolean;
   /** Which path the act feeds (unlocks hero or dark power branches). */

@@ -127,7 +127,7 @@ export class SocialSystem {
     if (act.reaction === "cheer") {
       if (target && targetNoticed) sys.react(target, "cheer", ctx.x, ctx.z, now, "♥");
       for (const w of witnesses) sys.react(w, "watch", ctx.x, ctx.z, now, w.faction === "thieves_guild" ? "…" : "♥");
-    } else {
+    } else if (act.reaction === "alarm") {
       if (target && targetNoticed) sys.react(target, act.violent ? "flee" : "watch", ctx.x, ctx.z, now, "!");
       for (const w of witnesses) {
         if (w.faction === "royal_guard") sys.react(w, "confront", ctx.x, ctx.z, now, "!");

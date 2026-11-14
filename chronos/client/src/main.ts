@@ -8,6 +8,7 @@ import { FACTIONS, FACTION_LABELS, PLAYER_ID, SocialSystem } from "./sim/social"
 import actsJson from "../data/packs/medieval/acts.json";
 import consequencesJson from "../data/packs/medieval/consequences.json";
 import powersJson from "../data/powers.json";
+import { AmbientSystem, type AmbientDef } from "./sim/ambient";
 import { ConsequenceSystem, type ConsequencesDef } from "./sim/consequences";
 import { PropSystem } from "./sim/physics";
 import { PowerSystem, type CastContext, type PowersData } from "./sim/powers";
@@ -151,6 +152,9 @@ const actsDef = actsJson as unknown as ActsDef;
 const dynamicProps = new PropSystem(layout, collision);
 const powers = new PowerSystem(powersJson as unknown as PowersData, agents, dynamicProps, social, clock);
 const consequences = new ConsequenceSystem(consequencesJson as unknown as ConsequencesDef, agents, social, actsDef, clock);
+const ambient = new AmbientSystem(agents, social, (consequencesJson as unknown as { ambient: AmbientDef }).ambient, clock, WORLD_SEED);
+const agentsById = new Map(agents.agents.map((a) => [a.id, a]));
+const nameOf = (id: string | null): string => (id === PLAYER_ID ? "Kael" : id ? agentsById.get(id)?.name ?? "quelqu'un" : "");
 powers.captureExtra = () => ({ coins });
 powers.restoreExtra = (e) => {
   coins = (e as { coins: number } | null)?.coins ?? coins;
@@ -163,6 +167,7 @@ consequences.onArrest = () => {
   // Fined, jailed until dawn, released in the barracks yard.
   coins = 0;
   powers.reveal();
+  powers.dropDisguise();
   const yard = agents.places.spots.get("barracks_yard");
   if (yard) powers.movePlayer(yard.pos[0], yard.pos[1], 0);
   const jail = consequencesDef.wanted.jailUntilHour;
@@ -188,7 +193,33 @@ const CAST_FAILURES: Record<string, string> = {
   energy: "Pas assez d'énergie.",
   locked: "Tu n'as pas encore éveillé ce pouvoir.",
   no_target: "Rien à portée dans cette direction.",
+  not_studied: "Tu ne connais pas encore assez ce visage : reste près de cette personne quelques instants.",
+  nothing_here: "Ce lieu n'a rien à raconter : il ne s'y est rien passé depuis hier.",
 };
+
+function ageLabel(minutes: number): string {
+  if (minutes < 60) return `il y a ${Math.max(1, Math.round(minutes))} min`;
+  return `il y a ${Math.round(minutes / 60)} h`;
+}
+
+/** Turns what the Echo read in the world log into ghosts and plain sentences. Nothing is invented here. */
+function showEcho(): void {
+  const visions = powers.lastEcho;
+  powerFx.spawnEcho(visions.map((v) => ({ x: v.x, z: v.z, undone: v.undone, fold: v.fold, hasTarget: v.targetId !== null, masked: v.masked })));
+  const lines = visions.map((v) => {
+    if (v.fold) return { text: `${ageLabel(v.age)} — le temps s'est replié ici.`, tone: "undone" };
+    const label = actsDef.acts[v.act]?.label ?? v.act;
+    let text = `${ageLabel(v.age)} — ${nameOf(v.actorId)} ${label} ${nameOf(v.targetId)}`.trim();
+    if (v.masked) text += ` — sous le visage de ${nameOf(v.apparentActorId)}`;
+    if (v.undone) text += " (effacé : cela n'a jamais eu lieu)";
+    if (v.witnessIds.length) text += ` · vu par ${v.witnessIds.slice(0, 3).map(nameOf).join(", ")}${v.witnessIds.length > 3 ? ` et ${v.witnessIds.length - 3} autres` : ""}`;
+    else if (powers.resolved("echo")?.effects?.some((e) => e.showWitnesses)) text += " · sans témoin";
+    if (powers.leverage.has(v.actorId) && v.actorId !== PLAYER_ID) text += " · tu tiens cette personne";
+    return { text: text + ".", tone: v.undone ? "undone" : v.masked ? "masked" : "" };
+  });
+  hud.showEcho(lines);
+  for (const l of lines.slice(0, 3)) social.pushFeed(clock.totalMinutes, `Écho : ${l.text}`, "neutral");
+}
 
 function castPower(id: string): void {
   const before = { ...social.reputation.factions };
@@ -199,6 +230,8 @@ function castPower(id: string): void {
     return;
   }
   if (id === "rewind") hud.flash("time");
+  if (id === "echo") showEcho();
+  if (id === "disguise" && powers.disguise) hud.toast(`Tu portes le visage de ${nameOf(powers.disguise.agentId)}. Évite cette personne et ses proches.`);
   const changes = FACTIONS.map((f) => ({ f, d: social.reputation.factions[f] - before[f] }))
     .filter((c) => Math.abs(c.d) >= 0.05)
     .map((c) => `${FACTION_LABELS[c.f]} ${c.d > 0 ? "+" : ""}${c.d.toFixed(1)}`);
@@ -350,8 +383,9 @@ function updateNameplate(px: number, pz: number): void {
   const place = agents.places.label(a.place);
   const doing = a.mode === "moving" && a.activity !== "patrol" && a.activity !== "wander" ? "est en route" : ACTIVITY_LABELS[a.activity];
   const known = social.topMemoryAbout(a, PLAYER_ID, clock.totalMinutes);
-  const op = social.reputation.opinion(a.id);
-  const mood = op <= -40 ? "te hait" : op <= -12 ? "se méfie de toi" : op >= 40 ? "t'admire" : op >= 12 ? "t'apprécie" : "";
+  const mask = powers.disguise?.agentId ?? null;
+  const op = mask ? (mask === a.id ? 0 : Math.max(social.relation(a.id, mask), social.reputation.opinion(a.id, mask))) : social.reputation.opinion(a.id);
+  const mood = mask ? (mask === a.id ? "c'est son visage que tu portes" : `te prend pour ${nameOf(mask)}`) : op <= -40 ? "te hait" : op <= -12 ? "se méfie de toi" : op >= 40 ? "t'admire" : op >= 12 ? "t'apprécie" : "";
   const knows = known
     ? `${known.kind === "heard" ? "A entendu dire que" : known.kind === "suffered" ? "N'oublie pas que" : "A vu que"} ${social.describe(known.claim, true)}`
     : "";
@@ -363,7 +397,12 @@ function updateNameplate(px: number, pz: number): void {
     `${a.role} · ${doing}${place && a.mode !== "moving" ? " " + place : ""}`,
     a.key,
     [mood, knows].filter(Boolean).join(" · "),
-    close ? "[F] parler · [E] aumône · [V] voler · [N] menacer · [B] frapper" : "",
+    [
+      close ? `[F] parler · [E] aumône · [V] voler · [N] ${powers.leverage.has(a.id) ? "faire chanter" : "menacer"} · [B] frapper` : "",
+      powers.unlocked.has("disguise") && !mask ? (powers.studyLeft(a.id) <= 0 ? "visage mémorisé [9]" : `étude du visage… ${Math.ceil(powers.studyLeft(a.id))} s`) : "",
+    ]
+      .filter(Boolean)
+      .join(" · "),
   );
 }
 
@@ -372,6 +411,9 @@ const ACT_KEYS: Record<string, string> = { KeyE: "give_alms", KeyV: "pickpocket"
 
 /** The player does something to an inhabitant. Everything that follows comes from the simulation. */
 function playerAct(actId: string, target: Agent): void {
+  // A secret read in the Echo turns a threat into blackmail.
+  const blackmail = actId === "intimidate" && powers.leverage.has(target.id);
+  if (blackmail) actId = "blackmail";
   if (actId === "give_alms") {
     if (coins <= 0) {
       hud.toast("Ta bourse est vide.");
@@ -390,6 +432,8 @@ function playerAct(actId: string, target: Agent): void {
     target,
     {
       actorId: PLAYER_ID,
+      // Under a false face, witnesses remember someone else.
+      apparentActorId: powers.apparentId,
       x: player.x,
       z: player.z,
       daylight: clock.daylight,
@@ -401,12 +445,18 @@ function playerAct(actId: string, target: Agent): void {
   );
   if (actId === "pickpocket") coins += (1 + Math.floor(social.rng.next() * 5)) * powers.theftMultiplier;
   // Striking or threatening someone breaks the Shadow.
-  if (actId === "assault" || actId === "intimidate") powers.reveal();
+  if (actId === "assault" || actId === "intimidate" || actId === "blackmail") powers.reveal();
+  if (blackmail) {
+    coins += 15;
+    powers.leverage.delete(target.id);
+    social.pushFeed(clock.totalMinutes, `${target.name} a payé 15 pièces pour ton silence.`, "bad");
+  }
   const changes = FACTIONS.map((f) => ({ f, d: social.reputation.factions[f] - before[f] }))
     .filter((c) => Math.abs(c.d) >= 0.05)
     .map((c) => `${FACTION_LABELS[c.f]} ${c.d > 0 ? "+" : ""}${c.d.toFixed(1)}`);
   const seen = result.witnesses.length + (result.targetNoticed ? 1 : 0);
-  hud.toast(seen === 0 ? "Personne n'a rien vu." : `${seen} témoin${seen > 1 ? "s" : ""}${changes.length ? " · " + changes.join(" · ") : ""}`);
+  const blamed = powers.disguise ? ` · on accusera ${nameOf(powers.disguise.agentId)}` : "";
+  hud.toast(seen === 0 ? "Personne n'a rien vu." : `${seen} témoin${seen > 1 ? "s" : ""}${changes.length ? " · " + changes.join(" · ") : ""}${blamed}`);
   hud.setCoins(coins);
 }
 
@@ -435,11 +485,26 @@ function aiDebugLine(): string {
   );
 }
 
+/** Who the inhabitant believes they are talking to, and what they think of that person. */
+function speakerId(): string {
+  return powers.apparentId;
+}
+function opinionOfSpeaker(a: Agent): number {
+  const who = speakerId();
+  if (who === PLAYER_ID) return social.reputation.opinion(a.id);
+  // Their existing tie to the imitated person, shifted by what they saw "them" do.
+  return Math.max(-100, Math.min(100, social.relation(a.id, who) + social.reputation.opinion(a.id, who)));
+}
+
 function openDialogue(a: Agent): void {
+  if (powers.disguise?.agentId === a.id) {
+    hud.toast(`${a.name} te dévisage : c'est son propre visage.`);
+    return;
+  }
   const def = defsById.get(a.id);
   if (!def) {
     // Extras never use AI: a short local line.
-    hud.toast(`${a.name} : « ${bark(fallbackData, a.faction, social.reputation.opinion(a.id), social.rng.next())} »`);
+    hud.toast(`${a.name} : « ${bark(fallbackData, a.faction, opinionOfSpeaker(a), social.rng.next())} »`);
     return;
   }
   talkingTo = a;
@@ -463,10 +528,11 @@ async function sayToNpc(text: string): Promise<void> {
   const a = talkingTo;
   const conv = conversation;
   if (!a || !conv) return;
-  const opinion = social.reputation.opinion(a.id);
+  const who = speakerId();
+  const opinion = opinionOfSpeaker(a);
   const now = clock.totalMinutes;
   const memories = social.memory
-    .relevant(a.id, PLAYER_ID, now, a.traits.grudge, DIALOGUE_LIMITS.memoriesMax)
+    .relevant(a.id, who, now, a.traits.grudge, DIALOGUE_LIMITS.memoriesMax)
     .map((m) => `${m.kind === "heard" ? "On t'a raconté que" : m.kind === "suffered" ? "Tu as subi ceci :" : "Tu as vu que"} ${social.describe(m.claim)}`.slice(0, 200));
   let bystanders = 0;
   let guardNearby = false;
@@ -481,8 +547,10 @@ async function sayToNpc(text: string): Promise<void> {
     history: conv.history(),
     context: {
       opinion,
-      factionReputation: social.reputation.factions[a.faction],
+      // An imitated face borrows that person's standing, not the hero's.
+      factionReputation: who === PLAYER_ID ? social.reputation.factions[a.faction] : 0,
       memories,
+      ...(who !== PLAYER_ID ? { speaker: { name: nameOf(who) } } : {}),
       scene: {
         time: `${clock.format()} (${PHASE_LABELS[clock.phase].toLowerCase()})`,
         place: agents.places.label(a.place).slice(0, 80),
@@ -505,8 +573,9 @@ async function sayToNpc(text: string): Promise<void> {
   const effects = conv.apply(result.reply, opinion, result.source !== "local");
   hud.addDialogueLine("npc", result.reply.line);
   if (effects.opinionDelta !== 0) {
-    social.reputation.nudgeOpinion(a.id, effects.opinionDelta);
-    hud.addDialogueLine("system", `${a.name} ${effects.opinionDelta > 0 ? "t'apprécie un peu plus" : "t'apprécie un peu moins"} (${effects.opinionDelta > 0 ? "+" : ""}${effects.opinionDelta}).`);
+    social.reputation.nudgeOpinion(a.id, effects.opinionDelta, who);
+    const whom = who === PLAYER_ID ? "t'" : `${nameOf(who)} : l'`;
+    hud.addDialogueLine("system", `${a.name} ${effects.opinionDelta > 0 ? `${whom}apprécie un peu plus` : `${whom}apprécie un peu moins`} (${effects.opinionDelta > 0 ? "+" : ""}${effects.opinionDelta}).`);
   }
   if (effects.secret) {
     social.pushFeed(now, `Secret confié par ${a.name} : ${effects.secret}`, "neutral");
@@ -584,6 +653,20 @@ function updatePowersUi(dt: number, rx: number, rz: number): void {
   powerFx.update(dt, handPos, held);
   propsView?.update(now);
   animatedKael?.setGhost(powers.cloaked, shadowTint);
+  // False face: the hero is drawn as one more member of the imitated person's look.
+  const worn = powers.disguise ? agentsById.get(powers.disguise.agentId) ?? null : null;
+  const masked = worn !== null && !powers.cloaked && crowd !== null;
+  playerRoot.visible = !masked;
+  if (crowd) {
+    crowd.impostor = masked && worn
+      ? { look: worn.look, tint: worn.tint, scale: worn.scale, x: rx, z: rz, facing: player.facing, anim: playerSpeed(player) > 3.2 ? "run" : playerSpeed(player) > 0.3 ? "walk" : "idle", speed: playerSpeed(player) }
+      : null;
+  }
+  hud.setDisguise(worn && powers.disguise ? `Visage : ${worn.name} · ${Math.max(0, Math.ceil(powers.disguise.until - now))} min` : "");
+  if (powers.spottedBy) {
+    hud.toast(`${nameOf(powers.spottedBy)} t'a démasqué !`);
+    powers.spottedBy = null;
+  }
   hud.setVeil(powers.cloaked ? "shadow" : "");
 
   for (const a of powers.updateUnlocks()) {
@@ -608,7 +691,7 @@ function updatePowersUi(dt: number, rx: number, rz: number): void {
     cost: c.ability.cost ?? 0,
     cooldown: powers.cooldownLeft(c.ability.id, now),
     locked: !c.unlocked,
-    active: (c.ability.id === "cloak" && powers.cloaked) || (c.ability.id === "grab" && powers.holding !== null),
+    active: (c.ability.id === "cloak" && powers.cloaked) || (c.ability.id === "grab" && powers.holding !== null) || (c.ability.id === "disguise" && powers.disguise !== null),
     vfx: c.power.vfx ?? "time",
   }));
   hud.updatePowers(powers.energy, powers.data.energy.max, slots);
@@ -655,7 +738,9 @@ function frame(now: number): void {
       dynamicProps.step(step * Math.min(clock.timeScale, 4), clock.totalMinutes, agents.agents, powers.timeFactorAt);
       powers.update(step, castContext());
       social.step(clock.totalMinutes);
-      consequences.step({ x: player.x, z: player.z, hidden: powers.cloaked });
+      ambient.step();
+      // A guard hunting Kael walks past a stranger's face.
+      consequences.step({ x: player.x, z: player.z, hidden: powers.unrecognizable });
     });
   }
 
@@ -668,6 +753,7 @@ function frame(now: number): void {
   if (animatedKael) animatedKael.update(frameDt, playerSpeed(player), player.state);
   else placeholderKael.animate(frameDt, playerSpeed(player), player.state, 1 - player.dodgeTime / PLAYER_TUNING.dodgeDuration);
 
+  if (crowd?.impostor) Object.assign(crowd.impostor, { x: rx, z: rz, facing: player.facing });
   crowd?.update(frameDt * Math.min(clock.timeScale, 4), simAlpha);
   updatePowersUi(frameDt, rx, rz);
   updateNameplate(rx, rz);
@@ -779,6 +865,12 @@ window.__chronos = {
       holding: powers.holding ? ("prop" in powers.holding ? "prop" : "agent") : null,
       unlocked: [...powers.unlocked],
       zones: agents.zones.length,
+      disguise: powers.disguise?.agentId ?? null,
+      apparent: powers.apparentId,
+      echo: powers.lastEcho.map((v) => ({ ...v })),
+      leverage: [...powers.leverage],
+      studied: Object.fromEntries(powers.studied),
+      jailed: agents.agents.filter((a) => a.jailedUntil > clock.totalMinutes).map((a) => a.id),
       frozen: agents.agents.filter((a) => a.frozenUntil > clock.totalMinutes).length,
       props: dynamicProps.props.map((p) => ({ x: p.x, y: p.y, z: p.z, held: p.held })),
     };
@@ -813,8 +905,9 @@ window.__chronos = {
   },
   agent(id: string) {
     const a = agents.agents.find((x) => x.id === id);
-    return a ? { x: a.x, z: a.z, activity: a.activity, place: a.place, mode: a.mode, insideOf: a.insideOf, anim: a.anim } : null;
+    return a ? { x: a.x, z: a.z, facing: a.facing, activity: a.activity, place: a.place, mode: a.mode, insideOf: a.insideOf, anim: a.anim } : null;
   },
+  outdoors: () => agents.agents.filter((a) => !a.insideOf).map((a) => ({ id: a.id, x: a.x, z: a.z, faction: a.faction, key: a.key })),
   setCamera(yaw: number, pitch: number, distance: number) {
     rig.yaw = yaw;
     rig.pitch = pitch;

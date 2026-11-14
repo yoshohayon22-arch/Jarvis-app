@@ -132,6 +132,23 @@ export class PowerFxView {
       case "shove":
         this.ring(fx.x, fx.z, c, 0.45, 0.3, fx.kind === "shove" ? 2.6 : 1.6, 0.6, 0.4);
         break;
+      case "echo":
+        this.ring(fx.x, fx.z, c, 1.2, 0.5, r, 0.1, 0.5);
+        this.ring(fx.x, fx.z, color(fx.vfx, "hero"), 1.8, 0.5, r, 0.6, 0.3);
+        break;
+      case "mask":
+      case "unmask": {
+        const mat = new THREE.MeshBasicMaterial({ color: color("face", fx.kind === "mask" ? "main" : "hero").multiplyScalar(1.8), transparent: true, depthWrite: false, fog: false });
+        const veil = new THREE.Mesh(new THREE.CylinderGeometry(0.75, 0.75, 2, 20, 1, true), mat);
+        veil.position.set(fx.x, 1, fx.z);
+        mat.side = THREE.DoubleSide;
+        this.add(veil, 0.7, (t, age) => {
+          veil.rotation.y = age * 9;
+          veil.scale.set(1 - t * 0.6, 1, 1 - t * 0.6);
+          mat.opacity = 0.8 * (1 - t);
+        });
+        break;
+      }
       case "cloak":
       case "uncloak": {
         const mat = new THREE.MeshBasicMaterial({ color: color("shadow", fx.kind === "cloak" ? "dark" : "hero"), transparent: true, opacity: 0.7, depthWrite: false });
@@ -146,6 +163,52 @@ export class PowerFxView {
     }
   }
 
+  /**
+   * Echo of the Past: translucent figures replay where each event happened.
+   * The author stands tall; the one it was done to is paler; erased moments flicker.
+   */
+  spawnEcho(visions: readonly { x: number; z: number; undone: boolean; fold: boolean; hasTarget: boolean; masked: boolean }[], life = 9): void {
+    const main = color("echo");
+    const pale = color("echo", "hero");
+    const dark = color("echo", "dark");
+    visions.forEach((v, i) => {
+      const group = new THREE.Group();
+      group.position.set(v.x, 0, v.z);
+      const mats: THREE.MeshBasicMaterial[] = [];
+      const figure = (c: THREE.Color, dx: number, scale: number) => {
+        const m = new THREE.MeshBasicMaterial({ color: c.clone().multiplyScalar(1.6), transparent: true, opacity: 0.5, depthWrite: false, blending: THREE.AdditiveBlending, fog: false });
+        mats.push(m);
+        const body = new THREE.Mesh(new THREE.CapsuleGeometry(0.26, 0.75, 3, 8), m);
+        body.position.set(dx, 0.75 * scale, 0);
+        const head = new THREE.Mesh(new THREE.IcosahedronGeometry(0.24, 1), m);
+        head.position.set(dx, 1.55 * scale, 0);
+        body.scale.setScalar(scale);
+        head.scale.setScalar(scale);
+        group.add(body, head);
+      };
+      if (v.fold) {
+        const m = new THREE.MeshBasicMaterial({ color: color("time").multiplyScalar(2), transparent: true, side: THREE.DoubleSide, depthWrite: false, fog: false });
+        mats.push(m);
+        const ring = new THREE.Mesh(new THREE.TorusGeometry(1.2, 0.04, 6, 48), m);
+        ring.rotation.x = Math.PI / 2;
+        ring.position.y = 1;
+        group.add(ring);
+      } else {
+        figure(v.masked ? dark : main, 0, 1);
+        if (v.hasTarget) figure(pale, 0.9, 0.92);
+      }
+      const delay = i * 0.35;
+      this.add(group, life + delay, (_t, age) => {
+        const a = Math.max(0, age - delay);
+        const fade = Math.min(1, a * 2) * Math.min(1, Math.max(0, (life - a) * 1.2));
+        const flicker = v.undone ? 0.45 + 0.55 * Math.abs(Math.sin(age * 14 + i)) : 1;
+        for (const m of mats) m.opacity = (v.fold ? 0.9 : 0.5) * fade * flicker;
+        group.position.y = Math.sin(age * 1.6 + i) * 0.06;
+        group.rotation.y = v.fold ? age * 2 : Math.sin(age * 0.7 + i) * 0.25;
+      });
+    });
+  }
+
   /** @param held world position of the carried object/person, or null */
   update(dt: number, hand: THREE.Vector3, held: THREE.Vector3 | null): void {
     this.time += dt;
@@ -156,9 +219,11 @@ export class PowerFxView {
       l.update(t, l.age);
       if (t >= 1) {
         this.group.remove(l.obj);
-        const m = l.obj as THREE.Mesh;
-        m.geometry?.dispose();
-        (m.material as THREE.Material | undefined)?.dispose();
+        l.obj.traverse((o) => {
+          const m = o as THREE.Mesh;
+          m.geometry?.dispose();
+          (m.material as THREE.Material | undefined)?.dispose();
+        });
         this.live.splice(i, 1);
       }
     }

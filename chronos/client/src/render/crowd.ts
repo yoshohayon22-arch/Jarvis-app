@@ -155,7 +155,21 @@ function patchVat(material: THREE.Material, baked: BakedLook, key: string): void
   material.customProgramCacheKey = () => key;
 }
 
+/** The player wearing someone's face: drawn as one more member of that look's batch. */
+export interface Impostor {
+  look: string;
+  tint: string;
+  scale: number;
+  x: number;
+  z: number;
+  facing: number;
+  anim: AgentAnim;
+  /** Ground speed, to pace the walk cycle. */
+  speed: number;
+}
+
 interface LookBatch {
+  lookId: string;
   mesh: THREE.InstancedMesh;
   anim: THREE.InstancedBufferAttribute;
   clips: Record<AgentAnim, ClipInfo>;
@@ -211,8 +225,9 @@ export class Crowd {
       const baked = bakeLook(model, look, def);
       const material = new THREE.MeshStandardMaterial({ map: baked.map, flatShading: true, roughness: 0.85, metalness: 0 });
       patchVat(material, baked, "chronos-crowd");
-      const mesh = new THREE.InstancedMesh(baked.geometry, material, list.length);
-      const anim = new THREE.InstancedBufferAttribute(new Float32Array(list.length * 3), 3);
+      // One spare instance per look for the player's false face.
+      const mesh = new THREE.InstancedMesh(baked.geometry, material, list.length + 1);
+      const anim = new THREE.InstancedBufferAttribute(new Float32Array((list.length + 1) * 3), 3);
       anim.setUsage(THREE.DynamicDrawUsage);
       baked.geometry.setAttribute("aAnim", anim);
       mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
@@ -224,7 +239,7 @@ export class Crowd {
       mesh.customDepthMaterial = depth;
       mesh.name = `crowd:${lookId}`;
       list.forEach((a, i) => mesh.setColorAt(i, tmpC.set(a.tint)));
-      crowd.batches.push({ mesh, anim, clips: baked.clips, agents: list });
+      crowd.batches.push({ lookId, mesh, anim, clips: baked.clips, agents: list });
       crowd.group.add(mesh);
     }
     return crowd;
@@ -233,6 +248,10 @@ export class Crowd {
   setShadows(enabled: boolean): void {
     for (const b of this.batches) b.mesh.castShadow = enabled;
   }
+
+  /** Set while the player wears a false face. */
+  impostor: Impostor | null = null;
+  private impostorPhase = 0;
 
   /** Tint applied to people frozen in time. */
   frozenTint = new THREE.Color("#bfe6ff");
@@ -277,6 +296,18 @@ export class Crowd {
         else if (a.timeFactor < 1) tmpC.lerp(this.frozenTint, 0.3);
         b.mesh.setColorAt(n, tmpC);
         b.anim.setXYZ(n, clip.start, clip.frames, this.phase[i] as number);
+        n++;
+      }
+      const imp = this.impostor;
+      if (imp && imp.look === b.lookId) {
+        const clip = b.clips[imp.anim];
+        this.impostorPhase = (this.impostorPhase + (dt * (imp.anim === "idle" ? 1 : Math.max(0.6, imp.speed / (1.5 * imp.scale)))) / clip.duration) % 1;
+        tmpP.set(imp.x, 0, imp.z);
+        tmpQ.setFromAxisAngle(UP, imp.facing);
+        tmpS.setScalar(imp.scale);
+        b.mesh.setMatrixAt(n, tmpM.compose(tmpP, tmpQ, tmpS));
+        b.mesh.setColorAt(n, tmpC.set(imp.tint));
+        b.anim.setXYZ(n, clip.start, clip.frames, this.impostorPhase);
         n++;
       }
       b.mesh.count = n;

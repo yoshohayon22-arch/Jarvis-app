@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chronos — Brumeval</title>
+  </head>
+  <body>
+    <canvas id="game"></canvas>
+
+    <div id="hud">
+      <div id="hud-clock"></div>
+      <div id="hud-coins">⛁ 10</div>
+      <div id="hud-speed"></div>
+      <div id="hud-wanted"></div>
+      <div id="hud-disguise"></div>
+    </div>
+    <div id="hud-district"></div>
+    <div id="hud-help">ZQSD se déplacer · Maj courir · Espace esquiver · 1 à 9 pouvoirs · F parler · J journal · T temps · G qualité · F3 debug</div>
+    <pre id="debug"></pre>
+    <div id="toast"></div>
+    <div id="veil"></div>
+    <div id="echo"></div>
+    <div id="flash"></div>
+    <div id="power-hud">
+      <div id="energy"><i id="energy-fill"></i></div>
+      <div id="powers"></div>
+    </div>
+    <div id="bubbles"></div>
+    <div id="nameplate"></div>
+    <div id="journal"></div>
+    <div id="dialogue">
+      <header><strong id="dialogue-name"></strong><span id="dialogue-role"></span><em id="dialogue-source"></em></header>
+      <div id="dialogue-log"></div>
+      <form id="dialogue-form" autocomplete="off">
+        <input id="dialogue-input" type="text" maxlength="300" placeholder="Dis quelque chose… (Entrée pour envoyer, Échap pour partir)" />
+      </form>
+    </div>
+
+    <div id="title" class="overlay">
+      <div class="card">
+        <h1>CHRONOS</h1>
+        <p class="sub">Brumeval, bourg-marché de la frontière</p>
+        <p class="pitch">
+          Tu es <strong>Kael</strong>, orphelin de Valdren — un royaume effacé en une seule nuit, dont nul ne se souvient.
+          Dans ta paume brille un éclat d'ambre. Ce matin, il s'est fissuré… et le temps a hésité.
+        </p>
+        <p id="loading" class="loading">Chargement de Brumeval…</p>
+        <p id="cta" class="cta hidden">Cliquer pour entrer à Brumeval</p>
+      </div>
+    </div>
+    <div id="pause" class="overlay hidden">
+      <div class="card"><h2>Pause</h2><p class="cta">Cliquer pour reprendre</p></div>
+    </div>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

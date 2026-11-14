@@ -1,0 +1,308 @@
+{
+  "acts": {
+    "give_alms": {
+      "label": "a fait l'aumône à",
+      "importance": 0.35,
+      "opinion": {
+        "villagers": 4,
+        "royal_guard": 1,
+        "thieves_guild": -1,
+        "mages_order": 1
+      },
+      "target": 14,
+      "tags": [
+        "kind",
+        "public"
+      ],
+      "reaction": "cheer",
+      "moral": "hero"
+    },
+    "pickpocket": {
+      "label": "a volé",
+      "importance": 0.55,
+      "opinion": {
+        "villagers": -7,
+        "royal_guard": -10,
+        "thieves_guild": 5,
+        "mages_order": -2
+      },
+      "target": -28,
+      "tags": [
+        "crime",
+        "theft"
+      ],
+      "reaction": "alarm",
+      "moral": "dark"
+    },
+    "intimidate": {
+      "label": "a menacé",
+      "importance": 0.6,
+      "opinion": {
+        "villagers": -6,
+        "royal_guard": -8,
+        "thieves_guild": 2,
+        "mages_order": -3
+      },
+      "target": -22,
+      "tags": [
+        "crime",
+        "fear"
+      ],
+      "reaction": "alarm",
+      "moral": "dark"
+    },
+    "assault": {
+      "label": "a frappé",
+      "importance": 0.85,
+      "opinion": {
+        "villagers": -12,
+        "royal_guard": -15,
+        "thieves_guild": 0,
+        "mages_order": -5
+      },
+      "target": -45,
+      "tags": [
+        "crime",
+        "violent",
+        "fear"
+      ],
+      "reaction": "alarm",
+      "violent": true,
+      "moral": "dark"
+    },
+    "power_time": {
+      "label": "a tordu le temps en public",
+      "importance": 0.5,
+      "opinion": {
+        "villagers": -2,
+        "royal_guard": -2,
+        "thieves_guild": 1,
+        "mages_order": -7
+      },
+      "target": -4,
+      "tags": [
+        "magic",
+        "time"
+      ],
+      "reaction": "alarm",
+      "moral": "neutral"
+    },
+    "power_telekinesis": {
+      "label": "a déplacé des choses par la pensée",
+      "importance": 0.45,
+      "opinion": {
+        "villagers": -2,
+        "royal_guard": -2,
+        "thieves_guild": 1,
+        "mages_order": -6
+      },
+      "target": -4,
+      "tags": [
+        "magic"
+      ],
+      "reaction": "alarm",
+      "moral": "neutral"
+    },
+    "power_shadow": {
+      "label": "a disparu sous les yeux de tous",
+      "importance": 0.45,
+      "opinion": {
+        "villagers": -2,
+        "royal_guard": -3,
+        "thieves_guild": 2,
+        "mages_order": -5
+      },
+      "target": -4,
+      "tags": [
+        "magic"
+      ],
+      "reaction": "alarm",
+      "moral": "neutral"
+    },
+    "tk_shove": {
+      "label": "a repoussé par magie",
+      "importance": 0.6,
+      "opinion": {
+        "villagers": -5,
+        "royal_guard": -7,
+        "thieves_guild": 1,
+        "mages_order": -6
+      },
+      "target": -18,
+      "tags": [
+        "crime",
+        "magic",
+        "fear"
+      ],
+      "reaction": "alarm",
+      "moral": "dark"
+    },
+    "tk_strike": {
+      "label": "a blessé d'un projectile",
+      "importance": 0.8,
+      "opinion": {
+        "villagers": -11,
+        "royal_guard": -14,
+        "thieves_guild": 0,
+        "mages_order": -8
+      },
+      "target": -40,
+      "tags": [
+        "crime",
+        "magic",
+        "violent",
+        "fear"
+      ],
+      "reaction": "alarm",
+      "moral": "dark",
+      "violent": true
+    },
+    "tk_crush": {
+      "label": "a projeté dans les airs",
+      "importance": 0.95,
+      "opinion": {
+        "villagers": -15,
+        "royal_guard": -18,
+        "thieves_guild": -1,
+        "mages_order": -10
+      },
+      "target": -55,
+      "tags": [
+        "crime",
+        "magic",
+        "violent",
+        "fear"
+      ],
+      "reaction": "alarm",
+      "moral": "dark",
+      "violent": true
+    },
+    "time_torment": {
+      "label": "a enfermé dans une boucle de temps",
+      "importance": 0.9,
+      "opinion": {
+        "villagers": -12,
+        "royal_guard": -12,
+        "thieves_guild": -2,
+        "mages_order": -14
+      },
+      "target": -50,
+      "tags": [
+        "crime",
+        "magic",
+        "time",
+        "fear"
+      ],
+      "reaction": "alarm",
+      "moral": "dark"
+    },
+    "tk_rescue": {
+      "label": "a porté en lieu sûr",
+      "importance": 0.5,
+      "opinion": {
+        "villagers": 5,
+        "royal_guard": 3,
+        "thieves_guild": 0,
+        "mages_order": -1
+      },
+      "target": 16,
+      "tags": [
+        "kind",
+        "magic"
+      ],
+      "reaction": "cheer",
+      "moral": "hero"
+    },
+    "power_echo": {
+      "label": "a fait apparaître les fantômes du passé",
+      "importance": 0.45,
+      "opinion": {
+        "villagers": -2,
+        "royal_guard": -1,
+        "thieves_guild": 0,
+        "mages_order": -6
+      },
+      "target": -3,
+      "tags": [
+        "magic"
+      ],
+      "reaction": "alarm",
+      "moral": "neutral"
+    },
+    "power_face": {
+      "label": "a changé de visage sous les yeux de tous",
+      "importance": 0.6,
+      "opinion": {
+        "villagers": -4,
+        "royal_guard": -5,
+        "thieves_guild": 2,
+        "mages_order": -7
+      },
+      "target": -6,
+      "tags": [
+        "magic"
+      ],
+      "reaction": "alarm",
+      "moral": "neutral"
+    },
+    "impersonation": {
+      "label": "a usurpé le visage de",
+      "importance": 0.8,
+      "opinion": {
+        "villagers": -8,
+        "royal_guard": -10,
+        "thieves_guild": 3,
+        "mages_order": -8
+      },
+      "target": -35,
+      "tags": [
+        "crime",
+        "magic"
+      ],
+      "reaction": "alarm",
+      "moral": "dark"
+    },
+    "blackmail": {
+      "label": "a fait chanter",
+      "importance": 0.7,
+      "opinion": {
+        "villagers": -7,
+        "royal_guard": -9,
+        "thieves_guild": 4,
+        "mages_order": -3
+      },
+      "target": -35,
+      "tags": [
+        "crime",
+        "fear"
+      ],
+      "reaction": "alarm",
+      "moral": "dark"
+    },
+    "secret_meeting": {
+      "label": "a rencontré en secret",
+      "importance": 0.55,
+      "opinion": {
+        "villagers": 0,
+        "royal_guard": 0,
+        "thieves_guild": 0,
+        "mages_order": 0
+      },
+      "target": 0,
+      "tags": [
+        "secret"
+      ],
+      "reaction": "none",
+      "moral": "neutral"
+    }
+  },
+  "tuning": {
+    "witnessWeight": 1,
+    "rumorWeight": 0.5,
+    "factionShare": 0.08,
+    "eventCap": 1.5,
+    "hopConfidence": 0.85,
+    "retellDelay": 20,
+    "distortion": 0.12
+  }
+}

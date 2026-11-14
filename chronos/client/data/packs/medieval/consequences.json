@@ -1,0 +1,107 @@
+{
+  "$comment": "World reactions. Each rule turns on when its condition holds and off when it stops holding. Conditions: rep.<faction> / terror.<district> with lt|gt. Effects are interpreted by sim/consequences.ts.",
+  "terror": {
+    "perFearAct": 0.14,
+    "perWitness": 0.02,
+    "violentBonus": 0.1,
+    "decayPerHour": 0.03,
+    "threshold": 0.5
+  },
+  "wanted": {
+    "giveUpMinutes": 40,
+    "catchDistance": 2.2,
+    "fineAll": true,
+    "jailUntilHour": 6,
+    "reputationAfterJail": -20
+  },
+  "betrayal": {
+    "allyAbove": 25,
+    "betrayBelow": -10,
+    "guardPenalty": -8
+  },
+  "rules": [
+    {
+      "id": "guard_watch",
+      "label": "La garde te recherche : elle t'arrêtera à vue.",
+      "when": {
+        "rep.royal_guard": {
+          "lt": -30
+        }
+      },
+      "then": {
+        "wanted": 1
+      }
+    },
+    {
+      "id": "guard_manhunt",
+      "label": "Chasse à l'homme : toute la garde est à tes trousses.",
+      "when": {
+        "rep.royal_guard": {
+          "lt": -60
+        }
+      },
+      "then": {
+        "wanted": 2
+      }
+    },
+    {
+      "id": "people_hero",
+      "label": "Les villageois pavoisent le marché en ton honneur.",
+      "when": {
+        "rep.villagers": {
+          "gt": 40
+        }
+      },
+      "then": {
+        "flag": "market_festive"
+      }
+    },
+    {
+      "id": "people_fear",
+      "label": "Les villageois s'écartent sur ton passage.",
+      "when": {
+        "rep.villagers": {
+          "lt": -40
+        }
+      },
+      "then": {
+        "flag": "villagers_shun"
+      }
+    },
+    {
+      "id": "guild_welcome",
+      "label": "La guilde des voleurs te considère comme l'un des siens.",
+      "when": {
+        "rep.thieves_guild": {
+          "gt": 40
+        }
+      },
+      "then": {
+        "flag": "guild_friend"
+      }
+    },
+    {
+      "id": "mages_heretic",
+      "label": "L'Ordre des mages te déclare hérétique.",
+      "when": {
+        "rep.mages_order": {
+          "lt": -40
+        }
+      },
+      "then": {
+        "flag": "mages_hostile"
+      }
+    }
+  ],
+  "framing": {
+    "$comment": "Someone blamed for a crime (false face, confused rumor) is arrested by the guard once enough people believe it.",
+    "accusationsToArrest": 2,
+    "jailHours": 18
+  },
+  "ambient": {
+    "$comment": "Things inhabitants do on their own, so the world log has more than the player's deeds (Echo of the Past, investigations).",
+    "pickpocketChancePerCheck": 0.12,
+    "checkEveryMinutes": 20,
+    "meetingRange": 3.5
+  }
+}

@@ -1,0 +1,7 @@
+# Configuration Netlify : sans ce fichier, Netlify publie le dépôt tel quel sans construire l'app.
+[build]
+  command = "npm run build"
+  publish = ".next"
+
+[build.environment]
+  NODE_VERSION = "22"

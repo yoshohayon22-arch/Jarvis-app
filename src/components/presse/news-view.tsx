@@ -12,7 +12,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { SkeletonGrid } from "@/components/ui/skeleton-card";
 import { SourceNote } from "@/components/ui/source-note";
 import { formatDateTime } from "@/lib/format";
-import { GROUP_LABELS, REAL_MADRID_PATTERN, type NewsGroup, type NewsTab } from "@/lib/rss/sources";
+import { GROUP_LABELS, newsMaxAgeDays, REAL_MADRID_PATTERN, type NewsGroup, type NewsTab } from "@/lib/rss/sources";
 import type { Article, NewsPayload } from "@/lib/rss/types";
 import { useCachedFetch } from "@/lib/use-cached-fetch";
 import { cn } from "@/lib/utils";
@@ -221,7 +221,7 @@ export function NewsView({ tab }: { tab: NewsTab }) {
           </p>
         ) : null}
         {silent.length ? (
-          <p className="text-xs text-text-2">Aucun article de moins de 3 jours : {silent.map((s) => s.name).join(", ")}.</p>
+          <p className="text-xs text-text-2">Aucun article de moins de {newsMaxAgeDays(tab)} jours : {silent.map((s) => s.name).join(", ")}.</p>
         ) : null}
         <p className="text-xs text-text-2">
           Seuls le titre et le court résumé fournis par chaque journal sont affichés ; l&apos;article complet se lit sur son site.

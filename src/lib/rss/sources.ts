@@ -75,3 +75,6 @@ export const REAL_MADRID_PATTERN = /real madrid|bernab[eé]u|madridista|merengue
 
 /** L'onglet « real » réunit son flux dédié et les sources foot (filtrées ensuite sur le Real Madrid). */
 export const sourcesForTab = (tab: NewsTab) => NEWS_SOURCES.filter((s) => s.tab === tab || (tab === "real" && s.tab === "foot"));
+
+/** Ancienneté maximale des articles affichés, en jours (les blogs officiels publient peu : fenêtre plus large). */
+export const newsMaxAgeDays = (tab: NewsTab) => (tab === "cours" ? 60 : tab === "ia" ? 21 : 3);

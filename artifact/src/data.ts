@@ -10,7 +10,8 @@ import { METEOALARM_FEED, parseAlerts } from "@/lib/meteo/alerts";
 import { fetchAirQuality, fetchForecast, type JsonLoader } from "@/lib/meteo/open-meteo";
 import type { AirQuality, AlertsPayload, Forecast } from "@/lib/meteo/types";
 import { decodeEntities, parseFeed } from "@/lib/rss/parse";
-import { REAL_MADRID_PATTERN, sourcesForTab, type NewsTab } from "@/lib/rss/sources";
+import { newsMaxAgeDays, REAL_MADRID_PATTERN, sourcesForTab, type NewsTab } from "@/lib/rss/sources";
+export { newsMaxAgeDays };
 import { parseAnthropicNews } from "@/lib/rss/anthropic";
 import type { Article, NewsPayload, SourceStatus } from "@/lib/rss/types";
 import { store } from "./dom";
@@ -178,8 +179,6 @@ export const loadAlerts = (force: boolean): Promise<Cached<AlertsPayload>> =>
 
 // ---------- Presse ----------
 const PER_SOURCE = 10;
-/** Ancienneté maximale des articles affichés, en jours (les blogs officiels publient peu : fenêtre plus large). */
-export const newsMaxAgeDays = (tab: NewsTab) => (tab === "cours" ? 60 : tab === "ia" ? 21 : 3);
 const maxAge = (tab: NewsTab) => newsMaxAgeDays(tab) * 24 * 60 * MINUTE;
 
 async function fetchNews(tab: NewsTab): Promise<NewsPayload> {

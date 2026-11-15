@@ -2,38 +2,41 @@ import "server-only";
 
 import { cached } from "@/lib/server-cache";
 import { decodeFeed, parseFeed, type FeedItem } from "./parse";
-import { REAL_MADRID_PATTERN, sourcesForTab, type NewsTab } from "./sources";
+import { parseAnthropicNews } from "./anthropic";
+import { newsMaxAgeDays, REAL_MADRID_PATTERN, sourcesForTab, type NewsSource, type NewsTab } from "./sources";
 import type { Article, NewsPayload, SourceStatus } from "./types";
 
 const PER_SOURCE = 12;
 /** On ignore les articles de plus de 3 jours (certains flux gardent de vieux contenus en tête) ; 60 jours pour les cours vidéo. */
 const DAY_MS = 24 * 60 * 60 * 1000;
-const maxAge = (tab: NewsTab) => (tab === "cours" ? 60 : 3) * DAY_MS;
+const maxAge = (tab: NewsTab) => newsMaxAgeDays(tab) * DAY_MS;
 
 const TEN_MINUTES = 10 * 60 * 1000;
 
 /** Lit un flux RSS. Résultat gardé 10 minutes pour ménager les serveurs des journaux. */
-function loadFeed(url: string): Promise<FeedItem[]> {
+function loadFeed({ url, format }: NewsSource): Promise<FeedItem[]> {
   return cached(`rss:${url}`, TEN_MINUTES, async () => {
     const res = await fetch(url, {
       headers: {
         "User-Agent": "Mozilla/5.0 (compatible; DashboardPerso/1.0; lecteur RSS personnel)",
-        Accept: "application/rss+xml, application/atom+xml, application/xml, text/xml",
+        Accept: format === "anthropic" ? "text/html" : "application/rss+xml, application/atom+xml, application/xml, text/xml",
       },
-      signal: AbortSignal.timeout(8000),
+      signal: AbortSignal.timeout(9000),
       cache: "no-store",
     }).catch((e: unknown) => {
       const timeout = e instanceof Error && e.name === "TimeoutError";
-      throw new Error(timeout ? "pas de réponse en 8 secondes" : "site injoignable");
+      throw new Error(timeout ? "pas de réponse en 9 secondes" : "site injoignable");
     });
     if (!res.ok) throw new Error(`le site a répondu ${res.status}`);
-    return parseFeed(decodeFeed(await res.arrayBuffer(), res.headers.get("content-type")), 30);
+    const text = decodeFeed(await res.arrayBuffer(), res.headers.get("content-type"));
+    // Anthropic n'a pas de flux RSS : sa page d'actualités est lue par un analyseur dédié.
+    return format === "anthropic" ? parseAnthropicNews(text, 30) : parseFeed(text, 30);
   });
 }
 
 export async function loadNews(tab: NewsTab): Promise<NewsPayload> {
   const sources = sourcesForTab(tab);
-  const results = await Promise.allSettled(sources.map((s) => loadFeed(s.url)));
+  const results = await Promise.allSettled(sources.map((s) => loadFeed(s)));
   const now = Date.now();
 
   const articles: Article[] = [];

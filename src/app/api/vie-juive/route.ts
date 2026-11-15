@@ -3,8 +3,7 @@
  * ?section=calendrier&bougies=18   |   ?section=paracha|tehilim|halakha   |   ?section=rambam&chapitres=1|3
  */
 import type { NextRequest } from "next/server";
-import { getCalendar } from "@/lib/judaisme/hebcal";
-import { loadStudy } from "@/lib/judaisme/study";
+import { getCalendar, loadStudy } from "@/lib/judaisme/server";
 import type { StudySection } from "@/lib/judaisme/types";
 
 const STUDY: StudySection[] = ["paracha", "tehilim", "halakha", "rambam"];

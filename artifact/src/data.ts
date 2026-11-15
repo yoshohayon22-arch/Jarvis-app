@@ -4,6 +4,8 @@
  * Firecrawl de la personne qui la regarde (capacité « mcp »), qui va lire l'adresse publique demandée.
  * Chaque lecture consomme un crédit Firecrawl : les réponses sont donc gardées en cache.
  */
+import { createJudaism } from "@/lib/judaisme/core";
+import type { CalendarPayload, StudyPayload, StudySection } from "@/lib/judaisme/types";
 import { METEOALARM_FEED, parseAlerts } from "@/lib/meteo/alerts";
 import { fetchAirQuality, fetchForecast, type JsonLoader } from "@/lib/meteo/open-meteo";
 import type { AirQuality, AlertsPayload, Forecast } from "@/lib/meteo/types";
@@ -136,6 +138,17 @@ export async function cachedLoad<T>(key: string, ttlMs: number, load: () => Prom
   return fresh;
 }
 
+/** Au démarrage : retire du stockage les réponses de plus de 2 jours (les clés datées s'accumuleraient sinon). */
+try {
+  for (const key of Object.keys(localStorage)) {
+    if (!key.startsWith("dash-cache:")) continue;
+    const entry = store.get<Cached<unknown>>(key);
+    if (!entry || Date.now() - entry.at > 48 * 60 * MINUTE) localStorage.removeItem(key);
+  }
+} catch {
+  // Stockage indisponible.
+}
+
 // ---------- Météo ----------
 export const loadForecast = (force: boolean): Promise<Cached<Forecast>> => cachedLoad("previsions", 20 * MINUTE, () => fetchForecast(loadJson), force);
 export const loadAir = (force: boolean): Promise<Cached<AirQuality>> => cachedLoad("air", 30 * MINUTE, () => fetchAirQuality(loadJson), force);
@@ -191,3 +204,29 @@ async function fetchNews(tab: NewsTab): Promise<NewsPayload> {
 
 export const loadNews = (tab: NewsTab, force: boolean): Promise<Cached<NewsPayload>> => cachedLoad(`presse-${tab}`, 30 * MINUTE, () => fetchNews(tab), force);
 export const newsSourceCount = (tab: NewsTab) => sourcesForTab(tab).length;
+
+// ---------- Vie juive (Hebcal et Sefaria, lus via Firecrawl) ----------
+const judaism = createJudaism(loadJson, async (key, ttlMs, load) => (await cachedLoad(key, ttlMs, load)).data);
+
+/** Les lecteurs gèrent leur propre cache par source ; `force` vide ce cache avant de relire. */
+function forget(prefixes: string[]): void {
+  try {
+    for (const key of Object.keys(localStorage)) {
+      if (prefixes.some((p) => key.startsWith(`dash-cache:${p}`))) localStorage.removeItem(key);
+    }
+  } catch {
+    // Stockage indisponible : rien à vider.
+  }
+}
+
+export async function loadCalendar(candleMinutes: number, force: boolean): Promise<Cached<CalendarPayload>> {
+  if (force) forget(["hebcal:calendrier"]);
+  const data = await judaism.getCalendar(candleMinutes);
+  return { data, at: new Date(data.fetchedAt).getTime() };
+}
+
+export async function loadStudy(section: StudySection, chapters: 1 | 3, force: boolean): Promise<Cached<StudyPayload>> {
+  if (force) forget(["hebcal:etude", "hebcal:paracha", "sefaria:"]);
+  const data = await judaism.loadStudy(section, chapters);
+  return { data, at: Date.now() };
+}

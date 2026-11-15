@@ -5,6 +5,7 @@
 import { clear, h, icon, store } from "./dom";
 import { DEFAULT_FAVORITES, getTab, TABS, type ArtifactTab } from "./tabs";
 import { meteoView, newsView, plannedView, realMadridView } from "./views";
+import { calendarView, coursView, studyView } from "./views-juif";
 
 type Theme = "nuit" | "glass" | "brutal" | "dessine";
 const THEMES: [Theme, string][] = [
@@ -126,6 +127,9 @@ function renderView(): void {
   else if (id === "la-une") newsView(view, "une");
   else if (id === "foot") newsView(view, "foot");
   else if (id === "real-madrid") realMadridView(view);
+  else if (id === "calendrier") calendarView(view);
+  else if (id === "paracha" || id === "tehilim" || id === "halakha" || id === "rambam") studyView(view, id);
+  else if (id === "cours") coursView(view);
   else if (tab) plannedView(view, tab);
   window.scrollTo(0, 0);
 }
@@ -366,7 +370,7 @@ main.addEventListener(
   (e) => {
     const start = touch;
     touch = null;
-    if (!start || (e.target as HTMLElement).closest(".chips, .hours, .table-wrap")) return;
+    if (!start || (e.target as HTMLElement).closest(".chips, .hours, .table-wrap, .hebrew")) return;
     const dx = e.changedTouches[0].clientX - start.x;
     const dy = e.changedTouches[0].clientY - start.y;
     if (Math.abs(dx) < 70 || Math.abs(dx) < Math.abs(dy) * 1.8 || Date.now() - start.t > 600) return;

@@ -8,25 +8,25 @@ import { h, icon, svg } from "./dom";
 import type { ArtifactTab } from "./tabs";
 
 const TZ = "Europe/Zurich";
-const dateFmt = new Intl.DateTimeFormat("fr-CH", { timeZone: TZ, day: "2-digit", month: "2-digit", year: "numeric" });
-const timeFmt = new Intl.DateTimeFormat("fr-CH", { timeZone: TZ, hour: "2-digit", minute: "2-digit", hourCycle: "h23" });
+export const dateFmt = new Intl.DateTimeFormat("fr-CH", { timeZone: TZ, day: "2-digit", month: "2-digit", year: "numeric" });
+export const timeFmt = new Intl.DateTimeFormat("fr-CH", { timeZone: TZ, hour: "2-digit", minute: "2-digit", hourCycle: "h23" });
 const oneDecimal = new Intl.NumberFormat("fr-CH", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 const weekday = new Intl.DateTimeFormat("fr-CH", { weekday: "short", day: "numeric", timeZone: "UTC" });
 const relative = new Intl.RelativeTimeFormat("fr", { numeric: "auto" });
-const dateTime = (ms: number | string) => `${dateFmt.format(new Date(ms))} à ${timeFmt.format(new Date(ms))}`;
+export const dateTime = (ms: number | string) => `${dateFmt.format(new Date(ms))} à ${timeFmt.format(new Date(ms))}`;
 const dec = (n: number) => oneDecimal.format(n);
 const round = (n: number) => String(Math.round(n));
 
 // ---------- Briques communes ----------
-function sourceNote(source: string, at?: number | string): HTMLElement {
+export function sourceNote(source: string, at?: number | string): HTMLElement {
   return h("p", { class: "note" }, `Source : ${source}`, at ? ` · Mis à jour le ${dateTime(at)}` : "");
 }
 
-function emptyState(title: string, reason: string): HTMLElement {
+export function emptyState(title: string, reason: string): HTMLElement {
   return h("div", { class: "empty" }, icon("info"), h("div", null, h("p", { class: "empty-title" }, title), h("p", { class: "muted" }, reason)));
 }
 
-function skeleton(lines = 3): HTMLElement {
+export function skeleton(lines = 3): HTMLElement {
   return h(
     "div",
     { class: "card skeleton-card", "aria-hidden": "true" },
@@ -57,7 +57,7 @@ function openDetail(title: string, content: Node[], opener: HTMLElement): void {
   closeBtn.focus();
 }
 
-function card(title: string, body: Node[], opts: { badge?: Node | string; detail?: () => Node[] } = {}): HTMLElement {
+export function card(title: string, body: (Node | string | null | false)[], opts: { badge?: Node | string; detail?: () => Node[] } = {}): HTMLElement {
   const el = h(
     "section",
     { class: "card" },
@@ -81,7 +81,7 @@ function stat(label: string, value: string, ic?: string): HTMLElement {
   return h("div", { class: "stat" }, h("dt", null, ic ? icon(ic, "ic ic-sm") : null, label), h("dd", null, value));
 }
 
-function errorCard(title: string, error: unknown, source: string, retry: () => void): HTMLElement {
+export function errorCard(title: string, error: unknown, source: string, retry: () => void): HTMLElement {
   // Seuls nos propres messages (rédigés pour l'utilisateur) sont affichés ; une erreur technique inattendue reste générique.
   const message = error instanceof DataError || (error instanceof Error && !/undefined|null|not a function|JSON/i.test(error.message)) ? (error as Error).message : "réponse inattendue de la source";
   const body = [

@@ -181,6 +181,30 @@ tbody th { font-weight: 500; text-transform: capitalize; }
 .links a:hover { text-decoration: underline; }
 .links .ic { margin-left: 4px; color: var(--text-2); }
 
+/* ---- Vie juive ---- */
+.kv { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; padding: 6px 0; font-size: 14px; }
+.kv.line { border-bottom: 1px solid color-mix(in srgb, var(--border) 60%, transparent); padding: 8px 0; }
+.kv a { text-align: right; }
+.cap::first-letter { text-transform: uppercase; }
+.big-2 { font-family: var(--ff-heading); font-weight: var(--heading-weight); font-size: 30px; line-height: 1.15; }
+.title-2 { font-size: 24px; line-height: 1.2; }
+.cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.tile-stat { padding: 12px; background: var(--surface-2); border-radius: var(--radius-sm); }
+.tile-stat dt { font-size: 12px; color: var(--text-2); }
+.chips.wrap { flex-wrap: wrap; overflow: visible; }
+.hebrew { font-family: "SBL Hebrew", "Ezra SIL", "Frank Ruehl CLM", "Times New Roman", serif; font-size: 21px; line-height: 1.7; }
+.hebrew.left { text-align: left; }
+.reader { max-width: 760px; }
+.text-link { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; align-self: flex-start; font-size: 14px; font-weight: 500; text-underline-offset: 4px; }
+.callout { padding: 8px 12px; font-size: 14px; background: var(--accent-soft); border: var(--border-width) solid var(--border); border-radius: var(--radius-sm); }
+.two-col { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr)); column-gap: 24px; }
+.section-title { font-size: 16px; }
+.verses { display: flex; flex-direction: column; gap: 16px; }
+.verses li { display: flex; gap: 12px; }
+.verses li > div { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px; line-height: 1.6; }
+.verse-n { width: 28px; flex: none; padding-top: 6px; text-align: right; font-size: 12px; color: var(--text-2); font-variant-numeric: tabular-nums; }
+.small-2 { font-size: 14px; }
+
 /* ---- Réglages ---- */
 .theme-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
 .theme-choice { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; min-height: 76px; padding: 12px; text-align: left; font-size: 14px; background: var(--surface-2); border: var(--border-width) solid var(--border); border-radius: var(--radius-sm); }

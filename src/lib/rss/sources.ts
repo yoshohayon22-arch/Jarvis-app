@@ -2,7 +2,7 @@
  * Sources de presse (flux RSS publics des éditeurs), vérifiées le 15.11.2026.
  * Non incluses faute de flux public : Reuters (flux RSS supprimés) et i24NEWS (aucun flux trouvé).
  */
-export type NewsTab = "une" | "foot";
+export type NewsTab = "une" | "foot" | "real";
 
 export type NewsGroup = "suisse" | "france" | "international" | "moyen-orient" | "foot-fr" | "foot-es" | "foot-en";
 
@@ -49,7 +49,12 @@ export const NEWS_SOURCES: readonly NewsSource[] = [
   { id: "marca", name: "Marca", url: "https://e00-marca.uecdn.es/rss/futbol.xml", tab: "foot", group: "foot-es", lang: "es" },
   { id: "as", name: "AS", url: "https://feeds.as.com/mrss-s/pages/as/site/as.com/section/futbol/portada/", tab: "foot", group: "foot-es", lang: "es" },
   { id: "athletic", name: "The Athletic", url: "https://www.nytimes.com/athletic/rss/football/", tab: "foot", group: "foot-en", lang: "en", paywall: true },
+  { id: "marca-real", name: "Marca · Real Madrid", url: "https://e00-marca.uecdn.es/rss/futbol/real-madrid.xml", tab: "real", group: "foot-es", lang: "es" },
   { id: "romano", name: "Fabrizio Romano (YouTube)", url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCX1em-uaFMS02Rrk_Bowyng", tab: "foot", group: "foot-en", lang: "en", noSummary: true },
 ];
 
-export const sourcesForTab = (tab: NewsTab) => NEWS_SOURCES.filter((s) => s.tab === tab);
+/** Mots qui signalent un article sur le Real Madrid dans les flux généralistes. */
+export const REAL_MADRID_PATTERN = /real madrid|bernab[eé]u|madridista|merengue/i;
+
+/** L'onglet « real » réunit son flux dédié et les sources foot (filtrées ensuite sur le Real Madrid). */
+export const sourcesForTab = (tab: NewsTab) => NEWS_SOURCES.filter((s) => s.tab === tab || (tab === "real" && s.tab === "foot"));

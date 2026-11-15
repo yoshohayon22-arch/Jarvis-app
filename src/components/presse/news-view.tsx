@@ -12,14 +12,13 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { SkeletonGrid } from "@/components/ui/skeleton-card";
 import { SourceNote } from "@/components/ui/source-note";
 import { formatDateTime } from "@/lib/format";
-import { GROUP_LABELS, type NewsGroup, type NewsTab } from "@/lib/rss/sources";
+import { GROUP_LABELS, REAL_MADRID_PATTERN, type NewsGroup, type NewsTab } from "@/lib/rss/sources";
 import type { Article, NewsPayload } from "@/lib/rss/types";
 import { useCachedFetch } from "@/lib/use-cached-fetch";
 import { cn } from "@/lib/utils";
 
 const TEN_MINUTES = 10 * 60 * 1000;
 const PAGE = 24;
-const REAL_MADRID = /real madrid|bernab[eé]u|madridista|merengue/i;
 const LANG_LABELS = { fr: null, en: "anglais", es: "espagnol" } as const;
 
 const relative = new Intl.RelativeTimeFormat("fr", { numeric: "auto" });
@@ -113,7 +112,7 @@ export function NewsView({ tab }: { tab: NewsTab }) {
         (a) =>
           (group === "tout" || a.group === group) &&
           (sourceId === "toutes" || a.sourceId === sourceId) &&
-          (!realOnly || REAL_MADRID.test(`${a.title} ${a.summary}`)),
+          (!realOnly || REAL_MADRID_PATTERN.test(`${a.title} ${a.summary}`)),
       ),
     [data, group, sourceId, realOnly],
   );

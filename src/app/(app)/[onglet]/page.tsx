@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { MeteoView } from "@/components/meteo/meteo-view";
 import { NewsView } from "@/components/presse/news-view";
+import { RealMadridView } from "@/components/real-madrid/real-madrid-view";
 import { TabView } from "@/components/tab-view";
 import { getTab, TAB_IDS } from "@/lib/tabs";
 
@@ -23,5 +24,6 @@ export default async function TabPage({ params }: PageProps<"/[onglet]">) {
   if (tab.id === "meteo") return <MeteoView />;
   if (tab.id === "la-une") return <NewsView tab="une" />;
   if (tab.id === "foot") return <NewsView tab="foot" />;
+  if (tab.id === "real-madrid") return <RealMadridView />;
   return <TabView tabId={tab.id} />;
 }

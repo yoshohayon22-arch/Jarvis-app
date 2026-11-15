@@ -2,7 +2,7 @@ import "server-only";
 
 import { cached } from "@/lib/server-cache";
 import { decodeFeed, parseFeed, type FeedItem } from "./parse";
-import { sourcesForTab, type NewsTab } from "./sources";
+import { REAL_MADRID_PATTERN, sourcesForTab, type NewsTab } from "./sources";
 import type { Article, NewsPayload, SourceStatus } from "./types";
 
 const PER_SOURCE = 12;
@@ -42,8 +42,11 @@ export async function loadNews(tab: NewsTab): Promise<NewsPayload> {
       const reason = result.reason instanceof Error ? result.reason.message : "erreur inconnue";
       return { id: source.id, name: source.name, group: source.group, ok: false, count: 0, error: reason };
     }
+    // Onglet Real Madrid : les sources foot généralistes ne gardent que les articles qui parlent du Real.
+    const onlyReal = tab === "real" && source.tab !== "real";
     const recent = result.value
       .filter((item) => !item.publishedAt || now - new Date(item.publishedAt).getTime() < MAX_AGE_MS)
+      .filter((item) => !onlyReal || REAL_MADRID_PATTERN.test(`${item.title} ${item.summary}`))
       .sort((a, b) => (b.publishedAt ?? "").localeCompare(a.publishedAt ?? ""))
       .slice(0, PER_SOURCE);
     for (const item of recent) {

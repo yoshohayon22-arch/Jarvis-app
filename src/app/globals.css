@@ -1,0 +1,218 @@
+@import "tailwindcss";
+@import "../styles/tokens.css";
+
+/* Le variant dark de Tailwind suit le thème (Nuit et Glass sont sombres). */
+@custom-variant dark (&:where([data-theme="nuit"], [data-theme="glass"]) *);
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-border: var(--border);
+  --color-text: var(--text);
+  --color-text-2: var(--text-2);
+  --color-accent: var(--accent);
+  --color-on-accent: var(--on-accent);
+  --color-accent-2: var(--accent-2);
+  --color-accent-soft: var(--accent-soft);
+  --font-heading: var(--ff-heading);
+  --font-body: var(--ff-body);
+  --radius-card: var(--radius);
+  --radius-control: var(--radius-sm);
+}
+
+html {
+  background: var(--bg);
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--ff-body);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+[data-theme="dessine"] body {
+  font-size: 1.0625rem;
+}
+
+h1,
+h2,
+h3,
+.font-heading {
+  font-family: var(--ff-heading);
+  font-weight: var(--heading-weight);
+  letter-spacing: var(--heading-tracking);
+}
+
+[data-theme="brutal"] h1,
+[data-theme="brutal"] h2 {
+  text-transform: uppercase;
+}
+
+/* Focus clavier visible dans tous les thèmes. */
+:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/* ---------- Carte ---------- */
+.card {
+  position: relative;
+  background: var(--surface);
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--card-shadow);
+  -webkit-backdrop-filter: var(--card-blur);
+  backdrop-filter: var(--card-blur);
+}
+
+/* Lueur dorée (Nuit) / cyan (Glass) au survol : on anime seulement l'opacité d'un pseudo-élément. */
+.card-hover::after {
+  content: "";
+  position: absolute;
+  inset: calc(var(--border-width) * -1);
+  border-radius: inherit;
+  box-shadow: var(--glow);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 200ms ease-out;
+}
+@media (hover: hover) {
+  [data-theme="nuit"] .card-hover:hover::after,
+  [data-theme="glass"] .card-hover:hover::after {
+    opacity: 1;
+  }
+}
+[data-theme="brutal"] .card-hover::after,
+[data-theme="dessine"] .card-hover::after {
+  display: none;
+}
+
+/* ---------- Boutons : enfoncement brutaliste ---------- */
+.btn-press {
+  transition: transform 120ms ease-out;
+}
+.btn-press:active {
+  transform: scale(0.97);
+}
+[data-theme="brutal"] .btn-press {
+  box-shadow: 4px 4px 0 #000;
+  transition: none;
+}
+[data-theme="brutal"] .btn-press:active {
+  /* L'ombre « s'écrase » : le bouton descend sur son ombre. */
+  transform: translate(4px, 4px);
+  box-shadow: 0 0 0 #000;
+}
+[data-theme="dessine"] .btn-press {
+  box-shadow: 2px 3px 0 #2b2b2b;
+}
+
+/* ---------- Squelettes (shimmer) ---------- */
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background: var(--surface-2);
+  border-radius: var(--radius-sm);
+}
+.skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.08), transparent);
+  animation: shimmer 1.4s ease-in-out infinite;
+}
+[data-theme="brutal"] .skeleton,
+[data-theme="dessine"] .skeleton {
+  background: #ebe7d8;
+}
+[data-theme="brutal"] .skeleton::after,
+[data-theme="dessine"] .skeleton::after {
+  background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.7), transparent);
+}
+[data-theme="brutal"] .skeleton::after {
+  animation-timing-function: steps(4);
+}
+@keyframes shimmer {
+  to {
+    transform: translateX(100%);
+  }
+}
+
+/* ---------- Fond Glassmorphism (dégradés radiaux, parallaxe pilotée en JS) ---------- */
+.glass-backdrop {
+  display: none;
+}
+[data-theme="glass"] .glass-backdrop {
+  display: block;
+}
+
+/* ---------- Trait dessiné (thème Dessiné) ---------- */
+.draw-stroke path {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: draw 420ms ease-out forwards;
+}
+@keyframes draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* ---------- Badge LIVE ---------- */
+.live-dot {
+  animation: live-pulse 1.6s ease-in-out infinite;
+}
+@keyframes live-pulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.45;
+    transform: scale(0.85);
+  }
+}
+
+/* ---------- Transition de thème (View Transitions API) ---------- */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+/* ---------- Mouvement réduit : on coupe les animations décoratives ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .skeleton::after,
+  .live-dot,
+  .draw-stroke path {
+    animation: none;
+  }
+  .draw-stroke path {
+    stroke-dashoffset: 0;
+  }
+  .btn-press:active {
+    transform: none;
+  }
+}
+
+/* Barre du bas : respecte l'encoche / la barre d'accueil de l'iPhone. */
+.safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.safe-top {
+  padding-top: env(safe-area-inset-top);
+}
+
+/* Masque la barre de défilement horizontale (listes d'onglets). */
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}

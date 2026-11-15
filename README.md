@@ -2,7 +2,7 @@
 
 Dashboard personnel privé (un seul utilisateur), en français, pour téléphone et ordinateur.
 
-- **Stack** : Next.js 16 (App Router) · TypeScript · Tailwind CSS 4 · composants style shadcn/ui · Motion · Supabase (Postgres + RLS + Auth Google) · PWA.
+- **Stack** : Next.js 16 (App Router) · TypeScript · Tailwind CSS 4 · composants style shadcn/ui · Motion · connexion par phrase de passe (Supabase prévu) · PWA · hébergé sur Netlify.
 - **Mise en ligne** : voir [`docs/MISE-EN-LIGNE.md`](docs/MISE-EN-LIGNE.md).
 
 ## Développement local

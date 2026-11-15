@@ -7,6 +7,7 @@ import {
   isLosingTooFast,
   isPlateau,
   projectedDate,
+  recentSummary,
   trendSeries,
   trendWeight,
   weeklyTrend,
@@ -146,5 +147,15 @@ describe('Coach', () => {
     expect(FAQ.length).toBeGreaterThanOrEqual(6)
     expect(FAQ.map((f) => f.q).join(' ')).toMatch(/monte d’un jour à l’autre/)
     expect(FAQ.map((f) => f.q).join(' ')).toMatch(/protéines/)
+  })
+})
+
+describe('Résumé des 4 dernières semaines (accueil)', () => {
+  it('ne garde que la période et mesure la variation de la moyenne', () => {
+    const w = series(60, 85, -0.5 / 7)
+    const { points, changeKg } = recentSummary(w, TODAY)
+    expect(points[0].date >= addDays(TODAY, -28)).toBe(true)
+    expect(changeKg).toBeCloseTo(-2, 0)
+    expect(recentSummary([{ date: TODAY, kg: 80 }], TODAY).changeKg).toBeNull()
   })
 })

@@ -129,3 +129,18 @@ export function projectedDate(trendKg: number, targetKg: number, kgPerWeek: numb
   if (weeks > 260) return null // plus de 5 ans : pas une estimation utile
   return addDays(today, Math.ceil(weeks * 7))
 }
+
+/**
+ * Résumé des dernières semaines pour la carte « Mon suivi » de l'accueil :
+ * points de la moyenne mobile sur la période, et variation de cette moyenne.
+ */
+export function recentSummary(
+  weighIns: WeighIn[],
+  today: string,
+  days = 28,
+): { points: TrendPoint[]; changeKg: number | null } {
+  const from = addDays(today, -days)
+  const points = trendSeries(weighIns).filter((p) => p.date >= from && p.date <= today)
+  const changeKg = points.length >= 2 ? Math.round((points[points.length - 1].avg7 - points[0].avg7) * 10) / 10 : null
+  return { points, changeKg }
+}

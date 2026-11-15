@@ -3,9 +3,10 @@
  * Tant qu'aucun profil n'existe, toutes les pages redirigent vers l'onboarding.
  */
 import { lazy, Suspense } from 'react'
-import { BrowserRouter, MemoryRouter, Navigate, Route, Routes } from 'react-router-dom'
+import { BrowserRouter, MemoryRouter, Navigate, Route, Routes, useNavigate } from 'react-router-dom'
 import { AppDataProvider, useAppData } from './state/AppDataContext'
 import { Layout } from './components/Layout'
+import { Intro } from './features/intro/Intro'
 
 // Chaque écran est chargé à la demande : la première page s'affiche plus vite,
 // et la bibliothèque de graphiques n'est téléchargée que sur l'écran Suivi.
@@ -27,7 +28,12 @@ function Loading() {
 }
 
 function AppRoutes() {
-  const { activeProfile } = useAppData()
+  const { activeProfile, data, update } = useAppData()
+
+  // Premier lancement : Mia se présente avant la création du profil.
+  if (!activeProfile && !data.introSeen) {
+    return <Intro onDone={() => update((d) => ({ ...d, introSeen: true }))} />
+  }
 
   if (!activeProfile) {
     return (
@@ -41,6 +47,7 @@ function AppRoutes() {
   return (
     <Routes>
       <Route path="/nouveau-profil" element={<Onboarding />} />
+      <Route path="/intro" element={<IntroAgain />} />
       <Route element={<Layout />}>
         <Route index element={<Dashboard />} />
         <Route path="menu" element={<MenuPage />} />
@@ -53,6 +60,12 @@ function AppRoutes() {
       </Route>
     </Routes>
   )
+}
+
+/** Revoir l'introduction depuis le profil. */
+function IntroAgain() {
+  const navigate = useNavigate()
+  return <Intro onDone={() => navigate('/')} doneLabel="Retour à l’accueil" />
 }
 
 /**

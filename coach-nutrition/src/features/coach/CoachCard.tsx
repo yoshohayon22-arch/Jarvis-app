@@ -8,6 +8,7 @@ import { coachMessages, type CoachMessage } from '../../domain/coach'
 import { computeTargets, todayIso } from '../../domain/nutrition'
 import { referenceWeightFor, updateProfile } from '../../domain/profiles'
 import { Button, Card } from '../../components/ui'
+import { MiaAvatar } from '../../components/Mia'
 import { useAppData } from '../../state/AppDataContext'
 import { useMenu } from '../menu/useMenu'
 
@@ -51,12 +52,17 @@ export function CoachCard({ onWeigh, className = '' }: { onWeigh: () => void; cl
 
   return (
     <Card aria-labelledby="coach-title" className={`bg-gradient-to-br ${tone.cls} to-white ${className}`}>
-      <h2 id="coach-title" className="mb-1 flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-muted">
-        <Icon size={18} aria-hidden="true" className={tone.iconCls} /> Message du coach
-      </h2>
+      <div className="flex items-start gap-3">
+        <MiaAvatar size={52} />
+        <div className="min-w-0">
+          <h2 id="coach-title" className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-muted">
+            <Icon size={16} aria-hidden="true" className={tone.iconCls} /> Mia, ta coach
+          </h2>
+          <p className="text-lg font-bold" aria-live="polite">{main.title}</p>
+        </div>
+      </div>
       <div aria-live="polite">
-        <p className="text-lg font-bold">{main.title}</p>
-        <p className="mt-1">{main.text}</p>
+        <p className="mt-2">{main.text}</p>
         {main.action && (
           <ActionButton label={actionLabel[main.action]} Icon={ActionIcon[main.action]} onClick={() => runAction(main)} />
         )}

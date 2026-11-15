@@ -189,6 +189,9 @@ function ProfileEditor({ importMsg, setImportMsg }: { importMsg: ImportMessage; 
               />
               {importMsg && <Notice tone={importMsg.tone}>{importMsg.text}</Notice>}
               <hr className="my-2 border-slate-100" />
+              <Button variant="ghost" onClick={() => navigate('/intro')}>
+                Revoir l’introduction de Mia
+              </Button>
               <Button variant="warning" onClick={() => setConfirm('profil')}>
                 <UserMinus size={18} aria-hidden="true" /> Supprimer ce profil
               </Button>

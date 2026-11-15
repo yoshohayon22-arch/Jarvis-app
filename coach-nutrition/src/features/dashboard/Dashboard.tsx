@@ -10,6 +10,7 @@ import { useAppData } from '../../state/AppDataContext'
 import { computeTargets, todayIso } from '../../domain/nutrition'
 import { referenceWeightFor } from '../../domain/profiles'
 import { CoachCard } from '../coach/CoachCard'
+import { TrendCard } from '../tracking/TrendCard'
 import { progressPercent } from '../../domain/progress'
 import { RECIPE_MAP } from '../../domain/catalog'
 import { planLookup } from '../../domain/menu/generator'
@@ -91,8 +92,9 @@ export function Dashboard() {
                   <dd className="font-bold">{formatKg(settings.startWeightKg)}</dd>
                 </div>
                 <div>
-                  <dt className="text-muted">Actuel <span className="text-xs">(moy. 7 j)</span></dt>
+                  <dt className="text-muted">Actuel</dt>
                   <dd className="font-bold text-brand-700">{formatKg(current)}</dd>
+                  <dd className="text-xs text-muted">moy. 7 jours</dd>
                 </div>
                 <div>
                   <dt className="text-muted">Cible</dt>
@@ -143,8 +145,11 @@ export function Dashboard() {
           </Link>
         </Card>
 
-        {/* Message du coach (règles : plateau, rythme, régularité, objectif, rappel) */}
-        <CoachCard onWeigh={() => setWeighOpen(true)} />
+        {/* Mini-courbe des 4 dernières semaines */}
+        <TrendCard weighIns={activeProfile.weighIns} targetKg={settings.targetWeightKg} />
+
+        {/* Mia, la coach (règles : plateau, rythme, régularité, objectif, rappel) */}
+        <CoachCard className="lg:col-span-3" onWeigh={() => setWeighOpen(true)} />
       </div>
 
       <WeighInDialog open={weighOpen} onClose={() => setWeighOpen(false)} />

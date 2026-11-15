@@ -3,7 +3,7 @@
  * et bibliothèque de recettes.
  */
 import { useState } from 'react'
-import { BookOpen, CalendarDays, Lock, LockOpen, RefreshCw, Shuffle, Sparkles, Wallet } from 'lucide-react'
+import { BookOpen, Calculator, CalendarDays, Lock, LockOpen, RefreshCw, Shuffle, Sparkles, Wallet } from 'lucide-react'
 import type { Recipe } from '../../domain/catalog'
 import { isBatchCooked } from '../../domain/menu/batch'
 import { daySummary, mealValues } from '../../domain/menu/generator'
@@ -17,20 +17,24 @@ import { RecipeLibrary } from '../recipes/RecipeLibrary'
 import { RecipeDetail } from '../recipes/RecipeDetail'
 import { KASHRUT_LABELS } from '../recipes/recipe-labels'
 import { useMenu } from './useMenu'
+import { MealCalculator, type CalculatorState } from './MealCalculator'
 
-type Tab = 'semaine' | 'recettes'
+type Tab = 'semaine' | 'recettes' | 'calcul'
 
 export function MenuPage() {
   const [tab, setTab] = useState<Tab>('semaine')
+  // L'assiette du calculateur est gardée quand on change d'onglet.
+  const [calc, setCalc] = useState<CalculatorState>({ slot: null, items: [] })
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <h1 className="text-3xl font-bold">Menu</h1>
-        <div role="tablist" aria-label="Affichage" className="flex rounded-xl bg-slate-100 p-1">
+        <div role="tablist" aria-label="Affichage" className="flex max-w-full overflow-x-auto rounded-xl bg-slate-100 p-1">
           {(
             [
               ['semaine', 'Ma semaine', CalendarDays],
               ['recettes', 'Recettes', BookOpen],
+              ['calcul', 'Calculer un repas', Calculator],
             ] as const
           ).map(([id, label, Icon]) => (
             <button
@@ -39,7 +43,7 @@ export function MenuPage() {
               type="button"
               aria-selected={tab === id}
               onClick={() => setTab(id)}
-              className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition ${
+              className={`flex shrink-0 items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold transition sm:px-4 ${
                 tab === id ? 'bg-white text-brand-700 shadow-sm' : 'text-muted hover:text-ink'
               }`}
             >
@@ -48,7 +52,9 @@ export function MenuPage() {
           ))}
         </div>
       </div>
-      {tab === 'semaine' ? <WeekView /> : <RecipeLibrary />}
+      {tab === 'semaine' && <WeekView />}
+      {tab === 'recettes' && <RecipeLibrary />}
+      {tab === 'calcul' && <MealCalculator state={calc} setState={setCalc} />}
     </div>
   )
 }

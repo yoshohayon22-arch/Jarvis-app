@@ -130,6 +130,8 @@ export interface Profile {
 /** Données complètes de l'application, telles que stockées dans le navigateur. */
 export interface AppData {
   schemaVersion: number
+  /** L'introduction de Mia a été vue (ou passée). */
+  introSeen?: boolean
   activeProfileId: string | null
   profiles: Profile[]
 }

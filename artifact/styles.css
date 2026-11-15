@@ -333,3 +333,13 @@ td.right, th.right { padding-right: 0; }
 textarea.draft { display: block; }
 .meta .over { display: inline-flex; color: var(--text); }
 .meta a, .card-foot a { min-height: 24px; display: inline-flex; align-items: center; }
+
+/* ---- Veille IA et Culture G ---- */
+.btn.above { position: relative; z-index: 1; }
+.quiz { display: flex; flex-direction: column; gap: 20px; }
+.quiz li { display: flex; flex-direction: column; gap: 8px; }
+.choices { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 200px), 1fr)); gap: 8px; }
+.choice { align-self: stretch; text-align: left; padding-block: 8px; }
+.choice:disabled { opacity: 0.7; }
+.choice.good { opacity: 1; border-color: var(--accent); background: var(--accent-soft); font-weight: 600; }
+.choice.bad { opacity: 1; text-decoration: line-through; }

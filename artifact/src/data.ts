@@ -11,6 +11,7 @@ import { fetchAirQuality, fetchForecast, type JsonLoader } from "@/lib/meteo/ope
 import type { AirQuality, AlertsPayload, Forecast } from "@/lib/meteo/types";
 import { decodeEntities, parseFeed } from "@/lib/rss/parse";
 import { REAL_MADRID_PATTERN, sourcesForTab, type NewsTab } from "@/lib/rss/sources";
+import { parseAnthropicNews } from "@/lib/rss/anthropic";
 import type { Article, NewsPayload, SourceStatus } from "@/lib/rss/types";
 import { store } from "./dom";
 
@@ -177,11 +178,13 @@ export const loadAlerts = (force: boolean): Promise<Cached<AlertsPayload>> =>
 
 // ---------- Presse ----------
 const PER_SOURCE = 10;
-const maxAge = (tab: NewsTab) => (tab === "cours" ? 60 : 3) * 24 * 60 * MINUTE;
+/** Ancienneté maximale des articles affichés, en jours (les blogs officiels publient peu : fenêtre plus large). */
+export const newsMaxAgeDays = (tab: NewsTab) => (tab === "cours" ? 60 : tab === "ia" ? 21 : 3);
+const maxAge = (tab: NewsTab) => newsMaxAgeDays(tab) * 24 * 60 * MINUTE;
 
 async function fetchNews(tab: NewsTab): Promise<NewsPayload> {
   const sources = sourcesForTab(tab);
-  const results = await Promise.allSettled(sources.map(async (s) => parseFeed(await readUrl(s.url), 30)));
+  const results = await Promise.allSettled(sources.map(async (s) => (s.format === "anthropic" ? parseAnthropicNews(await readUrl(s.url), 30) : parseFeed(await readUrl(s.url), 30))));
   // Si toutes les lectures échouent pour la même raison (connecteur absent ou non autorisé), c'est un problème de page.
   const failures = results.filter((r): r is PromiseRejectedResult => r.status === "rejected");
   if (failures.length === results.length && failures[0]?.reason instanceof DataError && failures[0].reason.code !== "tool_error") {
@@ -249,4 +252,56 @@ export async function loadStudy(section: StudySection, chapters: 1 | 3, force: b
   if (force) forget(["hebcal:etude", "hebcal:paracha", "sefaria:"]);
   const data = await judaism.loadStudy(section, chapters);
   return { data, at: Date.now() };
+}
+
+// ---------- Culture G (Wikipédia en français, API publique lue via Firecrawl) ----------
+export interface WikiPage {
+  title: string;
+  description: string;
+  extract: string;
+  url: string;
+}
+export interface CulturePayload {
+  /** aaaa-mm-jj (jour civil à Genève). */
+  date: string;
+  onThisDay: { year: number | null; text: string; page: WikiPage | null }[];
+  featured: WikiPage | null;
+  mostRead: WikiPage[];
+}
+
+interface RawWikiPage {
+  titles?: { normalized?: string };
+  description?: string;
+  extract?: string;
+  content_urls?: { desktop?: { page?: string } };
+  namespace?: { id?: number };
+}
+
+function wikiPage(raw: RawWikiPage | undefined): WikiPage | null {
+  const title = raw?.titles?.normalized;
+  const url = raw?.content_urls?.desktop?.page;
+  if (!raw || typeof title !== "string" || typeof url !== "string" || !/^https:\/\/fr\.wikipedia\.org\//.test(url)) return null;
+  if ((raw.namespace?.id ?? 0) !== 0 || /^(Wikipédia|Spécial|Portail|Fichier|Aide|Catégorie):/.test(title)) return null;
+  return { title: title.slice(0, 160), description: String(raw.description ?? "").slice(0, 200), extract: String(raw.extract ?? "").slice(0, 600), url };
+}
+
+export function loadCulture(force: boolean): Promise<Cached<CulturePayload>> {
+  const date = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Zurich" }).format(new Date());
+  return cachedLoad(
+    `culture-${date}`,
+    6 * 60 * MINUTE,
+    async () => {
+      const raw = await loadJson<{ tfa?: RawWikiPage; mostread?: { articles?: RawWikiPage[] }; onthisday?: { year?: number; text?: string; pages?: RawWikiPage[] }[] }>(`https://fr.wikipedia.org/api/rest_v1/feed/featured/${date.replace(/-/g, "/")}`);
+      if (!raw || typeof raw !== "object") throw new DataError("réponse inattendue de Wikipédia", "tool_error");
+      return {
+        date,
+        onThisDay: (Array.isArray(raw.onthisday) ? raw.onthisday : [])
+          .filter((e) => typeof e?.text === "string" && e.text.trim())
+          .map((e) => ({ year: typeof e.year === "number" ? e.year : null, text: String(e.text).slice(0, 400), page: (e.pages ?? []).map(wikiPage).find(Boolean) ?? null })),
+        featured: wikiPage(raw.tfa),
+        mostRead: (Array.isArray(raw.mostread?.articles) ? raw.mostread.articles : []).map(wikiPage).filter((p): p is WikiPage => p !== null).slice(0, 8),
+      };
+    },
+    force,
+  );
 }

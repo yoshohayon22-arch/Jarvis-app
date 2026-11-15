@@ -6,6 +6,7 @@ import { clear, h, icon, store } from "./dom";
 import { DEFAULT_FAVORITES, getTab, TABS, type ArtifactTab } from "./tabs";
 import { meteoView, newsView, plannedView, realMadridView } from "./views";
 import { budgetView } from "./budget";
+import { cultureView } from "./culture";
 import { etudesView } from "./etudes";
 import { projetsView } from "./projets";
 import { mailView } from "./mail";
@@ -134,6 +135,8 @@ function renderView(): void {
   else if (id === "meteo") meteoView(view);
   else if (id === "la-une") newsView(view, "une");
   else if (id === "foot") newsView(view, "foot");
+  else if (id === "veille-ia") newsView(view, "ia");
+  else if (id === "culture-g") cultureView(view);
   else if (id === "real-madrid") realMadridView(view);
   else if (id === "calendrier") calendarView(view);
   else if (id === "paracha" || id === "tehilim" || id === "halakha" || id === "rambam") studyView(view, id);

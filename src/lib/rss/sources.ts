@@ -2,9 +2,9 @@
  * Sources de presse (flux RSS publics des éditeurs), vérifiées le 15.11.2026.
  * Non incluses faute de flux public : Reuters (flux RSS supprimés) et i24NEWS (aucun flux trouvé).
  */
-export type NewsTab = "une" | "foot" | "real" | "cours";
+export type NewsTab = "une" | "foot" | "real" | "cours" | "ia";
 
-export type NewsGroup = "suisse" | "france" | "international" | "moyen-orient" | "foot-fr" | "foot-es" | "foot-en" | "torah";
+export type NewsGroup = "suisse" | "france" | "international" | "moyen-orient" | "foot-fr" | "foot-es" | "foot-en" | "torah" | "ia-officiel" | "ia-presse" | "ia-blogs";
 
 export const GROUP_LABELS: Record<NewsGroup, string> = {
   suisse: "Suisse romande",
@@ -15,6 +15,9 @@ export const GROUP_LABELS: Record<NewsGroup, string> = {
   "foot-es": "En espagnol",
   "foot-en": "En anglais",
   torah: "Cours de Torah",
+  "ia-officiel": "Annonces officielles",
+  "ia-presse": "Presse",
+  "ia-blogs": "Blogs",
 };
 
 export interface NewsSource {
@@ -28,6 +31,8 @@ export interface NewsSource {
   paywall?: boolean;
   /** Le résumé du flux n'est pas informatif (texte promotionnel répété) : on ne l'affiche pas. */
   noSummary?: boolean;
+  /** « anthropic » : page HTML lue par un analyseur dédié (pas de flux RSS). */
+  format?: "anthropic";
 }
 
 export const NEWS_SOURCES: readonly NewsSource[] = [
@@ -54,6 +59,15 @@ export const NEWS_SOURCES: readonly NewsSource[] = [
   // --- Cours (chaîne YouTube officielle de Torah-Box, flux public) ---
   { id: "torahbox", name: "Torah-Box (YouTube)", url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCNgEEqkr9UeSqxJAHxe6-KA", tab: "cours", group: "torah", lang: "fr", noSummary: true },
   { id: "romano", name: "Fabrizio Romano (YouTube)", url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCX1em-uaFMS02Rrk_Bowyng", tab: "foot", group: "foot-en", lang: "en", noSummary: true },
+  // --- Veille IA (vérifiées le 15.11.2026 ; Anthropic n'a pas de flux RSS, Numerama IA renvoie une erreur 404) ---
+  { id: "anthropic", name: "Anthropic", url: "https://www.anthropic.com/news", tab: "ia", group: "ia-officiel", lang: "en", format: "anthropic" },
+  { id: "claude-code", name: "Claude Code (versions)", url: "https://github.com/anthropics/claude-code/releases.atom", tab: "ia", group: "ia-officiel", lang: "en", noSummary: true },
+  { id: "openai", name: "OpenAI", url: "https://openai.com/news/rss.xml", tab: "ia", group: "ia-officiel", lang: "en" },
+  { id: "google-ai", name: "Google AI", url: "https://blog.google/technology/ai/rss/", tab: "ia", group: "ia-officiel", lang: "en" },
+  { id: "deepmind", name: "Google DeepMind", url: "https://deepmind.google/blog/rss.xml", tab: "ia", group: "ia-officiel", lang: "en" },
+  { id: "lemonde-ia", name: "Le Monde · IA", url: "https://www.lemonde.fr/intelligence-artificielle/rss_full.xml", tab: "ia", group: "ia-presse", lang: "fr", paywall: true },
+  { id: "verge-ia", name: "The Verge · AI", url: "https://www.theverge.com/rss/ai-artificial-intelligence/index.xml", tab: "ia", group: "ia-presse", lang: "en" },
+  { id: "willison", name: "Simon Willison", url: "https://simonwillison.net/atom/everything/", tab: "ia", group: "ia-blogs", lang: "en" },
 ];
 
 /** Mots qui signalent un article sur le Real Madrid dans les flux généralistes. */

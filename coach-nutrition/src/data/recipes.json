@@ -1,0 +1,6424 @@
+[
+  {
+    "id": "porridge-pomme-cannelle",
+    "name": "Porridge pomme-cannelle",
+    "mealTypes": [
+      "petit-dej"
+    ],
+    "servings": 1,
+    "prepMin": 5,
+    "cookMin": 5,
+    "ingredients": [
+      {
+        "id": "flocons-avoine",
+        "grams": 60
+      },
+      {
+        "id": "lait",
+        "grams": 250
+      },
+      {
+        "id": "pommes",
+        "grams": 120
+      },
+      {
+        "id": "cannelle",
+        "grams": 1
+      },
+      {
+        "id": "amandes",
+        "grams": 10
+      }
+    ],
+    "steps": [
+      "Couper la pomme en petits dés.",
+      "Porter le lait à frémissement avec les flocons et la pomme, cuire 4 à 5 min en remuant.",
+      "Saupoudrer de cannelle et parsemer d’amandes concassées."
+    ],
+    "kashrut": "halavi",
+    "tags": [
+      "rapide",
+      "petit-budget"
+    ],
+    "season": [
+      9,
+      10,
+      11,
+      12,
+      1,
+      2,
+      3
+    ],
+    "fridgeDays": 1,
+    "freezerMonths": 0,
+    "perServing": {
+      "kcal": 496,
+      "protein": 18.9,
+      "fat": 16.4,
+      "carbs": 63,
+      "priceChf": 0.8,
+      "priceBudgetChf": 0.75
+    },
+    "compatibleWith": [
+      "casher",
+      "halal",
+      "vegetarien",
+      "sans-arachides"
+    ]
+  },
+  {
+    "id": "overnight-oats-baies",
+    "name": "Overnight oats aux fruits rouges",
+    "mealTypes": [
+      "petit-dej"
+    ],
+    "servings": 1,
+    "prepMin": 5,
+    "cookMin": 0,
+    "ingredients": [
+      {
+        "id": "flocons-avoine",
+        "grams": 50
+      },
+      {
+        "id": "yaourt-nature",
+        "grams": 150
+      },
+      {
+        "id": "lait",
+        "grams": 100
+      },
+      {
+        "id": "baies-surgelees",
+        "grams": 100
+      },
+      {
+        "id": "miel",
+        "grams": 10
+      }
+    ],
+    "steps": [
+      "Mélanger flocons, yaourt, lait et miel dans un bocal.",
+      "Ajouter les fruits rouges encore surgelés par-dessus.",
+      "Fermer et laisser une nuit au frigo. Se mange froid."
+    ],
+    "kashrut": "halavi",
+    "tags": [
+      "rapide",
+      "batch-friendly"
+    ],
+    "season": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "fridgeDays": 2,
+    "freezerMonths": 0,
+    "perServing": {
+      "kcal": 419,
+      "protein": 17.1,
+      "fat": 11.8,
+      "carbs": 57.1,
+      "priceChf": 1.47,
+      "priceBudgetChf": 1.16
+    },
+    "compatibleWith": [
+      "casher",
+      "halal",
+      "vegetarien",
+      "sans-arachides"
+    ]
+  },
+  {
+    "id": "birchermuesli",
+    "name": "Birchermüesli maison",
+    "mealTypes": [
+      "petit-dej"
+    ],
+    "servings": 1,
+    "prepMin": 10,
+    "cookMin": 0,
+    "ingredients": [
+      {
+        "id": "flocons-avoine",
+        "grams": 50
+      },
+      {
+        "id": "yaourt-nature",
+        "grams": 150
+      },
+      {
+        "id": "lait",
+        "grams": 50
+      },
+      {
+        "id": "pommes",
+        "grams": 100
+      },
+      {
+        "id": "citron",
+        "grams": 10
+      },
+      {
+        "id": "noix",
+        "grams": 15
+      }
+    ],
+    "steps": [
+      "Mélanger flocons, lait et yaourt ; laisser gonfler 10 min (ou toute la nuit).",
+      "Râper la pomme avec la peau et l’arroser de jus de citron.",
+      "Incorporer la pomme, parsemer de noix concassées."
+    ],
+    "kashrut": "halavi",
+    "tags": [
+      "rapide",
+      "batch-friendly",
+      "petit-budget"
+    ],
+    "season": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "fridgeDays": 2,
+    "freezerMonths": 0,
+    "perServing": {
+      "kcal": 472,
+      "protein": 17,
+      "fat": 20.1,
+      "carbs": 52,
+      "priceChf": 0.91,
+      "priceBudgetChf": 0.91
+    },
+    "compatibleWith": [
+      "casher",
+      "halal",
+      "vegetarien",
+      "sans-arachides"
+    ]
+  },
+  {
+    "id": "tartines-oeufs-brouilles",
+    "name": "Tartines aux œufs brouillés et tomate",
+    "mealTypes": [
+      "petit-dej"
+    ],
+    "servings": 1,
+    "prepMin": 5,
+    "cookMin": 5,
+    "ingredients": [
+      {
+        "id": "pain-complet",
+        "grams": 80
+      },
+      {
+        "id": "oeufs",
+        "grams": 110
+      },
+      {
+        "id": "huile-olive",
+        "grams": 5
+      },
+      {
+        "id": "tomates",
+        "grams": 100
+      }
+    ],
+    "steps": [
+      "Battre les œufs avec une pincée de sel et de poivre.",
+      "Cuire à feu doux dans l’huile en remuant jusqu’à ce qu’ils soient crémeux.",
+      "Servir sur le pain grillé avec la tomate en tranches."
+    ],
+    "kashrut": "parve",
+    "tags": [
+      "rapide"
+    ],
+    "season": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "fridgeDays": 0,
+    "freezerMonths": 0,
+    "perServing": {
+      "kcal": 411,
+      "protein": 21.9,
+      "fat": 18.6,
+      "carbs": 37.1,
+      "priceChf": 1.51,
+      "priceBudgetChf": 1.4
+    },
+    "compatibleWith": [
+      "casher",
+      "halal",
+      "vegetarien",
+      "sans-lactose",
+      "sans-arachides"
+    ]
+  },
+  {
+    "id": "sere-fruits-rouges-avoine",
+    "name": "Séré aux fruits rouges et flocons",
+    "mealTypes": [
+      "petit-dej"
+    ],
+    "servings": 1,
+    "prepMin": 5,
+    "cookMin": 0,
+    "ingredients": [
+      {
+        "id": "sere-maigre",
+        "grams": 200
+      },
+      {
+        "id": "baies-surgelees",
+        "grams": 120
+      },
+      {
+        "id": "flocons-avoine",
+        "grams": 30
+      },
+      {
+        "id": "miel",
+        "grams": 10
+      }
+    ],
+    "steps": [
+      "Décongeler les fruits rouges quelques minutes (ou la veille au frigo).",
+      "Mélanger le séré avec le miel.",
+      "Ajouter les fruits et les flocons par-dessus."
+    ],
+    "kashrut": "halavi",
+    "tags": [
+      "rapide"
+    ],
+    "season": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "fridgeDays": 1,
+    "freezerMonths": 0,
+    "perServing": {
+      "kcal": 338,
+      "protein": 29.3,
+      "fat": 3.1,
+      "carbs": 43.3,
+      "priceChf": 1.77,
+      "priceBudgetChf": 1.39
+    },
+    "compatibleWith": [
+      "casher",
+      "halal",
+      "vegetarien",
+      "sans-arachides"
+    ]
+  },
+  {
+    "id": "tartine-cacahuete-banane",
+    "name": "Tartines beurre de cacahuète et banane",
+    "mealTypes": [
+      "petit-dej"
+    ],
+    "servings": 1,
+    "prepMin": 5,
+    "cookMin": 0,
+    "ingredients": [
+      {
+        "id": "pain-complet",
+        "grams": 80
+      },
+      {
+        "id": "beurre-cacahuete",
+        "grams": 20
+      },
+      {
+        "id": "bananes",
+        "grams": 120
+      }
+    ],
+    "steps": [
+      "Griller le pain si désiré.",
+      "Tartiner de beurre de cacahuète.",
+      "Recouvrir de rondelles de banane."
+    ],
+    "kashrut": "parve",
+    "tags": [
+      "rapide",
+      "petit-budget"
+    ],
+    "season": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "fridgeDays": 0,
+    "freezerMonths": 0,
+    "perServing": {
+      "kcal": 428,
+      "protein": 13.5,
+      "fat": 12.8,
+      "carbs": 60.4,
+      "priceChf": 0.8,
+      "priceBudgetChf": 0.79
+    },
+    "compatibleWith": [
+      "casher",
+      "halal",
+      "vegetarien",
+      "sans-lactose"
+    ]
+  },
+  {
+    "id": "omelette-epinards-feta",
+    "name": "Omelette épinards et feta",
+    "mealTypes": [
+      "petit-dej",
+      "dejeuner",
+      "diner"
+    ],
+    "servings": 1,
+    "prepMin": 5,
+    "cookMin": 8,
+    "ingredients": [
+      {
+        "id": "oeufs",
+        "grams": 165
+      },
+      {
+        "id": "epinards-surgeles",
+        "grams": 100
+      },
+      {
+        "id": "feta",
+        "grams": 30
+      },
+      {
+        "id": "pain-complet",
+        "grams": 50
+      },
+      {
+        "id": "huile-olive",
+        "grams": 5
+      }
+    ],
+    "steps": [
+      "Faire revenir les épinards dans l’huile jusqu’à évaporation de l’eau.",
+      "Verser les œufs battus, émietter la feta.",
+      "Cuire à feu moyen 3 à 4 min, plier l’omelette et servir avec le pain."
+    ],
+    "kashrut": "halavi",
+    "tags": [
+      "rapide",
+      "petit-budget"
+    ],
+    "season": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "fridgeDays": 0,
+    "freezerMonths": 0,
+    "perServing": {
+      "kcal": 501,
+      "protein": 32.4,
+      "fat": 30,
+      "carbs": 23.3,
+      "priceChf": 2.35,
+      "priceBudgetChf": 2.07
+    },
+    "compatibleWith": [
+      "casher",
+      "halal",
+      "vegetarien",
+      "sans-arachides"
+    ]
+  },
+  {
+    "id": "bowl-yaourt-grec-banane",
+    "name": "Bowl yaourt grec, banane et baies",
+    "mealTypes": [
+      "petit-dej"
+    ],
+    "servings": 1,
+    "prepMin": 5,
+    "cookMin": 0,
+    "ingredients": [
+      {
+        "id": "yaourt-grec",
+        "grams": 200
+      },
+      {
+        "id": "bananes",
+        "grams": 100
+      },
+      {
+        "id": "baies-surgelees",
+        "grams": 80
+      },
+      {
+        "id": "graines-lin",
+        "grams": 10
+      },
+      {
+        "id": "flocons-avoine",
+        "grams": 20
+      }
+    ],
+    "steps": [
+      "Verser le yaourt dans un bol.",
+      "Ajouter la banane en rondelles et les fruits rouges.",
+      "Parsemer de flocons et de graines de lin."
+    ],
+    "kashrut": "halavi",
+    "tags": [
+      "rapide"
+    ],
+    "season": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "fridgeDays": 0,
+    "freezerMonths": 0,
+    "perServing": {
+      "kcal": 395,
+      "protein": 24.6,
+      "fat": 9.9,
+      "carbs": 47.4,
+      "priceChf": 2.49,
+      "priceBudgetChf": 2.23
+    },
+    "compatibleWith": [
+      "casher",
+      "halal",
+      "vegetarien",
+      "sans-arachides"
+    ]
+  },
+  {
+    "id": "pancakes-avoine-banane",
+    "name": "Pancakes avoine-banane",
+    "mealTypes": [
+      "petit-dej"
+    ],
+    "servings": 2,
+    "prepMin": 10,
+    "cookMin": 10,
+    "ingredients": [
+      {
+        "id": "flocons-avoine",
+        "grams": 120
+      },
+      {
+        "id": "oeufs",
+        "grams": 220
+      },
+      {
+        "id": "bananes",
+        "grams": 200
+      },
+      {
+        "id": "boisson-avoine",
+        "grams": 100
+      },
+      {
+        "id": "baies-surgelees",
+        "grams": 160
+      },
+      {
+        "id": "huile-colza",
+        "grams": 5
+      }
+    ],
+    "steps": [
+      "Mixer flocons, œufs, bananes et boisson à l’avoine en pâte épaisse.",
+      "Cuire de petites louches dans une poêle huilée, 2 min par face.",
+      "Servir avec les fruits rouges réchauffés."
+    ],
+    "kashrut": "parve",
+    "tags": [
+      "batch-friendly"
+    ],
+    "season": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "fridgeDays": 2,
+    "freezerMonths": 2,
+    "perServing": {
+      "kcal": 551,
+      "protein": 24,
+      "fat": 19,
+      "carbs": 67.1,
+      "priceChf": 1.92,
+      "priceBudgetChf": 1.54
+    },
+    "compatibleWith": [
+      "casher",
+      "halal",
+      "vegetarien",
+      "sans-lactose",
+      "sans-arachides"
+    ]
+  },
+  {
+    "id": "tartine-avocat-oeuf",
+    "name": "Tartine avocat et œuf",
+    "mealTypes": [
+      "petit-dej"
+    ],
+    "servings": 1,
+    "prepMin": 5,
+    "cookMin": 8,
+    "ingredients": [
+      {
+        "id": "pain-complet",
+        "grams": 80
+      },
+      {
+        "id": "avocat",
+        "grams": 70
+      },
+      {
+        "id": "oeufs",
+        "grams": 55
+      },
+      {
+        "id": "citron",
+        "grams": 5
+      }
+    ],
+    "steps": [
+      "Cuire l’œuf 7 min dans l’eau bouillante, puis le refroidir.",
+      "Écraser l’avocat avec le citron, sel et poivre.",
+      "Tartiner sur le pain grillé et ajouter l’œuf en tranches."
+    ],
+    "kashrut": "parve",
+    "tags": [
+      "rapide"
+    ],
+    "season": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "fridgeDays": 0,
+    "freezerMonths": 0,
+    "perServing": {
+      "kcal": 383,
+      "protein": 15.5,
+      "fat": 18.4,
+      "carbs": 34.4,
+      "priceChf": 1.23,
+      "priceBudgetChf": 1.17
+    },
+    "compatibleWith": [
+      "casher",
+      "halal",
+      "vegetarien",
+      "sans-lactose",
+      "sans-arachides"
+    ]
+  },
+  {
+    "id": "yaourt-soja-muesli",
+    "name": "Yaourt de soja, muesli et pomme",
+    "mealTypes": [
+      "petit-dej"
+    ],
+    "servings": 1,
+    "prepMin": 5,
+    "cookMin": 0,
+    "ingredients": [
+      {
+        "id": "yaourt-soja",
+        "grams": 200
+      },
+      {
+        "id": "muesli-nature",
+        "grams": 40
+      },
+      {
+        "id": "pommes",
+        "grams": 100
+      },
+      {
+        "id": "noix",
+        "grams": 10
+      }
+    ],
+    "steps": [
+      "Verser le yaourt dans un bol.",
+      "Ajouter le muesli et la pomme en dés.",
+      "Parsemer de noix."
+    ],
+    "kashrut": "parve",
+    "tags": [
+      "rapide"
+    ],
+    "season": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "fridgeDays": 0,
+    "freezerMonths": 0,
+    "perServing": {
+      "kcal": 366,
+      "protein": 13.8,
+      "fat": 13.7,
+      "carbs": 42.5,
+      "priceChf": 1.83,
+      "priceBudgetChf": 1.75
+    },
+    "compatibleWith": [
+      "casher",
+      "halal",
+      "vegetarien",
+      "sans-lactose",
+      "sans-arachides"
+    ]
+  },
+  {
+    "id": "galettes-riz-cottage",
+    "name": "Galettes de riz, cottage cheese et crudités",
+    "mealTypes": [
+      "petit-dej",
+      "collation"
+    ],
+    "servings": 1,
+    "prepMin": 5,
+    "cookMin": 0,
+    "ingredients": [
+      {
+        "id": "galettes-riz",
+        "grams": 30
+      },
+      {
+        "id": "cottage-cheese",
+        "grams": 150
+      },
+      {
+        "id": "concombre",
+        "grams": 100
+      },
+      {
+        "id": "tomates",
+        "grams": 80
+      }
+    ],
+    "steps": [
+      "Tartiner les galettes de cottage cheese.",
+      "Ajouter concombre et tomate en tranches.",
+      "Poivrer, ajouter des herbes si tu en as."
+    ],
+    "kashrut": "halavi",
+    "tags": [
+      "rapide"
+    ],
+    "season": [
+      5,
+      6,
+      7,
+      8,
+      9,
+      10
+    ],
+    "fridgeDays": 0,
+    "freezerMonths": 0,
+    "perServing": {
+      "kcal": 286,
+      "protein": 21.7,
+      "fat": 7.2,
+      "carbs": 32.4,
+      "priceChf": 2.53,
+      "priceBudgetChf": 2.53
+    },
+    "compatibleWith": [
+      "casher",
+      "halal",
+      "vegetarien",
+      "sans-gluten",
+      "sans-arachides"
+    ]
+  },
+  {
+    "id": "porridge-quinoa-poire",
+    "name": "Porridge de quinoa à la poire (sans gluten)",
+    "mealTypes": [
+      "petit-dej"
+    ],
+    "servings": 1,
+    "prepMin": 5,
+    "cookMin": 15,
+    "ingredients": [
+      {
+        "id": "quinoa",
+        "grams": 50
+      },
+      {
+        "id": "lait-sans-lactose",
+        "grams": 250
+      },
+      {
+        "id": "poires",
+        "grams": 120
+      },
+      {
+        "id": "cannelle",
+        "grams": 1
+      },
+      {
+        "id": "amandes",
+        "grams": 10
+      }
+    ],
+    "steps": [
+      "Rincer le quinoa puis le cuire 15 min dans le lait à feu doux.",
+      "Ajouter la poire en dés les 3 dernières minutes.",
+      "Servir avec cannelle et amandes effilées."
+    ],
+    "kashrut": "halavi",
+    "tags": [],
+    "season": [
+      9,
+      10,
+      11,
+      12,
+      1,
+      2,
+      3
+    ],
+    "fridgeDays": 2,
+    "freezerMonths": 0,
+    "perServing": {
+      "kcal": 456,
+      "protein": 17.9,
+      "fat": 15.3,
+      "carbs": 57.2,
+      "priceChf": 1.69,
+      "priceBudgetChf": 1.53
+    },
+    "compatibleWith": [
+      "casher",
+      "halal",
+      "vegetarien",
+      "sans-gluten",
+      "sans-lactose",
+      "sans-arachides"
+    ]
+  },
+  {
+    "id": "muesli-lait-banane",
+    "name": "Muesli au lait et banane",
+    "mealTypes": [
+      "petit-dej"
+    ],
+    "servings": 1,
+    "prepMin": 3,
+    "cookMin": 0,
+    "ingredients": [
+      {
+        "id": "muesli-nature",
+        "grams": 60
+      },
+      {
+        "id": "lait",
+        "grams": 200
+      },
+      {
+        "id": "bananes",
+        "grams": 100
+      }
+    ],
+    "steps": [
+      "Verser le muesli dans un bol.",
+      "Ajouter le lait froid.",
+      "Garnir de banane en rondelles."
+    ],
+    "kashrut": "halavi",
+    "tags": [
+      "rapide",
+      "petit-budget"
+    ],
+    "season": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "fridgeDays": 0,
+    "freezerMonths": 0,
+    "perServing": {
+      "kcal": 425,
+      "protein": 13.7,
+      "fat": 9.3,
+      "carbs": 67.8,
+      "priceChf": 0.8,
+      "priceBudgetChf": 0.68
+    },
+    "compatibleWith": [
+      "casher",
+      "halal",
+      "vegetarien",
+      "sans-arachides"
+    ]
+  },
+  {
+    "id": "porridge-sans-gluten-banane",
+    "name": "Porridge sans gluten à la banane",
+    "mealTypes": [
+      "petit-dej"
+    ],
+    "servings": 1,
+    "prepMin": 5,
+    "cookMin": 5,
+    "ingredients": [
+      {
+        "id": "flocons-avoine-sans-gluten",
+        "grams": 60
+      },
+      {
+        "id": "lait",
+        "grams": 250
+      },
+      {
+        "id": "bananes",
+        "grams": 100
+      },
+      {
+        "id": "noix",
+        "grams": 10
+      }
+    ],
+    "steps": [
+      "Cuire les flocons certifiés sans gluten dans le lait 4 à 5 min en remuant.",
+      "Ajouter la banane écrasée en fin de cuisson.",
+      "Parsemer de noix concassées."
+    ],
+    "kashrut": "halavi",
+    "tags": [
+      "rapide"
+    ],
+    "season": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "fridgeDays": 1,
+    "freezerMonths": 0,
+    "perServing": {
+      "kcal": 529,
+      "protein": 19,
+      "fat": 17.8,
+      "carbs": 69.1,
+      "priceChf": 1.29,
+      "priceBudgetChf": 1.29
+    },
+    "compatibleWith": [
+      "casher",
+      "halal",
+      "vegetarien",
+      "sans-gluten",
+      "sans-arachides"
+    ]
+  },
+  {
+    "id": "oeufs-pain-sans-gluten",
+    "name": "Œufs brouillés, pain sans gluten et tomate",
+    "mealTypes": [
+      "petit-dej"
+    ],
+    "servings": 1,
+    "prepMin": 5,
+    "cookMin": 5,
+    "ingredients": [
+      {
+        "id": "oeufs",
+        "grams": 110
+      },
+      {
+        "id": "pain-sans-gluten",
+        "grams": 70
+      },
+      {
+        "id": "tomates",
+        "grams": 100
+      },
+      {
+        "id": "huile-olive",
+        "grams": 5
+      }
+    ],
+    "steps": [
+      "Battre les œufs, saler et poivrer.",
+      "Les cuire à feu doux dans l’huile en remuant.",
+      "Servir avec le pain grillé et la tomate."
+    ],
+    "kashrut": "parve",
+    "tags": [
+      "rapide"
+    ],
+    "season": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "fridgeDays": 0,
+    "freezerMonths": 0,
+    "perServing": {
+      "kcal": 394,
+      "protein": 16.8,
+      "fat": 19.7,
+      "carbs": 35.8,
+      "priceChf": 2.19,
+      "priceBudgetChf": 2.1
+    },
+    "compatibleWith": [
+      "casher",
+      "halal",
+      "vegetarien",
+      "sans-gluten",
+      "sans-lactose",
+      "sans-arachides"
+    ]
+  },
+  {
+    "id": "sere-poire-amandes",
+    "name": "Séré, poire et amandes",
+    "mealTypes": [
+      "petit-dej",
+      "collation"
+    ],
+    "servings": 1,
+    "prepMin": 5,
+    "cookMin": 0,
+    "ingredients": [
+      {
+        "id": "sere-maigre",
+        "grams": 200
+      },
+      {
+        "id": "poires",
+        "grams": 120
+      },
+      {
+        "id": "amandes",
+        "grams": 15
+      },
+      {
+        "id": "miel",
+        "grams": 5
+      }
+    ],
+    "steps": [
+      "Couper la poire en dés.",
+      "Mélanger le séré avec le miel.",
+      "Ajouter la poire et les amandes concassées."
+    ],
+    "kashrut": "halavi",
+    "tags": [
+      "rapide"
+    ],
+    "season": [
+      9,
+      10,
+      11,
+      12,
+      1,
+      2,
+      3
+    ],
+    "fridgeDays": 1,
+    "freezerMonths": 0,
+    "perServing": {
+      "kcal": 312,
+      "protein": 27.6,
+      "fat": 8.8,
+      "carbs": 27.9,
+      "priceChf": 1.3,
+      "priceBudgetChf": 1.23
+    },
+    "compatibleWith": [
+      "casher",
+      "halal",
+      "vegetarien",
+      "sans-gluten",
+      "sans-arachides"
+    ]
+  },
+  {
+    "id": "galettes-riz-cacahuete-banane",
+    "name": "Galettes de riz, beurre de cacahuète et banane",
+    "mealTypes": [
+      "petit-dej",
+      "collation"
+    ],
+    "servings": 1,
+    "prepMin": 3,
+    "cookMin": 0,
+    "ingredients": [
+      {
+        "id": "galettes-riz",
+        "grams": 30
+      },
+      {
+        "id": "beurre-cacahuete",
+        "grams": 20
+      },
+      {
+        "id": "bananes",
+        "grams": 120
+      }
+    ],
+    "steps": [
+      "Tartiner les galettes de beurre de cacahuète.",
+      "Ajouter la banane en rondelles."
+    ],
+    "kashrut": "parve",
+    "tags": [
+      "rapide",
+      "petit-budget"
+    ],
+    "season": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "fridgeDays": 0,
+    "freezerMonths": 0,
+    "perServing": {
+      "kcal": 350,
+      "protein": 8.7,
+      "fat": 11.3,
+      "carbs": 51.3,
+      "priceChf": 0.85,
+      "priceBudgetChf": 0.85
+    },
+    "compatibleWith": [
+      "casher",
+      "halal",
+      "vegetarien",
+      "sans-gluten",
+      "sans-lactose"
+    ]
+  },
+  {
+    "id": "yaourt-soja-baies-graines",
+    "name": "Yaourt de soja, fruits rouges et graines",
+    "mealTypes": [
+      "petit-dej"
+    ],
+    "servings": 1,
+    "prepMin": 5,
+    "cookMin": 0,
+    "ingredients": [
+      {
+        "id": "yaourt-soja",
+        "grams": 200
+      },
+      {
+        "id": "baies-surgelees",
+        "grams": 100
+      },
+      {
+        "id": "graines-courge",
+        "grams": 15
+      },
+      {
+        "id": "flocons-avoine-sans-gluten",
+        "grams": 30
+      }
+    ],
+    "steps": [
+      "Décongeler les fruits rouges quelques minutes.",
+      "Verser le yaourt dans un bol, ajouter les fruits.",
+      "Parsemer de flocons sans gluten et de graines de courge."
+    ],
+    "kashrut": "parve",
+    "tags": [
+      "rapide"
+    ],
+    "season": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "fridgeDays": 0,
+    "freezerMonths": 0,
+    "perServing": {
+      "kcal": 344,
+      "protein": 17.6,
+      "fat": 14.4,
+      "carbs": 31.5,
+      "priceChf": 2.66,
+      "priceBudgetChf": 2.34
+    },
+    "compatibleWith": [
+      "casher",
+      "halal",
+      "vegetarien",
+      "sans-gluten",
+      "sans-lactose",
+      "sans-arachides"
+    ]
+  },
+  {
+    "id": "base-riz-complet",
+    "name": "Base : riz complet",
+    "mealTypes": [
+      "base"
+    ],
+    "servings": 6,
+    "prepMin": 2,
+    "cookMin": 30,
+    "ingredients": [
+      {
+        "id": "riz-complet",
+        "grams": 420
+      }
+    ],
+    "steps": [
+      "Rincer le riz.",
+      "Cuire 30 min dans 2,5 fois son volume d’eau salée, à couvert.",
+      "Laisser reposer 5 min, égrener, refroidir rapidement et répartir en boîtes."
+    ],
+    "kashrut": "parve",
+    "tags": [
+      "batch-friendly",
+      "petit-budget"
+    ],
+    "season": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "fridgeDays": 4,
+    "freezerMonths": 3,
+    "batchRole": "cereale",
+    "perServing": {
+      "kcal": 245,
+      "protein": 5.3,
+      "fat": 1.9,
+      "carbs": 50.4,
+      "priceChf": 0.28,
+      "priceBudgetChf": 0.28
+    },
+    "compatibleWith": [
+      "casher",
+      "halal",
+      "vegetarien",
+      "sans-gluten",
+      "sans-lactose",
+      "sans-arachides"
+    ]
+  },
+  {
+    "id": "base-quinoa",
+    "name": "Base : quinoa",
+    "mealTypes": [
+      "base"
+    ],
+    "servings": 6,
+    "prepMin": 2,
+    "cookMin": 15,
+    "ingredients": [
+      {
+        "id": "quinoa",
+        "grams": 360
+      }
+    ],
+    "steps": [
+      "Rincer soigneusement le quinoa (il perd son amertume).",
+      "Cuire 12 à 15 min dans 2 fois son volume d’eau salée.",
+      "Égoutter, étaler pour refroidir, puis mettre en boîtes."
+    ],
+    "kashrut": "parve",
+    "tags": [
+      "batch-friendly",
+      "petit-budget"
+    ],
+    "season": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "fridgeDays": 4,
+    "freezerMonths": 3,
+    "batchRole": "cereale",
+    "perServing": {
+      "kcal": 219,
+      "protein": 8.4,
+      "fat": 3.6,
+      "carbs": 34.8,
+      "priceChf": 0.54,
+      "priceBudgetChf": 0.42
+    },
+    "compatibleWith": [
+      "casher",
+      "halal",
+      "vegetarien",
+      "sans-gluten",
+      "sans-lactose",
+      "sans-arachides"
+    ]
+  },
+  {
+    "id": "base-boulgour",
+    "name": "Base : boulgour",
+    "mealTypes": [
+      "base"
+    ],
+    "servings": 6,
+    "prepMin": 2,
+    "cookMin": 12,
+    "ingredients": [
+      {
+        "id": "boulgour",
+        "grams": 400
+      }
+    ],
+    "steps": [
+      "Porter 1 L d’eau salée à ébullition.",
+      "Verser le boulgour, couvrir et cuire 10 à 12 min à feu doux.",
+      "Égrener à la fourchette et laisser refroidir."
+    ],
+    "kashrut": "parve",
+    "tags": [
+      "batch-friendly",
+      "petit-budget"
+    ],
+    "season": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "fridgeDays": 4,
+    "freezerMonths": 3,
+    "batchRole": "cereale",
+    "perServing": {
+      "kcal": 233,
+      "protein": 8,
+      "fat": 1,
+      "carbs": 46.7,
+      "priceChf": 0.35,
+      "priceBudgetChf": 0.35
+    },
+    "compatibleWith": [
+      "casher",
+      "halal",
+      "vegetarien",
+      "sans-lactose",
+      "sans-arachides"
+    ]
+  },
+  {
+    "id": "base-poulet-epices",
+    "name": "Base : poulet rôti aux épices",
+    "mealTypes": [
+      "base"
+    ],
+    "servings": 6,
+    "prepMin": 10,
+    "cookMin": 25,
+    "ingredients": [
+      {
+        "id": "poulet-emince",
+        "grams": 900
+      },
+      {
+        "id": "huile-colza",
+        "grams": 20
+      },
+      {
+        "id": "paprika",
+        "grams": 6
+      },
+      {
+        "id": "cumin",
+        "grams": 4
+      },
+      {
+        "id": "ail",
+        "grams": 10
+      }
+    ],
+    "steps": [
+      "Préchauffer le four à 200 °C.",
+      "Mélanger le poulet avec l’huile, l’ail écrasé et les épices.",
+      "Étaler sur une plaque et rôtir 20 à 25 min.",
+      "Laisser refroidir, trancher et répartir en boîtes."
+    ],
+    "kashrut": "bassari",
+    "tags": [
+      "batch-friendly"
+    ],
+    "season": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "fridgeDays": 3,
+    "freezerMonths": 3,
+    "batchRole": "proteine",
+    "perServing": {
+      "kcal": 203,
+      "protein": 34.9,
+      "fat": 5.9,
+      "carbs": 0.9,
+      "priceChf": 2.14,
+      "priceBudgetChf": 2.14
+    },
+    "compatibleWith": [
+      "casher",
+      "halal",
+      "sans-gluten",
+      "sans-lactose",
+      "sans-arachides"
+    ]
+  },
+  {
+    "id": "base-lentilles",
+    "name": "Base : lentilles vertes cuites",
+    "mealTypes": [
+      "base"
+    ],
+    "servings": 6,
+    "prepMin": 5,
+    "cookMin": 25,
+    "ingredients": [
+      {
+        "id": "lentilles-vertes",
+        "grams": 400
+      },
+      {
+        "id": "oignons",
+        "grams": 100
+      },
+      {
+        "id": "carottes",
+        "grams": 150
+      },
+      {
+        "id": "bouillon-legumes",
+        "grams": 8
+      }
+    ],
+    "steps": [
+      "Rincer les lentilles.",
+      "Les cuire 20 à 25 min dans 3 fois leur volume d’eau avec l’oignon, la carotte en dés et le bouillon.",
+      "Égoutter (elles doivent rester un peu fermes) et refroidir."
+    ],
+    "kashrut": "parve",
+    "tags": [
+      "batch-friendly",
+      "petit-budget"
+    ],
+    "season": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "fridgeDays": 5,
+    "freezerMonths": 3,
+    "batchRole": "proteine",
+    "perServing": {
+      "kcal": 238,
+      "protein": 16.5,
+      "fat": 1.2,
+      "carbs": 35.4,
+      "priceChf": 0.52,
+      "priceBudgetChf": 0.52
+    },
+    "compatibleWith": [
+      "casher",
+      "halal",
+      "vegetarien",
+      "sans-gluten",
+      "sans-lactose",
+      "sans-arachides"
+    ]
+  },
+  {
+    "id": "base-pois-chiches-rotis",
+    "name": "Base : pois chiches rôtis",
+    "mealTypes": [
+      "base"
+    ],
+    "servings": 6,
+    "prepMin": 5,
+    "cookMin": 30,
+    "ingredients": [
+      {
+        "id": "pois-chiches-conserve",
+        "grams": 960
+      },
+      {
+        "id": "huile-olive",
+        "grams": 20
+      },
+      {
+        "id": "paprika",
+        "grams": 5
+      },
+      {
+        "id": "cumin",
+        "grams": 3
+      }
+    ],
+    "steps": [
+      "Préchauffer le four à 200 °C.",
+      "Égoutter, rincer et sécher les pois chiches dans un torchon.",
+      "Mélanger avec l’huile et les épices, rôtir 25 à 30 min en remuant à mi-cuisson."
+    ],
+    "kashrut": "parve",
+    "tags": [
+      "batch-friendly",
+      "petit-budget"
+    ],
+    "season": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "fridgeDays": 4,
+    "freezerMonths": 0,
+    "batchRole": "proteine",
+    "perServing": {
+      "kcal": 226,
+      "protein": 11.4,
+      "fat": 7.6,
+      "carbs": 24.3,
+      "priceChf": 0.8,
+      "priceBudgetChf": 0.8
+    },
+    "compatibleWith": [
+      "casher",
+      "halal",
+      "vegetarien",
+      "sans-gluten",
+      "sans-lactose",
+      "sans-arachides"
+    ]
+  },
+  {
+    "id": "base-legumes-rotis-hiver",
+    "name": "Base : légumes d’hiver rôtis",
+    "mealTypes": [
+      "base"
+    ],
+    "servings": 6,
+    "prepMin": 15,
+    "cookMin": 35,
+    "ingredients": [
+      {
+        "id": "courge-butternut",
+        "grams": 800
+      },
+      {
+        "id": "carottes",
+        "grams": 500
+      },
+      {
+        "id": "oignons",
+        "grams": 200
+      },
+      {
+        "id": "huile-olive",
+        "grams": 30
+      },
+      {
+        "id": "herbes-provence",
+        "grams": 3
+      }
+    ],
+    "steps": [
+      "Préchauffer le four à 200 °C.",
+      "Couper la courge et les carottes en cubes, l’oignon en quartiers.",
+      "Mélanger avec l’huile et les herbes, rôtir 30 à 35 min sur deux plaques."
+    ],
+    "kashrut": "parve",
+    "tags": [
+      "batch-friendly",
+      "petit-budget"
+    ],
+    "season": [
+      10,
+      11,
+      12,
+      1,
+      2,
+      3,
+      4
+    ],
+    "fridgeDays": 4,
+    "freezerMonths": 3,
+    "batchRole": "legumes",
+    "perServing": {
+      "kcal": 148,
+      "protein": 2.4,
+      "fat": 5.4,
+      "carbs": 22.1,
+      "priceChf": 0.78,
+      "priceBudgetChf": 0.78
+    },
+    "compatibleWith": [
+      "casher",
+      "halal",
+      "vegetarien",
+      "sans-gluten",
+      "sans-lactose",
+      "sans-arachides"
+    ]
+  },
+  {
+    "id": "base-legumes-rotis-ete",
+    "name": "Base : légumes d’été rôtis",
+    "mealTypes": [
+      "base"
+    ],
+    "servings": 6,
+    "prepMin": 15,
+    "cookMin": 30,
+    "ingredients": [
+      {
+        "id": "courgette",
+        "grams": 600
+      },
+      {
+        "id": "poivron",
+        "grams": 500
+      },
+      {
+        "id": "oignons",
+        "grams": 200
+      },
+      {
+        "id": "tomates",
+        "grams": 300
+      },
+      {
+        "id": "huile-olive",
+        "grams": 30
+      },
+      {
+        "id": "herbes-provence",
+        "grams": 3
+      }
+    ],
+    "steps": [
+      "Préchauffer le four à 200 °C.",
+      "Couper tous les légumes en morceaux de taille égale.",
+      "Mélanger avec l’huile et les herbes, rôtir 25 à 30 min."
+    ],
+    "kashrut": "parve",
+    "tags": [
+      "batch-friendly"
+    ],
+    "season": [
+      5,
+      6,
+      7,
+      8,
+      9,
+      10
+    ],
+    "fridgeDays": 4,
+    "freezerMonths": 3,
+    "batchRole": "legumes",
+    "perServing": {
+      "kcal": 111,
+      "protein": 3.2,
+      "fat": 5.8,
+      "carbs": 11.3,
+      "priceChf": 1.32,
+      "priceBudgetChf": 1.15
+    },
+    "compatibleWith": [
+      "casher",
+      "halal",
+      "vegetarien",
+      "sans-gluten",
+      "sans-lactose",
+      "sans-arachides"
+    ]
+  },
+  {
+    "id": "base-sauce-tomate",
+    "name": "Base : sauce tomate maison",
+    "mealTypes": [
+      "base"
+    ],
+    "servings": 6,
+    "prepMin": 10,
+    "cookMin": 30,
+    "ingredients": [
+      {
+        "id": "tomates-pelees-conserve",
+        "grams": 1200
+      },
+      {
+        "id": "oignons",
+        "grams": 150
+      },
+      {
+        "id": "ail",
+        "grams": 10
+      },
+      {
+        "id": "huile-olive",
+        "grams": 20
+      },
+      {
+        "id": "herbes-provence",
+        "grams": 3
+      }
+    ],
+    "steps": [
+      "Faire revenir l’oignon et l’ail hachés dans l’huile 5 min.",
+      "Ajouter les tomates et les herbes, saler.",
+      "Mijoter 25 min à couvert. Mixer si tu la veux lisse."
+    ],
+    "kashrut": "parve",
+    "tags": [
+      "batch-friendly",
+      "petit-budget"
+    ],
+    "season": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "fridgeDays": 5,
+    "freezerMonths": 6,
+    "batchRole": "sauce",
+    "perServing": {
+      "kcal": 86,
+      "protein": 2.6,
+      "fat": 3.8,
+      "carbs": 9.8,
+      "priceChf": 0.44,
+      "priceBudgetChf": 0.44
+    },
+    "compatibleWith": [
+      "casher",
+      "halal",
+      "vegetarien",
+      "sans-gluten",
+      "sans-lactose",
+      "sans-arachides"
+    ]
+  },
+  {
+    "id": "base-sauce-yaourt-herbes",
+    "name": "Base : sauce yaourt-citron",
+    "mealTypes": [
+      "base"
+    ],
+    "servings": 6,
+    "prepMin": 5,
+    "cookMin": 0,
+    "ingredients": [
+      {
+        "id": "yaourt-grec",
+        "grams": 400
+      },
+      {
+        "id": "citron",
+        "grams": 30
+      },
+      {
+        "id": "ail",
+        "grams": 5
+      },
+      {
+        "id": "herbes-provence",
+        "grams": 2
+      }
+    ],
+    "steps": [
+      "Mélanger le yaourt, le jus de citron et l’ail râpé.",
+      "Ajouter les herbes, saler et poivrer.",
+      "Conserver en bocal fermé."
+    ],
+    "kashrut": "halavi",
+    "tags": [
+      "batch-friendly",
+      "petit-budget"
+    ],
+    "season": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "fridgeDays": 4,
+    "freezerMonths": 0,
+    "batchRole": "sauce",
+    "perServing": {
+      "kcal": 50,
+      "protein": 6.1,
+      "fat": 1.4,
+      "carbs": 3.2,
+      "priceChf": 0.53,
+      "priceBudgetChf": 0.53
+    },
+    "compatibleWith": [
+      "casher",
+      "halal",
+      "vegetarien",
+      "sans-gluten",
+      "sans-arachides"
+    ]
+  },
+  {
+    "id": "base-sauce-tahini",
+    "name": "Base : sauce tahini-citron",
+    "mealTypes": [
+      "base"
+    ],
+    "servings": 6,
+    "prepMin": 5,
+    "cookMin": 0,
+    "ingredients": [
+      {
+        "id": "tahini",
+        "grams": 120
+      },
+      {
+        "id": "citron",
+        "grams": 40
+      },
+      {
+        "id": "ail",
+        "grams": 5
+      }
+    ],
+    "steps": [
+      "Mélanger le tahini et le jus de citron (il épaissit, c’est normal).",
+      "Détendre avec 6 à 8 c. à soupe d’eau froide jusqu’à consistance nappante.",
+      "Ajouter l’ail râpé et saler."
+    ],
+    "kashrut": "parve",
+    "tags": [
+      "batch-friendly",
+      "petit-budget"
+    ],
+    "season": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "fridgeDays": 6,
+    "freezerMonths": 0,
+    "batchRole": "sauce",
+    "perServing": {
+      "kcal": 124,
+      "protein": 3.7,
+      "fat": 10.8,
+      "carbs": 2.4,
+      "priceChf": 0.34,
+      "priceBudgetChf": 0.34
+    },
+    "compatibleWith": [
+      "casher",
+      "halal",
+      "vegetarien",
+      "sans-gluten",
+      "sans-lactose",
+      "sans-arachides"
+    ]
+  },
+  {
+    "id": "bowl-poulet-riz-legumes",
+    "name": "Bowl poulet, riz complet et légumes sautés",
+    "mealTypes": [
+      "dejeuner",
+      "diner"
+    ],
+    "servings": 1,
+    "prepMin": 10,
+    "cookMin": 15,
+    "ingredients": [
+      {
+        "id": "riz-complet",
+        "grams": 70
+      },
+      {
+        "id": "poulet-emince",
+        "grams": 150
+      },
+      {
+        "id": "melange-legumes-surgeles",
+        "grams": 150
+      },
+      {
+        "id": "sauce-soja",
+        "grams": 10
+      },
+      {
+        "id": "huile-colza",
+        "grams": 8
+      }
+    ],
+    "steps": [
+      "Cuire le riz (ou utiliser une base déjà cuite).",
+      "Saisir le poulet en lanières dans l’huile 5 à 6 min.",
+      "Ajouter les légumes, cuire 5 min, déglacer à la sauce soja.",
+      "Servir sur le riz."
+    ],
+    "kashrut": "bassari",
+    "tags": [
+      "batch-friendly"
+    ],
+    "season": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "fridgeDays": 3,
+    "freezerMonths": 2,
+    "perServing": {
+      "kcal": 548,
+      "protein": 43.6,
+      "fat": 12.6,
+      "carbs": 60,
+      "priceChf": 3.16,
+      "priceBudgetChf": 2.97
+    },
+    "compatibleWith": [
+      "casher",
+      "halal",
+      "sans-lactose",
+      "sans-arachides"
+    ]
+  },
+  {
+    "id": "chili-con-carne",
+    "name": "Chili con carne",
+    "mealTypes": [
+      "dejeuner",
+      "diner"
+    ],
+    "servings": 4,
+    "prepMin": 15,
+    "cookMin": 40,
+    "ingredients": [
+      {
+        "id": "boeuf-hache",
+        "grams": 400
+      },
+      {
+        "id": "haricots-rouges-conserve",
+        "grams": 480
+      },
+      {
+        "id": "tomates-pelees-conserve",
+        "grams": 800
+      },
+      {
+        "id": "oignons",
+        "grams": 150
+      },
+      {
+        "id": "poivron",
+        "grams": 200
+      },
+      {
+        "id": "mais-conserve",
+        "grams": 140
+      },
+      {
+        "id": "paprika",
+        "grams": 4
+      },
+      {
+        "id": "cumin",
+        "grams": 3
+      },
+      {
+        "id": "huile-colza",
+        "grams": 15
+      },
+      {
+        "id": "riz-long",
+        "grams": 240
+      }
+    ],
+    "steps": [
+      "Faire revenir oignons et poivron dans l’huile 5 min.",
+      "Ajouter la viande et la faire dorer en l’émiettant.",
+      "Ajouter épices, tomates, haricots et maïs ; mijoter 30 min.",
+      "Pendant ce temps, cuire le riz. Servir ensemble."
+    ],
+    "kashrut": "bassari",
+    "tags": [
+      "batch-friendly"
+    ],
+    "season": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "fridgeDays": 4,
+    "freezerMonths": 3,
+    "perServing": {
+      "kcal": 686,
+      "protein": 37.7,
+      "fat": 19.2,
+      "carbs": 83.3,
+      "priceChf": 3.41,
+      "priceBudgetChf": 3.26
+    },
+    "compatibleWith": [
+      "casher",
+      "halal",
+      "sans-gluten",
+      "sans-lactose",
+      "sans-arachides"
+    ]
+  },
+  {
+    "id": "chili-sin-carne",
+    "name": "Chili sin carne aux lentilles",
+    "mealTypes": [
+      "dejeuner",
+      "diner"
+    ],
+    "servings": 4,
+    "prepMin": 15,
+    "cookMin": 35,
+    "ingredients": [
+      {
+        "id": "lentilles-corail",
+        "grams": 200
+      },
+      {
+        "id": "haricots-rouges-conserve",
+        "grams": 480
+      },
+      {
+        "id": "tomates-pelees-conserve",
+        "grams": 800
+      },
+      {
+        "id": "oignons",
+        "grams": 150
+      },
+      {
+        "id": "poivron",
+        "grams": 200
+      },
+      {
+        "id": "mais-conserve",
+        "grams": 140
+      },
+      {
+        "id": "paprika",
+        "grams": 4
+      },
+      {
+        "id": "cumin",
+        "grams": 3
+      },
+      {
+        "id": "huile-colza",
+        "grams": 15
+      },
+      {
+        "id": "riz-long",
+        "grams": 240
+      }
+    ],
+    "steps": [
+      "Faire revenir oignons et poivron dans l’huile 5 min.",
+      "Ajouter épices, lentilles rincées, tomates et 400 ml d’eau.",
+      "Mijoter 20 min, ajouter haricots et maïs, cuire encore 10 min.",
+      "Servir avec le riz."
+    ],
+    "kashrut": "parve",
+    "tags": [
+      "batch-friendly",
+      "petit-budget"
+    ],
+    "season": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "fridgeDays": 5,
+    "freezerMonths": 3,
+    "perServing": {
+      "kcal": 656,
+      "protein": 29.7,
+      "fat": 6.9,
+      "carbs": 108.3,
+      "priceChf": 1.71,
+      "priceBudgetChf": 1.55
+    },
+    "compatibleWith": [
+      "casher",
+      "halal",
+      "vegetarien",
+      "sans-gluten",
+      "sans-lactose",
+      "sans-arachides"
+    ]
+  },
+  {
+    "id": "dahl-lentilles-corail",
+    "name": "Dahl de lentilles corail aux épinards",
+    "mealTypes": [
+      "dejeuner",
+      "diner"
+    ],
+    "servings": 4,
+    "prepMin": 10,
+    "cookMin": 25,
+    "ingredients": [
+      {
+        "id": "lentilles-corail",
+        "grams": 300
+      },
+      {
+        "id": "lait-coco",
+        "grams": 400
+      },
+      {
+        "id": "tomates-pelees-conserve",
+        "grams": 400
+      },
+      {
+        "id": "oignons",
+        "grams": 150
+      },
+      {
+        "id": "ail",
+        "grams": 10
+      },
+      {
+        "id": "epices-curry",
+        "grams": 8
+      },
+      {
+        "id": "epinards-surgeles",
+        "grams": 300
+      },
+      {
+        "id": "huile-colza",
+        "grams": 10
+      },
+      {
+        "id": "riz-long",
+        "grams": 240
+      }
+    ],
+    "steps": [
+      "Faire revenir oignon et ail dans l’huile, ajouter le curry 1 min.",
+      "Ajouter lentilles rincées, tomates, lait de coco et 300 ml d’eau.",
+      "Mijoter 20 min, ajouter les épinards 5 min avant la fin.",
+      "Servir avec le riz."
+    ],
+    "kashrut": "parve",
+    "tags": [
+      "batch-friendly",
+      "petit-budget"
+    ],
+    "season": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "fridgeDays": 4,
+    "freezerMonths": 3,
+    "perServing": {
+      "kcal": 734,
+      "protein": 27.8,
+      "fat": 22.9,
+      "carbs": 96,
+      "priceChf": 1.71,
+      "priceBudgetChf": 1.43
+    },
+    "compatibleWith": [
+      "casher",
+      "halal",
+      "vegetarien",
+      "sans-gluten",
+      "sans-lactose",
+      "sans-arachides"
+    ]
+  },
+  {
+    "id": "curry-pois-chiches",
+    "name": "Curry de pois chiches et épinards",
+    "mealTypes": [
+      "dejeuner",
+      "diner"
+    ],
+    "servings": 4,
+    "prepMin": 10,
+    "cookMin": 20,
+    "ingredients": [
+      {
+        "id": "pois-chiches-conserve",
+        "grams": 480
+      },
+      {
+        "id": "lait-coco",
+        "grams": 200
+      },
+      {
+        "id": "tomates-pelees-conserve",
+        "grams": 400
+      },
+      {
+        "id": "epinards-surgeles",
+        "grams": 200
+      },
+      {
+        "id": "oignons",
+        "grams": 120
+      },
+      {
+        "id": "epices-curry",
+        "grams": 8
+      },
+      {
+        "id": "huile-colza",
+        "grams": 10
+      },
+      {
+        "id": "riz-long",
+        "grams": 240
+      }
+    ],
+    "steps": [
+      "Faire revenir l’oignon dans l’huile, ajouter le curry.",
+      "Ajouter tomates, lait de coco et pois chiches égouttés ; mijoter 15 min.",
+      "Ajouter les épinards et cuire 5 min.",
+      "Servir avec le riz."
+    ],
+    "kashrut": "parve",
+    "tags": [
+      "batch-friendly",
+      "petit-budget"
+    ],
+    "season": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "fridgeDays": 4,
+    "freezerMonths": 3,
+    "perServing": {
+      "kcal": 521,
+      "protein": 16.5,
+      "fat": 15.6,
+      "carbs": 73.4,
+      "priceChf": 1.39,
+      "priceBudgetChf": 1.23
+    },
+    "compatibleWith": [
+      "casher",
+      "halal",
+      "vegetarien",
+      "sans-gluten",
+      "sans-lactose",
+      "sans-arachides"
+    ]
+  },
+  {
+    "id": "saumon-pdt-brocoli",
+    "name": "Saumon au four, pommes de terre et brocoli",
+    "mealTypes": [
+      "dejeuner",
+      "diner"
+    ],
+    "servings": 1,
+    "prepMin": 10,
+    "cookMin": 25,
+    "ingredients": [
+      {
+        "id": "saumon-filet",
+        "grams": 150
+      },
+      {
+        "id": "pommes-de-terre",
+        "grams": 250
+      },
+      {
+        "id": "brocoli",
+        "grams": 200
+      },
+      {
+        "id": "huile-olive",
+        "grams": 8
+      },
+      {
+        "id": "citron",
+        "grams": 10
+      }
+    ],
+    "steps": [
+      "Préchauffer le four à 200 °C. Couper les pommes de terre en quartiers.",
+      "Les rôtir 10 min avec la moitié de l’huile.",
+      "Ajouter le saumon et le brocoli en fleurettes, arroser du reste d’huile, cuire 12 à 15 min.",
+      "Servir avec un filet de citron."
+    ],
+    "kashrut": "parve",
+    "tags": [],
+    "season": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "fridgeDays": 2,
+    "freezerMonths": 0,
+    "perServing": {
+      "kcal": 636,
+      "protein": 42.1,
+      "fat": 28.6,
+      "carbs": 48.8,
+      "priceChf": 5.64,
+      "priceBudgetChf": 4.56
+    },
+    "compatibleWith": [
+      "casher",
+      "halal",
+      "sans-gluten",
+      "sans-lactose",
+      "sans-arachides"
+    ]
+  },
+  {
+    "id": "truite-pdt-haricots",
+    "name": "Truite suisse, pommes vapeur et haricots verts",
+    "mealTypes": [
+      "dejeuner",
+      "diner"
+    ],
+    "servings": 1,
+    "prepMin": 10,
+    "cookMin": 20,
+    "ingredients": [
+      {
+        "id": "truite-filet",
+        "grams": 150
+      },
+      {
+        "id": "pommes-de-terre",
+        "grams": 250
+      },
+      {
+        "id": "haricots-verts-surgeles",
+        "grams": 200
+      },
+      {
+        "id": "huile-colza",
+        "grams": 8
+      },
+      {
+        "id": "citron",
+        "grams": 10
+      }
+    ],
+    "steps": [
+      "Cuire les pommes de terre à la vapeur 20 min et les haricots 10 min.",
+      "Poêler la truite côté peau 3 min dans l’huile, puis 1 min de l’autre côté.",
+      "Servir avec du citron."
+    ],
+    "kashrut": "parve",
+    "tags": [
+      "rapide"
+    ],
+    "season": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "fridgeDays": 2,
+    "freezerMonths": 0,
+    "perServing": {
+      "kcal": 523,
+      "protein": 39.1,
+      "fat": 16.2,
+      "carbs": 52.8,
+      "priceChf": 6.01,
+      "priceBudgetChf": 5.79
+    },
+    "compatibleWith": [
+      "casher",
+      "halal",
+      "sans-gluten",
+      "sans-lactose",
+      "sans-arachides"
+    ]
+  },
+  {
+    "id": "cabillaud-papillote-riz",
+    "name": "Cabillaud en papillote, courgettes et riz",
+    "mealTypes": [
+      "dejeuner",
+      "diner"
+    ],
+    "servings": 1,
+    "prepMin": 10,
+    "cookMin": 20,
+    "ingredients": [
+      {
+        "id": "cabillaud-filet",
+        "grams": 160
+      },
+      {
+        "id": "courgette",
+        "grams": 150
+      },
+      {
+        "id": "tomates",
+        "grams": 100
+      },
+      {
+        "id": "riz-long",
+        "grams": 70
+      },
+      {
+        "id": "huile-olive",
+        "grams": 8
+      },
+      {
+        "id": "citron",
+        "grams": 10
+      }
+    ],
+    "steps": [
+      "Préchauffer le four à 200 °C et cuire le riz.",
+      "Sur du papier cuisson, déposer courgette et tomate en rondelles, puis le poisson.",
+      "Arroser d’huile et de citron, fermer la papillote et cuire 15 min."
+    ],
+    "kashrut": "parve",
+    "tags": [],
+    "season": [
+      5,
+      6,
+      7,
+      8,
+      9,
+      10
+    ],
+    "fridgeDays": 2,
+    "freezerMonths": 0,
+    "perServing": {
+      "kcal": 499,
+      "protein": 36.9,
+      "fat": 10.2,
+      "carbs": 62.1,
+      "priceChf": 4.38,
+      "priceBudgetChf": 3.42
+    },
+    "compatibleWith": [
+      "casher",
+      "halal",
+      "sans-gluten",
+      "sans-lactose",
+      "sans-arachides"
+    ]
+  },
+  {
+    "id": "pates-thon-tomate",
+    "name": "Pâtes au thon et à la tomate",
+    "mealTypes": [
+      "dejeuner",
+      "diner"
+    ],
+    "servings": 1,
+    "prepMin": 5,
+    "cookMin": 12,
+    "ingredients": [
+      {
+        "id": "pates",
+        "grams": 100
+      },
+      {
+        "id": "thon-conserve",
+        "grams": 120
+      },
+      {
+        "id": "tomates-pelees-conserve",
+        "grams": 200
+      },
+      {
+        "id": "oignons",
+        "grams": 50
+      },
+      {
+        "id": "huile-olive",
+        "grams": 8
+      },
+      {
+        "id": "herbes-provence",
+        "grams": 1
+      }
+    ],
+    "steps": [
+      "Cuire les pâtes.",
+      "Faire revenir l’oignon dans l’huile, ajouter tomates et herbes, mijoter 8 min.",
+      "Ajouter le thon émietté hors du feu et mélanger aux pâtes."
+    ],
+    "kashrut": "parve",
+    "tags": [
+      "rapide",
+      "petit-budget"
+    ],
+    "season": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "fridgeDays": 2,
+    "freezerMonths": 0,
+    "perServing": {
+      "kcal": 629,
+      "protein": 46.1,
+      "fat": 11.3,
+      "carbs": 82.2,
+      "priceChf": 1.71,
+      "priceBudgetChf": 1.71
+    },
+    "compatibleWith": [
+      "casher",
+      "halal",
+      "sans-lactose",
+      "sans-arachides"
+    ]
+  },
+  {
+    "id": "pates-bolognaise",
+    "name": "Pâtes à la bolognaise",
+    "mealTypes": [
+      "dejeuner",
+      "diner"
+    ],
+    "servings": 4,
+    "prepMin": 15,
+    "cookMin": 40,
+    "ingredients": [
+      {
+        "id": "pates",
+        "grams": 400
+      },
+      {
+        "id": "boeuf-hache",
+        "grams": 400
+      },
+      {
+        "id": "tomates-pelees-conserve",
+        "grams": 800
+      },
+      {
+        "id": "oignons",
+        "grams": 150
+      },
+      {
+        "id": "carottes",
+        "grams": 150
+      },
+      {
+        "id": "huile-olive",
+        "grams": 15
+      },
+      {
+        "id": "herbes-provence",
+        "grams": 3
+      }
+    ],
+    "steps": [
+      "Faire revenir oignons et carottes en petits dés dans l’huile 5 min.",
+      "Ajouter la viande et la dorer.",
+      "Ajouter tomates et herbes, mijoter 30 min.",
+      "Cuire les pâtes et servir avec la sauce."
+    ],
+    "kashrut": "bassari",
+    "tags": [
+      "batch-friendly"
+    ],
+    "season": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "fridgeDays": 4,
+    "freezerMonths": 3,
+    "perServing": {
+      "kcal": 661,
+      "protein": 35,
+      "fat": 18.9,
+      "carbs": 84.1,
+      "priceChf": 2.64,
+      "priceBudgetChf": 2.64
+    },
+    "compatibleWith": [
+      "casher",
+      "halal",
+      "sans-lactose",
+      "sans-arachides"
+    ]
+  },
+  {
+    "id": "pates-pesto-poulet",
+    "name": "Pâtes au pesto, poulet et tomates",
+    "mealTypes": [
+      "dejeuner",
+      "diner"
+    ],
+    "servings": 1,
+    "prepMin": 5,
+    "cookMin": 12,
+    "ingredients": [
+      {
+        "id": "pates",
+        "grams": 100
+      },
+      {
+        "id": "poulet-emince",
+        "grams": 120
+      },
+      {
+        "id": "pesto-basilic",
+        "grams": 30
+      },
+      {
+        "id": "tomates",
+        "grams": 100
+      },
+      {
+        "id": "huile-olive",
+        "grams": 5
+      }
+    ],
+    "steps": [
+      "Cuire les pâtes.",
+      "Poêler le poulet en lanières dans l’huile 6 min.",
+      "Mélanger pâtes, poulet, pesto et tomates en dés."
+    ],
+    "kashrut": "non-casher",
+    "tags": [
+      "rapide"
+    ],
+    "season": [
+      5,
+      6,
+      7,
+      8,
+      9,
+      10
+    ],
+    "fridgeDays": 2,
+    "freezerMonths": 0,
+    "perServing": {
+      "kcal": 687,
+      "protein": 42,
+      "fat": 22,
+      "carbs": 76.3,
+      "priceChf": 2.7,
+      "priceBudgetChf": 2.7
+    },
+    "compatibleWith": [
+      "halal",
+      "sans-lactose",
+      "sans-arachides"
+    ]
+  },
+  {
+    "id": "risotto-champignons",
+    "name": "Risotto aux champignons",
+    "mealTypes": [
+      "dejeuner",
+      "diner"
+    ],
+    "servings": 4,
+    "prepMin": 10,
+    "cookMin": 25,
+    "ingredients": [
+      {
+        "id": "riz-arborio",
+        "grams": 320
+      },
+      {
+        "id": "vin-blanc",
+        "grams": 100
+      },
+      {
+        "id": "champignons-paris",
+        "grams": 400
+      },
+      {
+        "id": "oignons",
+        "grams": 100
+      },
+      {
+        "id": "parmesan",
+        "grams": 40
+      },
+      {
+        "id": "bouillon-legumes",
+        "grams": 15
+      },
+      {
+        "id": "beurre",
+        "grams": 15
+      },
+      {
+        "id": "huile-olive",
+        "grams": 10
+      }
+    ],
+    "steps": [
+      "Préparer 1,2 L de bouillon chaud.",
+      "Faire revenir l’oignon dans l’huile, ajouter le riz et le nacrer 2 min.",
+      "Déglacer au vin blanc puis ajouter le bouillon louche par louche pendant 18 min.",
+      "Ajouter les champignons poêlés, le beurre et le parmesan."
+    ],
+    "kashrut": "halavi",
+    "tags": [
+      "petit-budget"
+    ],
+    "season": [
+      9,
+      10,
+      11,
+      12,
+      1,
+      2,
+      3
+    ],
+    "fridgeDays": 2,
+    "freezerMonths": 0,
+    "perServing": {
+      "kcal": 430,
+      "protein": 12.6,
+      "fat": 9.8,
+      "carbs": 66.3,
+      "priceChf": 1.94,
+      "priceBudgetChf": 1.68
+    },
+    "compatibleWith": [
+      "casher",
+      "vegetarien",
+      "sans-gluten",
+      "sans-arachides"
+    ]
+  },
+  {
+    "id": "gratin-pdt-poireaux",
+    "name": "Gratin de pommes de terre et poireaux",
+    "mealTypes": [
+      "dejeuner",
+      "diner"
+    ],
+    "servings": 4,
+    "prepMin": 20,
+    "cookMin": 45,
+    "ingredients": [
+      {
+        "id": "pommes-de-terre",
+        "grams": 800
+      },
+      {
+        "id": "poireau",
+        "grams": 400
+      },
+      {
+        "id": "lait",
+        "grams": 300
+      },
+      {
+        "id": "creme-cuisine",
+        "grams": 100
+      },
+      {
+        "id": "gruyere",
+        "grams": 100
+      },
+      {
+        "id": "beurre",
+        "grams": 10
+      }
+    ],
+    "steps": [
+      "Préchauffer le four à 190 °C et beurrer un plat.",
+      "Émincer les poireaux et trancher finement les pommes de terre.",
+      "Alterner les couches, verser lait et crème salés et poivrés.",
+      "Couvrir de gruyère râpé et cuire 45 min."
+    ],
+    "kashrut": "halavi",
+    "tags": [
+      "batch-friendly",
+      "petit-budget"
+    ],
+    "season": [
+      10,
+      11,
+      12,
+      1,
+      2,
+      3,
+      4
+    ],
+    "fridgeDays": 3,
+    "freezerMonths": 2,
+    "perServing": {
+      "kcal": 389,
+      "protein": 15.7,
+      "fat": 16.6,
+      "carbs": 43.6,
+      "priceChf": 1.35,
+      "priceBudgetChf": 1.34
+    },
+    "compatibleWith": [
+      "casher",
+      "halal",
+      "vegetarien",
+      "sans-gluten",
+      "sans-arachides"
+    ]
+  },
+  {
+    "id": "rosti-oeufs-salade",
+    "name": "Rösti, œufs au plat et salade verte",
+    "mealTypes": [
+      "dejeuner",
+      "diner"
+    ],
+    "servings": 1,
+    "prepMin": 10,
+    "cookMin": 20,
+    "ingredients": [
+      {
+        "id": "pommes-de-terre",
+        "grams": 300
+      },
+      {
+        "id": "huile-colza",
+        "grams": 15
+      },
+      {
+        "id": "oeufs",
+        "grams": 110
+      },
+      {
+        "id": "salade-verte",
+        "grams": 80
+      },
+      {
+        "id": "vinaigre-cidre",
+        "grams": 5
+      }
+    ],
+    "steps": [
+      "Râper les pommes de terre crues et bien les presser dans un torchon.",
+      "Cuire en galette dans l’huile 8 à 10 min par face à feu moyen.",
+      "Cuire les œufs au plat et servir avec la salade assaisonnée."
+    ],
+    "kashrut": "parve",
+    "tags": [
+      "petit-budget"
+    ],
+    "season": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "fridgeDays": 1,
+    "freezerMonths": 0,
+    "perServing": {
+      "kcal": 532,
+      "protein": 20.7,
+      "fat": 26.5,
+      "carbs": 53.3,
+      "priceChf": 1.74,
+      "priceBudgetChf": 1.65
+    },
+    "compatibleWith": [
+      "casher",
+      "halal",
+      "vegetarien",
+      "sans-gluten",
+      "sans-lactose",
+      "sans-arachides"
+    ]
+  },
+  {
+    "id": "alplermagronen",
+    "name": "Älplermagronen (pâtes, pommes de terre, fromage, compote)",
+    "mealTypes": [
+      "dejeuner",
+      "diner"
+    ],
+    "servings": 4,
+    "prepMin": 15,
+    "cookMin": 30,
+    "ingredients": [
+      {
+        "id": "pates",
+        "grams": 300
+      },
+      {
+        "id": "pommes-de-terre",
+        "grams": 300
+      },
+      {
+        "id": "gruyere",
+        "grams": 120
+      },
+      {
+        "id": "creme-cuisine",
+        "grams": 150
+      },
+      {
+        "id": "lait",
+        "grams": 100
+      },
+      {
+        "id": "oignons",
+        "grams": 150
+      },
+      {
+        "id": "pommes",
+        "grams": 400
+      },
+      {
+        "id": "huile-colza",
+        "grams": 10
+      }
+    ],
+    "steps": [
+      "Cuire la compote : pommes en morceaux avec un fond d’eau, 15 min.",
+      "Cuire les pommes de terre en dés et les pâtes ensemble dans l’eau salée.",
+      "Égoutter, mélanger avec crème, lait et fromage râpé.",
+      "Servir avec les oignons dorés à l’huile et la compote."
+    ],
+    "kashrut": "halavi",
+    "tags": [
+      "petit-budget"
+    ],
+    "season": [
+      10,
+      11,
+      12,
+      1,
+      2,
+      3,
+      4
+    ],
+    "fridgeDays": 2,
+    "freezerMonths": 0,
+    "perServing": {
+      "kcal": 611,
+      "protein": 21.6,
+      "fat": 20.2,
+      "carbs": 83.3,
+      "priceChf": 1.23,
+      "priceBudgetChf": 1.23
+    },
+    "compatibleWith": [
+      "casher",
+      "halal",
+      "vegetarien",
+      "sans-arachides"
+    ]
+  },
+  {
+    "id": "emince-porc-champignons",
+    "name": "Émincé de porc aux champignons et riz",
+    "mealTypes": [
+      "dejeuner",
+      "diner"
+    ],
+    "servings": 4,
+    "prepMin": 15,
+    "cookMin": 25,
+    "ingredients": [
+      {
+        "id": "porc-emince",
+        "grams": 400
+      },
+      {
+        "id": "champignons-paris",
+        "grams": 300
+      },
+      {
+        "id": "oignons",
+        "grams": 100
+      },
+      {
+        "id": "creme-cuisine",
+        "grams": 150
+      },
+      {
+        "id": "riz-long",
+        "grams": 280
+      },
+      {
+        "id": "huile-colza",
+        "grams": 15
+      },
+      {
+        "id": "paprika",
+        "grams": 2
+      }
+    ],
+    "steps": [
+      "Cuire le riz.",
+      "Saisir le porc dans l’huile, réserver.",
+      "Faire revenir oignon et champignons, ajouter la crème et le paprika.",
+      "Remettre la viande 2 min et servir avec le riz."
+    ],
+    "kashrut": "non-casher",
+    "tags": [],
+    "season": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "fridgeDays": 3,
+    "freezerMonths": 2,
+    "perServing": {
+      "kcal": 499,
+      "protein": 29.6,
+      "fat": 15.1,
+      "carbs": 58.3,
+      "priceChf": 3.3,
+      "priceBudgetChf": 3.12
+    },
+    "compatibleWith": [
+      "sans-gluten",
+      "sans-arachides"
+    ]
+  },
+  {
+    "id": "cervelas-salade-pdt",
+    "name": "Cervelas et salade de pommes de terre",
+    "mealTypes": [
+      "dejeuner",
+      "diner"
+    ],
+    "servings": 2,
+    "prepMin": 15,
+    "cookMin": 20,
+    "ingredients": [
+      {
+        "id": "cervelas",
+        "grams": 200
+      },
+      {
+        "id": "pommes-de-terre",
+        "grams": 400
+      },
+      {
+        "id": "oignons",
+        "grams": 50
+      },
+      {
+        "id": "moutarde",
+        "grams": 10
+      },
+      {
+        "id": "vinaigre-cidre",
+        "grams": 15
+      },
+      {
+        "id": "huile-colza",
+        "grams": 15
+      },
+      {
+        "id": "salade-verte",
+        "grams": 100
+      }
+    ],
+    "steps": [
+      "Cuire les pommes de terre en robe des champs 20 min, peler et trancher.",
+      "Préparer une vinaigrette moutarde-vinaigre-huile avec l’oignon haché.",
+      "Mélanger aux pommes de terre tièdes.",
+      "Griller ou chauffer les cervelas, servir avec la salade."
+    ],
+    "kashrut": "non-casher",
+    "tags": [
+      "petit-budget"
+    ],
+    "season": [
+      5,
+      6,
+      7,
+      8,
+      9,
+      10
+    ],
+    "fridgeDays": 2,
+    "freezerMonths": 0,
+    "perServing": {
+      "kcal": 516,
+      "protein": 16.3,
+      "fat": 32.4,
+      "carbs": 39,
+      "priceChf": 1.92,
+      "priceBudgetChf": 1.62
+    },
+    "compatibleWith": [
+      "sans-gluten",
+      "sans-lactose",
+      "sans-arachides"
+    ]
+  },
+  {
+    "id": "lapin-moutarde-polenta",
+    "name": "Lapin à la moutarde et polenta",
+    "mealTypes": [
+      "dejeuner",
+      "diner"
+    ],
+    "servings": 4,
+    "prepMin": 15,
+    "cookMin": 50,
+    "ingredients": [
+      {
+        "id": "lapin",
+        "grams": 600
+      },
+      {
+        "id": "moutarde",
+        "grams": 40
+      },
+      {
+        "id": "oignons",
+        "grams": 100
+      },
+      {
+        "id": "vin-blanc",
+        "grams": 150
+      },
+      {
+        "id": "bouillon-legumes",
+        "grams": 10
+      },
+      {
+        "id": "huile-colza",
+        "grams": 15
+      },
+      {
+        "id": "polenta",
+        "grams": 250
+      }
+    ],
+    "steps": [
+      "Badigeonner le lapin de moutarde et le dorer dans l’huile.",
+      "Ajouter l’oignon, déglacer au vin blanc, ajouter 300 ml de bouillon.",
+      "Mijoter 45 min à couvert.",
+      "Cuire la polenta 5 à 10 min dans 1 L d’eau salée et servir."
+    ],
+    "kashrut": "non-casher",
+    "tags": [],
+    "season": [
+      9,
+      10,
+      11,
+      12,
+      1,
+      2,
+      3
+    ],
+    "fridgeDays": 3,
+    "freezerMonths": 3,
+    "perServing": {
+      "kcal": 521,
+      "protein": 37.7,
+      "fat": 14.3,
+      "carbs": 51.4,
+      "priceChf": 3.71,
+      "priceBudgetChf": 3.71
+    },
+    "compatibleWith": [
+      "sans-gluten",
+      "sans-lactose",
+      "sans-arachides"
+    ]
+  },
+  {
+    "id": "crevettes-wok-riz",
+    "name": "Wok de crevettes, légumes et riz",
+    "mealTypes": [
+      "dejeuner",
+      "diner"
+    ],
+    "servings": 1,
+    "prepMin": 5,
+    "cookMin": 12,
+    "ingredients": [
+      {
+        "id": "crevettes",
+        "grams": 150
+      },
+      {
+        "id": "melange-legumes-surgeles",
+        "grams": 200
+      },
+      {
+        "id": "sauce-soja",
+        "grams": 15
+      },
+      {
+        "id": "ail",
+        "grams": 5
+      },
+      {
+        "id": "huile-colza",
+        "grams": 8
+      },
+      {
+        "id": "riz-long",
+        "grams": 70
+      }
+    ],
+    "steps": [
+      "Cuire le riz.",
+      "Saisir l’ail et les légumes dans l’huile très chaude 5 min.",
+      "Ajouter les crevettes et la sauce soja, cuire 3 min."
+    ],
+    "kashrut": "non-casher",
+    "tags": [
+      "rapide"
+    ],
+    "season": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "fridgeDays": 1,
+    "freezerMonths": 0,
+    "perServing": {
+      "kcal": 544,
+      "protein": 38.9,
+      "fat": 10.6,
+      "carbs": 69,
+      "priceChf": 6.19,
+      "priceBudgetChf": 5.95
+    },
+    "compatibleWith": [
+      "halal",
+      "sans-lactose",
+      "sans-arachides"
+    ]
+  },
+  {
+    "id": "salade-quinoa-feta",
+    "name": "Salade de quinoa, feta et pois chiches",
+    "mealTypes": [
+      "dejeuner",
+      "diner"
+    ],
+    "servings": 1,
+    "prepMin": 10,
+    "cookMin": 15,
+    "ingredients": [
+      {
+        "id": "quinoa",
+        "grams": 70
+      },
+      {
+        "id": "concombre",
+        "grams": 100
+      },
+      {
+        "id": "tomates",
+        "grams": 120
+      },
+      {
+        "id": "feta",
+        "grams": 40
+      },
+      {
+        "id": "pois-chiches-conserve",
+        "grams": 80
+      },
+      {
+        "id": "huile-olive",
+        "grams": 10
+      },
+      {
+        "id": "citron",
+        "grams": 10
+      }
+    ],
+    "steps": [
+      "Cuire le quinoa (ou utiliser une base cuite) et le laisser refroidir.",
+      "Couper concombre et tomates en dés.",
+      "Mélanger avec les pois chiches, la feta émiettée, l’huile et le citron."
+    ],
+    "kashrut": "halavi",
+    "tags": [
+      "batch-friendly"
+    ],
+    "season": [
+      5,
+      6,
+      7,
+      8,
+      9,
+      10
+    ],
+    "fridgeDays": 3,
+    "freezerMonths": 0,
+    "perServing": {
+      "kcal": 588,
+      "protein": 23.2,
+      "fat": 25.4,
+      "carbs": 59.4,
+      "priceChf": 2.64,
+      "priceBudgetChf": 2.5
+    },
+    "compatibleWith": [
+      "casher",
+      "halal",
+      "vegetarien",
+      "sans-gluten",
+      "sans-arachides"
+    ]
+  },
+  {
+    "id": "salade-lentilles-oeuf",
+    "name": "Salade de lentilles, carottes et œuf",
+    "mealTypes": [
+      "dejeuner",
+      "diner"
+    ],
+    "servings": 1,
+    "prepMin": 10,
+    "cookMin": 20,
+    "ingredients": [
+      {
+        "id": "lentilles-vertes",
+        "grams": 70
+      },
+      {
+        "id": "carottes",
+        "grams": 100
+      },
+      {
+        "id": "oignons",
+        "grams": 20
+      },
+      {
+        "id": "oeufs",
+        "grams": 110
+      },
+      {
+        "id": "moutarde",
+        "grams": 5
+      },
+      {
+        "id": "huile-colza",
+        "grams": 10
+      },
+      {
+        "id": "vinaigre-cidre",
+        "grams": 10
+      }
+    ],
+    "steps": [
+      "Cuire les lentilles 20 min (ou utiliser une base cuite).",
+      "Cuire les œufs 9 min, les écaler.",
+      "Râper les carottes, mélanger avec les lentilles et une vinaigrette moutarde.",
+      "Ajouter les œufs en quartiers."
+    ],
+    "kashrut": "parve",
+    "tags": [
+      "batch-friendly",
+      "petit-budget"
+    ],
+    "season": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "fridgeDays": 3,
+    "freezerMonths": 0,
+    "perServing": {
+      "kcal": 528,
+      "protein": 31.9,
+      "fat": 22.8,
+      "carbs": 43.6,
+      "priceChf": 1.54,
+      "priceBudgetChf": 1.45
+    },
+    "compatibleWith": [
+      "casher",
+      "halal",
+      "vegetarien",
+      "sans-gluten",
+      "sans-lactose",
+      "sans-arachides"
+    ]
+  },
+  {
+    "id": "wrap-poulet-tahini",
+    "name": "Wraps poulet, crudités et sauce tahini",
+    "mealTypes": [
+      "dejeuner",
+      "diner"
+    ],
+    "servings": 1,
+    "prepMin": 10,
+    "cookMin": 8,
+    "ingredients": [
+      {
+        "id": "tortillas-ble",
+        "grams": 90
+      },
+      {
+        "id": "poulet-emince",
+        "grams": 120
+      },
+      {
+        "id": "salade-verte",
+        "grams": 40
+      },
+      {
+        "id": "tomates",
+        "grams": 80
+      },
+      {
+        "id": "concombre",
+        "grams": 60
+      },
+      {
+        "id": "tahini",
+        "grams": 15
+      },
+      {
+        "id": "citron",
+        "grams": 5
+      },
+      {
+        "id": "huile-colza",
+        "grams": 5
+      }
+    ],
+    "steps": [
+      "Poêler le poulet en lanières dans l’huile 6 min.",
+      "Mélanger tahini, citron et un peu d’eau.",
+      "Garnir les tortillas de crudités, poulet et sauce, puis rouler."
+    ],
+    "kashrut": "bassari",
+    "tags": [
+      "rapide"
+    ],
+    "season": [
+      5,
+      6,
+      7,
+      8,
+      9,
+      10
+    ],
+    "fridgeDays": 1,
+    "freezerMonths": 0,
+    "perServing": {
+      "kcal": 577,
+      "protein": 39.5,
+      "fat": 22,
+      "carbs": 51.4,
+      "priceChf": 3.37,
+      "priceBudgetChf": 3.17
+    },
+    "compatibleWith": [
+      "casher",
+      "halal",
+      "sans-lactose",
+      "sans-arachides"
+    ]
+  },
+  {
+    "id": "wrap-pois-chiches",
+    "name": "Wraps aux pois chiches et carottes",
+    "mealTypes": [
+      "dejeuner",
+      "diner"
+    ],
+    "servings": 1,
+    "prepMin": 10,
+    "cookMin": 0,
+    "ingredients": [
+      {
+        "id": "tortillas-ble",
+        "grams": 90
+      },
+      {
+        "id": "pois-chiches-conserve",
+        "grams": 150
+      },
+      {
+        "id": "carottes",
+        "grams": 80
+      },
+      {
+        "id": "salade-verte",
+        "grams": 40
+      },
+      {
+        "id": "tahini",
+        "grams": 15
+      },
+      {
+        "id": "citron",
+        "grams": 10
+      }
+    ],
+    "steps": [
+      "Écraser grossièrement les pois chiches avec le tahini et le citron.",
+      "Râper les carottes.",
+      "Garnir les tortillas et les rouler."
+    ],
+    "kashrut": "parve",
+    "tags": [
+      "rapide",
+      "petit-budget"
+    ],
+    "season": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "fridgeDays": 1,
+    "freezerMonths": 0,
+    "perServing": {
+      "kcal": 587,
+      "protein": 22,
+      "fat": 18.9,
+      "carbs": 76,
+      "priceChf": 2.07,
+      "priceBudgetChf": 1.86
+    },
+    "compatibleWith": [
+      "casher",
+      "halal",
+      "vegetarien",
+      "sans-lactose",
+      "sans-arachides"
+    ]
+  },
+  {
+    "id": "soupe-legumes-lentilles",
+    "name": "Soupe de légumes d’hiver aux lentilles",
+    "mealTypes": [
+      "dejeuner",
+      "diner"
+    ],
+    "servings": 4,
+    "prepMin": 15,
+    "cookMin": 30,
+    "ingredients": [
+      {
+        "id": "poireau",
+        "grams": 300
+      },
+      {
+        "id": "carottes",
+        "grams": 300
+      },
+      {
+        "id": "pommes-de-terre",
+        "grams": 400
+      },
+      {
+        "id": "oignons",
+        "grams": 100
+      },
+      {
+        "id": "lentilles-corail",
+        "grams": 120
+      },
+      {
+        "id": "bouillon-legumes",
+        "grams": 15
+      },
+      {
+        "id": "huile-colza",
+        "grams": 15
+      },
+      {
+        "id": "pain-complet",
+        "grams": 200
+      }
+    ],
+    "steps": [
+      "Faire revenir l’oignon et le poireau émincés dans l’huile.",
+      "Ajouter carottes et pommes de terre en dés, lentilles et 1,5 L de bouillon.",
+      "Cuire 25 min puis mixer.",
+      "Servir avec le pain."
+    ],
+    "kashrut": "parve",
+    "tags": [
+      "batch-friendly",
+      "petit-budget"
+    ],
+    "season": [
+      10,
+      11,
+      12,
+      1,
+      2,
+      3,
+      4
+    ],
+    "fridgeDays": 4,
+    "freezerMonths": 3,
+    "perServing": {
+      "kcal": 400,
+      "protein": 16,
+      "fat": 6.7,
+      "carbs": 64.6,
+      "priceChf": 1,
+      "priceBudgetChf": 0.99
+    },
+    "compatibleWith": [
+      "casher",
+      "halal",
+      "vegetarien",
+      "sans-lactose",
+      "sans-arachides"
+    ]
+  },
+  {
+    "id": "soupe-courge-coco",
+    "name": "Soupe de courge au lait de coco",
+    "mealTypes": [
+      "dejeuner",
+      "diner"
+    ],
+    "servings": 4,
+    "prepMin": 15,
+    "cookMin": 25,
+    "ingredients": [
+      {
+        "id": "courge-butternut",
+        "grams": 800
+      },
+      {
+        "id": "lentilles-corail",
+        "grams": 160
+      },
+      {
+        "id": "oignons",
+        "grams": 100
+      },
+      {
+        "id": "lait-coco",
+        "grams": 200
+      },
+      {
+        "id": "epices-curry",
+        "grams": 5
+      },
+      {
+        "id": "bouillon-legumes",
+        "grams": 10
+      },
+      {
+        "id": "huile-colza",
+        "grams": 10
+      },
+      {
+        "id": "pain-complet",
+        "grams": 200
+      }
+    ],
+    "steps": [
+      "Faire revenir l’oignon dans l’huile avec le curry.",
+      "Ajouter la courge en cubes, les lentilles et 1 L de bouillon, cuire 20 min.",
+      "Ajouter le lait de coco et mixer.",
+      "Servir avec le pain."
+    ],
+    "kashrut": "parve",
+    "tags": [
+      "batch-friendly",
+      "petit-budget"
+    ],
+    "season": [
+      9,
+      10,
+      11,
+      12,
+      1,
+      2,
+      3
+    ],
+    "fridgeDays": 4,
+    "freezerMonths": 3,
+    "perServing": {
+      "kcal": 477,
+      "protein": 17.5,
+      "fat": 14.3,
+      "carbs": 64.7,
+      "priceChf": 1.53,
+      "priceBudgetChf": 1.43
+    },
+    "compatibleWith": [
+      "casher",
+      "halal",
+      "vegetarien",
+      "sans-lactose",
+      "sans-arachides"
+    ]
+  },
+  {
+    "id": "minestrone",
+    "name": "Minestrone aux haricots blancs",
+    "mealTypes": [
+      "dejeuner",
+      "diner"
+    ],
+    "servings": 4,
+    "prepMin": 15,
+    "cookMin": 30,
+    "ingredients": [
+      {
+        "id": "haricots-blancs-conserve",
+        "grams": 240
+      },
+      {
+        "id": "pates",
+        "grams": 120
+      },
+      {
+        "id": "courgette",
+        "grams": 200
+      },
+      {
+        "id": "carottes",
+        "grams": 200
+      },
+      {
+        "id": "poireau",
+        "grams": 150
+      },
+      {
+        "id": "tomates-pelees-conserve",
+        "grams": 400
+      },
+      {
+        "id": "bouillon-legumes",
+        "grams": 15
+      },
+      {
+        "id": "huile-olive",
+        "grams": 15
+      }
+    ],
+    "steps": [
+      "Faire revenir poireau et carottes en dés dans l’huile.",
+      "Ajouter courgette, tomates et 1,2 L de bouillon, cuire 15 min.",
+      "Ajouter pâtes et haricots, cuire encore 10 min."
+    ],
+    "kashrut": "parve",
+    "tags": [
+      "batch-friendly",
+      "petit-budget"
+    ],
+    "season": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "fridgeDays": 4,
+    "freezerMonths": 3,
+    "perServing": {
+      "kcal": 269,
+      "protein": 10.9,
+      "fat": 5.5,
+      "carbs": 41.2,
+      "priceChf": 1.15,
+      "priceBudgetChf": 1.15
+    },
+    "compatibleWith": [
+      "casher",
+      "halal",
+      "vegetarien",
+      "sans-lactose",
+      "sans-arachides"
+    ]
+  },
+  {
+    "id": "tortilla-espagnole",
+    "name": "Tortilla espagnole (omelette aux pommes de terre)",
+    "mealTypes": [
+      "dejeuner",
+      "diner",
+      "collation"
+    ],
+    "servings": 2,
+    "prepMin": 10,
+    "cookMin": 25,
+    "ingredients": [
+      {
+        "id": "oeufs",
+        "grams": 330
+      },
+      {
+        "id": "pommes-de-terre",
+        "grams": 400
+      },
+      {
+        "id": "poivron",
+        "grams": 100
+      },
+      {
+        "id": "oignons",
+        "grams": 100
+      },
+      {
+        "id": "huile-olive",
+        "grams": 15
+      },
+      {
+        "id": "salade-verte",
+        "grams": 100
+      }
+    ],
+    "steps": [
+      "Cuire pommes de terre en fines tranches, oignon et poivron dans l’huile 15 min à feu doux.",
+      "Les mélanger aux œufs battus.",
+      "Cuire 5 min à couvert, retourner à l’aide d’une assiette, cuire 3 min.",
+      "Servir chaude ou froide avec la salade."
+    ],
+    "kashrut": "parve",
+    "tags": [
+      "batch-friendly",
+      "petit-budget"
+    ],
+    "season": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "fridgeDays": 3,
+    "freezerMonths": 0,
+    "perServing": {
+      "kcal": 492,
+      "protein": 26.3,
+      "fat": 24.6,
+      "carbs": 42.3,
+      "priceChf": 2.23,
+      "priceBudgetChf": 2
+    },
+    "compatibleWith": [
+      "casher",
+      "halal",
+      "vegetarien",
+      "sans-gluten",
+      "sans-lactose",
+      "sans-arachides"
+    ]
+  },
+  {
+    "id": "tofu-brocoli-riz",
+    "name": "Tofu sauté, brocoli et riz",
+    "mealTypes": [
+      "dejeuner",
+      "diner"
+    ],
+    "servings": 1,
+    "prepMin": 10,
+    "cookMin": 15,
+    "ingredients": [
+      {
+        "id": "tofu-nature",
+        "grams": 150
+      },
+      {
+        "id": "brocoli",
+        "grams": 200
+      },
+      {
+        "id": "sauce-soja",
+        "grams": 15
+      },
+      {
+        "id": "ail",
+        "grams": 5
+      },
+      {
+        "id": "huile-colza",
+        "grams": 10
+      },
+      {
+        "id": "riz-long",
+        "grams": 70
+      }
+    ],
+    "steps": [
+      "Cuire le riz.",
+      "Dorer le tofu en cubes dans l’huile 6 à 8 min.",
+      "Ajouter le brocoli, l’ail et 3 c. à soupe d’eau, couvrir 4 min.",
+      "Déglacer à la sauce soja."
+    ],
+    "kashrut": "parve",
+    "tags": [
+      "petit-budget"
+    ],
+    "season": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "fridgeDays": 3,
+    "freezerMonths": 0,
+    "perServing": {
+      "kcal": 610,
+      "protein": 32.9,
+      "fat": 22.6,
+      "carbs": 65.3,
+      "priceChf": 2.66,
+      "priceBudgetChf": 2.2
+    },
+    "compatibleWith": [
+      "casher",
+      "halal",
+      "vegetarien",
+      "sans-lactose",
+      "sans-arachides"
+    ]
+  },
+  {
+    "id": "dinde-patate-douce",
+    "name": "Dinde, patate douce rôtie et haricots verts",
+    "mealTypes": [
+      "dejeuner",
+      "diner"
+    ],
+    "servings": 1,
+    "prepMin": 10,
+    "cookMin": 25,
+    "ingredients": [
+      {
+        "id": "dinde-escalope",
+        "grams": 150
+      },
+      {
+        "id": "patate-douce",
+        "grams": 250
+      },
+      {
+        "id": "haricots-verts-surgeles",
+        "grams": 150
+      },
+      {
+        "id": "huile-olive",
+        "grams": 10
+      },
+      {
+        "id": "paprika",
+        "grams": 2
+      }
+    ],
+    "steps": [
+      "Préchauffer le four à 200 °C, rôtir la patate douce en cubes avec la moitié de l’huile et le paprika 25 min.",
+      "Cuire les haricots verts à la vapeur 10 min.",
+      "Poêler la dinde 3 min par face dans le reste d’huile."
+    ],
+    "kashrut": "bassari",
+    "tags": [],
+    "season": [
+      9,
+      10,
+      11,
+      12,
+      1,
+      2,
+      3
+    ],
+    "fridgeDays": 3,
+    "freezerMonths": 0,
+    "perServing": {
+      "kcal": 513,
+      "protein": 43.3,
+      "fat": 12.3,
+      "carbs": 57.9,
+      "priceChf": 5.6,
+      "priceBudgetChf": 5.44
+    },
+    "compatibleWith": [
+      "casher",
+      "halal",
+      "sans-gluten",
+      "sans-lactose",
+      "sans-arachides"
+    ]
+  },
+  {
+    "id": "ragout-boeuf-carottes",
+    "name": "Ragoût de bœuf aux carottes",
+    "mealTypes": [
+      "dejeuner",
+      "diner"
+    ],
+    "servings": 4,
+    "prepMin": 20,
+    "cookMin": 120,
+    "ingredients": [
+      {
+        "id": "boeuf-ragout",
+        "grams": 600
+      },
+      {
+        "id": "carottes",
+        "grams": 400
+      },
+      {
+        "id": "oignons",
+        "grams": 150
+      },
+      {
+        "id": "pommes-de-terre",
+        "grams": 600
+      },
+      {
+        "id": "tomates-pelees-conserve",
+        "grams": 400
+      },
+      {
+        "id": "bouillon-legumes",
+        "grams": 10
+      },
+      {
+        "id": "huile-colza",
+        "grams": 15
+      }
+    ],
+    "steps": [
+      "Dorer la viande en plusieurs fois dans l’huile.",
+      "Ajouter oignons, tomates et 500 ml de bouillon, mijoter 1 h 15 à couvert.",
+      "Ajouter carottes et pommes de terre en morceaux, cuire encore 40 min."
+    ],
+    "kashrut": "bassari",
+    "tags": [
+      "batch-friendly"
+    ],
+    "season": [
+      10,
+      11,
+      12,
+      1,
+      2,
+      3,
+      4
+    ],
+    "fridgeDays": 4,
+    "freezerMonths": 3,
+    "perServing": {
+      "kcal": 436,
+      "protein": 37.1,
+      "fat": 13.7,
+      "carbs": 40,
+      "priceChf": 4.81,
+      "priceBudgetChf": 4.81
+    },
+    "compatibleWith": [
+      "casher",
+      "halal",
+      "sans-gluten",
+      "sans-lactose",
+      "sans-arachides"
+    ]
+  },
+  {
+    "id": "poulet-curry-coco",
+    "name": "Poulet au curry, coco et riz",
+    "mealTypes": [
+      "dejeuner",
+      "diner"
+    ],
+    "servings": 4,
+    "prepMin": 15,
+    "cookMin": 25,
+    "ingredients": [
+      {
+        "id": "poulet-emince",
+        "grams": 500
+      },
+      {
+        "id": "lait-coco",
+        "grams": 200
+      },
+      {
+        "id": "poivron",
+        "grams": 200
+      },
+      {
+        "id": "oignons",
+        "grams": 100
+      },
+      {
+        "id": "epices-curry",
+        "grams": 8
+      },
+      {
+        "id": "tomates-pelees-conserve",
+        "grams": 200
+      },
+      {
+        "id": "huile-colza",
+        "grams": 10
+      },
+      {
+        "id": "riz-long",
+        "grams": 280
+      }
+    ],
+    "steps": [
+      "Cuire le riz.",
+      "Dorer le poulet en morceaux dans l’huile, réserver.",
+      "Faire revenir oignon et poivron, ajouter curry, tomates et lait de coco.",
+      "Remettre le poulet et mijoter 10 min."
+    ],
+    "kashrut": "bassari",
+    "tags": [
+      "batch-friendly"
+    ],
+    "season": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "fridgeDays": 3,
+    "freezerMonths": 3,
+    "perServing": {
+      "kcal": 540,
+      "protein": 36,
+      "fat": 14.4,
+      "carbs": 63,
+      "priceChf": 2.63,
+      "priceBudgetChf": 2.44
+    },
+    "compatibleWith": [
+      "casher",
+      "halal",
+      "sans-gluten",
+      "sans-lactose",
+      "sans-arachides"
+    ]
+  },
+  {
+    "id": "cuisses-poulet-four-legumes",
+    "name": "Cuisses de poulet au four et légumes racines",
+    "mealTypes": [
+      "dejeuner",
+      "diner"
+    ],
+    "servings": 4,
+    "prepMin": 15,
+    "cookMin": 45,
+    "ingredients": [
+      {
+        "id": "cuisses-poulet",
+        "grams": 700
+      },
+      {
+        "id": "pommes-de-terre",
+        "grams": 800
+      },
+      {
+        "id": "carottes",
+        "grams": 400
+      },
+      {
+        "id": "oignons",
+        "grams": 150
+      },
+      {
+        "id": "huile-colza",
+        "grams": 20
+      },
+      {
+        "id": "herbes-provence",
+        "grams": 3
+      }
+    ],
+    "steps": [
+      "Préchauffer le four à 200 °C.",
+      "Couper les légumes en morceaux et les mélanger avec l’huile et les herbes.",
+      "Déposer le poulet par-dessus et cuire 40 à 45 min."
+    ],
+    "kashrut": "bassari",
+    "tags": [
+      "batch-friendly"
+    ],
+    "season": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "fridgeDays": 3,
+    "freezerMonths": 3,
+    "perServing": {
+      "kcal": 530,
+      "protein": 38.6,
+      "fat": 21.3,
+      "carbs": 44.4,
+      "priceChf": 2.21,
+      "priceBudgetChf": 2.21
+    },
+    "compatibleWith": [
+      "casher",
+      "halal",
+      "sans-gluten",
+      "sans-lactose",
+      "sans-arachides"
+    ]
+  },
+  {
+    "id": "couscous-legumes",
+    "name": "Couscous aux légumes et pois chiches",
+    "mealTypes": [
+      "dejeuner",
+      "diner"
+    ],
+    "servings": 4,
+    "prepMin": 20,
+    "cookMin": 30,
+    "ingredients": [
+      {
+        "id": "semoule-couscous",
+        "grams": 280
+      },
+      {
+        "id": "pois-chiches-conserve",
+        "grams": 240
+      },
+      {
+        "id": "courgette",
+        "grams": 300
+      },
+      {
+        "id": "carottes",
+        "grams": 300
+      },
+      {
+        "id": "oignons",
+        "grams": 100
+      },
+      {
+        "id": "tomates-pelees-conserve",
+        "grams": 400
+      },
+      {
+        "id": "cumin",
+        "grams": 4
+      },
+      {
+        "id": "huile-olive",
+        "grams": 15
+      },
+      {
+        "id": "raisins-secs",
+        "grams": 40
+      }
+    ],
+    "steps": [
+      "Faire revenir l’oignon dans l’huile avec le cumin.",
+      "Ajouter carottes, tomates et 600 ml d’eau, cuire 15 min.",
+      "Ajouter courgettes, pois chiches et raisins, cuire 10 min.",
+      "Préparer la semoule avec le même volume d’eau bouillante salée."
+    ],
+    "kashrut": "parve",
+    "tags": [
+      "batch-friendly",
+      "petit-budget"
+    ],
+    "season": [
+      5,
+      6,
+      7,
+      8,
+      9,
+      10
+    ],
+    "fridgeDays": 4,
+    "freezerMonths": 3,
+    "perServing": {
+      "kcal": 463,
+      "protein": 16.6,
+      "fat": 7.2,
+      "carbs": 79.5,
+      "priceChf": 1.31,
+      "priceBudgetChf": 1.23
+    },
+    "compatibleWith": [
+      "casher",
+      "halal",
+      "vegetarien",
+      "sans-lactose",
+      "sans-arachides"
+    ]
+  },
+  {
+    "id": "pizza-maison-legumes",
+    "name": "Pizza maison aux légumes",
+    "mealTypes": [
+      "dejeuner",
+      "diner"
+    ],
+    "servings": 4,
+    "prepMin": 20,
+    "cookMin": 15,
+    "ingredients": [
+      {
+        "id": "farine-ble",
+        "grams": 400
+      },
+      {
+        "id": "levure-seche",
+        "grams": 7
+      },
+      {
+        "id": "tomates-pelees-conserve",
+        "grams": 200
+      },
+      {
+        "id": "mozzarella",
+        "grams": 250
+      },
+      {
+        "id": "champignons-paris",
+        "grams": 200
+      },
+      {
+        "id": "poivron",
+        "grams": 150
+      },
+      {
+        "id": "huile-olive",
+        "grams": 20
+      }
+    ],
+    "steps": [
+      "Mélanger farine, levure, 250 ml d’eau tiède, l’huile et du sel ; pétrir 5 min et laisser lever 1 h.",
+      "Étaler la pâte sur deux plaques, couvrir de tomates.",
+      "Ajouter légumes émincés et mozzarella, cuire 12 à 15 min à 240 °C."
+    ],
+    "kashrut": "halavi",
+    "tags": [
+      "petit-budget"
+    ],
+    "season": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "fridgeDays": 2,
+    "freezerMonths": 2,
+    "perServing": {
+      "kcal": 585,
+      "protein": 25.4,
+      "fat": 18.6,
+      "carbs": 76.5,
+      "priceChf": 1.81,
+      "priceBudgetChf": 1.36
+    },
+    "compatibleWith": [
+      "casher",
+      "halal",
+      "vegetarien",
+      "sans-arachides"
+    ]
+  },
+  {
+    "id": "pates-completes-epinards-cottage",
+    "name": "Pâtes complètes, épinards et cottage cheese",
+    "mealTypes": [
+      "dejeuner",
+      "diner"
+    ],
+    "servings": 1,
+    "prepMin": 5,
+    "cookMin": 12,
+    "ingredients": [
+      {
+        "id": "pates-completes",
+        "grams": 100
+      },
+      {
+        "id": "epinards-surgeles",
+        "grams": 150
+      },
+      {
+        "id": "cottage-cheese",
+        "grams": 100
+      },
+      {
+        "id": "parmesan",
+        "grams": 10
+      },
+      {
+        "id": "ail",
+        "grams": 3
+      },
+      {
+        "id": "huile-olive",
+        "grams": 5
+      }
+    ],
+    "steps": [
+      "Cuire les pâtes.",
+      "Faire revenir l’ail et les épinards dans l’huile 5 min.",
+      "Mélanger pâtes, épinards, cottage cheese et parmesan."
+    ],
+    "kashrut": "halavi",
+    "tags": [
+      "rapide",
+      "petit-budget"
+    ],
+    "season": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "fridgeDays": 2,
+    "freezerMonths": 0,
+    "perServing": {
+      "kcal": 562,
+      "protein": 32.7,
+      "fat": 15,
+      "carbs": 68.7,
+      "priceChf": 2.38,
+      "priceBudgetChf": 2.18
+    },
+    "compatibleWith": [
+      "casher",
+      "halal",
+      "vegetarien",
+      "sans-arachides"
+    ]
+  },
+  {
+    "id": "polenta-ratatouille-oeuf",
+    "name": "Polenta, ratatouille et œuf poché",
+    "mealTypes": [
+      "dejeuner",
+      "diner"
+    ],
+    "servings": 1,
+    "prepMin": 15,
+    "cookMin": 25,
+    "ingredients": [
+      {
+        "id": "polenta",
+        "grams": 70
+      },
+      {
+        "id": "courgette",
+        "grams": 150
+      },
+      {
+        "id": "poivron",
+        "grams": 100
+      },
+      {
+        "id": "tomates",
+        "grams": 150
+      },
+      {
+        "id": "oignons",
+        "grams": 50
+      },
+      {
+        "id": "oeufs",
+        "grams": 55
+      },
+      {
+        "id": "huile-olive",
+        "grams": 10
+      }
+    ],
+    "steps": [
+      "Faire mijoter les légumes en dés dans l’huile 20 min.",
+      "Cuire la polenta dans 3 fois son volume d’eau salée 5 à 10 min.",
+      "Pocher l’œuf 3 min dans l’eau frémissante vinaigrée et servir le tout."
+    ],
+    "kashrut": "parve",
+    "tags": [],
+    "season": [
+      5,
+      6,
+      7,
+      8,
+      9,
+      10
+    ],
+    "fridgeDays": 2,
+    "freezerMonths": 0,
+    "perServing": {
+      "kcal": 524,
+      "protein": 17.7,
+      "fat": 17.7,
+      "carbs": 71.6,
+      "priceChf": 2.7,
+      "priceBudgetChf": 2.45
+    },
+    "compatibleWith": [
+      "casher",
+      "halal",
+      "vegetarien",
+      "sans-gluten",
+      "sans-lactose",
+      "sans-arachides"
+    ]
+  },
+  {
+    "id": "hachis-parmentier",
+    "name": "Hachis parmentier",
+    "mealTypes": [
+      "dejeuner",
+      "diner"
+    ],
+    "servings": 4,
+    "prepMin": 25,
+    "cookMin": 30,
+    "ingredients": [
+      {
+        "id": "boeuf-hache",
+        "grams": 400
+      },
+      {
+        "id": "pommes-de-terre",
+        "grams": 1000
+      },
+      {
+        "id": "oignons",
+        "grams": 150
+      },
+      {
+        "id": "carottes",
+        "grams": 200
+      },
+      {
+        "id": "tomates-pelees-conserve",
+        "grams": 200
+      },
+      {
+        "id": "bouillon-legumes",
+        "grams": 8
+      },
+      {
+        "id": "huile-olive",
+        "grams": 25
+      }
+    ],
+    "steps": [
+      "Cuire les pommes de terre 20 min et les écraser avec l’huile et un peu d’eau de cuisson (purée sans lait).",
+      "Faire revenir oignons et carottes, ajouter la viande et les tomates, cuire 10 min.",
+      "Dans un plat : viande puis purée. Gratiner 20 min à 200 °C."
+    ],
+    "kashrut": "bassari",
+    "tags": [
+      "batch-friendly"
+    ],
+    "season": [
+      10,
+      11,
+      12,
+      1,
+      2,
+      3,
+      4
+    ],
+    "fridgeDays": 3,
+    "freezerMonths": 3,
+    "perServing": {
+      "kcal": 495,
+      "protein": 26.6,
+      "fat": 20,
+      "carbs": 51.2,
+      "priceChf": 2.6,
+      "priceBudgetChf": 2.6
+    },
+    "compatibleWith": [
+      "casher",
+      "halal",
+      "sans-gluten",
+      "sans-lactose",
+      "sans-arachides"
+    ]
+  },
+  {
+    "id": "bowl-saumon-quinoa-avocat",
+    "name": "Bowl saumon, quinoa et avocat",
+    "mealTypes": [
+      "dejeuner",
+      "diner"
+    ],
+    "servings": 1,
+    "prepMin": 10,
+    "cookMin": 15,
+    "ingredients": [
+      {
+        "id": "saumon-filet",
+        "grams": 120
+      },
+      {
+        "id": "quinoa",
+        "grams": 60
+      },
+      {
+        "id": "avocat",
+        "grams": 70
+      },
+      {
+        "id": "concombre",
+        "grams": 100
+      },
+      {
+        "id": "sauce-soja",
+        "grams": 10
+      },
+      {
+        "id": "graines-courge",
+        "grams": 10
+      }
+    ],
+    "steps": [
+      "Cuire le quinoa et le saumon (poêle ou four, 10 min).",
+      "Couper avocat et concombre.",
+      "Assembler le bol, arroser de sauce soja et parsemer de graines."
+    ],
+    "kashrut": "parve",
+    "tags": [],
+    "season": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "fridgeDays": 1,
+    "freezerMonths": 0,
+    "perServing": {
+      "kcal": 648,
+      "protein": 38.2,
+      "fat": 34.8,
+      "carbs": 39.1,
+      "priceChf": 4.95,
+      "priceBudgetChf": 3.97
+    },
+    "compatibleWith": [
+      "casher",
+      "halal",
+      "sans-lactose",
+      "sans-arachides"
+    ]
+  },
+  {
+    "id": "shakshuka",
+    "name": "Shakshuka (œufs pochés à la tomate)",
+    "mealTypes": [
+      "petit-dej",
+      "dejeuner",
+      "diner"
+    ],
+    "servings": 2,
+    "prepMin": 10,
+    "cookMin": 20,
+    "ingredients": [
+      {
+        "id": "oeufs",
+        "grams": 220
+      },
+      {
+        "id": "tomates-pelees-conserve",
+        "grams": 400
+      },
+      {
+        "id": "poivron",
+        "grams": 200
+      },
+      {
+        "id": "oignons",
+        "grams": 100
+      },
+      {
+        "id": "cumin",
+        "grams": 3
+      },
+      {
+        "id": "paprika",
+        "grams": 3
+      },
+      {
+        "id": "huile-olive",
+        "grams": 15
+      },
+      {
+        "id": "pain-complet",
+        "grams": 120
+      }
+    ],
+    "steps": [
+      "Faire revenir oignon et poivron émincés dans l’huile 8 min.",
+      "Ajouter les épices et les tomates, mijoter 8 min.",
+      "Creuser 4 puits, y casser les œufs, couvrir et cuire 5 à 6 min.",
+      "Servir avec le pain."
+    ],
+    "kashrut": "parve",
+    "tags": [
+      "petit-budget"
+    ],
+    "season": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "fridgeDays": 1,
+    "freezerMonths": 0,
+    "perServing": {
+      "kcal": 467,
+      "protein": 23.4,
+      "fat": 21.6,
+      "carbs": 42.6,
+      "priceChf": 2.31,
+      "priceBudgetChf": 2.01
+    },
+    "compatibleWith": [
+      "casher",
+      "halal",
+      "vegetarien",
+      "sans-lactose",
+      "sans-arachides"
+    ]
+  },
+  {
+    "id": "sardines-pdt-salade",
+    "name": "Sardines, pommes de terre et salade",
+    "mealTypes": [
+      "dejeuner",
+      "diner"
+    ],
+    "servings": 1,
+    "prepMin": 10,
+    "cookMin": 20,
+    "ingredients": [
+      {
+        "id": "sardines-huile",
+        "grams": 90
+      },
+      {
+        "id": "pommes-de-terre",
+        "grams": 250
+      },
+      {
+        "id": "salade-verte",
+        "grams": 80
+      },
+      {
+        "id": "tomates",
+        "grams": 100
+      },
+      {
+        "id": "huile-colza",
+        "grams": 5
+      },
+      {
+        "id": "vinaigre-cidre",
+        "grams": 5
+      }
+    ],
+    "steps": [
+      "Cuire les pommes de terre à l’eau 20 min.",
+      "Préparer la salade et la tomate avec la vinaigrette.",
+      "Servir avec les sardines égouttées."
+    ],
+    "kashrut": "parve",
+    "tags": [],
+    "season": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "fridgeDays": 1,
+    "freezerMonths": 0,
+    "perServing": {
+      "kcal": 468,
+      "protein": 28.5,
+      "fat": 18.2,
+      "carbs": 47.5,
+      "priceChf": 2.89,
+      "priceBudgetChf": 2.89
+    },
+    "compatibleWith": [
+      "casher",
+      "halal",
+      "sans-gluten",
+      "sans-lactose",
+      "sans-arachides"
+    ]
+  },
+  {
+    "id": "pates-jambon-petits-pois",
+    "name": "Pâtes jambon, petits pois et crème",
+    "mealTypes": [
+      "dejeuner",
+      "diner"
+    ],
+    "servings": 1,
+    "prepMin": 5,
+    "cookMin": 12,
+    "ingredients": [
+      {
+        "id": "pates",
+        "grams": 100
+      },
+      {
+        "id": "jambon-cuit",
+        "grams": 60
+      },
+      {
+        "id": "petits-pois-surgeles",
+        "grams": 80
+      },
+      {
+        "id": "creme-cuisine",
+        "grams": 40
+      }
+    ],
+    "steps": [
+      "Cuire les pâtes avec les petits pois les 4 dernières minutes.",
+      "Égoutter et ajouter le jambon en lanières et la crème.",
+      "Réchauffer 1 min en remuant."
+    ],
+    "kashrut": "non-casher",
+    "tags": [
+      "rapide",
+      "petit-budget"
+    ],
+    "season": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "fridgeDays": 2,
+    "freezerMonths": 0,
+    "perServing": {
+      "kcal": 545,
+      "protein": 29,
+      "fat": 10,
+      "carbs": 82,
+      "priceChf": 1.98,
+      "priceBudgetChf": 1.9
+    },
+    "compatibleWith": [
+      "sans-arachides"
+    ]
+  },
+  {
+    "id": "gratin-chou-fleur",
+    "name": "Gratin de chou-fleur et pommes de terre",
+    "mealTypes": [
+      "dejeuner",
+      "diner"
+    ],
+    "servings": 4,
+    "prepMin": 20,
+    "cookMin": 35,
+    "ingredients": [
+      {
+        "id": "chou-fleur",
+        "grams": 800
+      },
+      {
+        "id": "pommes-de-terre",
+        "grams": 600
+      },
+      {
+        "id": "lait",
+        "grams": 400
+      },
+      {
+        "id": "farine-ble",
+        "grams": 30
+      },
+      {
+        "id": "beurre",
+        "grams": 20
+      },
+      {
+        "id": "gruyere",
+        "grams": 80
+      }
+    ],
+    "steps": [
+      "Cuire chou-fleur et pommes de terre en morceaux à la vapeur 12 min.",
+      "Préparer une béchamel : beurre, farine, puis lait en fouettant 5 min.",
+      "Mettre les légumes dans un plat, napper, couvrir de gruyère.",
+      "Gratiner 20 min à 200 °C."
+    ],
+    "kashrut": "halavi",
+    "tags": [
+      "batch-friendly",
+      "petit-budget"
+    ],
+    "season": [
+      10,
+      11,
+      12,
+      1,
+      2,
+      3,
+      4
+    ],
+    "fridgeDays": 3,
+    "freezerMonths": 2,
+    "perServing": {
+      "kcal": 368,
+      "protein": 16.8,
+      "fat": 14.2,
+      "carbs": 41.7,
+      "priceChf": 1.51,
+      "priceBudgetChf": 1.49
+    },
+    "compatibleWith": [
+      "casher",
+      "halal",
+      "vegetarien",
+      "sans-arachides"
+    ]
+  },
+  {
+    "id": "poelee-chou-lentilles",
+    "name": "Poêlée de chou, lentilles et carottes",
+    "mealTypes": [
+      "dejeuner",
+      "diner"
+    ],
+    "servings": 2,
+    "prepMin": 15,
+    "cookMin": 25,
+    "ingredients": [
+      {
+        "id": "chou-blanc",
+        "grams": 400
+      },
+      {
+        "id": "lentilles-vertes",
+        "grams": 120
+      },
+      {
+        "id": "carottes",
+        "grams": 200
+      },
+      {
+        "id": "oignons",
+        "grams": 100
+      },
+      {
+        "id": "cumin",
+        "grams": 2
+      },
+      {
+        "id": "huile-colza",
+        "grams": 15
+      },
+      {
+        "id": "moutarde",
+        "grams": 10
+      }
+    ],
+    "steps": [
+      "Cuire les lentilles 20 min.",
+      "Faire revenir oignon, chou émincé et carottes dans l’huile 15 min.",
+      "Ajouter lentilles, cumin et moutarde, cuire 5 min."
+    ],
+    "kashrut": "parve",
+    "tags": [
+      "batch-friendly",
+      "petit-budget"
+    ],
+    "season": [
+      10,
+      11,
+      12,
+      1,
+      2,
+      3,
+      4
+    ],
+    "fridgeDays": 4,
+    "freezerMonths": 2,
+    "perServing": {
+      "kcal": 380,
+      "protein": 18.9,
+      "fat": 9.8,
+      "carbs": 49.4,
+      "priceChf": 1.22,
+      "priceBudgetChf": 1.22
+    },
+    "compatibleWith": [
+      "casher",
+      "halal",
+      "vegetarien",
+      "sans-gluten",
+      "sans-lactose",
+      "sans-arachides"
+    ]
+  },
+  {
+    "id": "salade-betterave-oeufs-pdt",
+    "name": "Salade de betterave, pommes de terre et œufs",
+    "mealTypes": [
+      "dejeuner",
+      "diner"
+    ],
+    "servings": 1,
+    "prepMin": 10,
+    "cookMin": 20,
+    "ingredients": [
+      {
+        "id": "betterave-cuite",
+        "grams": 150
+      },
+      {
+        "id": "pommes-de-terre",
+        "grams": 200
+      },
+      {
+        "id": "oeufs",
+        "grams": 110
+      },
+      {
+        "id": "salade-verte",
+        "grams": 50
+      },
+      {
+        "id": "huile-colza",
+        "grams": 10
+      },
+      {
+        "id": "vinaigre-cidre",
+        "grams": 10
+      },
+      {
+        "id": "moutarde",
+        "grams": 5
+      }
+    ],
+    "steps": [
+      "Cuire pommes de terre (20 min) et œufs (9 min).",
+      "Couper betterave et pommes de terre en dés.",
+      "Mélanger avec la salade et une vinaigrette moutarde, ajouter les œufs."
+    ],
+    "kashrut": "parve",
+    "tags": [
+      "petit-budget"
+    ],
+    "season": [
+      10,
+      11,
+      12,
+      1,
+      2,
+      3,
+      4
+    ],
+    "fridgeDays": 2,
+    "freezerMonths": 0,
+    "perServing": {
+      "kcal": 482,
+      "protein": 21,
+      "fat": 22,
+      "carbs": 49.5,
+      "priceChf": 2.11,
+      "priceBudgetChf": 2.02
+    },
+    "compatibleWith": [
+      "casher",
+      "halal",
+      "vegetarien",
+      "sans-gluten",
+      "sans-lactose",
+      "sans-arachides"
+    ]
+  },
+  {
+    "id": "celeri-pommes-poulet",
+    "name": "Poulet, purée de céleri et pommes de terre",
+    "mealTypes": [
+      "dejeuner",
+      "diner"
+    ],
+    "servings": 2,
+    "prepMin": 15,
+    "cookMin": 25,
+    "ingredients": [
+      {
+        "id": "poulet-emince",
+        "grams": 280
+      },
+      {
+        "id": "celeri-rave",
+        "grams": 300
+      },
+      {
+        "id": "pommes-de-terre",
+        "grams": 300
+      },
+      {
+        "id": "huile-olive",
+        "grams": 20
+      },
+      {
+        "id": "herbes-provence",
+        "grams": 2
+      }
+    ],
+    "steps": [
+      "Cuire céleri et pommes de terre en cubes 20 min à l’eau salée.",
+      "Écraser avec la moitié de l’huile et un peu d’eau de cuisson.",
+      "Poêler le poulet avec les herbes dans le reste d’huile."
+    ],
+    "kashrut": "bassari",
+    "tags": [],
+    "season": [
+      10,
+      11,
+      12,
+      1,
+      2,
+      3,
+      4
+    ],
+    "fridgeDays": 3,
+    "freezerMonths": 2,
+    "perServing": {
+      "kcal": 407,
+      "protein": 37.5,
+      "fat": 12.8,
+      "carbs": 33.3,
+      "priceChf": 2.8,
+      "priceBudgetChf": 2.8
+    },
+    "compatibleWith": [
+      "casher",
+      "halal",
+      "sans-gluten",
+      "sans-lactose",
+      "sans-arachides"
+    ]
+  },
+  {
+    "id": "pomme-amandes",
+    "name": "Pomme et amandes",
+    "mealTypes": [
+      "collation"
+    ],
+    "servings": 1,
+    "prepMin": 1,
+    "cookMin": 0,
+    "ingredients": [
+      {
+        "id": "pommes",
+        "grams": 150
+      },
+      {
+        "id": "amandes",
+        "grams": 20
+      }
+    ],
+    "steps": [
+      "Laver la pomme.",
+      "Servir avec les amandes."
+    ],
+    "kashrut": "parve",
+    "tags": [
+      "rapide",
+      "petit-budget"
+    ],
+    "season": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "fridgeDays": 0,
+    "freezerMonths": 0,
+    "perServing": {
+      "kcal": 201,
+      "protein": 4.7,
+      "fat": 10.7,
+      "carbs": 19.2,
+      "priceChf": 0.59,
+      "priceBudgetChf": 0.49
+    },
+    "compatibleWith": [
+      "casher",
+      "halal",
+      "vegetarien",
+      "sans-gluten",
+      "sans-lactose",
+      "sans-arachides"
+    ]
+  },
+  {
+    "id": "yaourt-grec-miel-noix",
+    "name": "Yaourt grec, miel et noix",
+    "mealTypes": [
+      "collation"
+    ],
+    "servings": 1,
+    "prepMin": 2,
+    "cookMin": 0,
+    "ingredients": [
+      {
+        "id": "yaourt-grec",
+        "grams": 170
+      },
+      {
+        "id": "miel",
+        "grams": 10
+      },
+      {
+        "id": "noix",
+        "grams": 15
+      }
+    ],
+    "steps": [
+      "Verser le yaourt dans un bol.",
+      "Ajouter le miel et les noix concassées."
+    ],
+    "kashrut": "halavi",
+    "tags": [
+      "rapide"
+    ],
+    "season": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "fridgeDays": 0,
+    "freezerMonths": 0,
+    "perServing": {
+      "kcal": 253,
+      "protein": 17.6,
+      "fat": 13.2,
+      "carbs": 15.9,
+      "priceChf": 1.63,
+      "priceBudgetChf": 1.63
+    },
+    "compatibleWith": [
+      "casher",
+      "halal",
+      "vegetarien",
+      "sans-gluten",
+      "sans-arachides"
+    ]
+  },
+  {
+    "id": "sere-baies",
+    "name": "Séré et fruits rouges",
+    "mealTypes": [
+      "collation"
+    ],
+    "servings": 1,
+    "prepMin": 2,
+    "cookMin": 0,
+    "ingredients": [
+      {
+        "id": "sere-maigre",
+        "grams": 150
+      },
+      {
+        "id": "baies-surgelees",
+        "grams": 80
+      }
+    ],
+    "steps": [
+      "Décongeler les fruits rouges.",
+      "Mélanger avec le séré."
+    ],
+    "kashrut": "halavi",
+    "tags": [
+      "rapide"
+    ],
+    "season": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "fridgeDays": 1,
+    "freezerMonths": 0,
+    "perServing": {
+      "kcal": 141,
+      "protein": 18.8,
+      "fat": 0.7,
+      "carbs": 12.4,
+      "priceChf": 1.11,
+      "priceBudgetChf": 0.86
+    },
+    "compatibleWith": [
+      "casher",
+      "halal",
+      "vegetarien",
+      "sans-gluten",
+      "sans-arachides"
+    ]
+  },
+  {
+    "id": "banane-cacahuete",
+    "name": "Banane et beurre de cacahuète",
+    "mealTypes": [
+      "collation"
+    ],
+    "servings": 1,
+    "prepMin": 1,
+    "cookMin": 0,
+    "ingredients": [
+      {
+        "id": "bananes",
+        "grams": 120
+      },
+      {
+        "id": "beurre-cacahuete",
+        "grams": 15
+      }
+    ],
+    "steps": [
+      "Couper la banane en rondelles.",
+      "Tremper dans le beurre de cacahuète."
+    ],
+    "kashrut": "parve",
+    "tags": [
+      "rapide",
+      "petit-budget"
+    ],
+    "season": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "fridgeDays": 0,
+    "freezerMonths": 0,
+    "perServing": {
+      "kcal": 205,
+      "protein": 5.1,
+      "fat": 7.9,
+      "carbs": 27,
+      "priceChf": 0.45,
+      "priceBudgetChf": 0.45
+    },
+    "compatibleWith": [
+      "casher",
+      "halal",
+      "vegetarien",
+      "sans-gluten",
+      "sans-lactose"
+    ]
+  },
+  {
+    "id": "houmous-batonnets",
+    "name": "Houmous maison et bâtonnets de carottes",
+    "mealTypes": [
+      "collation"
+    ],
+    "servings": 4,
+    "prepMin": 10,
+    "cookMin": 0,
+    "ingredients": [
+      {
+        "id": "pois-chiches-conserve",
+        "grams": 480
+      },
+      {
+        "id": "tahini",
+        "grams": 60
+      },
+      {
+        "id": "citron",
+        "grams": 40
+      },
+      {
+        "id": "huile-olive",
+        "grams": 20
+      },
+      {
+        "id": "ail",
+        "grams": 5
+      },
+      {
+        "id": "carottes",
+        "grams": 600
+      }
+    ],
+    "steps": [
+      "Mixer pois chiches, tahini, citron, ail, huile et 4 c. à soupe d’eau froide.",
+      "Saler et ajuster la texture avec un peu d’eau.",
+      "Servir avec les carottes en bâtonnets."
+    ],
+    "kashrut": "parve",
+    "tags": [
+      "batch-friendly"
+    ],
+    "season": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "fridgeDays": 4,
+    "freezerMonths": 0,
+    "perServing": {
+      "kcal": 338,
+      "protein": 12.4,
+      "fat": 16.4,
+      "carbs": 31.4,
+      "priceChf": 1.16,
+      "priceBudgetChf": 1.16
+    },
+    "compatibleWith": [
+      "casher",
+      "halal",
+      "vegetarien",
+      "sans-gluten",
+      "sans-lactose",
+      "sans-arachides"
+    ]
+  },
+  {
+    "id": "chocolat-clementines",
+    "name": "Carré de chocolat noir et clémentines",
+    "mealTypes": [
+      "collation"
+    ],
+    "servings": 1,
+    "prepMin": 1,
+    "cookMin": 0,
+    "ingredients": [
+      {
+        "id": "chocolat-noir",
+        "grams": 20
+      },
+      {
+        "id": "clementines",
+        "grams": 150
+      }
+    ],
+    "steps": [
+      "Éplucher les clémentines.",
+      "Savourer avec le chocolat."
+    ],
+    "kashrut": "parve",
+    "tags": [
+      "rapide",
+      "petit-budget"
+    ],
+    "season": [
+      11,
+      12,
+      1,
+      2,
+      3
+    ],
+    "fridgeDays": 0,
+    "freezerMonths": 0,
+    "perServing": {
+      "kcal": 183,
+      "protein": 2.8,
+      "fat": 8.7,
+      "carbs": 21.6,
+      "priceChf": 0.89,
+      "priceBudgetChf": 0.7
+    },
+    "compatibleWith": [
+      "casher",
+      "halal",
+      "vegetarien",
+      "sans-gluten",
+      "sans-lactose",
+      "sans-arachides"
+    ]
+  },
+  {
+    "id": "cottage-tomates",
+    "name": "Cottage cheese et tomates cerises",
+    "mealTypes": [
+      "collation"
+    ],
+    "servings": 1,
+    "prepMin": 2,
+    "cookMin": 0,
+    "ingredients": [
+      {
+        "id": "cottage-cheese",
+        "grams": 150
+      },
+      {
+        "id": "tomates",
+        "grams": 100
+      }
+    ],
+    "steps": [
+      "Couper les tomates.",
+      "Mélanger avec le cottage cheese, poivrer."
+    ],
+    "kashrut": "halavi",
+    "tags": [
+      "rapide"
+    ],
+    "season": [
+      5,
+      6,
+      7,
+      8,
+      9,
+      10
+    ],
+    "fridgeDays": 1,
+    "freezerMonths": 0,
+    "perServing": {
+      "kcal": 163,
+      "protein": 18.9,
+      "fat": 6.2,
+      "carbs": 7.3,
+      "priceChf": 1.97,
+      "priceBudgetChf": 1.97
+    },
+    "compatibleWith": [
+      "casher",
+      "halal",
+      "vegetarien",
+      "sans-gluten",
+      "sans-arachides"
+    ]
+  },
+  {
+    "id": "oeufs-durs-crudites",
+    "name": "Œufs durs et crudités",
+    "mealTypes": [
+      "collation"
+    ],
+    "servings": 1,
+    "prepMin": 5,
+    "cookMin": 9,
+    "ingredients": [
+      {
+        "id": "oeufs",
+        "grams": 110
+      },
+      {
+        "id": "concombre",
+        "grams": 100
+      },
+      {
+        "id": "carottes",
+        "grams": 80
+      }
+    ],
+    "steps": [
+      "Cuire les œufs 9 min, les refroidir.",
+      "Couper concombre et carottes en bâtonnets."
+    ],
+    "kashrut": "parve",
+    "tags": [
+      "batch-friendly"
+    ],
+    "season": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "fridgeDays": 4,
+    "freezerMonths": 0,
+    "perServing": {
+      "kcal": 196,
+      "protein": 15,
+      "fat": 11.3,
+      "carbs": 8.9,
+      "priceChf": 1.2,
+      "priceBudgetChf": 1.11
+    },
+    "compatibleWith": [
+      "casher",
+      "halal",
+      "vegetarien",
+      "sans-gluten",
+      "sans-lactose",
+      "sans-arachides"
+    ]
+  },
+  {
+    "id": "dattes-noix",
+    "name": "Dattes et noix",
+    "mealTypes": [
+      "collation"
+    ],
+    "servings": 1,
+    "prepMin": 1,
+    "cookMin": 0,
+    "ingredients": [
+      {
+        "id": "dattes",
+        "grams": 30
+      },
+      {
+        "id": "noix",
+        "grams": 15
+      }
+    ],
+    "steps": [
+      "Servir ensemble : un en-cas énergétique avant le sport."
+    ],
+    "kashrut": "parve",
+    "tags": [
+      "rapide",
+      "petit-budget"
+    ],
+    "season": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "fridgeDays": 0,
+    "freezerMonths": 0,
+    "perServing": {
+      "kcal": 192,
+      "protein": 2.9,
+      "fat": 9.9,
+      "carbs": 22.1,
+      "priceChf": 0.7,
+      "priceBudgetChf": 0.7
+    },
+    "compatibleWith": [
+      "casher",
+      "halal",
+      "vegetarien",
+      "sans-gluten",
+      "sans-lactose",
+      "sans-arachides"
+    ]
+  },
+  {
+    "id": "smoothie-banane-lait",
+    "name": "Smoothie banane-avoine",
+    "mealTypes": [
+      "collation"
+    ],
+    "servings": 1,
+    "prepMin": 5,
+    "cookMin": 0,
+    "ingredients": [
+      {
+        "id": "bananes",
+        "grams": 100
+      },
+      {
+        "id": "lait",
+        "grams": 250
+      },
+      {
+        "id": "flocons-avoine",
+        "grams": 15
+      }
+    ],
+    "steps": [
+      "Mixer tous les ingrédients.",
+      "Boire frais."
+    ],
+    "kashrut": "halavi",
+    "tags": [
+      "rapide",
+      "petit-budget"
+    ],
+    "season": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "fridgeDays": 0,
+    "freezerMonths": 0,
+    "perServing": {
+      "kcal": 294,
+      "protein": 11.4,
+      "fat": 8.1,
+      "carbs": 41.9,
+      "priceChf": 0.56,
+      "priceBudgetChf": 0.56
+    },
+    "compatibleWith": [
+      "casher",
+      "halal",
+      "vegetarien",
+      "sans-arachides"
+    ]
+  },
+  {
+    "id": "melange-noix-raisins",
+    "name": "Mélange de noix et raisins secs",
+    "mealTypes": [
+      "collation"
+    ],
+    "servings": 1,
+    "prepMin": 1,
+    "cookMin": 0,
+    "ingredients": [
+      {
+        "id": "amandes",
+        "grams": 15
+      },
+      {
+        "id": "noix",
+        "grams": 10
+      },
+      {
+        "id": "raisins-secs",
+        "grams": 15
+      },
+      {
+        "id": "graines-courge",
+        "grams": 10
+      }
+    ],
+    "steps": [
+      "Mélanger le tout dans un petit sachet à emporter."
+    ],
+    "kashrut": "parve",
+    "tags": [
+      "rapide",
+      "petit-budget"
+    ],
+    "season": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "fridgeDays": 0,
+    "freezerMonths": 0,
+    "perServing": {
+      "kcal": 261,
+      "protein": 8.1,
+      "fat": 19.3,
+      "carbs": 12.3,
+      "priceChf": 0.78,
+      "priceBudgetChf": 0.7
+    },
+    "compatibleWith": [
+      "casher",
+      "halal",
+      "vegetarien",
+      "sans-gluten",
+      "sans-lactose",
+      "sans-arachides"
+    ]
+  },
+  {
+    "id": "tartine-gruyere-poire",
+    "name": "Tartine de gruyère et poire",
+    "mealTypes": [
+      "collation"
+    ],
+    "servings": 1,
+    "prepMin": 3,
+    "cookMin": 0,
+    "ingredients": [
+      {
+        "id": "pain-complet",
+        "grams": 40
+      },
+      {
+        "id": "gruyere",
+        "grams": 25
+      },
+      {
+        "id": "poires",
+        "grams": 100
+      }
+    ],
+    "steps": [
+      "Trancher le gruyère et la poire.",
+      "Disposer sur le pain."
+    ],
+    "kashrut": "halavi",
+    "tags": [
+      "rapide"
+    ],
+    "season": [
+      9,
+      10,
+      11,
+      12,
+      1,
+      2,
+      3
+    ],
+    "fridgeDays": 0,
+    "freezerMonths": 0,
+    "perServing": {
+      "kcal": 254,
+      "protein": 11,
+      "fat": 9.8,
+      "carbs": 28.9,
+      "priceChf": 0.96,
+      "priceBudgetChf": 0.95
+    },
+    "compatibleWith": [
+      "casher",
+      "halal",
+      "vegetarien",
+      "sans-lactose",
+      "sans-arachides"
+    ]
+  },
+  {
+    "id": "barres-avoine-dattes",
+    "name": "Barres maison avoine-dattes",
+    "mealTypes": [
+      "collation"
+    ],
+    "servings": 8,
+    "prepMin": 15,
+    "cookMin": 0,
+    "ingredients": [
+      {
+        "id": "flocons-avoine",
+        "grams": 200
+      },
+      {
+        "id": "dattes",
+        "grams": 150
+      },
+      {
+        "id": "beurre-cacahuete",
+        "grams": 80
+      },
+      {
+        "id": "graines-courge",
+        "grams": 40
+      }
+    ],
+    "steps": [
+      "Mixer les dattes avec 3 c. à soupe d’eau chaude en pâte.",
+      "Mélanger avec le beurre de cacahuète, les flocons et les graines.",
+      "Tasser dans un moule chemisé, réfrigérer 1 h et couper en 8 barres."
+    ],
+    "kashrut": "parve",
+    "tags": [
+      "batch-friendly",
+      "petit-budget"
+    ],
+    "season": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "fridgeDays": 7,
+    "freezerMonths": 3,
+    "perServing": {
+      "kcal": 240,
+      "protein": 7.8,
+      "fat": 9.3,
+      "carbs": 29.3,
+      "priceChf": 0.46,
+      "priceBudgetChf": 0.46
+    },
+    "compatibleWith": [
+      "casher",
+      "halal",
+      "vegetarien",
+      "sans-lactose"
+    ]
+  },
+  {
+    "id": "yaourt-nature-pomme-cannelle",
+    "name": "Yaourt nature, pomme et cannelle",
+    "mealTypes": [
+      "collation"
+    ],
+    "servings": 1,
+    "prepMin": 3,
+    "cookMin": 0,
+    "ingredients": [
+      {
+        "id": "yaourt-nature",
+        "grams": 180
+      },
+      {
+        "id": "pommes",
+        "grams": 100
+      },
+      {
+        "id": "cannelle",
+        "grams": 1
+      }
+    ],
+    "steps": [
+      "Râper la pomme dans le yaourt.",
+      "Saupoudrer de cannelle."
+    ],
+    "kashrut": "halavi",
+    "tags": [
+      "rapide",
+      "petit-budget"
+    ],
+    "season": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "fridgeDays": 0,
+    "freezerMonths": 0,
+    "perServing": {
+      "kcal": 174,
+      "protein": 7.5,
+      "fat": 6.5,
+      "carbs": 20.7,
+      "priceChf": 0.52,
+      "priceBudgetChf": 0.52
+    },
+    "compatibleWith": [
+      "casher",
+      "halal",
+      "vegetarien",
+      "sans-gluten",
+      "sans-arachides"
+    ]
+  }
+]

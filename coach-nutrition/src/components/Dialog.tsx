@@ -10,11 +10,14 @@ export function Dialog({
   onClose,
   title,
   children,
+  size = 'md',
 }: {
   open: boolean
   onClose: () => void
   title: string
   children: ReactNode
+  /** Largeur : « md » pour une confirmation, « xl » pour une fiche recette. */
+  size?: 'md' | 'xl'
 }) {
   const ref = useRef<HTMLDialogElement>(null)
 
@@ -34,7 +37,7 @@ export function Dialog({
         if (e.target === ref.current) onClose()
       }}
       aria-labelledby="dialog-title"
-      className="m-auto w-[calc(100%-2rem)] max-w-md rounded-2xl p-0 shadow-xl backdrop:bg-slate-900/40"
+      className={`m-auto w-[calc(100%-2rem)] ${size === 'xl' ? 'max-w-2xl' : 'max-w-md'} max-h-[90vh] rounded-2xl p-0 shadow-xl backdrop:bg-slate-900/40`}
     >
       {open && (
         <div className="flex flex-col gap-4 p-6">

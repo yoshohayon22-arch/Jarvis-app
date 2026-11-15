@@ -1,0 +1,1412 @@
+{
+  "updatedAt": "2026-11-15",
+  "note": "Prix indicatifs en CHF, hors promotions. « relevé » = prix constaté sur migros.ch ou coop.ch à la date checkedAt ; « estimation » = valeur approximative (Lidl et Aldi ne publient pas leurs prix en ligne). Modifie librement priceChf et packageSize (même unité que l’ingrédient : g, ml ou pièces).",
+  "items": {
+    "riz-long": [
+      {
+        "store": "Migros",
+        "label": "Riz long grain étuvé Migros",
+        "priceChf": 1.35,
+        "packageSize": 1000,
+        "budgetLine": false,
+        "source": "relevé",
+        "checkedAt": "2026-11-15",
+        "url": "https://www.migros.ch/fr/product/104415300000"
+      }
+    ],
+    "riz-complet": [
+      {
+        "store": "Migros",
+        "label": "Riz complet",
+        "priceChf": 3.95,
+        "packageSize": 1000,
+        "budgetLine": false,
+        "source": "estimation"
+      }
+    ],
+    "riz-arborio": [
+      {
+        "store": "Lidl",
+        "label": "Riz arborio Lidl",
+        "priceChf": 2.9,
+        "packageSize": 1000,
+        "budgetLine": false,
+        "source": "estimation"
+      }
+    ],
+    "pates": [
+      {
+        "store": "Migros",
+        "label": "Spaghetti Migros",
+        "priceChf": 1.2,
+        "packageSize": 1000,
+        "budgetLine": false,
+        "source": "relevé",
+        "checkedAt": "2026-11-15",
+        "url": "https://www.migros.ch/fr/product/104102000000"
+      },
+      {
+        "store": "Coop",
+        "label": "Spaghettis Prix Garantie",
+        "priceChf": 1.2,
+        "packageSize": 1000,
+        "budgetLine": true,
+        "source": "relevé",
+        "checkedAt": "2026-11-15",
+        "url": "https://www.coop.ch/fr/nourriture/garde-manger/aliments-de-base/pates/spaghettis/spaghettis-prix-garantie/p/7362486"
+      }
+    ],
+    "pates-completes": [
+      {
+        "store": "Migros",
+        "label": "Alnatura Spaghetti complets",
+        "priceChf": 1.2,
+        "packageSize": 500,
+        "budgetLine": false,
+        "source": "relevé",
+        "checkedAt": "2026-11-15",
+        "url": "https://www.migros.ch/fr/product/104162300000"
+      }
+    ],
+    "pates-sans-gluten": [
+      {
+        "store": "Coop",
+        "label": "Pâtes sans gluten Free From",
+        "priceChf": 3.5,
+        "packageSize": 500,
+        "budgetLine": false,
+        "source": "estimation"
+      }
+    ],
+    "flocons-avoine": [
+      {
+        "store": "Migros",
+        "label": "M-Classic Flocons d’avoine complets fins",
+        "priceChf": 1.4,
+        "packageSize": 1000,
+        "budgetLine": false,
+        "source": "relevé",
+        "checkedAt": "2026-11-15",
+        "url": "https://www.migros.ch/fr/product/104202000000"
+      }
+    ],
+    "flocons-avoine-sans-gluten": [
+      {
+        "store": "Coop",
+        "label": "Flocons d’avoine sans gluten",
+        "priceChf": 4.5,
+        "packageSize": 500,
+        "budgetLine": false,
+        "source": "estimation"
+      }
+    ],
+    "quinoa": [
+      {
+        "store": "Migros",
+        "label": "Alnatura Quinoa blanc",
+        "priceChf": 4.5,
+        "packageSize": 500,
+        "budgetLine": false,
+        "source": "relevé",
+        "checkedAt": "2026-11-15",
+        "url": "https://www.migros.ch/fr/product/104464800000"
+      },
+      {
+        "store": "Aldi",
+        "label": "Quinoa Aldi",
+        "priceChf": 3.49,
+        "packageSize": 500,
+        "budgetLine": true,
+        "source": "estimation"
+      }
+    ],
+    "boulgour": [
+      {
+        "store": "Migros",
+        "label": "Boulgour",
+        "priceChf": 2.6,
+        "packageSize": 500,
+        "budgetLine": false,
+        "source": "estimation"
+      }
+    ],
+    "semoule-couscous": [
+      {
+        "store": "Coop",
+        "label": "Couscous",
+        "priceChf": 1.6,
+        "packageSize": 500,
+        "budgetLine": false,
+        "source": "estimation"
+      },
+      {
+        "store": "Lidl",
+        "label": "Couscous Lidl",
+        "priceChf": 0.99,
+        "packageSize": 500,
+        "budgetLine": true,
+        "source": "estimation"
+      }
+    ],
+    "polenta": [
+      {
+        "store": "Migros",
+        "label": "Polenta",
+        "priceChf": 1.8,
+        "packageSize": 500,
+        "budgetLine": false,
+        "source": "estimation"
+      }
+    ],
+    "farine-ble": [
+      {
+        "store": "Coop",
+        "label": "Farine fleur",
+        "priceChf": 1.6,
+        "packageSize": 1000,
+        "budgetLine": false,
+        "source": "estimation"
+      },
+      {
+        "store": "Migros",
+        "label": "M-Budget Farine",
+        "priceChf": 1.15,
+        "packageSize": 1000,
+        "budgetLine": true,
+        "source": "estimation"
+      }
+    ],
+    "levure-seche": [
+      {
+        "store": "Migros",
+        "label": "Levure sèche (3 sachets)",
+        "priceChf": 1.2,
+        "packageSize": 21,
+        "budgetLine": false,
+        "source": "estimation"
+      }
+    ],
+    "muesli-nature": [
+      {
+        "store": "Migros",
+        "label": "Birchermüesli",
+        "priceChf": 3.9,
+        "packageSize": 750,
+        "budgetLine": false,
+        "source": "estimation"
+      },
+      {
+        "store": "Aldi",
+        "label": "Muesli Aldi",
+        "priceChf": 2.49,
+        "packageSize": 750,
+        "budgetLine": true,
+        "source": "estimation"
+      }
+    ],
+    "galettes-riz": [
+      {
+        "store": "Coop",
+        "label": "Galettes de riz",
+        "priceChf": 1.5,
+        "packageSize": 130,
+        "budgetLine": false,
+        "source": "estimation"
+      }
+    ],
+    "pain-complet": [
+      {
+        "store": "Coop",
+        "label": "Karma Pain complet",
+        "priceChf": 1.8,
+        "packageSize": 500,
+        "budgetLine": false,
+        "source": "relevé",
+        "checkedAt": "2026-11-15",
+        "url": "https://www.coop.ch/fr/nourriture/pains-viennoiseries/pains-durables/pains-durables/whole-grain-bread-karma/p/7510765"
+      },
+      {
+        "store": "Migros",
+        "label": "Alnatura Pain complet de seigle au levain",
+        "priceChf": 2.0,
+        "packageSize": 500,
+        "budgetLine": false,
+        "source": "relevé",
+        "checkedAt": "2026-11-15",
+        "url": "https://www.migros.ch/fr/product/111334500000"
+      },
+      {
+        "store": "Lidl",
+        "label": "Pain complet Lidl",
+        "priceChf": 1.95,
+        "packageSize": 500,
+        "budgetLine": true,
+        "source": "estimation"
+      }
+    ],
+    "pain-sans-gluten": [
+      {
+        "store": "Coop",
+        "label": "Pain Free From",
+        "priceChf": 4.2,
+        "packageSize": 300,
+        "budgetLine": false,
+        "source": "estimation"
+      }
+    ],
+    "tortillas-ble": [
+      {
+        "store": "Migros",
+        "label": "Tortillas (8 pièces)",
+        "priceChf": 2.9,
+        "packageSize": 370,
+        "budgetLine": false,
+        "source": "estimation"
+      },
+      {
+        "store": "Lidl",
+        "label": "Wraps Lidl",
+        "priceChf": 1.79,
+        "packageSize": 320,
+        "budgetLine": true,
+        "source": "estimation"
+      }
+    ],
+    "lentilles-corail": [
+      {
+        "store": "Migros",
+        "label": "Alnatura Lentilles rouges",
+        "priceChf": 2.2,
+        "packageSize": 400,
+        "budgetLine": false,
+        "source": "relevé",
+        "checkedAt": "2026-11-15",
+        "url": "https://www.migros.ch/fr/product/104461900000"
+      }
+    ],
+    "lentilles-vertes": [
+      {
+        "store": "Migros",
+        "label": "Bio Lentilles vertes",
+        "priceChf": 3.2,
+        "packageSize": 500,
+        "budgetLine": false,
+        "source": "relevé",
+        "checkedAt": "2026-11-15",
+        "url": "https://www.migros.ch/fr/product/105005400000"
+      }
+    ],
+    "pois-chiches-conserve": [
+      {
+        "store": "Migros",
+        "label": "Pois chiches Migros (poids égoutté)",
+        "priceChf": 1.05,
+        "packageSize": 245,
+        "budgetLine": false,
+        "source": "relevé",
+        "checkedAt": "2026-11-15",
+        "url": "https://www.migros.ch/fr/product/153134000000"
+      }
+    ],
+    "haricots-rouges-conserve": [
+      {
+        "store": "Migros",
+        "label": "M-Classic Haricots rouges (poids égoutté probable)",
+        "priceChf": 0.95,
+        "packageSize": 310,
+        "budgetLine": false,
+        "source": "relevé",
+        "checkedAt": "2026-11-15",
+        "url": "https://www.migros.ch/fr/product/153012400000"
+      }
+    ],
+    "haricots-blancs-conserve": [
+      {
+        "store": "Coop",
+        "label": "Haricots blancs (400 g brut)",
+        "priceChf": 1.7,
+        "packageSize": 240,
+        "budgetLine": false,
+        "source": "estimation"
+      }
+    ],
+    "tofu-nature": [
+      {
+        "store": "Migros",
+        "label": "M-Budget Tofu nature",
+        "priceChf": 1.15,
+        "packageSize": 300,
+        "budgetLine": true,
+        "source": "relevé",
+        "checkedAt": "2026-11-15",
+        "url": "https://www.migros.ch/fr/product/130927400000"
+      },
+      {
+        "store": "Lidl",
+        "label": "Tofu Lidl",
+        "priceChf": 2.49,
+        "packageSize": 250,
+        "budgetLine": true,
+        "source": "estimation"
+      }
+    ],
+    "poulet-emince": [
+      {
+        "store": "Coop",
+        "label": "Émincé de poulet Prix Garantie env. 700 g",
+        "priceChf": 9.45,
+        "packageSize": 700,
+        "budgetLine": true,
+        "source": "relevé",
+        "checkedAt": "2026-11-15",
+        "url": "https://www.coop.ch/fr/nourriture/viandes-poissons/viandes-fraiches-emballees/volaille/emince-de-poulet-prix-garantie-env/p/7533580"
+      }
+    ],
+    "cuisses-poulet": [
+      {
+        "store": "Coop",
+        "label": "Cuisses de poulet Prix Garantie",
+        "priceChf": 9.5,
+        "packageSize": 1000,
+        "budgetLine": false,
+        "source": "estimation"
+      }
+    ],
+    "dinde-escalope": [
+      {
+        "store": "Migros",
+        "label": "Escalopes de dinde",
+        "priceChf": 9.8,
+        "packageSize": 400,
+        "budgetLine": false,
+        "source": "estimation"
+      }
+    ],
+    "boeuf-hache": [
+      {
+        "store": "Migros",
+        "label": "Viande hachée de bœuf Migros",
+        "priceChf": 5.95,
+        "packageSize": 300,
+        "budgetLine": false,
+        "source": "relevé",
+        "checkedAt": "2026-11-15",
+        "url": "https://www.migros.ch/fr/product/220220032000"
+      }
+    ],
+    "boeuf-ragout": [
+      {
+        "store": "Migros",
+        "label": "Ragoût de bœuf",
+        "priceChf": 14.0,
+        "packageSize": 500,
+        "budgetLine": false,
+        "source": "estimation"
+      }
+    ],
+    "porc-emince": [
+      {
+        "store": "Migros",
+        "label": "Émincé de porc",
+        "priceChf": 8.5,
+        "packageSize": 400,
+        "budgetLine": false,
+        "source": "estimation"
+      }
+    ],
+    "cervelas": [
+      {
+        "store": "Coop",
+        "label": "Cervelas (2 pièces)",
+        "priceChf": 2.4,
+        "packageSize": 2,
+        "budgetLine": false,
+        "source": "estimation"
+      },
+      {
+        "store": "Migros",
+        "label": "M-Budget Cervelas (2 pièces)",
+        "priceChf": 1.8,
+        "packageSize": 2,
+        "budgetLine": true,
+        "source": "estimation"
+      }
+    ],
+    "jambon-cuit": [
+      {
+        "store": "Migros",
+        "label": "Jambon de campagne",
+        "priceChf": 3.2,
+        "packageSize": 150,
+        "budgetLine": false,
+        "source": "estimation"
+      }
+    ],
+    "lapin": [
+      {
+        "store": "Coop",
+        "label": "Lapin découpé",
+        "priceChf": 12.0,
+        "packageSize": 600,
+        "budgetLine": false,
+        "source": "estimation"
+      }
+    ],
+    "saumon-filet": [
+      {
+        "store": "Migros",
+        "label": "Pelican Filets de saumon surgelés",
+        "priceChf": 8.0,
+        "packageSize": 250,
+        "budgetLine": false,
+        "source": "relevé",
+        "checkedAt": "2026-11-15",
+        "url": "https://www.migros.ch/fr/product/252008600000"
+      },
+      {
+        "store": "Migros",
+        "label": "Filet de saumon frais avec peau (prix au kg)",
+        "priceChf": 22.0,
+        "packageSize": 1000,
+        "budgetLine": false,
+        "source": "relevé",
+        "checkedAt": "2026-11-15",
+        "url": "https://www.migros.ch/fr/product/251200400000"
+      },
+      {
+        "store": "Aldi",
+        "label": "Saumon surgelé Aldi",
+        "priceChf": 9.9,
+        "packageSize": 500,
+        "budgetLine": true,
+        "source": "estimation"
+      }
+    ],
+    "truite-filet": [
+      {
+        "store": "Migros",
+        "label": "Filets de truite suisses",
+        "priceChf": 6.5,
+        "packageSize": 200,
+        "budgetLine": false,
+        "source": "estimation"
+      }
+    ],
+    "cabillaud-filet": [
+      {
+        "store": "Coop",
+        "label": "Cabillaud surgelé",
+        "priceChf": 7.9,
+        "packageSize": 400,
+        "budgetLine": false,
+        "source": "estimation"
+      },
+      {
+        "store": "Lidl",
+        "label": "Filets de colin Lidl",
+        "priceChf": 5.5,
+        "packageSize": 400,
+        "budgetLine": true,
+        "source": "estimation"
+      }
+    ],
+    "thon-conserve": [
+      {
+        "store": "Migros",
+        "label": "Thon à l’eau Migros",
+        "priceChf": 1.3,
+        "packageSize": 150,
+        "budgetLine": false,
+        "source": "relevé",
+        "checkedAt": "2026-11-15",
+        "url": "https://www.migros.ch/fr/product/155900200000"
+      }
+    ],
+    "sardines-huile": [
+      {
+        "store": "Migros",
+        "label": "Sardines à l’huile",
+        "priceChf": 1.6,
+        "packageSize": 90,
+        "budgetLine": false,
+        "source": "estimation"
+      }
+    ],
+    "crevettes": [
+      {
+        "store": "Coop",
+        "label": "Crevettes surgelées",
+        "priceChf": 6.5,
+        "packageSize": 200,
+        "budgetLine": false,
+        "source": "estimation"
+      }
+    ],
+    "oeufs": [
+      {
+        "store": "Migros",
+        "label": "M-Budget Œufs 53+ import, plein air (10)",
+        "priceChf": 4.2,
+        "packageSize": 10,
+        "budgetLine": true,
+        "source": "relevé",
+        "checkedAt": "2026-11-15",
+        "url": "https://www.migros.ch/fr/product/196520001700"
+      },
+      {
+        "store": "Migros",
+        "label": "M-Budget Œufs 53+ import, au sol (15)",
+        "priceChf": 4.95,
+        "packageSize": 15,
+        "budgetLine": true,
+        "source": "relevé",
+        "checkedAt": "2026-11-15",
+        "url": "https://www.migros.ch/fr/product/196500501500"
+      }
+    ],
+    "lait": [
+      {
+        "store": "Migros",
+        "label": "M-Budget Lait demi-écrémé 1,5 % UHT (2 L)",
+        "priceChf": 2.35,
+        "packageSize": 2000,
+        "budgetLine": true,
+        "source": "relevé",
+        "checkedAt": "2026-11-15",
+        "url": "https://www.migros.ch/fr/product/204019900000"
+      }
+    ],
+    "lait-sans-lactose": [
+      {
+        "store": "Migros",
+        "label": "Aha! Lait sans lactose",
+        "priceChf": 2.2,
+        "packageSize": 1000,
+        "budgetLine": false,
+        "source": "estimation"
+      }
+    ],
+    "boisson-avoine": [
+      {
+        "store": "Coop",
+        "label": "Boisson avoine",
+        "priceChf": 2.2,
+        "packageSize": 1000,
+        "budgetLine": false,
+        "source": "estimation"
+      },
+      {
+        "store": "Lidl",
+        "label": "Boisson avoine Lidl",
+        "priceChf": 1.49,
+        "packageSize": 1000,
+        "budgetLine": true,
+        "source": "estimation"
+      }
+    ],
+    "yaourt-nature": [
+      {
+        "store": "Coop",
+        "label": "Prix Garantie Yogourt nature 1,5 %",
+        "priceChf": 0.85,
+        "packageSize": 500,
+        "budgetLine": true,
+        "source": "relevé",
+        "checkedAt": "2026-11-15",
+        "url": "https://www.coop.ch/fr/nourriture/produits-laitiers-oeufs/yogourts/yogourts-nature/prix-garantie-yog-nature-15/p/7341117"
+      }
+    ],
+    "yaourt-grec": [
+      {
+        "store": "Migros",
+        "label": "Yaourt à la grecque",
+        "priceChf": 3.5,
+        "packageSize": 500,
+        "budgetLine": false,
+        "source": "estimation"
+      }
+    ],
+    "yaourt-soja": [
+      {
+        "store": "Coop",
+        "label": "Yaourt soja nature",
+        "priceChf": 2.5,
+        "packageSize": 400,
+        "budgetLine": false,
+        "source": "estimation"
+      }
+    ],
+    "sere-maigre": [
+      {
+        "store": "Migros",
+        "label": "M-Budget Séré maigre",
+        "priceChf": 1.3,
+        "packageSize": 500,
+        "budgetLine": true,
+        "source": "relevé",
+        "checkedAt": "2026-11-15",
+        "url": "https://www.migros.ch/fr/product/200803100000"
+      }
+    ],
+    "cottage-cheese": [
+      {
+        "store": "Migros",
+        "label": "Cottage cheese",
+        "priceChf": 2.1,
+        "packageSize": 200,
+        "budgetLine": false,
+        "source": "estimation"
+      }
+    ],
+    "gruyere": [
+      {
+        "store": "Migros",
+        "label": "Gruyère AOP doux (prix au kg)",
+        "priceChf": 17.0,
+        "packageSize": 1000,
+        "budgetLine": false,
+        "source": "relevé",
+        "checkedAt": "2026-11-15",
+        "url": "https://www.migros.ch/fr/product/210123024000"
+      }
+    ],
+    "mozzarella": [
+      {
+        "store": "Coop",
+        "label": "Mozzarella",
+        "priceChf": 1.6,
+        "packageSize": 150,
+        "budgetLine": false,
+        "source": "estimation"
+      },
+      {
+        "store": "Migros",
+        "label": "M-Budget Mozzarella",
+        "priceChf": 1.1,
+        "packageSize": 150,
+        "budgetLine": true,
+        "source": "estimation"
+      }
+    ],
+    "feta": [
+      {
+        "store": "Migros",
+        "label": "Feta",
+        "priceChf": 3.6,
+        "packageSize": 200,
+        "budgetLine": false,
+        "source": "estimation"
+      }
+    ],
+    "parmesan": [
+      {
+        "store": "Coop",
+        "label": "Parmigiano Reggiano râpé",
+        "priceChf": 3.5,
+        "packageSize": 100,
+        "budgetLine": false,
+        "source": "estimation"
+      }
+    ],
+    "beurre": [
+      {
+        "store": "Coop",
+        "label": "Beurre de choix",
+        "priceChf": 3.8,
+        "packageSize": 250,
+        "budgetLine": false,
+        "source": "estimation"
+      },
+      {
+        "store": "Migros",
+        "label": "M-Budget Beurre",
+        "priceChf": 2.95,
+        "packageSize": 250,
+        "budgetLine": true,
+        "source": "estimation"
+      }
+    ],
+    "creme-cuisine": [
+      {
+        "store": "Migros",
+        "label": "Crème à cuire",
+        "priceChf": 1.95,
+        "packageSize": 250,
+        "budgetLine": false,
+        "source": "estimation"
+      }
+    ],
+    "pommes-de-terre": [
+      {
+        "store": "Migros",
+        "label": "M-Budget Pommes de terre fermes (5 kg)",
+        "priceChf": 5.6,
+        "packageSize": 5000,
+        "budgetLine": true,
+        "source": "relevé",
+        "checkedAt": "2026-11-15",
+        "url": "https://www.migros.ch/fr/product/274461603300"
+      }
+    ],
+    "patate-douce": [
+      {
+        "store": "Coop",
+        "label": "Patates douces",
+        "priceChf": 4.5,
+        "packageSize": 1000,
+        "budgetLine": false,
+        "source": "estimation"
+      }
+    ],
+    "carottes": [
+      {
+        "store": "Migros",
+        "label": "M-Budget Carottes (2 kg)",
+        "priceChf": 3.85,
+        "packageSize": 2000,
+        "budgetLine": true,
+        "source": "relevé",
+        "checkedAt": "2026-11-15",
+        "url": "https://www.migros.ch/fr/product/274502602200"
+      }
+    ],
+    "oignons": [
+      {
+        "store": "Migros",
+        "label": "M-Budget Oignons (2 kg)",
+        "priceChf": 3.0,
+        "packageSize": 2000,
+        "budgetLine": true,
+        "source": "relevé",
+        "checkedAt": "2026-11-15",
+        "url": "https://www.migros.ch/fr/product/277108110400"
+      }
+    ],
+    "ail": [
+      {
+        "store": "Migros",
+        "label": "Ail",
+        "priceChf": 1.2,
+        "packageSize": 100,
+        "budgetLine": false,
+        "source": "estimation"
+      }
+    ],
+    "poireau": [
+      {
+        "store": "Coop",
+        "label": "Poireaux suisses",
+        "priceChf": 3.8,
+        "packageSize": 1000,
+        "budgetLine": false,
+        "source": "estimation"
+      }
+    ],
+    "courgette": [
+      {
+        "store": "Migros",
+        "label": "Courgettes",
+        "priceChf": 3.9,
+        "packageSize": 1000,
+        "budgetLine": false,
+        "source": "estimation"
+      }
+    ],
+    "poivron": [
+      {
+        "store": "Coop",
+        "label": "Poivrons mélangés",
+        "priceChf": 3.5,
+        "packageSize": 500,
+        "budgetLine": false,
+        "source": "estimation"
+      },
+      {
+        "store": "Aldi",
+        "label": "Poivrons Aldi",
+        "priceChf": 2.49,
+        "packageSize": 500,
+        "budgetLine": true,
+        "source": "estimation"
+      }
+    ],
+    "tomates": [
+      {
+        "store": "Migros",
+        "label": "Tomates grappe",
+        "priceChf": 3.9,
+        "packageSize": 1000,
+        "budgetLine": false,
+        "source": "estimation"
+      }
+    ],
+    "tomates-pelees-conserve": [
+      {
+        "store": "Migros",
+        "label": "M-Budget Tomates concassées",
+        "priceChf": 0.6,
+        "packageSize": 400,
+        "budgetLine": true,
+        "source": "relevé",
+        "checkedAt": "2026-11-15",
+        "url": "https://www.migros.ch/fr/product/153232100000"
+      }
+    ],
+    "concombre": [
+      {
+        "store": "Coop",
+        "label": "Concombre (pièce)",
+        "priceChf": 1.2,
+        "packageSize": 400,
+        "budgetLine": false,
+        "source": "estimation"
+      }
+    ],
+    "salade-verte": [
+      {
+        "store": "Migros",
+        "label": "Laitue (pièce)",
+        "priceChf": 1.8,
+        "packageSize": 250,
+        "budgetLine": false,
+        "source": "estimation"
+      }
+    ],
+    "epinards-surgeles": [
+      {
+        "store": "Coop",
+        "label": "Épinards hachés",
+        "priceChf": 3.2,
+        "packageSize": 750,
+        "budgetLine": false,
+        "source": "estimation"
+      },
+      {
+        "store": "Migros",
+        "label": "M-Budget Épinards",
+        "priceChf": 2.2,
+        "packageSize": 750,
+        "budgetLine": true,
+        "source": "estimation"
+      }
+    ],
+    "brocoli": [
+      {
+        "store": "Coop",
+        "label": "Brocoli",
+        "priceChf": 2.9,
+        "packageSize": 500,
+        "budgetLine": false,
+        "source": "estimation"
+      }
+    ],
+    "chou-fleur": [
+      {
+        "store": "Migros",
+        "label": "Chou-fleur (pièce)",
+        "priceChf": 3.2,
+        "packageSize": 800,
+        "budgetLine": false,
+        "source": "estimation"
+      }
+    ],
+    "chou-blanc": [
+      {
+        "store": "Coop",
+        "label": "Chou blanc",
+        "priceChf": 2.2,
+        "packageSize": 1000,
+        "budgetLine": false,
+        "source": "estimation"
+      }
+    ],
+    "courge-butternut": [
+      {
+        "store": "Migros",
+        "label": "Courge butternut",
+        "priceChf": 3.5,
+        "packageSize": 1000,
+        "budgetLine": false,
+        "source": "estimation"
+      }
+    ],
+    "champignons-paris": [
+      {
+        "store": "Coop",
+        "label": "Champignons de Paris",
+        "priceChf": 2.4,
+        "packageSize": 250,
+        "budgetLine": false,
+        "source": "estimation"
+      },
+      {
+        "store": "Lidl",
+        "label": "Champignons Lidl",
+        "priceChf": 1.79,
+        "packageSize": 250,
+        "budgetLine": true,
+        "source": "estimation"
+      }
+    ],
+    "celeri-rave": [
+      {
+        "store": "Migros",
+        "label": "Céleri-rave",
+        "priceChf": 1.8,
+        "packageSize": 500,
+        "budgetLine": false,
+        "source": "estimation"
+      }
+    ],
+    "betterave-cuite": [
+      {
+        "store": "Coop",
+        "label": "Betteraves cuites",
+        "priceChf": 2.2,
+        "packageSize": 500,
+        "budgetLine": false,
+        "source": "estimation"
+      }
+    ],
+    "petits-pois-surgeles": [
+      {
+        "store": "Coop",
+        "label": "Petits pois",
+        "priceChf": 3.4,
+        "packageSize": 1000,
+        "budgetLine": false,
+        "source": "estimation"
+      },
+      {
+        "store": "Migros",
+        "label": "M-Budget Petits pois",
+        "priceChf": 2.4,
+        "packageSize": 1000,
+        "budgetLine": true,
+        "source": "estimation"
+      }
+    ],
+    "haricots-verts-surgeles": [
+      {
+        "store": "Migros",
+        "label": "Haricots verts",
+        "priceChf": 3.9,
+        "packageSize": 1000,
+        "budgetLine": false,
+        "source": "estimation"
+      },
+      {
+        "store": "Aldi",
+        "label": "Haricots verts Aldi",
+        "priceChf": 2.79,
+        "packageSize": 1000,
+        "budgetLine": true,
+        "source": "estimation"
+      }
+    ],
+    "melange-legumes-surgeles": [
+      {
+        "store": "Coop",
+        "label": "Légumes wok",
+        "priceChf": 3.2,
+        "packageSize": 750,
+        "budgetLine": false,
+        "source": "estimation"
+      },
+      {
+        "store": "Lidl",
+        "label": "Légumes wok Lidl",
+        "priceChf": 2.29,
+        "packageSize": 750,
+        "budgetLine": true,
+        "source": "estimation"
+      }
+    ],
+    "mais-conserve": [
+      {
+        "store": "Coop",
+        "label": "Maïs doux",
+        "priceChf": 1.4,
+        "packageSize": 285,
+        "budgetLine": false,
+        "source": "estimation"
+      },
+      {
+        "store": "Migros",
+        "label": "M-Budget Maïs",
+        "priceChf": 0.95,
+        "packageSize": 285,
+        "budgetLine": true,
+        "source": "estimation"
+      }
+    ],
+    "pommes": [
+      {
+        "store": "Migros",
+        "label": "M-Budget Pommes (2,5 kg)",
+        "priceChf": 3.95,
+        "packageSize": 2500,
+        "budgetLine": true,
+        "source": "relevé",
+        "checkedAt": "2026-11-15",
+        "url": "https://www.migros.ch/fr/product/260233803300"
+      }
+    ],
+    "bananes": [
+      {
+        "store": "Migros",
+        "label": "Bananes Migros (au kg)",
+        "priceChf": 2.5,
+        "packageSize": 1000,
+        "budgetLine": false,
+        "source": "relevé",
+        "checkedAt": "2026-11-15",
+        "url": "https://www.migros.ch/fr/product/264200301000"
+      }
+    ],
+    "poires": [
+      {
+        "store": "Migros",
+        "label": "Poires suisses",
+        "priceChf": 3.8,
+        "packageSize": 1000,
+        "budgetLine": false,
+        "source": "estimation"
+      }
+    ],
+    "oranges": [
+      {
+        "store": "Coop",
+        "label": "Oranges",
+        "priceChf": 4.5,
+        "packageSize": 2000,
+        "budgetLine": false,
+        "source": "estimation"
+      }
+    ],
+    "clementines": [
+      {
+        "store": "Migros",
+        "label": "Clémentines",
+        "priceChf": 3.5,
+        "packageSize": 1000,
+        "budgetLine": false,
+        "source": "estimation"
+      }
+    ],
+    "baies-surgelees": [
+      {
+        "store": "Coop",
+        "label": "Fruits rouges",
+        "priceChf": 4.5,
+        "packageSize": 500,
+        "budgetLine": false,
+        "source": "estimation"
+      },
+      {
+        "store": "Aldi",
+        "label": "Mélange de baies Aldi",
+        "priceChf": 3.5,
+        "packageSize": 600,
+        "budgetLine": true,
+        "source": "estimation"
+      }
+    ],
+    "citron": [
+      {
+        "store": "Migros",
+        "label": "Citrons",
+        "priceChf": 2.5,
+        "packageSize": 500,
+        "budgetLine": false,
+        "source": "estimation"
+      }
+    ],
+    "raisins-secs": [
+      {
+        "store": "Coop",
+        "label": "Raisins secs",
+        "priceChf": 2.4,
+        "packageSize": 250,
+        "budgetLine": false,
+        "source": "estimation"
+      }
+    ],
+    "dattes": [
+      {
+        "store": "Migros",
+        "label": "Dattes",
+        "priceChf": 3.2,
+        "packageSize": 250,
+        "budgetLine": false,
+        "source": "estimation"
+      }
+    ],
+    "avocat": [
+      {
+        "store": "Coop",
+        "label": "Avocat (pièce)",
+        "priceChf": 1.5,
+        "packageSize": 200,
+        "budgetLine": false,
+        "source": "estimation"
+      }
+    ],
+    "huile-colza": [
+      {
+        "store": "Migros",
+        "label": "M-Budget Huile de colza",
+        "priceChf": 3.5,
+        "packageSize": 1000,
+        "budgetLine": true,
+        "source": "relevé",
+        "checkedAt": "2026-11-15",
+        "url": "https://www.migros.ch/fr/product/103323200000"
+      }
+    ],
+    "huile-olive": [
+      {
+        "store": "Coop",
+        "label": "Huile d’olive vierge extra",
+        "priceChf": 6.5,
+        "packageSize": 500,
+        "budgetLine": false,
+        "source": "estimation"
+      }
+    ],
+    "amandes": [
+      {
+        "store": "Migros",
+        "label": "Amandes",
+        "priceChf": 3.5,
+        "packageSize": 200,
+        "budgetLine": false,
+        "source": "estimation"
+      },
+      {
+        "store": "Lidl",
+        "label": "Amandes Lidl",
+        "priceChf": 2.49,
+        "packageSize": 200,
+        "budgetLine": true,
+        "source": "estimation"
+      }
+    ],
+    "noix": [
+      {
+        "store": "Coop",
+        "label": "Cerneaux de noix",
+        "priceChf": 4.2,
+        "packageSize": 200,
+        "budgetLine": false,
+        "source": "estimation"
+      }
+    ],
+    "beurre-cacahuete": [
+      {
+        "store": "Migros",
+        "label": "Beurre de cacahuète",
+        "priceChf": 3.5,
+        "packageSize": 350,
+        "budgetLine": false,
+        "source": "estimation"
+      }
+    ],
+    "graines-courge": [
+      {
+        "store": "Coop",
+        "label": "Graines de courge",
+        "priceChf": 3.2,
+        "packageSize": 200,
+        "budgetLine": false,
+        "source": "estimation"
+      }
+    ],
+    "graines-lin": [
+      {
+        "store": "Migros",
+        "label": "Graines de lin",
+        "priceChf": 2.2,
+        "packageSize": 250,
+        "budgetLine": false,
+        "source": "estimation"
+      }
+    ],
+    "miel": [
+      {
+        "store": "Coop",
+        "label": "Miel de fleurs",
+        "priceChf": 6.5,
+        "packageSize": 500,
+        "budgetLine": false,
+        "source": "estimation"
+      }
+    ],
+    "chocolat-noir": [
+      {
+        "store": "Coop",
+        "label": "Chocolat noir 70 %",
+        "priceChf": 1.8,
+        "packageSize": 100,
+        "budgetLine": false,
+        "source": "estimation"
+      },
+      {
+        "store": "Aldi",
+        "label": "Chocolat noir Aldi",
+        "priceChf": 0.89,
+        "packageSize": 100,
+        "budgetLine": true,
+        "source": "estimation"
+      }
+    ],
+    "cacao-poudre": [
+      {
+        "store": "Migros",
+        "label": "Cacao en poudre",
+        "priceChf": 4.5,
+        "packageSize": 250,
+        "budgetLine": false,
+        "source": "estimation"
+      }
+    ],
+    "sauce-soja": [
+      {
+        "store": "Coop",
+        "label": "Sauce soja",
+        "priceChf": 2.8,
+        "packageSize": 150,
+        "budgetLine": false,
+        "source": "estimation"
+      }
+    ],
+    "moutarde": [
+      {
+        "store": "Migros",
+        "label": "Moutarde Thomy",
+        "priceChf": 1.5,
+        "packageSize": 200,
+        "budgetLine": false,
+        "source": "estimation"
+      }
+    ],
+    "bouillon-legumes": [
+      {
+        "store": "Coop",
+        "label": "Bouillon de légumes",
+        "priceChf": 3.5,
+        "packageSize": 250,
+        "budgetLine": false,
+        "source": "estimation"
+      }
+    ],
+    "pesto-basilic": [
+      {
+        "store": "Coop",
+        "label": "Pesto alla genovese",
+        "priceChf": 3.2,
+        "packageSize": 190,
+        "budgetLine": false,
+        "source": "estimation"
+      }
+    ],
+    "vin-blanc": [
+      {
+        "store": "Coop",
+        "label": "Chasselas vaudois",
+        "priceChf": 6.5,
+        "packageSize": 750,
+        "budgetLine": false,
+        "source": "estimation"
+      }
+    ],
+    "vinaigre-cidre": [
+      {
+        "store": "Migros",
+        "label": "Vinaigre de cidre",
+        "priceChf": 2.2,
+        "packageSize": 500,
+        "budgetLine": false,
+        "source": "estimation"
+      }
+    ],
+    "lait-coco": [
+      {
+        "store": "Coop",
+        "label": "Lait de coco",
+        "priceChf": 2.2,
+        "packageSize": 400,
+        "budgetLine": false,
+        "source": "estimation"
+      },
+      {
+        "store": "Lidl",
+        "label": "Lait de coco Lidl",
+        "priceChf": 1.49,
+        "packageSize": 400,
+        "budgetLine": true,
+        "source": "estimation"
+      }
+    ],
+    "tahini": [
+      {
+        "store": "Coop",
+        "label": "Tahini",
+        "priceChf": 4.5,
+        "packageSize": 300,
+        "budgetLine": false,
+        "source": "estimation"
+      }
+    ],
+    "epices-curry": [
+      {
+        "store": "Migros",
+        "label": "Curry",
+        "priceChf": 2.5,
+        "packageSize": 50,
+        "budgetLine": false,
+        "source": "estimation"
+      }
+    ],
+    "paprika": [
+      {
+        "store": "Coop",
+        "label": "Paprika doux",
+        "priceChf": 2.2,
+        "packageSize": 50,
+        "budgetLine": false,
+        "source": "estimation"
+      }
+    ],
+    "cumin": [
+      {
+        "store": "Migros",
+        "label": "Cumin",
+        "priceChf": 2.5,
+        "packageSize": 40,
+        "budgetLine": false,
+        "source": "estimation"
+      }
+    ],
+    "herbes-provence": [
+      {
+        "store": "Coop",
+        "label": "Herbes de Provence",
+        "priceChf": 2.2,
+        "packageSize": 30,
+        "budgetLine": false,
+        "source": "estimation"
+      }
+    ],
+    "cannelle": [
+      {
+        "store": "Migros",
+        "label": "Cannelle moulue",
+        "priceChf": 2.2,
+        "packageSize": 40,
+        "budgetLine": false,
+        "source": "estimation"
+      }
+    ]
+  }
+}

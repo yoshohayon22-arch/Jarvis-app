@@ -9,7 +9,8 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
-    "lint": "oxlint"
+    "lint": "oxlint",
+    "recipes:update": "node scripts/update-recipes.ts"
   },
   "dependencies": {
     "lucide-react": "^1.73.0",

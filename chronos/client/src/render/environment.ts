@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { EXRLoader } from "three/addons/loaders/EXRLoader.js";
+import { PACKED, loadPacks, packedFile } from "./packed";
 import type { WorldClock } from "../sim/clock";
 import { ASSET_ROOT } from "./assets";
 
@@ -15,6 +16,22 @@ const SLOTS = [
 ] as const;
 const DUSK = { file: "sunset", intensity: 0.55 };
 
+/** Builds the HDR texture from packed bytes, the way the loader does after a download. */
+async function packedExr(loader: EXRLoader, path: string): Promise<THREE.DataTexture> {
+  await loadPacks(ASSET_ROOT);
+  const bytes = packedFile(path);
+  if (!bytes) throw new Error(`Missing packed asset ${path}`);
+  const d = loader.parse(bytes) as unknown as { data: Float32Array | Uint16Array; width: number; height: number; format: THREE.PixelFormat; type: THREE.TextureDataType; colorSpace: THREE.ColorSpace };
+  const tex = new THREE.DataTexture(d.data, d.width, d.height, d.format, d.type);
+  tex.colorSpace = d.colorSpace;
+  tex.minFilter = THREE.LinearFilter;
+  tex.magFilter = THREE.LinearFilter;
+  tex.generateMipmaps = false;
+  tex.flipY = false;
+  tex.needsUpdate = true;
+  return tex;
+}
+
 export class EnvironmentLighting {
   private readonly maps = new Map<string, THREE.Texture>();
   private current: string | null = null;
@@ -27,7 +44,7 @@ export class EnvironmentLighting {
     const files = [...new Set([...SLOTS.map((s) => s.file), DUSK.file])];
     await Promise.all(
       files.map(async (f) => {
-        const hdr = await loader.loadAsync(`${ASSET_ROOT}pmndrs/hdri/${f}.exr`);
+        const hdr = PACKED ? await packedExr(loader, `pmndrs/hdri/${f}.exr`) : await loader.loadAsync(`${ASSET_ROOT}pmndrs/hdri/${f}.exr`);
         hdr.mapping = THREE.EquirectangularReflectionMapping;
         this.maps.set(f, pmrem.fromEquirectangular(hdr).texture);
         hdr.dispose();

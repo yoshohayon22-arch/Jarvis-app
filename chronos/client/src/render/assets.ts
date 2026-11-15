@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { GLTFLoader, type GLTF } from "three/addons/loaders/GLTFLoader.js";
+import { PACKED, loadPacks, packedFile } from "./packed";
 import { MeshoptDecoder } from "three/addons/libs/meshopt_decoder.module.js";
 import * as SkeletonUtils from "three/addons/utils/SkeletonUtils.js";
 
@@ -29,7 +30,14 @@ export class AssetLibrary {
   load(path: string): Promise<LoadedModel> {
     let p = this.cache.get(path);
     if (!p) {
-      p = this.loader.loadAsync(ASSET_ROOT + path).then((gltf: GLTF) => {
+      const source: Promise<GLTF> = PACKED
+        ? loadPacks(ASSET_ROOT).then(() => {
+            const bytes = packedFile(path);
+            if (!bytes) throw new Error(`Missing packed asset ${path}`);
+            return this.loader.parseAsync(bytes, "");
+          })
+        : this.loader.loadAsync(ASSET_ROOT + path);
+      p = source.then((gltf: GLTF) => {
         const scene = gltf.scene;
         scene.traverse((o) => {
           const mesh = o as THREE.Mesh;

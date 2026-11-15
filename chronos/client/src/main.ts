@@ -465,8 +465,19 @@ el<HTMLSelectElement>("set-cap").addEventListener("change", (e) => {
 el<HTMLSelectElement>("set-quality").addEventListener("change", (e) => setQuality((e.target as HTMLSelectElement).value === "high" ? "high" : "low"));
 el("btn-resume").addEventListener("click", start);
 el("btn-save").addEventListener("click", () => void saveGame("manual").then(refreshSaveList));
-el("btn-restart").addEventListener("click", () => {
-  if (window.confirm("Recommencer depuis le début ? Les sauvegardes existantes sont conservées.")) window.location.reload();
+// Two clicks instead of a browser dialog (dialogs are unavailable in some embedded views).
+el("btn-restart").addEventListener("click", (e) => {
+  const b = e.currentTarget as HTMLButtonElement;
+  if (b.dataset.armed === "1") {
+    window.location.reload();
+    return;
+  }
+  b.dataset.armed = "1";
+  b.textContent = "Confirmer : recommencer (les sauvegardes sont conservées)";
+  window.setTimeout(() => {
+    b.dataset.armed = "";
+    b.textContent = "Recommencer depuis le début";
+  }, 4000);
 });
 el("btn-new").addEventListener("click", (e) => {
   stop(e);

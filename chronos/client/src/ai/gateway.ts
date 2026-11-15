@@ -39,6 +39,8 @@ export interface AiSettings {
 
 export type MissionDraft = { ok: true; mission: unknown; source: "ai" | "mock"; costUsd: number } | { ok: false; reason: string };
 
+const OFFLINE_BUILD = (import.meta as { env?: Record<string, string | undefined> }).env?.VITE_OFFLINE === "1";
+
 const REASONS: Record<string, string> = {
   no_api_key: "pas de clé API sur le serveur",
   budget_exceeded: "budget IA du jour atteint",
@@ -46,6 +48,7 @@ const REASONS: Record<string, string> = {
   network: "serveur IA injoignable",
   timeout: "réponse trop lente",
   invalid: "réponse IA invalide",
+  offline: "version de démonstration sans serveur IA",
   disabled: "IA désactivée dans les réglages",
   session_cap: "plafond de dépense de la session atteint",
 };
@@ -62,6 +65,8 @@ export class AiGateway {
 
   /** Why no call may be made right now, or null. Checked before every request: nothing leaves the browser otherwise. */
   private blocked(): string | null {
+    // Builds without a proxy (the hosted demo page) never try to reach one.
+    if (OFFLINE_BUILD) return "offline";
     if (!this.settings.enabled) return "disabled";
     if (this.settings.sessionCapUsd !== null && this.stats.sessionCostUsd >= this.settings.sessionCapUsd) return "session_cap";
     return null;

@@ -21,6 +21,14 @@ export const THEME_COLORS: Record<ThemeId, string> = {
 
 export const THEME_STORAGE_KEY = "dashboard-theme";
 
+/** Fichiers de police à précharger pour chaque thème (servis depuis /public/fonts). */
+export const THEME_FONT_FILES: Record<ThemeId, string[]> = {
+  nuit: [],
+  glass: ["/fonts/manrope.woff2"],
+  brutal: ["/fonts/archivo-black.woff2", "/fonts/space-mono-400.woff2"],
+  dessine: ["/fonts/caveat.woff2", "/fonts/patrick-hand.woff2"],
+};
+
 export function isTheme(value: unknown): value is ThemeId {
   return typeof value === "string" && (THEMES as readonly string[]).includes(value);
 }
@@ -33,4 +41,6 @@ export const THEME_INIT_SCRIPT = `(function(){try{var t=localStorage.getItem('${
   THEMES,
 )};if(ok.indexOf(t)<0)t='${DEFAULT_THEME}';document.documentElement.dataset.theme=t;var c=${JSON.stringify(
   THEME_COLORS,
-)}[t];var m=document.querySelector('meta[name="theme-color"]');if(m)m.setAttribute('content',c);}catch(e){document.documentElement.dataset.theme='${DEFAULT_THEME}';}})();`;
+)}[t];var m=document.querySelector('meta[name="theme-color"]');if(m)m.setAttribute('content',c);(${JSON.stringify(
+  THEME_FONT_FILES,
+)})[t].forEach(function(h){var l=document.createElement('link');l.rel='preload';l.as='font';l.type='font/woff2';l.crossOrigin='anonymous';l.href=h;document.head.appendChild(l);});}catch(e){document.documentElement.dataset.theme='${DEFAULT_THEME}';}})();`;

@@ -92,10 +92,11 @@ export function PrefsProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const local = getSnapshot();
 
-    const supabase = getSupabaseBrowserClient();
-    if (!supabase) return;
+    const supabasePromise = getSupabaseBrowserClient();
+    if (!supabasePromise) return;
     let cancelled = false;
     (async () => {
+      const supabase = await supabasePromise;
       const { data: auth } = await supabase.auth.getUser();
       const userId = auth.user?.id;
       if (!userId || cancelled) return;
@@ -123,11 +124,12 @@ export function PrefsProvider({ children }: { children: React.ReactNode }) {
 
   // 2. Sauvegarde Supabase différée (regroupe les changements rapprochés).
   const scheduleRemoteSave = useCallback((next: Preferences) => {
-    const supabase = getSupabaseBrowserClient();
+    const supabasePromise = getSupabaseBrowserClient();
     const userId = userIdRef.current;
-    if (!supabase || !userId) return;
+    if (!supabasePromise || !userId) return;
     if (saveTimer.current) clearTimeout(saveTimer.current);
-    saveTimer.current = setTimeout(() => {
+    saveTimer.current = setTimeout(async () => {
+      const supabase = await supabasePromise;
       void supabase.from("preferences").upsert({
         user_id: userId,
         theme: next.theme,

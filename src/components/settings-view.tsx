@@ -63,7 +63,7 @@ export function SettingsView() {
     "btn-press inline-flex size-11 items-center justify-center rounded-control text-text-2 hover:text-text disabled:opacity-30 [[data-theme=brutal]_&]:shadow-none [[data-theme=dessine]_&]:shadow-none";
 
   return (
-    <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+    <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-2">
       <Section title="Thème" description="Mémorisé sur cet appareil et dans ton compte.">
         <div className="grid grid-cols-2 gap-3" role="radiogroup" aria-label="Thème">
           {THEMES.map((theme) => {

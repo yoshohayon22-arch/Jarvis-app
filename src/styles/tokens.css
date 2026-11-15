@@ -51,8 +51,8 @@
   --glow: 0 0 0 1px rgb(155 231 255 / 0.4), 0 12px 40px -10px rgb(155 231 255 / 0.4);
   --focus: #9be7ff;
   --nav-bg: rgb(16 18 40 / 0.55);
-  --ff-heading: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
-  --ff-body: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
+  --ff-heading: "Manrope", ui-sans-serif, system-ui, sans-serif;
+  --ff-body: "Manrope", ui-sans-serif, system-ui, sans-serif;
   --heading-weight: 700;
   --heading-tracking: -0.02em;
 }
@@ -77,8 +77,8 @@
   --glow: 6px 6px 0 #000000;
   --focus: #000000;
   --nav-bg: #f2f0e6;
-  --ff-heading: var(--font-archivo-black), ui-sans-serif, system-ui, sans-serif;
-  --ff-body: var(--font-space-mono), ui-monospace, monospace;
+  --ff-heading: "Archivo Black", Impact, ui-sans-serif, system-ui, sans-serif;
+  --ff-body: "Space Mono", ui-monospace, monospace;
   --heading-weight: 400;
   --heading-tracking: -0.01em;
 }
@@ -104,8 +104,8 @@
   --glow: 3px 4px 0 #2b2b2b;
   --focus: #c7402a;
   --nav-bg: rgb(251 247 238 / 0.94);
-  --ff-heading: var(--font-caveat), "Comic Sans MS", cursive;
-  --ff-body: var(--font-patrick-hand), "Comic Sans MS", cursive;
+  --ff-heading: "Caveat", "Comic Sans MS", cursive;
+  --ff-body: "Patrick Hand", "Comic Sans MS", cursive;
   --heading-weight: 700;
   --heading-tracking: 0;
 }

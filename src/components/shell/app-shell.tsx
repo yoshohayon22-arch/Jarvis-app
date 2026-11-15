@@ -48,7 +48,7 @@ function Header() {
         <button
           type="button"
           onClick={open}
-          aria-label="Ouvrir la palette de commandes (Ctrl + K)"
+          aria-label="Rechercher (Ctrl + K)"
           className="btn-press inline-flex h-11 min-w-11 items-center justify-center gap-2 rounded-control border-[length:var(--border-width)] border-border bg-surface px-3 text-sm text-text-2"
         >
           <Search aria-hidden className="size-4" />
@@ -90,11 +90,13 @@ function AnimatedContent({ children }: { children: React.ReactNode }) {
   const index = visible.findIndex((t) => t.id === activeId);
 
   // Direction calculée à partir de l'onglet précédent (mise à jour pendant le rendu, pattern React documenté).
-  const [prev, setPrev] = useState({ path: pathname, index, dir: 0 });
+  const [prev, setPrev] = useState({ path: pathname, index, dir: 0, navigated: false });
   if (prev.path !== pathname) {
-    setPrev({ path: pathname, index, dir: index >= 0 && prev.index >= 0 ? Math.sign(index - prev.index) : 0 });
+    setPrev({ path: pathname, index, dir: index >= 0 && prev.index >= 0 ? Math.sign(index - prev.index) : 0, navigated: true });
   }
   const dir = prev.path === pathname ? prev.dir : 0;
+  // Pas d'animation d'entrée au tout premier affichage (le contenu apparaît tout de suite).
+  const isFirstRender = !prev.navigated && prev.path === pathname;
 
   const touch = useRef<{ x: number; y: number; t: number } | null>(null);
   const onTouchStart = (e: React.TouchEvent) => {
@@ -126,7 +128,7 @@ function AnimatedContent({ children }: { children: React.ReactNode }) {
     >
       <motion.div
         key={pathname}
-        initial={{ opacity: 0, x: dir * preset.pageOffset }}
+        initial={isFirstRender ? false : { opacity: 0, x: dir * preset.pageOffset }}
         animate={{ opacity: 1, x: 0 }}
         transition={preset.page}
       >

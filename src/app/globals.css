@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "../styles/fonts.css";
 @import "../styles/tokens.css";
 
 /* Le variant dark de Tailwind suit le thème (Nuit et Glass sont sombres). */
@@ -34,6 +35,11 @@ body {
   text-rendering: optimizeLegibility;
 }
 
+/* Glass : le corps devient transparent pour laisser voir les dégradés du fond. */
+[data-theme="glass"] body {
+  background: transparent;
+}
+
 [data-theme="dessine"] body {
   font-size: 1.0625rem;
 }
@@ -58,6 +64,8 @@ h3,
   outline-offset: 2px;
 }
 
+/* Classes de composants dans @layer components : les utilitaires Tailwind (fixed, etc.) restent prioritaires. */
+@layer components {
 /* ---------- Carte ---------- */
 .card {
   position: relative;
@@ -109,6 +117,8 @@ h3,
 }
 [data-theme="dessine"] .btn-press {
   box-shadow: 2px 3px 0 #2b2b2b;
+}
+
 }
 
 /* ---------- Squelettes (shimmer) ---------- */

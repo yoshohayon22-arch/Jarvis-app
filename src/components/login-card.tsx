@@ -34,9 +34,10 @@ export function LoginCard() {
   const preset = useMotionPreset();
 
   const signIn = async () => {
-    const supabase = getSupabaseBrowserClient();
-    if (!supabase) return;
+    const supabasePromise = getSupabaseBrowserClient();
+    if (!supabasePromise) return;
     setPending(true);
+    const supabase = await supabasePromise;
     const { error: err } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {

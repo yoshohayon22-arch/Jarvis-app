@@ -1,29 +1,15 @@
 import type { Metadata, Viewport } from "next";
-import {
-  Archivo_Black,
-  Caveat,
-  Inter,
-  Manrope,
-  Patrick_Hand,
-  Space_Grotesk,
-  Space_Mono,
-} from "next/font/google";
+import { Inter, Space_Grotesk } from "next/font/google";
 import { Providers } from "@/components/providers";
 import { THEME_COLORS, THEME_INIT_SCRIPT } from "@/lib/themes";
 import "./globals.css";
 
-// Polices des 4 thèmes, auto-hébergées par next/font (aucun appel à Google côté visiteur).
+// Polices du thème Nuit (par défaut), auto-hébergées par next/font et préchargées.
+// Les polices des autres thèmes sont dans src/styles/fonts.css (chargées seulement si le thème est actif).
 const spaceGrotesk = Space_Grotesk({ subsets: ["latin"], variable: "--font-space-grotesk", display: "swap" });
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap" });
-const manrope = Manrope({ subsets: ["latin"], variable: "--font-manrope", display: "swap", preload: false });
-const archivoBlack = Archivo_Black({ subsets: ["latin"], weight: "400", variable: "--font-archivo-black", display: "swap", preload: false });
-const spaceMono = Space_Mono({ subsets: ["latin"], weight: ["400", "700"], variable: "--font-space-mono", display: "swap", preload: false });
-const caveat = Caveat({ subsets: ["latin"], variable: "--font-caveat", display: "swap", preload: false });
-const patrickHand = Patrick_Hand({ subsets: ["latin"], weight: "400", variable: "--font-patrick-hand", display: "swap", preload: false });
 
-const fontVariables = [spaceGrotesk, inter, manrope, archivoBlack, spaceMono, caveat, patrickHand]
-  .map((f) => f.variable)
-  .join(" ");
+const fontVariables = `${spaceGrotesk.variable} ${inter.variable}`;
 
 export const metadata: Metadata = {
   title: { default: "Dashboard", template: "%s · Dashboard" },

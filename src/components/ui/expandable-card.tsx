@@ -6,7 +6,7 @@
  */
 import { AnimatePresence, motion } from "motion/react";
 import { Maximize2, X } from "lucide-react";
-import { useEffect, useId, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useMotionPreset } from "@/lib/motion/use-motion-preset";
 import { cn } from "@/lib/utils";
@@ -35,25 +35,25 @@ export function ExpandableCard({
   const closeRef = useRef<HTMLButtonElement>(null);
   const titleId = `${layoutId}-title`;
 
-  useEffect(() => {
-    if (!open) return;
-    closeRef.current?.focus();
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [open]);
-
-  const close = () => {
+  const close = useCallback(() => {
     setOpen(false);
     // Le bouton « Détails » est remonté après la fermeture : on lui rend le focus.
     setTimeout(() => triggerRef.current?.focus(), 50);
-  };
+  }, []);
+
+  useEffect(() => {
+    if (!open) return;
+    closeRef.current?.focus();
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && close();
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open, close]);
 
   const header = (expanded: boolean) => (
     <div className="flex items-start justify-between gap-3">
-      <motion.h3 layout="position" id={expanded ? titleId : undefined} className="text-lg leading-tight">
+      <motion.h2 layout="position" id={expanded ? titleId : undefined} className="text-lg leading-tight">
         {title}
-      </motion.h3>
+      </motion.h2>
       <div className="flex items-center gap-2">
         {badge}
         {expanded ? (
@@ -92,8 +92,8 @@ export function ExpandableCard({
               ref={triggerRef}
               type="button"
               onClick={openCard}
-              className="btn-press -mx-2 -mb-2 inline-flex min-h-11 items-center gap-2 self-start rounded-control px-2 text-sm text-text-2 hover:text-text"
-              aria-label={`Ouvrir la vue détaillée : ${title}`}
+              className="btn-press -mx-2 -mb-2 inline-flex min-h-11 items-center gap-2 self-start rounded-control px-2 text-sm text-text-2 hover:text-text [[data-theme=brutal]_&]:shadow-none [[data-theme=dessine]_&]:shadow-none"
+              aria-label={`Détails : ${title}`}
             >
               <Maximize2 aria-hidden className="size-4" />
               Détails

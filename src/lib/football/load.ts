@@ -1,6 +1,7 @@
 import "server-only";
 
 import { cached } from "@/lib/server-cache";
+import { ESPN_API, ESPN_REAL_MADRID, parseMatches, parseStandings, type Match as EspnMatch } from "./espn";
 import {
   REAL_MADRID_ID,
   type Match,
@@ -53,92 +54,6 @@ async function part<T>(key: string, ttlMs: number, load: () => Promise<T>): Prom
   }
 }
 
-// ---------- Matchs ----------
-interface ApiMatch {
-  id: number;
-  utcDate: string;
-  status: string;
-  matchday: number | null;
-  competition: { name: string; code: string };
-  homeTeam: ApiTeam;
-  awayTeam: ApiTeam;
-  score: { winner: string | null; fullTime: { home: number | null; away: number | null } };
-}
-
-const COMPETITION_NAMES: Record<string, string> = { PD: "LaLiga", CL: "Ligue des champions" };
-
-function toMatch(m: ApiMatch): Match {
-  const live = m.status === "IN_PLAY" || m.status === "PAUSED" || m.status === "LIVE";
-  const finished = m.status === "FINISHED" || m.status === "AWARDED";
-  const postponed = m.status === "POSTPONED" || m.status === "SUSPENDED" || m.status === "CANCELLED";
-  const realIsHome = m.homeTeam.id === REAL_MADRID_ID;
-  const winner = m.score.winner;
-  return {
-    id: m.id,
-    utcDate: m.utcDate,
-    timeConfirmed: m.status !== "SCHEDULED",
-    status: live ? "en-cours" : finished ? "termine" : postponed ? "reporte" : "a-venir",
-    competition: COMPETITION_NAMES[m.competition.code] ?? m.competition.name,
-    competitionCode: m.competition.code,
-    matchday: m.matchday,
-    home: team(m.homeTeam),
-    away: team(m.awayTeam),
-    homeScore: m.score.fullTime.home,
-    awayScore: m.score.fullTime.away,
-    outcome: !finished || !winner ? null : winner === "DRAW" ? "N" : (winner === "HOME_TEAM") === realIsHome ? "V" : "D",
-  };
-}
-
-const day = (offsetDays: number) => new Date(Date.now() + offsetDays * 86400000).toISOString().slice(0, 10);
-
-async function loadMatches() {
-  const data = await api<{ matches: ApiMatch[] }>(`/teams/${REAL_MADRID_ID}/matches?dateFrom=${day(-45)}&dateTo=${day(60)}`);
-  const matches = data.matches.map(toMatch).sort((a, b) => a.utcDate.localeCompare(b.utcDate));
-  return {
-    live: matches.find((m) => m.status === "en-cours") ?? null,
-    upcoming: matches.filter((m) => m.status === "a-venir").slice(0, 6),
-    recent: matches.filter((m) => m.status === "termine").slice(-6).reverse(),
-  };
-}
-
-// ---------- Classements ----------
-interface ApiStandings {
-  season: { currentMatchday: number | null };
-  standings: {
-    type: string;
-    table: {
-      position: number;
-      team: ApiTeam;
-      playedGames: number;
-      won: number;
-      draw: number;
-      lost: number;
-      goalsFor: number;
-      goalsAgainst: number;
-      goalDifference: number;
-      points: number;
-    }[];
-  }[];
-}
-
-async function loadStandings(code: "PD" | "CL") {
-  const data = await api<ApiStandings>(`/competitions/${code}/standings`);
-  const total = data.standings.find((s) => s.type === "TOTAL") ?? data.standings[0];
-  const table: StandingRow[] = (total?.table ?? []).map((r) => ({
-    position: r.position,
-    team: team(r.team),
-    played: r.playedGames,
-    won: r.won,
-    draw: r.draw,
-    lost: r.lost,
-    goalsFor: r.goalsFor,
-    goalsAgainst: r.goalsAgainst,
-    goalDifference: r.goalDifference,
-    points: r.points,
-  }));
-  return { matchday: data.season.currentMatchday, table };
-}
-
 // ---------- Buteurs ----------
 async function loadScorers(): Promise<Scorer[]> {
   const data = await api<{
@@ -186,11 +101,81 @@ async function loadSquad() {
   return { coach: data.coach?.name ?? null, venue: data.venue ?? null, players };
 }
 
+// ---------- Matchs et classements : API publique d'ESPN (sans jeton) ----------
+async function espn(path: string): Promise<Record<string, unknown>> {
+  const res = await fetch(`${ESPN_API}${path}`, { cache: "no-store", signal: AbortSignal.timeout(10000) }).catch((e: unknown) => {
+    throw new Error(e instanceof Error && e.name === "TimeoutError" ? "pas de réponse d'ESPN en 10 secondes" : "ESPN injoignable");
+  });
+  if (!res.ok) throw new Error(`ESPN a répondu ${res.status}`);
+  return (await res.json()) as Record<string, unknown>;
+}
+
+const espnTeam = (id: string, name: string): TeamRef => ({ id: Number(id) || 0, name, crest: null });
+
+function fromEspn(m: EspnMatch): Match {
+  const known = m.homeScore !== null && m.awayScore !== null;
+  const mine = m.homeId === ESPN_REAL_MADRID ? m.homeScore : m.awayScore;
+  const theirs = m.homeId === ESPN_REAL_MADRID ? m.awayScore : m.homeScore;
+  return {
+    id: Number(m.id) || 0,
+    utcDate: m.date,
+    timeConfirmed: true,
+    status: m.state === "in" ? "en-cours" : m.state === "post" ? "termine" : "a-venir",
+    competition: m.competition,
+    competitionCode: m.competition,
+    matchday: null,
+    home: espnTeam(m.homeId, m.home),
+    away: espnTeam(m.awayId, m.away),
+    homeScore: m.homeScore,
+    awayScore: m.awayScore,
+    outcome: m.state !== "post" || !known ? null : mine! > theirs! ? "V" : mine! < theirs! ? "D" : "N",
+  };
+}
+
+async function loadEspnMatches() {
+  const schedule = async (path: string, name = "") => parseMatches((await espn(path)).events, name);
+  const [upcoming, liga, europe] = await Promise.allSettled([
+    schedule(`/site/v2/sports/soccer/all/teams/${ESPN_REAL_MADRID}/schedule?fixture=true`),
+    schedule(`/site/v2/sports/soccer/esp.1/teams/${ESPN_REAL_MADRID}/schedule`, "LaLiga"),
+    schedule(`/site/v2/sports/soccer/uefa.champions/teams/${ESPN_REAL_MADRID}/schedule`, "Ligue des champions"),
+  ]);
+  if (upcoming.status === "rejected" && liga.status === "rejected") throw upcoming.reason;
+  const all = [upcoming, liga, europe].flatMap((r) => (r.status === "fulfilled" ? r.value : [])).map(fromEspn);
+  const unique = [...new Map(all.map((m) => [m.id, m])).values()].sort((a, b) => a.utcDate.localeCompare(b.utcDate));
+  return {
+    live: unique.find((m) => m.status === "en-cours") ?? null,
+    upcoming: unique.filter((m) => m.status === "a-venir").slice(0, 6),
+    recent: unique.filter((m) => m.status === "termine").slice(-6).reverse(),
+  };
+}
+
+async function loadEspnStandings(league: string) {
+  const rows = parseStandings(await espn(`/v2/sports/soccer/${league}/standings`));
+  if (!rows.length) throw new Error("classement vide ou illisible");
+  const table: StandingRow[] = rows.map((r) => ({
+    position: r.rank,
+    team: { ...espnTeam(r.teamId, r.team), id: r.teamId === ESPN_REAL_MADRID ? REAL_MADRID_ID : (Number(r.teamId) || 0) + 100000 },
+    played: r.played,
+    won: r.wins,
+    draw: r.draws,
+    lost: r.losses,
+    goalsFor: Number.isFinite(r.goalsFor) ? r.goalsFor : 0,
+    goalsAgainst: Number.isFinite(r.goalsAgainst) ? r.goalsAgainst : 0,
+    goalDifference: Number(r.diff) || 0,
+    points: r.points,
+  }));
+  return { matchday: null, table };
+}
+
+/**
+ * Matchs et classements : ESPN (aucun jeton nécessaire).
+ * Buteurs et effectif : football-data.org, seulement si FOOTBALL_DATA_TOKEN est configuré.
+ */
 export async function loadRealMadrid(): Promise<RealMadridPayload> {
   const [matches, laliga, championsLeague, scorers, squad] = await Promise.all([
-    part("foot:matchs", 1 * MINUTE, loadMatches),
-    part("foot:laliga", 10 * MINUTE, () => loadStandings("PD")),
-    part("foot:ldc", 10 * MINUTE, () => loadStandings("CL")),
+    part("espn:matchs", 1 * MINUTE, loadEspnMatches),
+    part("espn:laliga", 10 * MINUTE, () => loadEspnStandings("esp.1")),
+    part("espn:ldc", 10 * MINUTE, () => loadEspnStandings("uefa.champions")),
     part("foot:buteurs", 30 * MINUTE, loadScorers),
     part("foot:effectif", 12 * 60 * MINUTE, loadSquad),
   ]);

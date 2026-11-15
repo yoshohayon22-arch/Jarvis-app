@@ -2,7 +2,7 @@
 
 /**
  * Onglet Real Madrid : prochain match (compte à rebours), score, classements LaLiga et Ligue des champions,
- * buteurs, effectif et actus. Données réelles de football-data.org (plan gratuit : scores en différé).
+ * buteurs, effectif et actus. Matchs et classements : API publique d'ESPN. Buteurs et effectif : football-data.org (si un jeton est configuré).
  */
 import { ExternalLink, RefreshCw } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
@@ -29,7 +29,8 @@ import type { NewsPayload } from "@/lib/rss/types";
 import { useCachedFetch } from "@/lib/use-cached-fetch";
 import { cn } from "@/lib/utils";
 
-const SOURCE = "football-data.org";
+const SOURCE = "ESPN";
+const SOURCE_FD = "football-data.org";
 const ONE_MINUTE = 60 * 1000;
 const TEN_MINUTES = 10 * ONE_MINUTE;
 const round = (n: number) => Math.round(n).toString();
@@ -67,7 +68,7 @@ export function RealMadridView() {
     if (loading) return <SkeletonGrid count={6} />;
     return (
       <div className="card flex flex-col gap-3 p-5">
-        <EmptyState title="Données indisponibles" reason={`Le serveur n'a pas pu lire football-data.org (${error ?? "raison inconnue"}).`} />
+        <EmptyState title="Données indisponibles" reason={`Le serveur n'a pas pu lire les données de football (${error ?? "raison inconnue"}).`} />
         <Button variant="secondary" onClick={refresh} className="self-start">
           Réessayer
         </Button>
@@ -113,7 +114,7 @@ function Crest({ team, className }: { team: TeamRef; className?: string }) {
   // Si l'écusson ne se charge pas, on affiche une pastille neutre plutôt qu'une image cassée.
   const [failed, setFailed] = useState(false);
   if (!team.crest || failed) return <span aria-hidden className={cn("inline-block size-6 shrink-0 rounded-full bg-surface-2", className)} />;
-  // Les écussons viennent du service de football-data.org ; simple <img>, pas d'optimisation serveur nécessaire.
+  // Écussons (fournis seulement par football-data.org) ; simple <img>, pas d'optimisation serveur nécessaire.
   return (
     // eslint-disable-next-line @next/next/no-img-element
     <img
@@ -475,7 +476,7 @@ function ScorersCard({ part }: { part: Part<Scorer[]> }) {
             : `Aucun joueur du Real parmi les ${scorers.length} premiers buteurs.`}{" "}
           Les passes décisives ne sont connues que pour ces joueurs : la source ne fournit pas de classement des passeurs.
         </p>
-        <SourceNote source={SOURCE} updatedAt={new Date(part.fetchedAt)} />
+        <SourceNote source={SOURCE_FD} updatedAt={new Date(part.fetchedAt)} />
       </div>
     </ExpandableCard>
   );
@@ -532,7 +533,7 @@ function SquadCard({ part }: { part: Part<{ coach: string | null; venue: string 
           {venue ? `Stade : ${venue}.` : ""}
         </p>
         <p className="text-xs text-text-2">Les blessures et suspensions ne sont pas fournies par cette source.</p>
-        <SourceNote source={SOURCE} updatedAt={new Date(part.fetchedAt)} />
+        <SourceNote source={SOURCE_FD} updatedAt={new Date(part.fetchedAt)} />
       </div>
     </ExpandableCard>
   );

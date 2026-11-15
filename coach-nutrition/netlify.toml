@@ -1,0 +1,14 @@
+# Configuration Netlify : site statique construit depuis le sous-dossier coach-nutrition/.
+# Dans l'interface Netlify, choisir « Base directory » = coach-nutrition.
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "22"
+
+# Application monopage : toutes les routes renvoient vers index.html.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

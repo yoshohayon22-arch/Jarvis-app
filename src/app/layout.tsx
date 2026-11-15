@@ -33,11 +33,13 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="fr-CH" data-theme="nuit" className={fontVariables} suppressHydrationWarning>
-      <head>
-        {/* Applique le thème mémorisé avant le premier affichage (pas de flash). */}
-        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
-      </head>
       <body className="min-h-dvh">
+        {/*
+          Applique le thème mémorisé avant le premier affichage (pas de flash).
+          Placé en tête de <body> et non dans <head> : l'hébergeur (Netlify) insère un commentaire
+          dans <head>, ce qui provoquait une erreur d'hydratation React quand <head> contenait un script.
+        */}
+        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
         <a
           href="#contenu"
           className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100] focus:rounded-control focus:bg-accent focus:px-4 focus:py-2 focus:text-on-accent"

@@ -28,7 +28,12 @@ const LOCK_MS = 15 * 60 * 1000;
 const memory = new Map<string, unknown>();
 const useMemory = process.env.LOCAL_AUTH_STORE === "1";
 
-const store = () => getStore("auth");
+/**
+ * Next.js remplace la fonction fetch du serveur ; sans « cache: no-store », les lectures du stockage
+ * restaient sans réponse. On passe donc au stockage une version de fetch qui désactive ce cache.
+ */
+const uncachedFetch: typeof fetch = (input, init) => fetch(input, { ...init, cache: "no-store" });
+const store = () => getStore({ name: "auth", fetch: uncachedFetch });
 
 /** Évite qu'un stockage qui ne répond pas bloque la page 30 secondes : on abandonne après 6 s avec une erreur claire. */
 function withTimeout<T>(promise: Promise<T>, what: string): Promise<T> {

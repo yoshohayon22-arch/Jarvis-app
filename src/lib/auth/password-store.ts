@@ -28,9 +28,19 @@ const LOCK_MS = 15 * 60 * 1000;
 const memory = new Map<string, unknown>();
 const useMemory = process.env.LOCAL_AUTH_STORE === "1";
 
+const store = () => getStore("auth");
+
+/** Évite qu'un stockage qui ne répond pas bloque la page 30 secondes : on abandonne après 6 s avec une erreur claire. */
+function withTimeout<T>(promise: Promise<T>, what: string): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<never>((_, reject) => setTimeout(() => reject(new Error(`stockage : ${what} sans réponse`)), 6000)),
+  ]);
+}
+
 async function read<T>(key: string): Promise<T | null> {
   if (useMemory) return (memory.get(key) as T) ?? null;
-  return (await getStore({ name: "auth", consistency: "strong" }).get(key, { type: "json" })) as T | null;
+  return (await withTimeout(store().get(key, { type: "json" }), "lecture")) as T | null;
 }
 async function write(key: string, value: unknown, onlyIfNew = false): Promise<boolean> {
   if (useMemory) {
@@ -38,7 +48,7 @@ async function write(key: string, value: unknown, onlyIfNew = false): Promise<bo
     memory.set(key, value);
     return true;
   }
-  const { modified } = await getStore({ name: "auth", consistency: "strong" }).setJSON(key, value, onlyIfNew ? { onlyIfNew: true } : {});
+  const { modified } = await withTimeout(store().setJSON(key, value, onlyIfNew ? { onlyIfNew: true } : {}), "écriture");
   return modified;
 }
 

@@ -52,7 +52,7 @@ export function PasswordLoginCard() {
         ? "Ce lien de première connexion n'est plus valable (il ne sert qu'une fois). Connecte-toi avec ton mot de passe."
         : result.erreur === "config"
           ? "La connexion n'est pas encore configurée sur ce serveur."
-          : "L'enregistrement a échoué. Réessaie dans un instant.",
+          : "L'enregistrement a échoué (stockage indisponible). Réessaie dans un instant.",
     );
   };
 
@@ -71,7 +71,9 @@ export function PasswordLoginCard() {
           ? "Aucun mot de passe n'a encore été choisi. Utilise le lien de première connexion."
           : result.erreur === "config"
             ? "La connexion n'est pas encore configurée sur ce serveur."
-            : "Mot de passe incorrect.",
+            : result.erreur === "stockage"
+              ? "La vérification a échoué (stockage indisponible). Réessaie dans un instant."
+              : "Mot de passe incorrect.",
     );
   };
 

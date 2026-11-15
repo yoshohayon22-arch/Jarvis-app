@@ -1,0 +1,111 @@
+/*
+ * Design tokens des 4 thèmes.
+ * Le thème actif est porté par l'attribut data-theme sur <html> (appliqué avant le premier rendu).
+ * Toutes les couleurs de texte ont été vérifiées à un contraste ≥ 4.5:1 sur leur fond (scripts/check-contrast.mjs).
+ */
+
+:root,
+[data-theme="nuit"] {
+  color-scheme: dark;
+  --bg: #0b0e14;
+  --surface: #151a23;
+  --surface-2: #1c2230;
+  --border: #252c38;
+  --border-width: 1px;
+  --radius: 16px;
+  --radius-sm: 10px;
+  --card-shadow: 0 1px 0 rgb(255 255 255 / 0.03) inset;
+  --card-blur: none;
+  --text: #e8ecf2;
+  --text-2: #a3adbb;
+  --accent: #f5c451;
+  --on-accent: #14110a;
+  --accent-2: #f5c451;
+  --accent-soft: rgb(245 196 81 / 0.12);
+  --glow: 0 0 0 1px rgb(245 196 81 / 0.35), 0 8px 32px -8px rgb(245 196 81 / 0.35);
+  --focus: #f5c451;
+  --nav-bg: rgb(11 14 20 / 0.86);
+  --ff-heading: var(--font-space-grotesk), ui-sans-serif, system-ui, sans-serif;
+  --ff-body: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --heading-weight: 600;
+  --heading-tracking: -0.02em;
+}
+
+[data-theme="glass"] {
+  color-scheme: dark;
+  --bg: #0b0e1d;
+  --surface: rgb(255 255 255 / 0.08);
+  --surface-2: rgb(255 255 255 / 0.12);
+  --border: rgb(255 255 255 / 0.2);
+  --border-width: 1px;
+  --radius: 22px;
+  --radius-sm: 14px;
+  --card-shadow: 0 8px 32px -12px rgb(0 0 0 / 0.45), 0 1px 0 rgb(255 255 255 / 0.12) inset;
+  --card-blur: blur(18px) saturate(140%);
+  --text: #f3f5fb;
+  --text-2: #c6ccdd;
+  --accent: #9be7ff;
+  --on-accent: #06202a;
+  --accent-2: #9be7ff;
+  --accent-soft: rgb(155 231 255 / 0.14);
+  --glow: 0 0 0 1px rgb(155 231 255 / 0.4), 0 12px 40px -10px rgb(155 231 255 / 0.4);
+  --focus: #9be7ff;
+  --nav-bg: rgb(16 18 40 / 0.55);
+  --ff-heading: "Manrope", ui-sans-serif, system-ui, sans-serif;
+  --ff-body: "Manrope", ui-sans-serif, system-ui, sans-serif;
+  --heading-weight: 700;
+  --heading-tracking: -0.02em;
+}
+
+[data-theme="brutal"] {
+  color-scheme: light;
+  --bg: #f2f0e6;
+  --surface: #ffffff;
+  --surface-2: #ffe14d;
+  --border: #000000;
+  --border-width: 3px;
+  --radius: 0px;
+  --radius-sm: 0px;
+  --card-shadow: 6px 6px 0 #000000;
+  --card-blur: none;
+  --text: #000000;
+  --text-2: #333333;
+  --accent: #ff4a1c;
+  --on-accent: #000000;
+  --accent-2: #ffe14d;
+  --accent-soft: #ffe14d;
+  --glow: 6px 6px 0 #000000;
+  --focus: #000000;
+  --nav-bg: #f2f0e6;
+  --ff-heading: "Archivo Black", Impact, ui-sans-serif, system-ui, sans-serif;
+  --ff-body: "Space Mono", ui-monospace, monospace;
+  --heading-weight: 400;
+  --heading-tracking: -0.01em;
+}
+
+[data-theme="dessine"] {
+  color-scheme: light;
+  --bg: #fbf7ee;
+  --surface: #ffffff;
+  --surface-2: #fff3b0;
+  --border: #2b2b2b;
+  --border-width: 2px;
+  /* Rayons irréguliers pour l'effet « tracé au feutre ». */
+  --radius: 18px 6px 16px 8px / 8px 16px 6px 18px;
+  --radius-sm: 12px 4px 10px 5px / 5px 10px 4px 12px;
+  --card-shadow: 3px 4px 0 #2b2b2b;
+  --card-blur: none;
+  --text: #2b2b2b;
+  --text-2: #555555;
+  --accent: #c7402a;
+  --on-accent: #ffffff;
+  --accent-2: #fff3b0;
+  --accent-soft: #fff3b0;
+  --glow: 3px 4px 0 #2b2b2b;
+  --focus: #c7402a;
+  --nav-bg: rgb(251 247 238 / 0.94);
+  --ff-heading: "Caveat", "Comic Sans MS", cursive;
+  --ff-body: "Patrick Hand", "Comic Sans MS", cursive;
+  --heading-weight: 700;
+  --heading-tracking: 0;
+}

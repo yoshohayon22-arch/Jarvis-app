@@ -28,15 +28,29 @@ export interface MissionsDef {
   failure: { giverOpinion: number; factionReputation: number };
   givers: Record<string, { intent: MissionIntent; culprits: string[]; victims: string[]; places: string[] }>;
   templates: MissionTemplate[];
+  /** The hand-written main story: chapters unlock one after the other. */
+  story?: StoryChapter[];
 }
 
-export type MissionSource = "ai" | "mock" | "template";
+export interface StoryChapter {
+  id: string;
+  chapter: number;
+  /** Chapters that must be finished first. */
+  requires: string[];
+  /** investigate: what the Echo will reveal (defaults to a theft). */
+  sceneAct?: string;
+  proposal: MissionProposal;
+}
+
+export type MissionSource = "ai" | "mock" | "template" | "story";
 export type MissionStatus = "active" | "choice" | "done" | "failed";
 
 export interface Mission {
   id: number;
   proposal: MissionProposal;
   source: MissionSource;
+  /** Set for chapters of the main story. */
+  storyId: string | null;
   status: MissionStatus;
   stepIndex: number;
   acceptedAt: number;
@@ -107,7 +121,8 @@ export class MissionSystem {
         .filter((a) => a.key)
         .map((a) => ({ id: a.id, name: a.name, role: a.role, faction: a.faction, key: true, available: a.jailedUntil <= now })),
       places: [...this.agents.places.spots.values()].map((s) => ({ id: s.id, name: s.name })),
-      taken: this.missions.map((m) => ({ giverId: m.proposal.giverId, title: m.proposal.title, active: m.status === "active" || m.status === "choice" })),
+      // A failed chapter of the story can be taken again.
+      taken: this.missions.filter((m) => !(m.storyId && m.status === "failed")).map((m) => ({ giverId: m.proposal.giverId, title: m.proposal.title, active: m.status === "active" || m.status === "choice" })),
     };
   }
 
@@ -115,10 +130,33 @@ export class MissionSystem {
   offerOf(agentId: string): MissionIntent | null {
     const g = this.def.givers[agentId];
     const a = this.byId.get(agentId);
-    if (!g || !a || a.jailedUntil > this.clock.totalMinutes) return null;
-    if (this.missions.some((m) => m.proposal.giverId === agentId)) return null;
-    if (this.active.length >= MISSION_LIMITS.activeMax) return null;
+    if (!a || a.jailedUntil > this.clock.totalMinutes) return null;
+    if (this.active.length >= MISSION_LIMITS.activeMax || this.active.some((m) => m.proposal.giverId === agentId)) return null;
+    const chapter = this.storyFor(agentId);
+    if (chapter) return chapter.proposal.intent;
+    if (!g || this.missions.some((m) => !m.storyId && m.proposal.giverId === agentId)) return null;
     return g.intent;
+  }
+
+  private storyDone(id: string): boolean {
+    return this.missions.some((m) => m.storyId === id && m.status === "done");
+  }
+
+  /** Chapters that can be started now (previous ones finished, not running, not done). */
+  openChapters(): StoryChapter[] {
+    return (this.def.story ?? []).filter(
+      (c) => !this.storyDone(c.id) && !this.active.some((m) => m.storyId === c.id) && c.requires.every((r) => this.storyDone(r)),
+    );
+  }
+
+  /** The story chapter this character can hand out right now, if any. */
+  storyFor(agentId: string): StoryChapter | null {
+    return this.openChapters().find((c) => c.proposal.giverId === agentId) ?? null;
+  }
+
+  get storyProgress(): { done: number; total: number } {
+    const all = this.def.story ?? [];
+    return { done: all.filter((c) => this.storyDone(c.id)).length, total: all.length };
   }
 
   get active(): Mission[] {
@@ -208,7 +246,7 @@ export class MissionSystem {
   // ---------------------------------------------------------------- lifecycle
 
   /** Registers a mission. Refuses anything the validator rejects. */
-  accept(proposal: MissionProposal, source: MissionSource): Mission {
+  accept(proposal: MissionProposal, source: MissionSource, storyId: string | null = null): Mission {
     const errors = validateMission(proposal, this.world());
     if (errors.length) throw new Error(`Invalid mission: ${errors.join("; ")}`);
     const now = this.clock.totalMinutes;
@@ -216,6 +254,7 @@ export class MissionSystem {
       id: this.nextId++,
       proposal,
       source,
+      storyId,
       status: "active",
       stepIndex: 0,
       acceptedAt: now,
@@ -226,7 +265,7 @@ export class MissionSystem {
       outcome: null,
       failReason: null,
     };
-    if (proposal.intent === "investigate") m.sceneEventId = this.stageScene(proposal, now);
+    if (proposal.intent === "investigate") m.sceneEventId = this.stageScene(proposal, now, this.def.story?.find((c) => c.id === storyId)?.sceneAct ?? "pickpocket");
     this.missions.push(m);
     this.lastEventId = Math.max(this.lastEventId, this.social.log.nextId - 1);
     this.social.pushFeed(now, `Mission acceptée : « ${proposal.title} » — ${proposal.summary}`, "neutral");
@@ -238,12 +277,12 @@ export class MissionSystem {
    * An investigation needs something true to find: the theft the giver talks about
    * is written into the world log (two hours ago, unseen), like any other event.
    */
-  private stageScene(p: MissionProposal, now: number): number {
+  private stageScene(p: MissionProposal, now: number, act: string): number {
     const spot = this.agents.places.spots.get(p.placeId);
     const victim = this.byId.get(p.victimId) ?? null;
     const x = spot?.pos[0] ?? 0;
     const z = spot?.pos[1] ?? 0;
-    const r = this.social.commit("pickpocket", victim, { actorId: p.culpritId, x, z, daylight: 0, hidden: true, targetNotices: false }, now - 120);
+    const r = this.social.commit(act, victim, { actorId: p.culpritId, x, z, daylight: 0, hidden: true, targetNotices: false }, now - 120);
     return r.event.id;
   }
 

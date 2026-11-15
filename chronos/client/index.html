@@ -17,7 +17,7 @@
       <div id="hud-missions"></div>
     </div>
     <div id="hud-district"></div>
-    <div id="hud-help">ZQSD bouger · Maj courir · Espace esquiver · 1-9 pouvoirs · F parler · M mission · J journal · T temps · G qualité · F3</div>
+    <div id="hud-help">ZQSD bouger · Maj courir · Espace esquiver · 1-9 pouvoirs · F parler · M mission · C carte · J journal · T temps · G qualité · F3</div>
     <pre id="debug"></pre>
     <div id="toast"></div>
     <div id="veil"></div>
@@ -31,10 +31,28 @@
     </div>
     <div id="bubbles"></div>
     <div id="nameplate"></div>
+    <canvas id="minimap" width="184" height="184"></canvas>
+    <div id="talk-prompt"></div>
+    <div id="bigmap">
+      <canvas id="bigmap-canvas" width="900" height="900"></canvas>
+      <div id="bigmap-side">
+        <h3>Carte de Brumeval</h3>
+        <p class="legend"><b class="k objective"></b> objectif en cours<br /><b class="k story"></b> histoire principale<br /><b class="k job"></b> travail à prendre<br /><b class="k guard"></b> garde à tes trousses</p>
+        <div id="bigmap-missions"></div>
+        <p class="hint">[C] fermer la carte</p>
+      </div>
+    </div>
     <div id="journal"></div>
     <div id="dialogue">
       <header><strong id="dialogue-name"></strong><span id="dialogue-role"></span><em id="dialogue-source"></em></header>
       <div id="dialogue-log"></div>
+      <div id="dialogue-quick">
+        <button type="button" data-say="Bonjour !">Bonjour !</button>
+        <button type="button" data-say="Quoi de neuf à Brumeval ?">Quoi de neuf ?</button>
+        <button type="button" data-say="Que sais-tu de Valdren ?">Valdren ?</button>
+        <button type="button" data-say="Que penses-tu de la garde ?">La garde ?</button>
+        <button type="button" data-say="Au revoir.">Au revoir</button>
+      </div>
       <form id="dialogue-form" autocomplete="off">
         <input id="dialogue-input" type="text" maxlength="300" placeholder="Dis quelque chose… (Entrée pour envoyer, Échap pour partir)" />
       </form>
@@ -79,6 +97,8 @@
           <label>Qualité graphique
             <select id="set-quality"><option value="low">basse</option><option value="high">haute</option></select>
           </label>
+          <label>Volume <input id="set-volume" type="range" min="0" max="100" step="5" /></label>
+          <label><input id="set-music" type="checkbox" /> Musique</label>
           <p id="set-spend"></p>
         </div>
         <div class="menu"><button id="btn-restart" type="button">Recommencer depuis le début</button></div>

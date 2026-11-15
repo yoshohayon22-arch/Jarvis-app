@@ -12,6 +12,11 @@ import { AmbientSystem, type AmbientDef } from "./sim/ambient";
 import { ConsequenceSystem, type ConsequencesDef } from "./sim/consequences";
 import { MissionSystem, type Mission, type MissionsDef } from "./sim/missions";
 import missionsJson from "../data/packs/medieval/missions.json";
+import { AudioEngine, type Voice } from "./audio/audio";
+import { StepCounter } from "./audio/mix";
+import { MapView, type MapMarker, type MapState } from "./ui/mapView";
+import { directions } from "./ui/mapMath";
+import type { StoryChapter } from "./sim/missions";
 import { generateMission, type GeneratedMission } from "./ai/missionGen";
 import { applySave, captureSave, checkSave, type SaveGame, type SaveWorld } from "./save/saveGame";
 import { IndexedDbBackend, MANUAL_SLOT, SaveStore } from "./save/store";
@@ -320,8 +325,76 @@ const pauseEl = document.getElementById("pause") as HTMLElement;
 let started = false;
 let paused = true;
 
+// ---------------------------------------------------------------- sound
+const audio = new AudioEngine();
+const stepCounter = new StepCounter();
+const tavernPos = layout.buildings.find((b) => b.id === "tavern")?.pos ?? [0, 0];
+let ambienceAt = 0;
+let chatterAt = 6;
+/** A stable voice per inhabitant, from their look. */
+function voiceOf(a: Agent): Voice {
+  const feminine = (visuals.looks[a.look] as { feminine?: boolean } | undefined)?.feminine === true;
+  if (feminine) return a.index % 2 ? "female_light" : "female_standard";
+  return a.index % 3 === 0 || a.faction === "royal_guard" ? "male_deep" : "male_standard";
+}
+function hurtSound(a: Agent): void {
+  const feminine = (visuals.looks[a.look] as { feminine?: boolean } | undefined)?.feminine === true;
+  if (feminine) audio.playVariant("hurt_f", 2, { at: a, volume: 0.9 });
+  else audio.playVariant("hurt_m", 6, { at: a, volume: 0.9 });
+}
+const POWER_SOUNDS: Record<string, [string, number]> = {
+  zone: ["spell_2", 0.8], freeze: ["spell_1", 1.2], rewind: ["chime_2", 0.7], loop: ["spell_4", 0.7], stasis: ["spell_1", 0.8],
+  grab: ["spell_2", 1.3], throw: ["swish_2", 0.8], shove: ["swish_3", 0.7], cloak: ["spell_2", 0.6], uncloak: ["spell_2", 0.9],
+  echo: ["chime_2", 0.55], mask: ["cloth", 0.8], unmask: ["cloth", 1.1],
+};
+
+/** Steps, ambience, music and the murmur of people nearby. */
+function updateAudio(dt: number, moved: number): void {
+  const b = rig.basis();
+  audio.setListener(player.x, player.z, b.rx, b.rz);
+  if (paused || !started) return;
+  // A jump in position (teleport, loaded save, rewind) is not walking.
+  if (moved > 1.5) stepCounter.reset();
+  else if (player.state !== "dodge" && moved > 0) {
+    const steps = stepCounter.advance(moved, player.state === "run");
+    if (steps > 0 && !powers.cloaked) {
+      const paved = districtAt(layout, player.x, player.z)?.id === "market";
+      audio.playVariant(paved ? "step_stone" : "step_soft", 6, { volume: player.state === "run" ? 0.5 : 0.34 });
+    }
+  }
+  ambienceAt -= dt;
+  if (ambienceAt <= 0) {
+    ambienceAt = 0.5;
+    let crowdNear = 0;
+    agents.forNeighbors(player.x, player.z, 18, (a) => {
+      if (!a.insideOf) crowdNear++;
+    });
+    audio.updateAmbience({
+      daylight: clock.daylight,
+      crowdNear,
+      tavernDistance: Math.hypot(player.x - (tavernPos[0] as number), player.z - (tavernPos[1] as number)),
+      hour: clock.minuteOfDay / 60,
+      outside: Math.hypot(player.x, player.z) > layout.wallRadius,
+    });
+  }
+  // People talking among themselves: a voice here and there, placed in space.
+  chatterAt -= dt;
+  if (chatterAt <= 0) {
+    chatterAt = 1.6 + Math.random() * 3.2;
+    const near: Agent[] = [];
+    agents.forNeighbors(player.x, player.z, 15, (a) => {
+      if (!a.insideOf && a.mode === "acting" && (a.activity === "socialize" || a.activity === "work" || a.activity === "eat") && a.frozenUntil <= clock.totalMinutes) near.push(a);
+    });
+    const who = near[Math.floor(Math.random() * near.length)];
+    if (who) audio.speak(voiceOf(who), "un mot ou deux en passant", who, 0.5);
+  }
+}
+
 function start(): void {
   if (!ready) return;
+  audio.unlock();
+  audio.setPaused(false);
+  audio.preload(["hit_1", "hit_2", "swish_1", "step_stone_1", "step_soft_1", "coins", "spell_1", "spell_2", "chime", "voice_male_standard_1"]);
   started = true;
   paused = false;
   title.classList.add("hidden");
@@ -330,6 +403,7 @@ function start(): void {
 }
 function pauseGame(): void {
   if (document.pointerLockElement) document.exitPointerLock();
+  audio.setPaused(true);
   paused = true;
   pauseEl.classList.remove("hidden");
   refreshAiStatus();
@@ -429,7 +503,8 @@ async function refreshSaveList(): Promise<void> {
 const SETTINGS_KEY = "chronos.settings";
 function loadSettings(): void {
   try {
-    const raw = JSON.parse(localStorage.getItem(SETTINGS_KEY) ?? "{}") as { aiEnabled?: unknown; sessionCapUsd?: unknown };
+    const raw = JSON.parse(localStorage.getItem(SETTINGS_KEY) ?? "{}") as { aiEnabled?: unknown; sessionCapUsd?: unknown; volume?: unknown; music?: unknown };
+    audio.settings = { volume: typeof raw.volume === "number" ? Math.max(0, Math.min(1, raw.volume)) : 0.8, music: raw.music !== false };
     gateway.settings = {
       enabled: raw.aiEnabled !== false,
       sessionCapUsd: typeof raw.sessionCapUsd === "number" && raw.sessionCapUsd > 0 ? raw.sessionCapUsd : null,
@@ -440,7 +515,7 @@ function loadSettings(): void {
 }
 function storeSettings(): void {
   try {
-    localStorage.setItem(SETTINGS_KEY, JSON.stringify({ aiEnabled: gateway.settings.enabled, sessionCapUsd: gateway.settings.sessionCapUsd }));
+    localStorage.setItem(SETTINGS_KEY, JSON.stringify({ aiEnabled: gateway.settings.enabled, sessionCapUsd: gateway.settings.sessionCapUsd, volume: audio.settings.volume, music: audio.settings.music }));
   } catch {
     /* private mode: settings last for the session only */
   }
@@ -449,11 +524,22 @@ function refreshSettingsUi(): void {
   el<HTMLInputElement>("set-ai").checked = gateway.settings.enabled;
   el<HTMLSelectElement>("set-cap").value = gateway.settings.sessionCapUsd === null ? "" : String(gateway.settings.sessionCapUsd);
   el<HTMLSelectElement>("set-quality").value = qualityLevel;
+  el<HTMLInputElement>("set-volume").value = String(Math.round(audio.settings.volume * 100));
+  el<HTMLInputElement>("set-music").checked = audio.settings.music;
   const g = gateway.stats;
   const server = aiStatus ? `serveur : ${aiStatus.spentTodayUsd.toFixed(4)} $ sur ${aiStatus.dailyLimitUsd} $ aujourd'hui (${aiStatus.mode === "ai" ? aiStatus.model : aiStatus.mode === "mock" ? "IA simulée" : "pas de clé"})` : "serveur IA injoignable : tout est local";
   el("set-spend").textContent = `Cette session : ${g.sessionCostUsd.toFixed(4)} $ · ${g.aiReplies} répliques, ${g.missionCalls} missions, ${g.summaryCalls} résumés · ${server}`;
 }
 el("pause-card").addEventListener("click", stop);
+el<HTMLInputElement>("set-volume").addEventListener("input", (e) => {
+  audio.settings.volume = Number((e.target as HTMLInputElement).value) / 100;
+  audio.applyVolume();
+  storeSettings();
+});
+el<HTMLInputElement>("set-music").addEventListener("change", (e) => {
+  audio.settings.music = (e.target as HTMLInputElement).checked;
+  storeSettings();
+});
 el<HTMLInputElement>("set-ai").addEventListener("change", (e) => {
   gateway.settings.enabled = (e.target as HTMLInputElement).checked;
   storeSettings();
@@ -563,8 +649,11 @@ const nameplatePos = new THREE.Vector3();
 let nameplateAgent: Agent | null = null;
 /** Shows who the closest inhabitant is and what they are doing. */
 function updateNameplate(px: number, pz: number): void {
-  const a = started && crowd && !hud.dialogueOpen ? agents.nearestTo(px, pz, 3.2) : null;
+  const a = started && crowd && !hud.dialogueOpen ? agents.nearestTo(px, pz, 4.2) : null;
   nameplateAgent = a;
+  const reach = a && !paused && Math.hypot(a.x - player.x, a.z - player.z) < INTERACT_RANGE;
+  const job = reach && a && !offer && !offerBusy ? (missions.storyFor(a.id) ? " · [M] écouter ce qu'il a à te confier" : missions.offerOf(a.id) ? " · [M] demander du travail" : "") : "";
+  hud.setTalkPrompt(reach && a ? `[F] Parler à ${a.name}${job}` : "");
   if (!a || !crowd) {
     hud.hideNameplate();
     return;
@@ -601,7 +690,7 @@ function updateNameplate(px: number, pz: number): void {
   );
 }
 
-const INTERACT_RANGE = 2.4;
+const INTERACT_RANGE = 3.2;
 const ACT_KEYS: Record<string, string> = { KeyE: "give_alms", KeyV: "pickpocket", KeyN: "intimidate", KeyB: "assault" };
 
 /** The player does something to an inhabitant. Everything that follows comes from the simulation. */
@@ -648,7 +737,13 @@ function playerAct(actId: string, target: Agent): void {
     const nz = target.z - toPlayerZ * k;
     if (agents.places.nav.isWalkable(nx, nz)) Object.assign(target, { x: nx, z: nz });
     powerFx.impact(target.x, target.z);
+    audio.playVariant("swish", 4, { volume: 0.7 });
+    audio.play(`hit_${1 + Math.floor(Math.random() * 6)}`, { volume: 0.9, delay: 0.1, at: target });
+    hurtSound(target);
   }
+  if (actId === "pickpocket") audio.play("cloth", { volume: 0.6 });
+  if (actId === "give_alms" || actId === "blackmail") audio.play("coins", { volume: 0.7 });
+  if (actId === "intimidate") audio.play("draw", { volume: 0.6 });
   // Striking or threatening someone breaks the Shadow.
   if (actId === "assault" || actId === "intimidate" || actId === "blackmail") powers.reveal();
   if (blackmail) {
@@ -728,18 +823,17 @@ function openDialogue(a: Agent): void {
   }
   missions.noteTalk(a.id);
   const def = defsById.get(a.id);
-  if (!def) {
-    // Extras never use AI: a short local line.
-    hud.toast(`${a.name} : « ${bark(fallbackData, a.faction, opinionOfSpeaker(a), social.rng.next())} »`);
-    return;
-  }
   talkingTo = a;
-  conversation = new Conversation(a.id, def.secrets ?? []);
-  requestSummary(a);
+  conversation = new Conversation(a.id, def?.secrets ?? []);
+  if (def) requestSummary(a);
   agents.hold(a, player.x, player.z, clock.totalMinutes);
   hud.openDialogue(a.name, a.role);
-  document.exitPointerLock();
-  refreshAiStatus();
+  if (document.pointerLockElement) document.exitPointerLock();
+  // They speak first: a greeting that fits what they think of Kael (extras: a remark of their own).
+  const hello = def ? localReply(fallbackData, "bonjour", opinionOfSpeaker(a), true, social.rng.next()).line : bark(fallbackData, a.faction, opinionOfSpeaker(a), social.rng.next());
+  hud.addDialogueLine("npc", hello);
+  audio.speak(voiceOf(a), hello, a, 0.85);
+  if (def) refreshAiStatus();
 }
 
 function closeDialogue(): void {
@@ -803,13 +897,16 @@ async function sayToNpc(text: string): Promise<void> {
   const pending = hud.addDialogueLine("pending", `${a.name} réfléchit…`);
   hud.setDialogueBusy(true);
   const firstTurn = conv.turns.length === 1;
-  const result = await gateway.dialogue(request, defsById.get(a.id)?.secrets?.length ?? 0, () =>
-    localReply(fallbackData, request.playerText, opinion, firstTurn, social.rng.next()),
-  );
+  // Extras never use AI: they answer with local lines, like everyone does offline.
+  const local = () => localReply(fallbackData, request.playerText, opinion, firstTurn, social.rng.next());
+  const result = defsById.has(a.id)
+    ? await gateway.dialogue(request, defsById.get(a.id)?.secrets?.length ?? 0, local)
+    : { reply: local(), source: "local" as const, reason: "figurant" };
   pending.remove();
   if (conversation !== conv) return; // the player walked away meanwhile
   const effects = conv.apply(result.reply, opinion, result.source !== "local");
   hud.addDialogueLine("npc", result.reply.line);
+  audio.speak(voiceOf(a), result.reply.line, a, 0.85);
   if (effects.opinionDelta !== 0) {
     social.reputation.nudgeOpinion(a.id, effects.opinionDelta, who);
     const whom = who === PLAYER_ID ? "t'" : `${nameOf(who)} : l'`;
@@ -838,13 +935,14 @@ hud.bindDialogue((text) => void sayToNpc(text), closeDialogue);
 
 // ---------------------------------------------------------------- missions (J7)
 const INTENT_LABELS = { investigate: "enquête", protect: "protection", infiltrate: "infiltration" } as const;
-let offer: { giver: Agent; gen: GeneratedMission } | null = null;
+let offer: { giver: Agent; gen: GeneratedMission; storyId?: string } | null = null;
 let offerBusy = false;
 let lastGen: GeneratedMission | null = null;
 /** Drafts already paid for: asking the same person again shows the same offer. */
 const drafts = new Map<string, GeneratedMission>();
 
 function sourceLabel(g: GeneratedMission): string {
+  if (g.source === "story") return "histoire principale";
   if (g.source === "ai") return g.attempts > 1 ? `IA (${g.attempts} essais)` : "IA";
   if (g.source === "mock") return g.attempts > 1 ? `IA simulée (${g.attempts} essais)` : "IA simulée";
   return `mission locale — ${g.fallbackReason ?? "sans IA"}`;
@@ -856,6 +954,17 @@ async function requestMission(giver: Agent): Promise<boolean> {
   offerBusy = true;
   hud.setMissionBusy(`${giver.name} réfléchit à ce qu'il pourrait te confier…`);
   agents.hold(giver, player.x, player.z, clock.totalMinutes, 2);
+  // The main story comes first: its chapters are written by hand, no AI involved.
+  const chapter = missions.storyFor(giver.id);
+  if (chapter) {
+    offerBusy = false;
+    hud.setMissionBusy("");
+    const p = chapter.proposal;
+    offer = { giver, gen: { proposal: p, source: "story", attempts: 0, rejections: [], fallbackReason: null, costUsd: 0 }, storyId: chapter.id };
+    hud.showMissionOffer({ giver: `${giver.name} — histoire principale`, title: p.title, briefing: p.briefing, steps: p.steps.map((st) => st.text), hours: p.timeLimitHours, source: `chapitre ${chapter.chapter} sur ${missions.storyProgress.total}` });
+    audio.speak(voiceOf(giver), p.briefing, giver, 0.85);
+    return true;
+  }
   let gen = drafts.get(giver.id) ?? null;
   // A draft made earlier may no longer fit the world (someone was jailed since).
   if (gen && missions.validate(gen.proposal, intent, giver.id).length) gen = null;
@@ -877,7 +986,7 @@ async function requestMission(giver: Agent): Promise<boolean> {
 
 function answerOffer(accept: boolean): void {
   if (!offer) return;
-  const { giver, gen } = offer;
+  const { giver, gen, storyId } = offer;
   offer = null;
   hud.showMissionOffer(null);
   if (!accept) {
@@ -892,12 +1001,43 @@ function answerOffer(accept: boolean): void {
     return;
   }
   drafts.delete(giver.id);
-  missions.accept(gen.proposal, gen.source);
+  missions.accept(gen.proposal, gen.source, storyId ?? null);
 }
 
 function timeLeft(m: Mission): string {
   const min = Math.max(0, m.deadline - clock.totalMinutes);
   return min >= 120 ? `reste ${Math.round(min / 60)} h` : `reste ${Math.round(min)} min`;
+}
+
+const mapView = new MapView(layout, agents.places.spots);
+const miniCanvas = document.getElementById("minimap") as HTMLCanvasElement;
+const bigCanvas = document.getElementById("bigmap-canvas") as HTMLCanvasElement;
+let mapAt = 0;
+let storyHinted = false;
+
+/** Where the story continues when no mission is running: its giver, with directions. */
+function storyHint(): { chapter: StoryChapter; giver: Agent } | null {
+  const chapter = missions.openChapters()[0];
+  const giver = chapter ? agentsById.get(chapter.proposal.giverId) : undefined;
+  return chapter && giver ? { chapter, giver } : null;
+}
+
+function mapState(): MapState {
+  const markers: MapMarker[] = [];
+  for (const m of missions.active) {
+    const o = missions.objective(m);
+    if (o) markers.push({ x: o.x, z: o.z, kind: "objective", label: m.proposal.title });
+  }
+  for (const c of missions.openChapters()) {
+    const g = agentsById.get(c.proposal.giverId);
+    if (g) markers.push({ x: g.x, z: g.z, kind: "story", label: g.name });
+  }
+  for (const id of Object.keys(missions.def.givers)) {
+    const g = agentsById.get(id);
+    if (g && !missions.storyFor(id) && missions.offerOf(id)) markers.push({ x: g.x, z: g.z, kind: "job", label: g.name });
+  }
+  if (consequences.wantedLevel > 0) for (const a of agents.agents) if (a.pursuing && !a.insideOf) markers.push({ x: a.x, z: a.z, kind: "guard" });
+  return { player: { x: player.x, z: player.z, facing: player.facing }, markers };
 }
 
 const marker = new THREE.Group();
@@ -935,6 +1075,8 @@ function updateMissionsUi(dt: number): void {
   }
   for (const n of missions.notices.splice(0)) {
     hud.toast(n.kind === "step" ? `Objectif : ${n.text}` : n.text);
+    audio.play(n.kind === "failed" ? "stones" : n.kind === "done" ? "chime" : "chime_2", { volume: 0.8, rate: n.kind === "failed" ? 0.7 : 1 });
+    if (n.kind === "done" && n.gold > 0) audio.play("coins_2", { volume: 0.8, delay: 0.35 });
     if (n.kind === "done") {
       coins += n.gold;
       hud.setCoins(coins);
@@ -945,8 +1087,45 @@ function updateMissionsUi(dt: number): void {
   if (clock.totalMinutes < lastAutosaveAt) lastAutosaveAt = clock.totalMinutes;
   if (started && !paused && clock.totalMinutes - lastAutosaveAt >= AUTOSAVE_EVERY_MINUTES) void saveGame("auto");
   const active = missions.active;
-  hud.updateMissions(active.map((m) => ({ title: m.proposal.title, objective: missions.objective(m)?.text ?? "", left: timeLeft(m), choice: m.status === "choice" })));
-  const target = active[0] ? missions.objective(active[0]) : null;
+  const hint = active.length === 0 ? storyHint() : null;
+  const rows = active.map((m) => {
+    const o = missions.objective(m);
+    return { title: m.proposal.title, objective: o ? `${o.text} — ${directions(o.x - player.x, o.z - player.z)}` : "", left: timeLeft(m), choice: m.status === "choice" };
+  });
+  if (hint)
+    rows.push({ title: "Histoire principale", objective: `Va voir ${hint.giver.name} (${hint.giver.role}) — ${directions(hint.giver.x - player.x, hint.giver.z - player.z)}`, left: "[M] près de lui pour l'écouter · [C] carte", choice: false });
+  hud.updateMissions(rows);
+  if (started && hint && !storyHinted) {
+    storyHinted = true;
+    hud.toast(`${hint.giver.name} veut te parler. Suis la balise dorée, ou ouvre la carte avec C.`);
+  }
+  if (input.wasPressed("KeyC") && started && !hud.dialogueOpen) {
+    hud.toggleMap();
+    audio.play("ui_open", { volume: 0.5 });
+    mapAt = 0;
+  }
+  mapAt -= dt;
+  if (started && mapAt <= 0) {
+    mapAt = hud.mapOpen ? 0.25 : 0.12;
+    const state = mapState();
+    mapView.drawMini(miniCanvas, state);
+    if (hud.mapOpen) {
+      mapView.drawFull(bigCanvas, state);
+      const prog = missions.storyProgress;
+      hud.setMapMissions([
+        { title: `Histoire principale : ${prog.done} chapitre${prog.done > 1 ? "s" : ""} sur ${prog.total}`, text: hint ? `Prochain : ${hint.chapter.proposal.title} — ${hint.giver.name}` : prog.done === prog.total ? "Terminée." : "", tone: "hint" },
+        ...missions.missions
+          .slice()
+          .reverse()
+          .map((m) => ({
+            title: m.proposal.title,
+            text: m.status === "done" ? "Accomplie" : m.status === "failed" ? `Échouée : ${m.failReason ?? ""}` : (missions.objective(m)?.text ?? ""),
+            tone: m.status === "done" ? "done" : m.status === "failed" ? "failed" : "",
+          })),
+      ]);
+    }
+  }
+  const target = active[0] ? missions.objective(active[0]) : hint ? { x: hint.giver.x, z: hint.giver.z, text: "" } : null;
   marker.visible = target !== null && started;
   if (target) {
     marker.position.set(target.x, 0, target.z);
@@ -966,7 +1145,10 @@ function updateSocialUi(): void {
   if (nameplateAgent && !paused && Math.hypot(nameplateAgent.x - player.x, nameplateAgent.z - player.z) < INTERACT_RANGE) {
     for (const [code, actId] of Object.entries(ACT_KEYS)) if (input.wasPressed(code)) playerAct(actId, nameplateAgent);
   }
-  if (input.wasPressed("KeyJ")) hud.toggleJournal();
+  if (input.wasPressed("KeyJ")) {
+    hud.toggleJournal();
+    audio.play("ui_open", { volume: 0.5 });
+  }
   hud.updateJournal(
     FACTIONS.map((f) => ({ label: FACTION_LABELS[f], value: social.reputation.factions[f] })),
     social.reputation.portrait(),
@@ -997,6 +1179,8 @@ let lastWanted = 0;
 function updatePowersUi(dt: number, rx: number, rz: number): void {
   const now = clock.totalMinutes;
   for (const fx of powers.fx.splice(0)) {
+    const snd = POWER_SOUNDS[fx.kind];
+    if (snd) audio.play(snd[0], { rate: snd[1], volume: 0.75 });
     // Cloak/uncloak cues carry no position: they happen on the hero.
     if (fx.kind === "cloak" || fx.kind === "uncloak") powerFx.spawn({ ...fx, x: rx, z: rz });
     else powerFx.spawn(fx);
@@ -1033,9 +1217,14 @@ function updatePowersUi(dt: number, rx: number, rz: number): void {
   for (const n of consequences.notices.splice(0)) {
     hud.toast(n.text);
     if (n.kind !== "betrayal" && n.kind !== "arrest") social.pushFeed(now, n.text, n.kind === "district_recovered" ? "good" : n.kind === "rule_off" ? "neutral" : "bad");
-    if (n.kind === "arrest") hud.setCoins(coins);
+    if (n.kind === "arrest") {
+      hud.setCoins(coins);
+      audio.play("chain", { volume: 0.9 });
+      audio.play("lock", { volume: 0.9, delay: 0.5 });
+    }
   }
   if (consequences.wantedLevel !== lastWanted) {
+    if (consequences.wantedLevel > lastWanted) audio.play("draw", { volume: 0.8 });
     lastWanted = consequences.wantedLevel;
     hud.setWanted(lastWanted);
   }
@@ -1053,6 +1242,8 @@ function updatePowersUi(dt: number, rx: number, rz: number): void {
   hud.updatePowers(powers.energy, powers.data.energy.max, slots);
 }
 
+let lastRx = 0;
+let lastRz = 0;
 function frame(now: number): void {
   renderer.info.reset();
   const dt = Math.min((now - last) / 1000, 0.25);
@@ -1107,6 +1298,9 @@ function frame(now: number): void {
   playerRoot.position.set(rx, 0, rz);
   playerRoot.rotation.y = player.facing;
   const frameDt = paused ? 0 : dt;
+  updateAudio(frameDt, paused ? 0 : Math.hypot(rx - lastRx, rz - lastRz));
+  lastRx = rx;
+  lastRz = rz;
   if (animatedKael) animatedKael.update(frameDt, playerSpeed(player), player.state);
   else placeholderKael.animate(frameDt, playerSpeed(player), player.state, 1 - player.dodgeTime / PLAYER_TUNING.dodgeDuration);
 
@@ -1221,6 +1415,9 @@ window.__chronos = {
   get settings() {
     return { ...gateway.settings };
   },
+  get audio() {
+    return { ready: audio.ready, played: audio.played, track: audio.currentTrack, ...audio.settings };
+  },
   setAi(enabled: boolean, cap: number | null = null) {
     gateway.settings = { enabled, sessionCapUsd: cap };
     storeSettings();
@@ -1238,6 +1435,9 @@ window.__chronos = {
       offer: offer ? { giverId: offer.giver.id, title: offer.gen.proposal.title, source: offer.gen.source, attempts: offer.gen.attempts, rejections: offer.gen.rejections.length, proposal: offer.gen.proposal } : null,
       list: missions.missions.map((m) => ({ id: m.id, title: m.proposal.title, intent: m.proposal.intent, status: m.status, step: m.stepIndex, outcome: m.outcome, failReason: m.failReason, source: m.source, objective: missions.objective(m), proposal: m.proposal })),
       marker: marker.visible,
+      story: missions.storyProgress,
+      open: missions.openChapters().map((c) => c.id),
+      mapOpen: hud.mapOpen,
     };
   },
   aim(yaw: number) {

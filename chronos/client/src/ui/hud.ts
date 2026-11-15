@@ -186,6 +186,15 @@ export class Hud {
       this.dialogueInput.value = "";
       onSend(text);
     });
+    // Ready-made lines: talking never requires typing.
+    for (const b of Array.from($("dialogue-quick").querySelectorAll("button"))) {
+      b.addEventListener("click", () => {
+        if (this.dialogueInput.disabled) return;
+        const say = (b as HTMLElement).dataset.say ?? "";
+        if (/^Au revoir/.test(say)) onClose();
+        else onSend(say);
+      });
+    }
     this.dialogueInput.addEventListener("keydown", (e) => {
       if (e.key === "Escape") {
         e.preventDefault();
@@ -259,6 +268,38 @@ export class Hud {
         el.append(cd);
       }
       bar.append(el);
+    }
+  }
+
+  /** "F — Parler à Garn": the one thing to press when someone is within reach. */
+  setTalkPrompt(text: string): void {
+    const el = $("talk-prompt");
+    if (el.textContent !== text) el.textContent = text;
+  }
+
+  mapOpen = false;
+  toggleMap(): boolean {
+    this.mapOpen = !this.mapOpen;
+    $("bigmap").classList.toggle("visible", this.mapOpen);
+    return this.mapOpen;
+  }
+
+  private mapListKey = "";
+  setMapMissions(lines: readonly { title: string; text: string; tone: string }[]): void {
+    const key = JSON.stringify(lines);
+    if (key === this.mapListKey) return;
+    this.mapListKey = key;
+    const el = $("bigmap-missions");
+    el.replaceChildren();
+    for (const l of lines) {
+      const p = document.createElement("p");
+      p.className = l.tone;
+      const b = document.createElement("strong");
+      b.textContent = l.title;
+      const s = document.createElement("span");
+      s.textContent = l.text;
+      p.append(b, s);
+      el.append(p);
     }
   }
 

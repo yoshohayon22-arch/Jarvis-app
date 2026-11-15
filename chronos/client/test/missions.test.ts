@@ -409,3 +409,88 @@ describe("three playable missions", () => {
     expect(w.missions.offerOf("garn")).toBeNull();
   });
 });
+
+describe("main story (hand-written chapters, same validator)", () => {
+  const story = def.story!;
+
+  /** Plays a chapter to its end the quickest way the rules allow. */
+  function finish(w: ReturnType<typeof world>, id: string, ending: "hero" | "dark" = "hero") {
+    const ch = story.find((c) => c.id === id)!;
+    expect(w.missions.storyFor(ch.proposal.giverId)?.id, id).toBe(id);
+    expect(w.missions.validate(ch.proposal, ch.proposal.intent, ch.proposal.giverId)).toEqual([]);
+    const m = w.missions.accept(ch.proposal, "story", ch.id);
+    w.hidden.unrecognizable = true;
+    for (const st of ch.proposal.steps) {
+      if (st.type === "talk") w.missions.noteTalk(st.targetId);
+      if (st.type === "goto" || st.type === "infiltrate") {
+        w.goto(st.placeId);
+        w.run(0.2);
+      }
+      if (st.type === "echo") {
+        w.goto(st.placeId);
+        expect(w.powers.cast("echo", w.ctx()).ok).toBe(true);
+        w.missions.noteEcho(w.powers.lastEcho);
+        w.powers.energy = 100;
+        w.clock.totalMinutes += 30; // cooldown
+      }
+      if (st.type === "protect") {
+        w.act("intimidate", ch.proposal.culpritId);
+        w.run(0.2);
+      }
+    }
+    expect(m.status, `${id} steps`).toBe("choice");
+    const o = ch.proposal[ending];
+    if (o.type === "talk") w.missions.noteTalk(o.targetId);
+    else {
+      w.act(o.actId, o.targetId);
+      w.run(0.2);
+    }
+    expect(m, id).toMatchObject({ status: "done", outcome: ending, storyId: id });
+    return m;
+  }
+
+  it("has five chapters, each accepted by the validator when its turn comes", () => {
+    expect(story.map((c) => c.id)).toEqual(["ch1", "ch2", "ch3", "ch4", "ch5"]);
+    const w = world();
+    w.powers.echoPinned = () => w.missions.sceneEvents();
+    for (const c of story) finish(w, c.id, c.chapter % 2 ? "hero" : "dark");
+    expect(w.missions.storyProgress).toEqual({ done: 5, total: 5 });
+    expect(w.missions.openChapters()).toEqual([]);
+  });
+
+  it("unlocks chapters in order, and only from their own giver", () => {
+    const w = world();
+    expect(w.missions.openChapters().map((c) => c.id)).toEqual(["ch1"]);
+    expect(w.missions.offerOf("garn")).toBe("infiltrate"); // chapter I, not Garn's side job
+    expect(w.missions.storyFor("aveline")).toBeNull();
+    finish(w, "ch1");
+    expect(w.missions.openChapters().map((c) => c.id)).toEqual(["ch2"]);
+    expect(w.missions.storyFor("aveline")!.id).toBe("ch2");
+    // Garn's own side job becomes available once his chapter is done.
+    expect(w.missions.offerOf("garn")).toBe("protect");
+  });
+
+  it("stages the scene each investigation asks for, and lets a failed chapter be tried again", () => {
+    const w = world();
+    w.powers.echoPinned = () => w.missions.sceneEvents();
+    for (const id of ["ch1", "ch2", "ch3", "ch4"]) finish(w, id);
+    const ch5 = story[4]!;
+    const m = w.missions.accept(ch5.proposal, "story", "ch5");
+    const scene = w.social.log.events.find((e) => e.id === m.sceneEventId)!;
+    expect(scene).toMatchObject({ act: "secret_meeting", actorId: "orsan", targetId: "lysa" });
+    w.clock.totalMinutes = m.deadline + 1;
+    w.run(0.1);
+    expect(m.status).toBe("failed");
+    expect(w.missions.storyFor("theobald")!.id).toBe("ch5");
+    expect(w.missions.validate(ch5.proposal, "investigate", "theobald")).toEqual([]);
+  });
+
+  it("keeps the story through a save", () => {
+    const w = world();
+    finish(w, "ch1");
+    const copy = world();
+    copy.missions.load(w.missions.save());
+    expect(copy.missions.storyProgress.done).toBe(1);
+    expect(copy.missions.openChapters().map((c) => c.id)).toEqual(["ch2"]);
+  });
+});

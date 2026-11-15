@@ -225,5 +225,317 @@
    },
    "timeLimitHours": 24
   }
+ ],
+ "story": [
+  {
+   "id": "ch1",
+   "chapter": 1,
+   "requires": [],
+   "proposal": {
+    "intent": "infiltrate",
+    "title": "I — L'éclat fissuré",
+    "giverId": "garn",
+    "summary": "L'éclat d'ambre dans la paume de Kael s'est fissuré. Garn connaît un vieux conteur qui parle d'un royaume disparu… et la tour des mages surveille déjà Kael.",
+    "briefing": "Tu as vu ta main, gamin ? Ça luit. Le vieux Théobald raconte des histoires sur une lueur pareille, du temps de Valdren. Va l'écouter. Et évite maître Orsan : les mages n'aiment pas ce qu'ils ne contrôlent pas.",
+    "culpritId": "orsan",
+    "victimId": "",
+    "placeId": "mage_court",
+    "steps": [
+     {
+      "type": "talk",
+      "text": "Écouter le conteur Théobald, dans les Bas-Fonds",
+      "targetId": "theobald",
+      "placeId": "",
+      "actId": ""
+     },
+     {
+      "type": "talk",
+      "text": "Demander à sœur Aveline ce qu'elle sent pendant ses prières",
+      "targetId": "aveline",
+      "placeId": "",
+      "actId": ""
+     },
+     {
+      "type": "infiltrate",
+      "text": "Approcher du pied de la tour des mages sans être reconnu (Ombre 6 ou faux visage 9)",
+      "targetId": "",
+      "placeId": "mage_court",
+      "actId": ""
+     }
+    ],
+    "hero": {
+     "label": "Tout raconter à Garn",
+     "type": "talk",
+     "targetId": "garn",
+     "actId": "",
+     "epilogue": "Garn hoche la tête : « Alors c'est vrai, Valdren. » Tu sais maintenant que l'éclat vient de là-bas.",
+     "gold": 15,
+     "reputation": {
+      "villagers": 6,
+      "royal_guard": 0,
+      "thieves_guild": 0,
+      "mages_order": 0
+     }
+    },
+    "dark": {
+     "label": "Voler les notes de Théobald (V)",
+     "type": "act",
+     "targetId": "theobald",
+     "actId": "pickpocket",
+     "epilogue": "Les notes du conteur sont à toi. Il ne saura jamais qui les a prises, mais il les cherchera.",
+     "gold": 25,
+     "reputation": {
+      "villagers": -4,
+      "royal_guard": 0,
+      "thieves_guild": 3,
+      "mages_order": 0
+     }
+    },
+    "timeLimitHours": 36
+   }
+  },
+  {
+   "id": "ch2",
+   "chapter": 2,
+   "requires": [
+    "ch1"
+   ],
+   "sceneAct": "pickpocket",
+   "proposal": {
+    "intent": "investigate",
+    "title": "II — Le tronc du temple",
+    "giverId": "aveline",
+    "summary": "On a vidé le tronc des pauvres pendant la nuit. Sœur Aveline sait que Kael voit ce que les autres ne voient pas.",
+    "briefing": "On a vidé le tronc des pauvres, cette nuit, sur la pelouse du temple. Je ne veux pas de la garde ici : ils pendraient un affamé. Toi, tu vois les plis du temps. Regarde, et dis-moi qui c'était.",
+    "culpritId": "pip",
+    "victimId": "aveline",
+    "placeId": "temple_lawn",
+    "steps": [
+     {
+      "type": "goto",
+      "text": "Se rendre sur la pelouse du temple",
+      "targetId": "",
+      "placeId": "temple_lawn",
+      "actId": ""
+     },
+     {
+      "type": "echo",
+      "text": "Utiliser l'Écho du passé (8) sur la pelouse du temple",
+      "targetId": "",
+      "placeId": "temple_lawn",
+      "actId": ""
+     }
+    ],
+    "hero": {
+     "label": "Dire la vérité à sœur Aveline",
+     "type": "talk",
+     "targetId": "aveline",
+     "actId": "",
+     "epilogue": "Aveline soupire : « Un enfant qui a faim. » Elle nourrira Pip elle-même, et te bénit.",
+     "gold": 20,
+     "reputation": {
+      "villagers": 10,
+      "royal_guard": 0,
+      "thieves_guild": -3,
+      "mages_order": 0
+     }
+    },
+    "dark": {
+     "label": "Faire chanter Pip (N) et garder le silence",
+     "type": "act",
+     "targetId": "pip",
+     "actId": "intimidate",
+     "epilogue": "Pip a rendu la moitié des pièces… dans ta poche. Aveline ne saura rien.",
+     "gold": 45,
+     "reputation": {
+      "villagers": -3,
+      "royal_guard": 0,
+      "thieves_guild": 4,
+      "mages_order": 0
+     }
+    },
+    "timeLimitHours": 18
+   }
+  },
+  {
+   "id": "ch3",
+   "chapter": 3,
+   "requires": [
+    "ch2"
+   ],
+   "proposal": {
+    "intent": "infiltrate",
+    "title": "III — La dette de la Corneille",
+    "giverId": "sylve",
+    "summary": "Pip a parlé de Kael à sa maîtresse. Sylve « la Corneille » propose un marché : des yeux dans la caserne contre ce que la guilde sait de Valdren.",
+    "briefing": "Le gamin dit que tu marches entre les heures. J'ai besoin de savoir où le capitaine garde son sceau. Entre dans la cour de la caserne, regarde, ressors. En échange, je te dirai qui achetait des cartes de Valdren avant que tout disparaisse.",
+    "culpritId": "hadrien",
+    "victimId": "",
+    "placeId": "barracks_yard",
+    "steps": [
+     {
+      "type": "infiltrate",
+      "text": "Entrer dans la cour de la caserne sans être reconnu",
+      "targetId": "",
+      "placeId": "barracks_yard",
+      "actId": ""
+     }
+    ],
+    "hero": {
+     "label": "Prévenir le capitaine Hadrien",
+     "type": "talk",
+     "targetId": "hadrien",
+     "actId": "",
+     "epilogue": "Hadrien double la garde. « Tu as bien fait. » La Corneille, elle, n'oubliera pas.",
+     "gold": 20,
+     "reputation": {
+      "villagers": 0,
+      "royal_guard": 12,
+      "thieves_guild": -12,
+      "mages_order": 0
+     }
+    },
+    "dark": {
+     "label": "Rapporter à Sylve ce que tu as vu",
+     "type": "talk",
+     "targetId": "sylve",
+     "actId": "",
+     "epilogue": "Sylve sourit : « C'était un mage. Orsan achetait ces cartes. » Tu as un nom.",
+     "gold": 60,
+     "reputation": {
+      "villagers": 0,
+      "royal_guard": -6,
+      "thieves_guild": 12,
+      "mages_order": 0
+     }
+    },
+    "timeLimitHours": 24
+   }
+  },
+  {
+   "id": "ch4",
+   "chapter": 4,
+   "requires": [
+    "ch3"
+   ],
+   "proposal": {
+    "intent": "protect",
+    "title": "IV — Faire taire le conteur",
+    "giverId": "lysa",
+    "summary": "Maître Orsan veut que Théobald cesse de parler de Valdren. Son apprentie Lysa prévient Kael avant qu'il ne soit trop tard.",
+    "briefing": "Mon maître est sorti avec son bâton. Il a dit que le vieux conteur « se souvenait trop ». J'ai peur de ce qu'il va faire. Tu es le seul qui puisse l'arrêter sans que l'Ordre s'en mêle.",
+    "culpritId": "orsan",
+    "victimId": "theobald",
+    "placeId": "",
+    "steps": [
+     {
+      "type": "talk",
+      "text": "Prévenir Théobald",
+      "targetId": "theobald",
+      "placeId": "",
+      "actId": ""
+     },
+     {
+      "type": "protect",
+      "text": "Protéger Théobald : tenir maître Orsan à distance, ou lui faire passer l'envie",
+      "targetId": "theobald",
+      "placeId": "",
+      "actId": ""
+     }
+    ],
+    "hero": {
+     "label": "Rassurer Lysa",
+     "type": "talk",
+     "targetId": "lysa",
+     "actId": "",
+     "epilogue": "Théobald est sauf. Lysa te glisse : « Il cache des archives, tout en haut de la tour. »",
+     "gold": 25,
+     "reputation": {
+      "villagers": 8,
+      "royal_guard": 0,
+      "thieves_guild": 0,
+      "mages_order": -6
+     }
+    },
+    "dark": {
+     "label": "Forcer Théobald à tout dire (N)",
+     "type": "act",
+     "targetId": "theobald",
+     "actId": "intimidate",
+     "epilogue": "Terrifié, Théobald lâche tout : la nuit de Valdren, il l'a vécue deux fois. Tu sais, mais à quel prix.",
+     "gold": 40,
+     "reputation": {
+      "villagers": -10,
+      "royal_guard": 0,
+      "thieves_guild": 0,
+      "mages_order": 0
+     }
+    },
+    "timeLimitHours": 12
+   }
+  },
+  {
+   "id": "ch5",
+   "chapter": 5,
+   "requires": [
+    "ch4"
+   ],
+   "sceneAct": "secret_meeting",
+   "proposal": {
+    "intent": "investigate",
+    "title": "V — Valdren n'a pas brûlé",
+    "giverId": "theobald",
+    "summary": "Théobald en est sûr : la vérité s'est jouée au pied de la tour des mages. L'Écho du passé peut la montrer.",
+    "briefing": "Je l'ai vécue deux fois, cette nuit-là. Deux fois, petit ! Et les deux fois, c'est au pied de la tour que tout s'est décidé. Va, regarde ce que le temps a gardé. Je veux finir mon histoire avant de mourir.",
+    "culpritId": "orsan",
+    "victimId": "lysa",
+    "placeId": "mage_court",
+    "steps": [
+     {
+      "type": "goto",
+      "text": "Se rendre au pied de la tour des mages",
+      "targetId": "",
+      "placeId": "mage_court",
+      "actId": ""
+     },
+     {
+      "type": "echo",
+      "text": "Utiliser l'Écho du passé (8) au pied de la tour",
+      "targetId": "",
+      "placeId": "mage_court",
+      "actId": ""
+     }
+    ],
+    "hero": {
+     "label": "Confronter maître Orsan",
+     "type": "talk",
+     "targetId": "orsan",
+     "actId": "",
+     "epilogue": "Orsan blêmit : « Valdren n'a pas été détruit. Il a été déplacé, dans un autre temps. Et ton éclat est la clé. » L'histoire de Théobald a enfin une fin… et la tienne commence.",
+     "gold": 80,
+     "reputation": {
+      "villagers": 10,
+      "royal_guard": 5,
+      "thieves_guild": 0,
+      "mages_order": 5
+     }
+    },
+    "dark": {
+     "label": "Faire chanter maître Orsan (N)",
+     "type": "act",
+     "targetId": "orsan",
+     "actId": "intimidate",
+     "epilogue": "Orsan paie, et parle : Valdren n'a pas brûlé, il a été déplacé dans un autre temps. Tu tiens l'Ordre des mages… et la clé d'un royaume.",
+     "gold": 150,
+     "reputation": {
+      "villagers": 0,
+      "royal_guard": 0,
+      "thieves_guild": 5,
+      "mages_order": -20
+     }
+    },
+    "timeLimitHours": 20
+   }
+  }
  ]
 }

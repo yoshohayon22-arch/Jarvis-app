@@ -10,7 +10,7 @@ export interface MissionHost {
 
 export interface GeneratedMission {
   proposal: MissionProposal;
-  source: "ai" | "mock" | "template";
+  source: "ai" | "mock" | "template" | "story";
   /** How many times the model was asked. */
   attempts: number;
   /** Why earlier drafts were refused (for the debug panel). */

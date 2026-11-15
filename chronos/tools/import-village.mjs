@@ -4,8 +4,8 @@
 //   node tools/import-village.mjs <dir with *.glb>
 import { NodeIO } from "@gltf-transform/core";
 import { ALL_EXTENSIONS } from "@gltf-transform/extensions";
-import { dedup, flatten, getBounds, join as joinPrimitives, meshopt, prune, textureCompress, weld } from "@gltf-transform/functions";
-import { MeshoptEncoder } from "meshoptimizer";
+import { dedup, flatten, getBounds, join as joinPrimitives, meshopt, prune, simplify, textureCompress, weld } from "@gltf-transform/functions";
+import { MeshoptEncoder, MeshoptSimplifier } from "meshoptimizer";
 import sharp from "sharp";
 import { mkdirSync, readdirSync, statSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
@@ -14,13 +14,14 @@ const src = resolve(process.argv[2] ?? ".");
 const out = resolve(new URL("../client/public/assets/village", import.meta.url).pathname);
 mkdirSync(out, { recursive: true });
 await MeshoptEncoder.ready;
+await MeshoptSimplifier.ready;
 const io = new NodeIO().registerExtensions(ALL_EXTENSIONS).registerDependencies({ "meshopt.encoder": MeshoptEncoder });
 const manifest = {};
 let total = 0;
 for (const f of readdirSync(src).filter((x) => x.endsWith(".glb")).sort()) {
   const doc = await io.read(join(src, f));
   for (const m of doc.getRoot().listMaterials()) m.setMetallicFactor(0).setRoughnessFactor(0.9).setDoubleSided(true);
-  await doc.transform(dedup(), flatten(), joinPrimitives(), weld(), prune(), textureCompress({ encoder: sharp, targetFormat: "webp", resize: [512, 512], quality: 80 }), meshopt({ encoder: MeshoptEncoder, level: "medium" }));
+  await doc.transform(dedup(), flatten(), joinPrimitives(), weld(), simplify({ simplifier: MeshoptSimplifier, ratio: 0.4, error: 0.004 }), prune(), textureCompress({ encoder: sharp, targetFormat: "webp", resize: [512, 512], quality: 80 }), meshopt({ encoder: MeshoptEncoder, level: "medium" }));
   const b = getBounds(doc.getRoot().listScenes()[0]);
   const r = (v) => Math.round(v * 1000) / 1000;
   manifest[f.replace(/\.glb$/, "")] = { min: b.min.map(r), max: b.max.map(r) };

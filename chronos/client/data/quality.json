@@ -1,5 +1,31 @@
 {
-  "$comment": "Graphics presets. Toggle in game with G; the choice is remembered per browser.",
+  "$comment": "Graphics presets. Automatic by default (starts low, steps down if the frame rate is poor); G cycles them by hand.",
+  "minimal": {
+    "label": "Qualité minimale",
+    "maxPixelRatio": 0.75,
+    "shadowMapSize": 0,
+    "shadowRadius": 2,
+    "multisampling": 0,
+    "fxaa": true,
+    "ao": null,
+    "bloom": {
+      "intensity": 0.3,
+      "threshold": 0.82,
+      "smoothing": 0.25,
+      "radius": 0.6
+    },
+    "vignette": {
+      "offset": 0.3,
+      "darkness": 0.55
+    },
+    "maxNightLights": 2,
+    "dof": null,
+    "grass": null,
+    "detailMaterials": true,
+    "crowdShadows": false,
+    "shadowEvery": 4,
+    "crowdDistance": 45
+  },
   "low": {
     "label": "Qualité basse",
     "maxPixelRatio": 1,
@@ -22,14 +48,16 @@
     "dof": null,
     "grass": null,
     "detailMaterials": true,
-    "crowdShadows": false
+    "crowdShadows": false,
+    "shadowEvery": 2,
+    "crowdDistance": 75
   },
   "high": {
     "label": "Qualité haute",
-    "maxPixelRatio": 2,
-    "shadowMapSize": 4096,
+    "maxPixelRatio": 1.5,
+    "shadowMapSize": 2048,
     "shadowRadius": 4,
-    "multisampling": 4,
+    "multisampling": 2,
     "fxaa": false,
     "ao": {
       "intensity": 2.2,
@@ -57,10 +85,12 @@
       "resolutionScale": 0.5
     },
     "grass": {
-      "count": 60000,
+      "count": 30000,
       "patch": 56
     },
     "detailMaterials": true,
-    "crowdShadows": true
+    "crowdShadows": true,
+    "shadowEvery": 1,
+    "crowdDistance": 160
   }
 }

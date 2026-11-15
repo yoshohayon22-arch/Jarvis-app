@@ -116,8 +116,8 @@ export function buildTerrain(layout: WorldLayout, detail: DetailTextures | null 
   const sampler = new GroundSampler(layout);
   const g = new THREE.Group();
   g.name = "terrain";
-  g.add(buildTerrainPatch(sampler, 200, 0.8, 0, material));
-  g.add(buildTerrainPatch(sampler, 700, 5, 99, material));
+  g.add(buildTerrainPatch(sampler, 200, 1.25, 0, material));
+  g.add(buildTerrainPatch(sampler, 700, 7, 99, material));
   return g;
 }
 

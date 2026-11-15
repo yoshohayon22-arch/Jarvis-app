@@ -93,3 +93,31 @@ describe("audio files", () => {
     expect(readdirSync(dir).filter((f) => f.endsWith(".ogg")).length).toBe(names.length);
   });
 });
+
+import { AutoQuality } from "../src/render/quality";
+
+describe("automatic quality", () => {
+  const feed = (t: AutoQuality, fps: number, seconds: number, level: "minimal" | "low" | "high") => {
+    const acts = [];
+    for (let i = 0; i < seconds * fps; i++) {
+      const a = t.frame(1 / fps, level);
+      if (a) acts.push(a);
+    }
+    return acts;
+  };
+  it("leaves a fluid game alone", () => {
+    expect(feed(new AutoQuality(), 60, 30, "low")).toEqual([]);
+  });
+  it("steps the preset down when the frame rate stays low, after a warm-up", () => {
+    const t = new AutoQuality();
+    expect(feed(t, 15, 4, "high")).toEqual([]); // still loading: no verdict yet
+    expect(feed(t, 15, 6, "high")[0]).toEqual({ level: "low" });
+  });
+  it("then lowers the resolution, down to a floor, and never raises anything", () => {
+    const t = new AutoQuality();
+    const acts = feed(t, 12, 120, "minimal");
+    expect(acts.map((a) => a.scale)).toEqual([0.85, 0.7, 0.55]);
+    expect(feed(t, 90, 60, "minimal")).toEqual([]);
+    expect(t.scale).toBe(0.55);
+  });
+});

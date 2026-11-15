@@ -77,6 +77,11 @@ vec3 triplanarNormal(sampler2D tex, vec3 p, vec3 n, float scale) {
   tz = vec3(tz.xy + n.xy, abs(tz.z) * n.z);
   return normalize(tx.zyx * w.x + ty.xzy * w.y + tz.xyz * w.z);
 }
+
+vec3 planarNormal(sampler2D tex, vec3 p, vec3 n, float scale) {
+  vec3 t = texture2D(tex, p.xz * scale).xyz * 2.0 - 1.0;
+  return normalize(vec3(t.x + n.x, abs(t.z) * n.y, t.y + n.z));
+}
 `;
 
 const VERTEX_WORLD = /* glsl */ `
@@ -212,8 +217,9 @@ export function createTerrainMaterial(tex: DetailTextures | null): THREE.MeshSta
   diffuseColor.rgb *= grassVar * sW.x + soilVar * sW.y + cobbleVar * sW.z;
   // Photographic albedo, two scales blended to hide the tiling; the painted color only tints it.
   vec2 gUv = p.xz;
+  // Grass tiles the most visibly: it alone gets a second, larger scale.
   vec3 aG = mix(texture2D(uGrassA, gUv * 0.31).rgb, texture2D(uGrassA, gUv * 0.073 + 0.37).rgb, 0.45);
-  vec3 aD = mix(texture2D(uDirtA, gUv * 0.27).rgb, texture2D(uDirtA, gUv * 0.061 + 0.21).rgb, 0.4);
+  vec3 aD = texture2D(uDirtA, gUv * 0.27).rgb;
   vec3 aC = texture2D(uCobbleA, gUv * 0.22).rgb;
   vec3 photo = aG * sW.x * 1.25 + aD * sW.y * 1.15 + aC * sW.z * 1.2;
   float paintLum = dot(diffuseColor.rgb, vec3(0.3, 0.55, 0.15));
@@ -228,9 +234,10 @@ export function createTerrainMaterial(tex: DetailTextures | null): THREE.MeshSta
         /* glsl */ `vec3 detailWorldNormal;
 {
   vec3 up = normalize(vDetailWorldNormal);
-  vec3 nG = triplanarNormal(uGround, p, up, 0.55);
-  vec3 nS = triplanarNormal(uSoil, p, up, 0.35);
-  vec3 nC = triplanarNormal(uCobble, p, up, 0.75);
+  // The ground is nearly flat: one top-down sample per map instead of three.
+  vec3 nG = planarNormal(uGround, p, up, 0.55);
+  vec3 nS = planarNormal(uSoil, p, up, 0.35);
+  vec3 nC = planarNormal(uCobble, p, up, 0.75);
   detailWorldNormal = normalize(nG * sW.x + nS * sW.y + nC * sW.z);
 }
 ${APPLY_DETAIL_NORMAL}`,

@@ -299,7 +299,12 @@ export class Crowd {
    * @param dt     frame time scaled by the world's time scale (animation speed)
    * @param alpha  interpolation factor between the last two simulation ticks
    */
+  /** Camera position and forward direction (xz), and how far people are drawn: set every frame. */
+  view = { x: 0, z: 0, fx: 0, fz: 1, maxDistance: Infinity };
+
   update(dt: number, alpha: number): void {
+    const V = this.view;
+    const max2 = V.maxDistance * V.maxDistance;
     for (const b of this.batches) {
       let n = 0;
       for (const a of b.agents) {
@@ -325,6 +330,12 @@ export class Crowd {
         const rate = a.anim === "walk" ? a.walkSpeed / (1.5 * a.scale) : 1;
         // Local time: frozen people stop mid-gesture, slowed people move in slow motion.
         this.phase[i] = ((this.phase[i] as number) + (dt * rate * a.timeFactor) / clip.duration) % 1;
+
+        // Not drawn: too far away, or clearly behind the camera (their state above stays up to date).
+        const vx = x - V.x;
+        const vz = z - V.z;
+        const d2 = vx * vx + vz * vz;
+        if (d2 > max2 || (d2 > 36 && vx * V.fx + vz * V.fz < -0.25 * Math.sqrt(d2))) continue;
 
         tmpP.set(x, a.y, z);
         tmpQ.setFromAxisAngle(UP, this.facing[i] as number);

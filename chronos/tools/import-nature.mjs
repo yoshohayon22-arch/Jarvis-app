@@ -4,8 +4,8 @@
 //   node tools/import-nature.mjs <glb dir> name=<texture dir> [name=<texture dir> ...]
 import { NodeIO } from "@gltf-transform/core";
 import { ALL_EXTENSIONS } from "@gltf-transform/extensions";
-import { dedup, flatten, getBounds, join as joinPrimitives, meshopt, prune, textureCompress, weld } from "@gltf-transform/functions";
-import { MeshoptEncoder } from "meshoptimizer";
+import { dedup, flatten, getBounds, join as joinPrimitives, meshopt, prune, simplify, textureCompress, weld } from "@gltf-transform/functions";
+import { MeshoptEncoder, MeshoptSimplifier } from "meshoptimizer";
 import sharp from "sharp";
 import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from "node:fs";
 import { basename, join, resolve } from "node:path";
@@ -16,6 +16,7 @@ const out = resolve(new URL("../client/public/assets/nature", import.meta.url).p
 const manifestPath = resolve(new URL("../client/data/nature-manifest.json", import.meta.url).pathname);
 mkdirSync(out, { recursive: true });
 await MeshoptEncoder.ready;
+await MeshoptSimplifier.ready;
 const io = new NodeIO().registerExtensions(ALL_EXTENSIONS).registerDependencies({ "meshopt.encoder": MeshoptEncoder });
 
 /** Splits a GLB and embeds the textures found (by file name) in `texDir`. */
@@ -62,7 +63,7 @@ for (const [name, texDir] of jobs) {
     else m.setAlphaMode("OPAQUE");
     m.setMetallicFactor(0).setRoughnessFactor(0.9).setNormalTexture(null).setEmissiveTexture(null).setOcclusionTexture(null).setMetallicRoughnessTexture(null);
   }
-  await doc.transform(dedup(), flatten(), joinPrimitives(), weld(), prune(), textureCompress({ encoder: sharp, targetFormat: "webp", resize: [512, 512], quality: 82 }), meshopt({ encoder: MeshoptEncoder, level: "medium" }));
+  await doc.transform(dedup(), flatten(), joinPrimitives(), weld(), simplify({ simplifier: MeshoptSimplifier, ratio: 0.45, error: 0.02 }), prune(), textureCompress({ encoder: sharp, targetFormat: "webp", resize: [512, 512], quality: 82 }), meshopt({ encoder: MeshoptEncoder, level: "medium" }));
   // Stand the model on the ground, centred on its footprint.
   const scene = doc.getRoot().listScenes()[0];
   const b0 = getBounds(scene);

@@ -248,7 +248,7 @@
     "../nature/whitebirch01",
     "../nature/conifer04_tall"
    ],
-   "count": 70,
+   "count": 48,
    "radius": [
     104,
     150
@@ -298,7 +298,7 @@
     "../nature/smallrock01",
     "../nature/mossrock01"
    ],
-   "count": 140,
+   "count": 70,
    "radius": [
     6,
     96

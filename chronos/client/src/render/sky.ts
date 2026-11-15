@@ -160,7 +160,8 @@ export class DayNightCycle {
   /** Applies a shadow-map resolution and blur radius (quality presets). */
   setShadowQuality(mapSize: number, radius: number): void {
     const sh = this.light.shadow;
-    if (sh.mapSize.x !== mapSize) {
+    this.light.castShadow = mapSize > 0;
+    if (mapSize > 0 && sh.mapSize.x !== mapSize) {
       sh.mapSize.set(mapSize, mapSize);
       sh.map?.dispose();
       sh.map = null;

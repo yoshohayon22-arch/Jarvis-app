@@ -44,7 +44,7 @@ import { AssetLibrary } from "./render/assets";
 import { CameraRig } from "./render/cameraRig";
 import { CharacterModel, KAEL_LOOK } from "./render/character";
 import { PostFx } from "./render/postfx";
-import { QUALITY, initialQuality, saveQuality, type QualityLevel } from "./render/quality";
+import { AutoQuality, QUALITY, QUALITY_ORDER, initialQuality, saveQuality, type QualityLevel } from "./render/quality";
 import { DayNightCycle } from "./render/sky";
 import { buildWorldView, enhanceModel, loadModel, type VisualsDef } from "./render/worldView";
 import { EnvironmentLighting } from "./render/environment";
@@ -81,7 +81,10 @@ const agents = createAgentSystem(
 );
 
 // ---------------------------------------------------------------- rendering
-let qualityLevel: QualityLevel = initialQuality();
+const startQuality = initialQuality();
+let qualityLevel: QualityLevel = startQuality.level;
+let autoQuality = startQuality.auto;
+const tuner = new AutoQuality();
 let quality = QUALITY[qualityLevel];
 const canvas = document.getElementById("game") as HTMLCanvasElement;
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: false, powerPreference: "high-performance", stencil: false });
@@ -89,6 +92,8 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio, quality.maxPixelRatio))
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFShadowMap;
+// The shadow map is refreshed by hand, every frame or less often depending on the preset.
+renderer.shadowMap.autoUpdate = false;
 renderer.info.autoReset = false; // count every pass of the post-processing chain
 
 const scene = new THREE.Scene();
@@ -128,11 +133,21 @@ window.addEventListener("resize", () => {
   postfx.setSize(window.innerWidth, window.innerHeight);
 });
 
-function setQuality(level: QualityLevel): void {
+function applyResolution(): void {
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, quality.maxPixelRatio) * (autoQuality ? tuner.scale : 1));
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  postfx.setSize(window.innerWidth, window.innerHeight);
+}
+
+/** @param byHand the player chose this level: automatic tuning stops. */
+function setQuality(level: QualityLevel, byHand = true): void {
   qualityLevel = level;
   quality = QUALITY[level];
-  saveQuality(level);
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, quality.maxPixelRatio));
+  if (byHand) {
+    autoQuality = false;
+    saveQuality(level);
+  }
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, quality.maxPixelRatio) * (autoQuality ? tuner.scale : 1));
   renderer.setSize(window.innerWidth, window.innerHeight);
   dayNight.setShadowQuality(quality.shadowMapSize, quality.shadowRadius);
   postfx.apply(quality);
@@ -523,7 +538,7 @@ function storeSettings(): void {
 function refreshSettingsUi(): void {
   el<HTMLInputElement>("set-ai").checked = gateway.settings.enabled;
   el<HTMLSelectElement>("set-cap").value = gateway.settings.sessionCapUsd === null ? "" : String(gateway.settings.sessionCapUsd);
-  el<HTMLSelectElement>("set-quality").value = qualityLevel;
+  el<HTMLSelectElement>("set-quality").value = autoQuality ? "auto" : qualityLevel;
   el<HTMLInputElement>("set-volume").value = String(Math.round(audio.settings.volume * 100));
   el<HTMLInputElement>("set-music").checked = audio.settings.music;
   const g = gateway.stats;
@@ -549,7 +564,14 @@ el<HTMLSelectElement>("set-cap").addEventListener("change", (e) => {
   gateway.settings.sessionCapUsd = v > 0 ? v : null;
   storeSettings();
 });
-el<HTMLSelectElement>("set-quality").addEventListener("change", (e) => setQuality((e.target as HTMLSelectElement).value === "high" ? "high" : "low"));
+el<HTMLSelectElement>("set-quality").addEventListener("change", (e) => {
+  const v = (e.target as HTMLSelectElement).value;
+  if (v === "auto") {
+    autoQuality = true;
+    tuner.reset();
+    saveQuality("auto");
+  } else setQuality(v as QualityLevel);
+});
 el("btn-resume").addEventListener("click", start);
 el("btn-save").addEventListener("click", () => void saveGame("manual").then(refreshSaveList));
 // Two clicks instead of a browser dialog (dialogs are unavailable in some embedded views).
@@ -1242,6 +1264,7 @@ function updatePowersUi(dt: number, rx: number, rz: number): void {
   hud.updatePowers(powers.energy, powers.data.energy.max, slots);
 }
 
+let shadowFrame = 0;
 let lastRx = 0;
 let lastRz = 0;
 function frame(now: number): void {
@@ -1250,7 +1273,17 @@ function frame(now: number): void {
   last = now;
 
   if (input.wasPressed("F3")) hud.toggleDebug();
-  if (input.wasPressed("KeyG")) setQuality(qualityLevel === "high" ? "low" : "high");
+  if (input.wasPressed("KeyG")) setQuality(QUALITY_ORDER[(QUALITY_ORDER.indexOf(qualityLevel) + 1) % QUALITY_ORDER.length] as QualityLevel);
+  // Automatic quality: step down while the frame rate stays poor.
+  if (autoQuality && started && !paused) {
+    const act = tuner.frame(dt, qualityLevel);
+    if (act?.level) {
+      setQuality(act.level, false);
+      hud.toast(`${QUALITY[act.level].label} : réglage automatique pour garder le jeu fluide.`);
+    } else if (act?.scale) applyResolution();
+  }
+  shadowFrame++;
+  renderer.shadowMap.needsUpdate = quality.shadowMapSize > 0 && shadowFrame % quality.shadowEvery === 0;
   if (started && !paused && !hud.dialogueOpen) for (const slot of POWER_SLOTS) if (input.wasPressed(slot.code)) castPower(slot.id);
   if (input.wasPressed("KeyT")) {
     timeScaleIndex = (timeScaleIndex + 1) % TIME_SCALES.length;
@@ -1304,6 +1337,10 @@ function frame(now: number): void {
   if (animatedKael) animatedKael.update(frameDt, playerSpeed(player), player.state);
   else placeholderKael.animate(frameDt, playerSpeed(player), player.state, 1 - player.dodgeTime / PLAYER_TUNING.dodgeDuration);
 
+  if (crowd) {
+    const cb = rig.basis();
+    Object.assign(crowd.view, { x: rig.position.x, z: rig.position.z, fx: cb.fx, fz: cb.fz, maxDistance: started ? quality.crowdDistance : Infinity });
+  }
   if (crowd?.impostor) Object.assign(crowd.impostor, { x: rx, z: rz, facing: player.facing });
   crowd?.update(frameDt * Math.min(clock.timeScale, 4), simAlpha);
   updatePowersUi(frameDt, rx, rz);
@@ -1412,6 +1449,20 @@ window.__chronos = {
   saves: () => saves.list(),
   snapshot,
   pause: pauseGame,
+  /** Triangles per mesh (instances included), heaviest first: where the frame goes. */
+  sceneStats(top = 14) {
+    const rows: { name: string; tris: number; instances: number }[] = [];
+    scene.traverse((o) => {
+      const m = o as THREE.InstancedMesh;
+      if (!m.isMesh || !m.visible) return;
+      const g = m.geometry;
+      const per = (g.index ? g.index.count : g.getAttribute("position").count) / 3;
+      const instances = m.isInstancedMesh ? m.count : 1;
+      rows.push({ name: m.name || o.parent?.name || "?", tris: Math.round(per * instances), instances });
+    });
+    rows.sort((x, y) => y.tris - x.tris);
+    return { total: rows.reduce((t, r) => t + r.tris, 0), top: rows.slice(0, top) };
+  },
   get settings() {
     return { ...gateway.settings };
   },

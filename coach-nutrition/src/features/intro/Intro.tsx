@@ -46,6 +46,7 @@ const SLIDES: Slide[] = [
 
 export function Intro({ onDone, doneLabel = 'C’est parti !' }: { onDone: () => void; doneLabel?: string }) {
   const [i, setI] = useState(0)
+  const [dir, setDir] = useState(1)
   const headingRef = useRef<HTMLHeadingElement>(null)
   const moved = useRef(false)
   useEffect(() => {
@@ -53,6 +54,7 @@ export function Intro({ onDone, doneLabel = 'C’est parti !' }: { onDone: () =>
   }, [i])
   const go = (n: number) => {
     moved.current = true
+    setDir(n > i ? 1 : -1)
     setI(n)
   }
   const slide = SLIDES[i]
@@ -71,15 +73,15 @@ export function Intro({ onDone, doneLabel = 'C’est parti !' }: { onDone: () =>
 
       <section aria-labelledby="intro-title" className="flex flex-col gap-6 rounded-3xl bg-white p-6 shadow-sm sm:p-10">
         <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-end">
-          <Mia size={180} className="shrink-0" />
-          <div className="relative w-full rounded-2xl rounded-bl-sm bg-brand-50 p-4 text-brand-900 sm:mb-6">
+          <Mia size={180} className="animate-bounce-in shrink-0" />
+          <div key={`bulle-${i}`} className="animate-pop-in relative w-full origin-bottom-left rounded-2xl rounded-bl-sm bg-brand-50 p-4 text-brand-900 sm:mb-6" style={{ animationDelay: i === 0 ? '350ms' : '0ms' }}>
             <p className="text-lg leading-relaxed">{slide.bubble}</p>
           </div>
         </div>
-        <h1 id="intro-title" ref={headingRef} tabIndex={-1} className="text-3xl font-bold outline-none" aria-live="polite">
+        <h1 id="intro-title" key={`titre-${i}`} ref={headingRef} tabIndex={-1} className={`${dir > 0 ? 'animate-slide-in-right' : 'animate-slide-in-left'} text-3xl font-bold outline-none`} aria-live="polite">
           {slide.title}
         </h1>
-        <ul className="flex flex-col gap-3">
+        <ul key={`points-${i}`} className="stagger flex flex-col gap-3">
           {slide.points.map(({ icon: Icon, text }) => (
             <li key={text} className="flex items-start gap-3">
               <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-brand-100 text-brand-700">

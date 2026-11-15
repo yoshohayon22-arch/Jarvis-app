@@ -17,6 +17,7 @@ import { RecipeLibrary } from '../recipes/RecipeLibrary'
 import { RecipeDetail } from '../recipes/RecipeDetail'
 import { KASHRUT_LABELS } from '../recipes/recipe-labels'
 import { useMenu } from './useMenu'
+import { CountUp } from '../../components/CountUp'
 import { MealCalculator, type CalculatorState } from './MealCalculator'
 
 type Tab = 'semaine' | 'recettes' | 'calcul'
@@ -140,7 +141,7 @@ function WeekView() {
             <p className="flex items-center gap-1.5 text-sm text-muted">
               <Wallet size={16} aria-hidden="true" /> Coût estimé de la semaine
             </p>
-            <p className="text-2xl font-bold">{formatChf(summary.costChf)}</p>
+            <CountUp className="block text-2xl font-bold tabular-nums" value={summary.costChf} format={formatChf} />
             <p className="text-sm text-muted">soit {formatChf(summary.costPerDayChf)} par jour</p>
           </div>
           <div className="sm:col-span-2">
@@ -240,7 +241,7 @@ function BudgetBar({ cost, budget, lowBudget, onLowBudget }: { cost: number; bud
         aria-valuemax={100}
         aria-valuenow={Math.round(Math.min(ratio, 1) * 100)}
       >
-        <div className={`h-full rounded-full ${over ? 'bg-accent-400' : 'bg-brand-500'}`} style={{ width: `${Math.min(ratio, 1) * 100}%` }} />
+        <div className={`bar-fill h-full rounded-full ${over ? 'bg-accent-400' : 'bg-brand-500'}`} style={{ width: `${Math.min(ratio, 1) * 100}%` }} />
       </div>
       {over && (
         <p className="text-sm text-muted">
@@ -292,7 +293,7 @@ function DayDetail({
   ]
   return (
     <div className="grid gap-6 lg:grid-cols-3">
-      <Card className="lg:col-span-2" aria-labelledby={`day-${dayIndex}`}>
+      <Card key={day.date} className="animate-fade-in lg:col-span-2" aria-labelledby={`day-${dayIndex}`}>
         <h2 id={`day-${dayIndex}`} className="mb-4 text-lg font-bold capitalize">
           {formatDate(day.date, { weekday: 'long', day: 'numeric', month: 'long' })}
         </h2>
@@ -301,7 +302,7 @@ function DayDetail({
             const r = recipes.get(m.recipeId)!
             const v = mealValues(m, r, lowBudget)
             return (
-              <li key={m.slot} className={`rounded-xl border p-4 ${m.locked ? 'border-brand-300 bg-brand-50/50' : 'border-slate-100'}`}>
+              <li key={`${m.slot}-${m.recipeId}`} className={`animate-slide-in-right rounded-xl border p-4 transition-colors ${m.locked ? 'border-brand-300 bg-brand-50/50' : 'border-slate-100'}`}>
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div className="min-w-0 flex-1">
                     <p className="text-xs font-semibold uppercase tracking-wide text-muted">{SLOT_LABELS[m.slot]}</p>
@@ -363,7 +364,7 @@ function DayDetail({
                   </span>
                 </dd>
                 <dd className="col-span-2 mt-1 h-2 overflow-hidden rounded-full bg-slate-100" aria-hidden="true">
-                  <div className="h-full rounded-full bg-brand-500" style={{ width: `${Math.min(100, (row.value / row.target) * 100)}%` }} />
+                  <div className="bar-fill h-full rounded-full bg-brand-500" style={{ width: `${Math.min(100, (row.value / row.target) * 100)}%` }} />
                 </dd>
               </div>
             )

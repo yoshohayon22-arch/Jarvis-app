@@ -12,6 +12,7 @@ import { Button, Card, Notice } from '../../components/ui'
 import { useAppData } from '../../state/AppDataContext'
 import { formatChf, formatDate } from '../../lib/format'
 import { useMenu } from '../menu/useMenu'
+import { CountUp } from '../../components/CountUp'
 
 export function ShoppingPage() {
   const { activeProfile, update } = useAppData()
@@ -112,7 +113,7 @@ function ListCard({ anchor, list, checked, onToggle }: { anchor: string; list: S
           <p className="text-sm text-muted">{list.subtitle}</p>
         </div>
         <div className="text-right">
-          <p className="text-2xl font-bold">{formatChf(list.totalChf)}</p>
+          <CountUp className="block text-2xl font-bold tabular-nums" value={list.totalChf} format={formatChf} />
           <p className="text-sm text-muted" aria-live="polite">
             {done} / {count} article{count >= 2 ? 's' : ''} dans le panier
           </p>
@@ -157,7 +158,7 @@ function ItemRow({ item, checked, onToggle }: { item: ShoppingItem; checked: boo
   return (
     <li>
       <label htmlFor={id} className={`flex cursor-pointer items-start gap-3 rounded-lg px-2 py-1.5 hover:bg-slate-50 ${checked ? 'opacity-50' : ''}`}>
-        <input id={id} type="checkbox" checked={checked} onChange={onToggle} className="mt-1 h-4 w-4 shrink-0 accent-brand-600" />
+        <input key={String(checked)} id={id} type="checkbox" checked={checked} onChange={onToggle} className={`mt-1 h-4 w-4 shrink-0 accent-brand-600 ${checked ? 'animate-check-pop' : ''}`} />
         <span className="flex min-w-0 flex-1 flex-col">
           <span className={`font-semibold ${checked ? 'line-through' : ''}`}>
             {item.ingredient.name} <span className="font-normal text-muted">— {formatAmount(item.ingredient, item.neededUnits)}</span>

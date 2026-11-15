@@ -61,7 +61,7 @@ export function TrackingPage() {
         <h1 className="text-3xl font-bold">Suivi</h1>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-3">
+      <div className="stagger grid gap-6 lg:grid-cols-3">
         <QuickWeighIn onSave={(date, kg) => update((d) => upsertWeighIn(d, activeProfile.id, { date, kg }))} />
         <CoachCard className="lg:col-span-2" onWeigh={() => setWeighOpen(true)} />
       </div>
@@ -296,7 +296,7 @@ function QuickWeighIn({ onSave }: { onSave: (date: string, kg: number) => void }
         </div>
         <Button type="submit">Enregistrer</Button>
         <p className="min-h-5 text-sm text-brand-700" aria-live="polite">
-          {saved ? 'Pesée enregistrée, tendance mise à jour.' : ''}
+          {saved ? <span className="animate-pop-in inline-block">Pesée enregistrée, tendance mise à jour.</span> : ''}
         </p>
       </form>
     </Card>

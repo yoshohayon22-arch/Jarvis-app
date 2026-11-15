@@ -18,7 +18,7 @@ export function MacroBar({ targets }: { targets: NutritionTargets }) {
   ]
   return (
     <div>
-      <div className="flex h-3 overflow-hidden rounded-full bg-slate-100" aria-hidden="true">
+      <div className="animate-grow-x flex h-3 overflow-hidden rounded-full bg-slate-100" aria-hidden="true">
         {items.map((i) => (
           <div key={i.label} className={i.color} style={{ width: `${(i.kcal / total) * 100}%` }} />
         ))}

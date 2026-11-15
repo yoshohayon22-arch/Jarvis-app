@@ -11,6 +11,7 @@ import { computeTargets, todayIso } from '../../domain/nutrition'
 import { referenceWeightFor } from '../../domain/profiles'
 import { CoachCard } from '../coach/CoachCard'
 import { TrendCard } from '../tracking/TrendCard'
+import { CountUp } from '../../components/CountUp'
 import { progressPercent } from '../../domain/progress'
 import { RECIPE_MAP } from '../../domain/catalog'
 import { planLookup } from '../../domain/menu/generator'
@@ -50,7 +51,7 @@ export function Dashboard() {
         </Button>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-3">
+      <div className="stagger grid gap-6 lg:grid-cols-3">
         {/* Calories du jour */}
         <Card className="lg:col-span-2" aria-labelledby="kcal-title">
           <div className="mb-4 flex items-center justify-between">
@@ -60,7 +61,7 @@ export function Dashboard() {
             <Pill>{{ perte: 'Perte douce', prise: 'Prise progressive', maintien: 'Maintien' }[targets.goal]}</Pill>
           </div>
           <p className="mb-4">
-            <span className="text-4xl font-bold text-brand-700">{targets.targetKcal.toLocaleString('fr-CH')}</span>{' '}
+            <CountUp className="text-4xl font-bold tabular-nums text-brand-700" value={targets.targetKcal} />{' '}
             <span className="text-muted">kcal visées aujourd’hui</span>
           </p>
           <MacroBar targets={targets} />
@@ -83,7 +84,7 @@ export function Dashboard() {
                 aria-valuemax={100}
                 aria-valuenow={pct}
               >
-                <div className="h-full rounded-full bg-brand-500" style={{ width: `${pct}%` }} />
+                <div className="bar-fill h-full rounded-full bg-brand-500" style={{ width: `${pct}%` }} />
               </div>
               <p className="mt-2 text-sm font-semibold">{pct} % du chemin parcouru</p>
               <dl className="mt-4 grid grid-cols-3 gap-2 text-center text-sm">

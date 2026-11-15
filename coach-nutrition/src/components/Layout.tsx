@@ -3,7 +3,7 @@
  * contenu, et mention santé en pied de page.
  * Sur mobile, la navigation passe en barre fixe en bas de l'écran.
  */
-import { NavLink, Outlet, useNavigate } from 'react-router-dom'
+import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { CalendarDays, ChefHat, Home, Leaf, LineChart, ShoppingCart, UserRound, UserPlus } from 'lucide-react'
 import { useAppData } from '../state/AppDataContext'
 import { setActiveProfile } from '../domain/profiles'
@@ -58,6 +58,7 @@ function ProfileSwitcher() {
 }
 
 export function Layout() {
+  const location = useLocation()
   return (
     <div className="min-h-screen pb-24 md:pb-0">
       <a href="#contenu" className="skip-link">
@@ -103,7 +104,9 @@ export function Layout() {
       <main id="contenu" tabIndex={-1} className="mx-auto max-w-6xl px-4 py-6 outline-none sm:py-8">
         {/* Suspense local : la barre de navigation reste affichée pendant le chargement d'un écran. */}
         <Suspense fallback={<p role="status" className="p-8 text-center text-muted">Chargement…</p>}>
-          <Outlet />
+          <div key={location.pathname} className="animate-fade-up">
+            <Outlet />
+          </div>
         </Suspense>
       </main>
 

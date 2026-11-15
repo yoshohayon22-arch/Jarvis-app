@@ -222,7 +222,7 @@ export function MealCalculator({ state, setState }: { state: CalculatorState; se
                     )}
                   </dd>
                   <dd className="col-span-2 mt-1 h-2 overflow-hidden rounded-full bg-slate-100" aria-hidden="true">
-                    <div className="h-full rounded-full bg-brand-500" style={{ width: `${Math.min(100, (row.value / Math.max(1, row.target)) * 100)}%` }} />
+                    <div className="bar-fill h-full rounded-full bg-brand-500" style={{ width: `${Math.min(100, (row.value / Math.max(1, row.target)) * 100)}%` }} />
                   </dd>
                 </div>
               )

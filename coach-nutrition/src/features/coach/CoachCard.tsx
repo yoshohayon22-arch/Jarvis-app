@@ -9,6 +9,7 @@ import { computeTargets, todayIso } from '../../domain/nutrition'
 import { referenceWeightFor, updateProfile } from '../../domain/profiles'
 import { Button, Card } from '../../components/ui'
 import { MiaAvatar } from '../../components/Mia'
+import { Celebrate } from '../../components/Celebrate'
 import { useAppData } from '../../state/AppDataContext'
 import { useMenu } from '../menu/useMenu'
 
@@ -22,6 +23,7 @@ export function CoachCard({ onWeigh, className = '' }: { onWeigh: () => void; cl
   const { activeProfile, update } = useAppData()
   const { plan, refit } = useMenu()
   const [notice, setNotice] = useState<string | null>(null)
+  const [celebrate, setCelebrate] = useState(false)
   const today = todayIso()
   const messages = useMemo(
     () => (activeProfile ? coachMessages(activeProfile.name, activeProfile.settings, activeProfile.weighIns, today) : []),
@@ -36,6 +38,7 @@ export function CoachCard({ onWeigh, className = '' }: { onWeigh: () => void; cl
     if (m.action === 'peser') onWeigh()
     if (m.action === 'maintien') {
       update((d) => updateProfile(d, activeProfile.id, { settings: { ...activeProfile.settings, maintenanceMode: true } }))
+      setCelebrate(true)
       setNotice('Plan de maintien activé : tes calories sont maintenant égales à ta dépense. Pense à adapter ton menu (écran Menu).')
     }
     if (m.action === 'recalcul') {
@@ -51,9 +54,10 @@ export function CoachCard({ onWeigh, className = '' }: { onWeigh: () => void; cl
   const ActionIcon = { peser: Scale, maintien: Sparkles, recalcul: RefreshCw } as const
 
   return (
-    <Card aria-labelledby="coach-title" className={`bg-gradient-to-br ${tone.cls} to-white ${className}`}>
+    <Card aria-labelledby="coach-title" className={`relative overflow-hidden bg-gradient-to-br ${tone.cls} to-white ${className}`}>
+      {(main.situation === 'objectif-atteint' || celebrate) && <Celebrate key={celebrate ? 'maintien' : 'objectif'} />}
       <div className="flex items-start gap-3">
-        <MiaAvatar size={52} />
+        <MiaAvatar key={main.situation} size={52} className="animate-hop" />
         <div className="min-w-0">
           <h2 id="coach-title" className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-muted">
             <Icon size={16} aria-hidden="true" className={tone.iconCls} /> Mia, ta coach
@@ -66,7 +70,7 @@ export function CoachCard({ onWeigh, className = '' }: { onWeigh: () => void; cl
         {main.action && (
           <ActionButton label={actionLabel[main.action]} Icon={ActionIcon[main.action]} onClick={() => runAction(main)} />
         )}
-        {notice && <p className="mt-3 rounded-xl bg-white/70 p-3 text-sm text-brand-900">{notice}</p>}
+        {notice && <p className="animate-pop-in mt-3 rounded-xl bg-white/70 p-3 text-sm text-brand-900">{notice}</p>}
       </div>
       {others.length > 0 && (
         <ul className="mt-4 flex flex-col gap-2 border-t border-slate-100 pt-3 text-sm">

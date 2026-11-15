@@ -115,7 +115,7 @@ export function Onboarding() {
         aria-valuemax={STEP_IDS.length}
         aria-valuenow={index + 1}
       >
-        <div className="h-full rounded-full bg-brand-500 transition-all" style={{ width: `${progress}%` }} />
+        <div className="bar-fill h-full rounded-full bg-brand-500" style={{ width: `${progress}%` }} />
       </div>
 
       <Card as="div">
@@ -135,7 +135,9 @@ export function Onboarding() {
               targetWeightKg={settings.targetWeightKg}
             />
           ) : (
-            <StepFields step={step} draft={draft} set={set} errors={errors} />
+            <div key={step} className="animate-slide-in-right">
+              <StepFields step={step} draft={draft} set={set} errors={errors} />
+            </div>
           )}
 
           <div className="flex items-center justify-between gap-3 border-t border-slate-100 pt-5">

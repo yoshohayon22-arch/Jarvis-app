@@ -87,8 +87,8 @@ function Sparkline({ points, targetKg }: { points: { date: string; avg7: number 
           </text>
         </g>
       )}
-      <path d={path} fill="none" stroke={AVG} strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" />
-      <circle cx={x(t[t.length - 1])} cy={y(last.avg7)} r="4.5" fill={AVG} stroke="#fff" strokeWidth="2" />
+      <path d={path} pathLength={1} className="draw" fill="none" stroke={AVG} strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" />
+      <circle cx={x(t[t.length - 1])} cy={y(last.avg7)} r="4.5" fill={AVG} stroke="#fff" strokeWidth="2" className="animate-pop-in" style={{ animationDelay: '1.1s', transformBox: 'fill-box', transformOrigin: 'center' }} />
       <text x={PAD.left} y={H - 6} fontSize="10" fill={AXIS}>
         {formatDate(points[0].date, { day: 'numeric', month: 'short' })}
       </text>

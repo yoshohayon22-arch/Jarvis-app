@@ -14,6 +14,9 @@ const AIR = "https://air-quality-api.open-meteo.com/v1/air-quality";
 const DAILY_FIELDS =
   "weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,wind_gusts_10m_max,sunrise,sunset";
 
+/** Fonction qui va chercher un JSON à une adresse. Par défaut : fetch du navigateur. */
+export type JsonLoader = <T>(url: string) => Promise<T>;
+
 async function getJson<T>(url: string): Promise<T> {
   const res = await fetch(url);
   const data = (await res.json().catch(() => null)) as (T & { error?: boolean; reason?: string }) | null;
@@ -82,16 +85,16 @@ function dailyPoint(block: DailyBlock, i: number, model: DailyPoint["model"]): D
  * Prévisions : modèle MétéoSuisse ICON-CH (1–2 km) pour maintenant, les 24 h et les 5 premiers jours ;
  * le modèle européen ECMWF complète les jours que ICON-CH ne couvre pas (au-delà de 120 h).
  */
-export async function fetchForecast(): Promise<Forecast> {
+export async function fetchForecast(load: JsonLoader = getJson): Promise<Forecast> {
   const [ch, ecmwf] = await Promise.all([
-    getJson<ForecastResponse>(
+    load<ForecastResponse>(
       `${FORECAST}?${GENEVA}&models=meteoswiss_icon_seamless` +
         "&current=temperature_2m,apparent_temperature,relative_humidity_2m,precipitation,weather_code,is_day,wind_speed_10m,wind_gusts_10m,wind_direction_10m" +
         "&hourly=temperature_2m,precipitation_probability,precipitation,weather_code,wind_speed_10m,wind_gusts_10m,is_day" +
         `&daily=${DAILY_FIELDS}&forecast_days=7&forecast_hours=24`,
     ),
     // Si ECMWF échoue, on garde simplement les jours MétéoSuisse.
-    getJson<{ daily: DailyBlock }>(`${FORECAST}?${GENEVA}&models=ecmwf_ifs025&daily=${DAILY_FIELDS}&forecast_days=7`).catch(
+    load<{ daily: DailyBlock }>(`${FORECAST}?${GENEVA}&models=ecmwf_ifs025&daily=${DAILY_FIELDS}&forecast_days=7`).catch(
       () => null,
     ),
   ]);
@@ -135,12 +138,13 @@ export async function fetchForecast(): Promise<Forecast> {
 }
 
 /** Qualité de l'air et indice UV (modèle européen CAMS ; les modèles ICON-CH et ECMWF ne fournissent pas l'UV). */
-export async function fetchAirQuality(): Promise<AirQuality> {
-  const data = await getJson<{
+export async function fetchAirQuality(load: JsonLoader = getJson): Promise<AirQuality> {
+  const data = await load<{
     current: { european_aqi: number; pm10: number; pm2_5: number; nitrogen_dioxide: number; ozone: number; uv_index: number | null };
-    hourly: { uv_index: (number | null)[] };
+    hourly?: { uv_index?: (number | null)[] };
   }>(`${AIR}?${GENEVA}&current=european_aqi,pm10,pm2_5,nitrogen_dioxide,ozone,uv_index&hourly=uv_index&forecast_hours=24`);
-  const uvValues = data.hourly.uv_index.filter((v): v is number => v != null);
+  const uvValues = (data.hourly?.uv_index ?? []).filter((v): v is number => v != null);
+  if (typeof data.current?.european_aqi !== "number") throw new Error("réponse inattendue de la source");
   return {
     aqi: data.current.european_aqi,
     pm10: data.current.pm10,

@@ -122,8 +122,8 @@ export const TABS: readonly TabDefinition[] = [
   },
   {
     id: "matchs-tv",
-    label: "Matchs TV",
-    shortLabel: "TV",
+    label: "Matchs de la journée",
+    shortLabel: "Matchs",
     icon: Tv,
     group: "foot",
     phase: 6,

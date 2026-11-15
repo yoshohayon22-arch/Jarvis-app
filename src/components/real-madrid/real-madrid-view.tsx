@@ -2,7 +2,7 @@
 
 /**
  * Onglet Real Madrid : prochain match (compte à rebours), score, classements LaLiga et Ligue des champions,
- * buteurs, effectif et actus. Matchs et classements : API publique d'ESPN. Buteurs et effectif : football-data.org (si un jeton est configuré).
+ * buteurs, effectif et actus. Toutes les données viennent de l'API publique d'ESPN (aucun jeton nécessaire).
  */
 import { ExternalLink, RefreshCw } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
@@ -30,7 +30,6 @@ import { useCachedFetch } from "@/lib/use-cached-fetch";
 import { cn } from "@/lib/utils";
 
 const SOURCE = "ESPN";
-const SOURCE_FD = "football-data.org";
 const ONE_MINUTE = 60 * 1000;
 const TEN_MINUTES = 10 * ONE_MINUTE;
 const round = (n: number) => Math.round(n).toString();
@@ -446,16 +445,15 @@ function ScorerRow({ scorer, rank }: { scorer: Scorer; rank: number }) {
 }
 
 function ScorersCard({ part }: { part: Part<Scorer[]> }) {
-  if (!part.ok) return <Missing title="Buteurs LaLiga" error={part.error} />;
+  if (!part.ok) return <Missing title="Buteurs du Real (LaLiga)" error={part.error} />;
   const scorers = part.data;
-  const realScorers = scorers.filter((s) => isReal(s.team));
 
   return (
     <ExpandableCard
-      title="Buteurs LaLiga"
+      title="Buteurs du Real (LaLiga)"
       detail={
         <div className={cn("flex flex-col gap-2", border)}>
-          <p className="text-xs text-text-2">Les {scorers.length} meilleurs buteurs du championnat.</p>
+          <p className="text-xs text-text-2">Tous les buteurs du Real Madrid en LaLiga cette saison.</p>
           <ol>
             {scorers.map((s, i) => (
               <ScorerRow key={`${s.name}-${s.team.id}`} scorer={s} rank={i + 1} />
@@ -471,12 +469,9 @@ function ScorersCard({ part }: { part: Part<Scorer[]> }) {
           ))}
         </ol>
         <p className="text-xs text-text-2">
-          {realScorers.length
-            ? `Joueurs du Real parmi les ${scorers.length} premiers : ${realScorers.map((s) => `${s.name} (${s.goals})`).join(", ")}.`
-            : `Aucun joueur du Real parmi les ${scorers.length} premiers buteurs.`}{" "}
-          Les passes décisives ne sont connues que pour ces joueurs : la source ne fournit pas de classement des passeurs.
+          Buts et passes décisives en LaLiga cette saison ({scorers.length} buteur{scorers.length > 1 ? "s" : ""}).
         </p>
-        <SourceNote source={SOURCE_FD} updatedAt={new Date(part.fetchedAt)} />
+        <SourceNote source={SOURCE} updatedAt={new Date(part.fetchedAt)} />
       </div>
     </ExpandableCard>
   );
@@ -533,7 +528,7 @@ function SquadCard({ part }: { part: Part<{ coach: string | null; venue: string 
           {venue ? `Stade : ${venue}.` : ""}
         </p>
         <p className="text-xs text-text-2">Les blessures et suspensions ne sont pas fournies par cette source.</p>
-        <SourceNote source={SOURCE_FD} updatedAt={new Date(part.fetchedAt)} />
+        <SourceNote source={SOURCE} updatedAt={new Date(part.fetchedAt)} />
       </div>
     </ExpandableCard>
   );

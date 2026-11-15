@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { MatchsView } from "@/components/matchs/matchs-view";
 import { MeteoView } from "@/components/meteo/meteo-view";
 import { NewsView } from "@/components/presse/news-view";
 import { RealMadridView } from "@/components/real-madrid/real-madrid-view";
@@ -28,6 +29,7 @@ export default async function TabPage({ params }: PageProps<"/[onglet]">) {
   if (tab.id === "la-une") return <NewsView tab="une" />;
   if (tab.id === "foot") return <NewsView tab="foot" />;
   if (tab.id === "real-madrid") return <RealMadridView />;
+  if (tab.id === "matchs-tv") return <MatchsView />;
   if (tab.id === "calendrier") return <CalendarView />;
   if (tab.id === "paracha" || tab.id === "tehilim" || tab.id === "halakha" || tab.id === "rambam") return <StudyView section={tab.id} />;
   if (tab.id === "cours") return <CoursView />;

@@ -13,37 +13,7 @@ import {
   type TeamRef,
 } from "./types";
 
-/**
- * football-data.org (API v4, plan gratuit) : 10 requêtes par minute, scores en différé.
- * Chaque appel est mis en cache côté serveur pour rester très en dessous de cette limite.
- * Le jeton est lu dans FOOTBALL_DATA_TOKEN (variable serveur) et n'est jamais envoyé au navigateur.
- */
-const API = "https://api.football-data.org/v4";
 const MINUTE = 60 * 1000;
-
-async function api<T>(path: string): Promise<T> {
-  const token = process.env.FOOTBALL_DATA_TOKEN;
-  if (!token) throw new Error("jeton football-data.org non configuré sur le serveur");
-  const res = await fetch(`${API}${path}`, {
-    headers: { "X-Auth-Token": token },
-    cache: "no-store",
-    signal: AbortSignal.timeout(10000),
-  }).catch((e: unknown) => {
-    throw new Error(e instanceof Error && e.name === "TimeoutError" ? "pas de réponse en 10 secondes" : "service injoignable");
-  });
-  if (res.status === 429) throw new Error("limite de 10 requêtes par minute atteinte, réessaie dans une minute");
-  if (res.status === 403) throw new Error("donnée non incluse dans le plan gratuit");
-  if (!res.ok) throw new Error(`football-data.org a répondu ${res.status}`);
-  return (await res.json()) as T;
-}
-
-interface ApiTeam {
-  id: number;
-  name: string;
-  shortName?: string | null;
-  crest?: string | null;
-}
-const team = (t: ApiTeam): TeamRef => ({ id: t.id, name: t.shortName || t.name, crest: t.crest ?? null });
 
 async function part<T>(key: string, ttlMs: number, load: () => Promise<T>): Promise<Part<T>> {
   try {
@@ -52,53 +22,6 @@ async function part<T>(key: string, ttlMs: number, load: () => Promise<T>): Prom
   } catch (e) {
     return { ok: false, error: e instanceof Error ? e.message : "erreur inconnue" };
   }
-}
-
-// ---------- Buteurs ----------
-async function loadScorers(): Promise<Scorer[]> {
-  const data = await api<{
-    scorers: { player: { name: string }; team: ApiTeam; playedMatches?: number | null; goals: number; assists?: number | null; penalties?: number | null }[];
-  }>("/competitions/PD/scorers?limit=30");
-  return data.scorers.map((s) => ({
-    name: s.player.name,
-    team: team(s.team),
-    played: s.playedMatches ?? null,
-    goals: s.goals,
-    assists: s.assists ?? null,
-    penalties: s.penalties ?? null,
-  }));
-}
-
-// ---------- Effectif ----------
-const POSITIONS: Record<string, string> = {
-  Goalkeeper: "Gardien",
-  Defence: "Défenseur",
-  "Centre-Back": "Défenseur central",
-  "Left-Back": "Arrière gauche",
-  "Right-Back": "Arrière droit",
-  Midfield: "Milieu",
-  "Defensive Midfield": "Milieu défensif",
-  "Central Midfield": "Milieu central",
-  "Attacking Midfield": "Milieu offensif",
-  Offence: "Attaquant",
-  "Centre-Forward": "Avant-centre",
-  "Left Winger": "Ailier gauche",
-  "Right Winger": "Ailier droit",
-};
-
-async function loadSquad() {
-  const data = await api<{
-    venue?: string | null;
-    coach?: { name?: string | null } | null;
-    squad: { name: string; position?: string | null; nationality?: string | null; dateOfBirth?: string | null }[];
-  }>(`/teams/${REAL_MADRID_ID}`);
-  const players: SquadPlayer[] = data.squad.map((p) => ({
-    name: p.name,
-    position: p.position ? (POSITIONS[p.position] ?? p.position) : "Poste non précisé",
-    nationality: p.nationality ?? null,
-    dateOfBirth: p.dateOfBirth ?? null,
-  }));
-  return { coach: data.coach?.name ?? null, venue: data.venue ?? null, players };
 }
 
 // ---------- Matchs et classements : API publique d'ESPN (sans jeton) ----------
@@ -167,17 +90,62 @@ async function loadEspnStandings(league: string) {
   return { matchday: null, table };
 }
 
-/**
- * Matchs et classements : ESPN (aucun jeton nécessaire).
- * Buteurs et effectif : football-data.org, seulement si FOOTBALL_DATA_TOKEN est configuré.
- */
+// ---------- Effectif et buteurs du club (fiche d'équipe ESPN) ----------
+const POSITIONS: Record<string, string> = { Goalkeeper: "Gardien", Defender: "Défenseur", Midfielder: "Milieu", Forward: "Attaquant" };
+type Raw = Record<string, unknown>;
+const obj = (v: unknown): Raw => (v && typeof v === "object" ? (v as Raw) : {});
+const list = (v: unknown): Raw[] => (Array.isArray(v) ? (v as Raw[]) : []);
+
+function athleteStat(athlete: Raw, name: string): number | null {
+  for (const category of list(obj(obj(athlete.statistics).splits).categories)) {
+    const value = list(category.stats).find((s) => s.name === name)?.value;
+    if (typeof value === "number" && Number.isFinite(value)) return value;
+  }
+  return null;
+}
+
+const loadRoster = () =>
+  cached("espn:effectif", 60 * MINUTE, async () => {
+    const athletes = list((await espn(`/site/v2/sports/soccer/esp.1/teams/${ESPN_REAL_MADRID}/roster`)).athletes).filter((a) => typeof a.displayName === "string" && a.displayName);
+    if (!athletes.length) throw new Error("effectif vide ou illisible");
+    return athletes;
+  });
+
+async function loadScorers(): Promise<Scorer[]> {
+  const real = espnTeam(ESPN_REAL_MADRID, "Real Madrid");
+  return (await loadRoster())
+    .map((a) => ({ name: String(a.displayName), team: real, played: athleteStat(a, "appearances"), goals: athleteStat(a, "totalGoals") ?? 0, assists: athleteStat(a, "goalAssists"), penalties: null }))
+    .filter((s) => s.goals > 0)
+    .sort((a, b) => b.goals - a.goals || (b.assists ?? 0) - (a.assists ?? 0));
+}
+
+async function loadSquad() {
+  const players: SquadPlayer[] = (await loadRoster()).map((a) => {
+    const position = String(obj(a.position).displayName ?? "");
+    const born = typeof a.dateOfBirth === "string" && !Number.isNaN(Date.parse(a.dateOfBirth)) ? new Date(a.dateOfBirth).toISOString().slice(0, 10) : null;
+    return { name: String(a.displayName), position: POSITIONS[position] ?? (position || "Poste non précisé"), nationality: typeof a.citizenship === "string" && a.citizenship ? a.citizenship : null, dateOfBirth: born };
+  });
+  // L'entraîneur et le stade ne sont pas repris : la fiche ESPN ne les donne pas de façon fiable.
+  return { coach: null, venue: null, players };
+}
+
+/** Journée en cours d'une compétition (tableau des scores ESPN). */
+export async function loadMatchday(league: string, name: string) {
+  return part(`espn:journee:${league}`, 2 * MINUTE, async () => {
+    const raw = await espn(`/site/v2/sports/soccer/${league}/scoreboard`);
+    if (!Array.isArray(raw.events)) throw new Error("réponse inattendue d'ESPN");
+    return parseMatches(raw.events, name).sort((a, b) => a.date.localeCompare(b.date));
+  });
+}
+
+/** Toutes les données viennent de l'API publique d'ESPN : aucun jeton n'est nécessaire. */
 export async function loadRealMadrid(): Promise<RealMadridPayload> {
   const [matches, laliga, championsLeague, scorers, squad] = await Promise.all([
     part("espn:matchs", 1 * MINUTE, loadEspnMatches),
     part("espn:laliga", 10 * MINUTE, () => loadEspnStandings("esp.1")),
     part("espn:ldc", 10 * MINUTE, () => loadEspnStandings("uefa.champions")),
-    part("foot:buteurs", 30 * MINUTE, loadScorers),
-    part("foot:effectif", 12 * 60 * MINUTE, loadSquad),
+    part("espn:buteurs", 30 * MINUTE, loadScorers),
+    part("espn:effectif-vue", 60 * MINUTE, loadSquad),
   ]);
   return { matches, laliga, championsLeague, scorers, squad };
 }

@@ -7,7 +7,6 @@
  */
 export const SESSION_COOKIE = "dash_session";
 export const SESSION_MAX_AGE = 60 * 60 * 24 * 90; // 90 jours
-export const MIN_PASSWORD_LENGTH = 10;
 
 const encoder = new TextEncoder();
 

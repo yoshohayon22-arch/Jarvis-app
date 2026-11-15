@@ -8,6 +8,7 @@ import { computeTargets, todayIso } from '../../domain/nutrition'
 import { latestWeight, setMenu, updateProfile } from '../../domain/profiles'
 import {
   generateWeek,
+  planLookup,
   planningWeekStart,
   refitPortions,
   replaceMeal,
@@ -36,7 +37,8 @@ export function useMenu() {
   }, [activeProfile])
 
   const plan = activeProfile?.menu ?? null
-  const summary = useMemo(() => (plan ? weekSummary(plan, RECIPE_MAP) : null), [plan])
+  const recipes = useMemo(() => (plan ? planLookup(plan, RECIPE_MAP.values()) : RECIPE_MAP), [plan])
+  const summary = useMemo(() => (plan ? weekSummary(plan, recipes) : null), [plan, recipes])
 
   const save = (fn: (p: NonNullable<typeof plan>) => NonNullable<typeof plan>) => {
     if (!activeProfile || !plan) return
@@ -47,6 +49,8 @@ export function useMenu() {
     ctx,
     plan,
     summary,
+    /** Recettes du catalogue + bowls du menu. */
+    recipes,
     /** Les besoins ont changé depuis la génération du menu. */
     stale: Boolean(plan && ctx && (targetsChanged(plan, ctx.targets) || plan.lowBudget !== ctx.settings.lowBudget)),
     /** Génère un nouveau menu (en gardant les plats verrouillés). */

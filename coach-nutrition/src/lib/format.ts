@@ -14,3 +14,11 @@ export function formatKg(kg: number): string {
 export function formatChf(chf: number): string {
   return `CHF ${chf.toFixed(2)}`
 }
+
+/** 95 → « 1 h 35 », 40 → « 40 min ». */
+export function formatDuration(min: number): string {
+  const h = Math.floor(min / 60)
+  const m = Math.round(min % 60)
+  if (h === 0) return `${m} min`
+  return m === 0 ? `${h} h` : `${h} h ${String(m).padStart(2, '0')}`
+}

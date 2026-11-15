@@ -26,6 +26,7 @@ export function createProfile(
     // La première pesée est le poids de départ saisi à l'onboarding.
     weighIns: [{ date: todayIso(now), kg: settings.startWeightKg }],
     menu: null,
+    shoppingChecks: {},
   }
 }
 
@@ -90,5 +91,18 @@ export function setMenu(data: AppData, profileId: string, menu: WeekPlan | null)
   return {
     ...data,
     profiles: data.profiles.map((p) => (p.id === profileId ? { ...p, menu } : p)),
+  }
+}
+
+/** Coche / décoche un article d'une liste de courses. */
+export function toggleShoppingCheck(data: AppData, profileId: string, listId: string, itemId: string): AppData {
+  return {
+    ...data,
+    profiles: data.profiles.map((p) => {
+      if (p.id !== profileId) return p
+      const current = p.shoppingChecks[listId] ?? []
+      const next = current.includes(itemId) ? current.filter((x) => x !== itemId) : [...current, itemId]
+      return { ...p, shoppingChecks: { ...p.shoppingChecks, [listId]: next } }
+    }),
   }
 }

@@ -2,6 +2,7 @@
  * Types métier partagés par toute l'application.
  * Aucune dépendance à React ici : ces types décrivent uniquement les données.
  */
+import type { Recipe } from './catalog'
 
 export type Sex = 'homme' | 'femme'
 
@@ -87,6 +88,16 @@ export interface DayPlan {
   meals: PlannedMeal[]
 }
 
+/** Session de batch cooking : on cuisine `cookDate` pour les jours `days` (indices 0 = lundi). */
+export interface BatchSession {
+  cookDate: string
+  days: number[]
+  /** Bases cuisinées en grande quantité (céréale, protéine, légumes, sauce). */
+  baseIds: string[]
+  /** Identifiant du bowl qui combine ces bases. */
+  bowlId: string
+}
+
 /** Menu de la semaine (lundi → dimanche). */
 export interface WeekPlan {
   weekStart: string
@@ -97,6 +108,10 @@ export interface WeekPlan {
   targets: { kcal: number; proteinG: number; fatG: number; carbsG: number }
   lowBudget: boolean
   days: DayPlan[]
+  /** Organisation batch cooking (null si le batch cooking n'est pas activé). */
+  batch: { sessions: BatchSession[] } | null
+  /** Recettes « assemblées » propres à ce menu (bowls de batch cooking). */
+  bowls: Recipe[]
 }
 
 export interface Profile {
@@ -108,6 +123,8 @@ export interface Profile {
   weighIns: WeighIn[]
   /** Menu de la semaine en cours (null tant qu'aucun menu n'a été généré). */
   menu: WeekPlan | null
+  /** Cases cochées dans les listes de courses (par identifiant de liste). */
+  shoppingChecks: Record<string, string[]>
 }
 
 /** Données complètes de l'application, telles que stockées dans le navigateur. */

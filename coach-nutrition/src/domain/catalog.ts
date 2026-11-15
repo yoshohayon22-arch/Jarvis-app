@@ -72,6 +72,8 @@ export interface PriceEntry {
   /** Ligne petit prix : M-Budget, Prix Garantie, marques Lidl/Aldi… */
   budgetLine: boolean
   source: 'estimation' | 'relevé'
+  /** Vendu au poids (vrac, coupe) : on paie la quantité prise, au prorata du prix indiqué. */
+  byWeight?: boolean
   checkedAt?: string
   url?: string
 }
@@ -105,6 +107,8 @@ export interface Recipe {
   /** 0 = ne se congèle pas. */
   freezerMonths: number
   batchRole?: BatchRole
+  /** Pour un bowl de batch cooking : bases qui le composent et portions de chacune. */
+  components?: { id: string; portions: number }[]
   /** Valeurs par portion — calculées par `npm run recipes:update`. */
   perServing: Per100g & { priceChf: number; priceBudgetChf: number }
   /** Régimes compatibles — calculés par `npm run recipes:update` (pour lecture humaine). */

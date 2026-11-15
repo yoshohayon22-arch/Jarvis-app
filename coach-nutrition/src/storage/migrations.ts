@@ -43,7 +43,8 @@ function normalize(data: AppData): AppData {
     profiles: data.profiles.map((p) => ({
       ...p,
       weighIns: Array.isArray(p.weighIns) ? p.weighIns : [],
-      menu: p.menu ?? null,
+      menu: p.menu ? { ...p.menu, batch: p.menu.batch ?? null, bowls: p.menu.bowls ?? [] } : null,
+      shoppingChecks: p.shoppingChecks ?? {},
       settings: {
         ...DEFAULT_SETTINGS,
         ...p.settings,

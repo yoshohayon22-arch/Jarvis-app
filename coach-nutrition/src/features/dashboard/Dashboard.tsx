@@ -12,6 +12,7 @@ import { computeTargets, todayIso } from '../../domain/nutrition'
 import { latestWeight } from '../../domain/profiles'
 import { progressPercent } from '../../domain/progress'
 import { RECIPE_MAP } from '../../domain/catalog'
+import { planLookup } from '../../domain/menu/generator'
 import { SLOT_LABELS } from '../../domain/menu/slots'
 import { formatDate, formatKg } from '../../lib/format'
 import { MacroBar } from '../onboarding/TargetsSummary'
@@ -115,7 +116,7 @@ export function Dashboard() {
           {todayPlan ? (
             <ul className="divide-y divide-slate-100">
               {todayPlan.meals.map((m) => {
-                const r = RECIPE_MAP.get(m.recipeId)
+                const r = planLookup(activeProfile.menu!, RECIPE_MAP.values()).get(m.recipeId)
                 if (!r) return null
                 return (
                   <li key={m.slot} className="flex items-center justify-between gap-4 py-2.5">

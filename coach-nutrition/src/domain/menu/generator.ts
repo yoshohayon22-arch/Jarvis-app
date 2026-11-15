@@ -14,6 +14,7 @@ import { canFollow, isRecipeAllowed } from '../restrictions'
 import type { DayPlan, MealSlot, PlannedMeal, ProfileSettings, WeekPlan } from '../types'
 import { objective, optimizePortions, relativeError, roundPortions, totals, type MacroVector, type PortionProblem } from './portions'
 import { KCAL_SHARE, PORTION_BOUNDS, SLOT_HOUR, SLOT_MEAL_TYPE, SLOTS_BY_COUNT } from './slots'
+import { canServe, isBatchCooked, planBatch, sessionForDay } from './batch'
 
 /** Marge tolérée sur les calories de chaque jour. */
 export const KCAL_TOLERANCE = 0.05
@@ -159,6 +160,8 @@ function portionProblem(slots: MealSlot[], recipes: Recipe[], ctx: GeneratorCont
 interface ScoreOptions {
   costWeight: number
   month: number
+  /** Mode batch cooking actif : bonus pour les plats préparés en session. */
+  batch?: boolean
 }
 
 /** Évalue une combinaison : précision nutritionnelle + coût + saison. Plus le score est bas, mieux c'est. */
@@ -172,7 +175,51 @@ function evaluate(slots: MealSlot[], recipes: Recipe[], ctx: GeneratorContext, o
   const cost = recipes.reduce((s, r, i) => s + recipePrice(r, ctx.settings.lowBudget) * portions[i], 0)
   score += opt.costWeight * cost
   score += recipes.filter((r) => !r.season.includes(opt.month)).length * 0.01
+  // Batch cooking : on veut utiliser ce qu'on a cuisiné en session (bowls, plats mijotés).
+  if (opt.batch) {
+    recipes.forEach((r, i) => {
+      if (r.components) score -= 0.04
+      else if (isBatchCooked(r, slots[i])) score -= 0.015
+    })
+  }
   return { recipes, portions, score }
+}
+
+/** Toutes les recettes utilisables par un menu : le catalogue + ses bowls de batch cooking. */
+export function planLookup(plan: Pick<WeekPlan, 'bowls'>, recipes: Iterable<Recipe>): Map<string, Recipe> {
+  const map = new Map<string, Recipe>()
+  for (const r of recipes) map.set(r.id, r)
+  for (const b of plan.bowls ?? []) map.set(b.id, b)
+  return map
+}
+
+/**
+ * Règles de batch cooking pour un plat à un jour donné :
+ * - un bowl n'est proposé que pendant les jours couverts par SA session ;
+ * - un plat cuisiné en session doit se conserver jusqu'au jour prévu (frigo, ou congélateur).
+ */
+function batchAllowed(
+  batch: WeekPlan['batch'],
+  weekStart: string,
+  byId: ReadonlyMap<string, Recipe>,
+  recipe: Recipe,
+  dayIndex: number,
+  slot: MealSlot,
+): boolean {
+  if (recipe.components && !batch) return false
+  if (!batch || !isBatchCooked(recipe, slot)) return true
+  const info = sessionForDay(batch.sessions, weekStart, dayIndex)
+  if (!info) return !recipe.components
+  if (recipe.components && info.session.bowlId !== recipe.id) return false
+  return canServe(recipe, info.offset, byId)
+}
+
+/** Bowl proposé pour un jour donné (celui de la session qui couvre ce jour). */
+function bowlForDay(batch: WeekPlan['batch'], weekStart: string, byId: ReadonlyMap<string, Recipe>, dayIndex: number): Recipe[] {
+  if (!batch) return []
+  const info = sessionForDay(batch.sessions, weekStart, dayIndex)
+  const bowl = info?.session.bowlId ? byId.get(info.session.bowlId) : undefined
+  return bowl ? [bowl] : []
 }
 
 // ─────────────────────────── Génération d'une semaine ───────────────────────────
@@ -194,6 +241,17 @@ function generateOnce(ctx: GeneratorContext, opts: GenerateOptions): WeekPlan {
   const byId = new Map(ctx.recipes.map((r) => [r.id, r]))
   const month = Number(ctx.weekStart.slice(5, 7))
   const scoreOpt: ScoreOptions = { costWeight: opts.costWeight ?? defaultCostWeight(ctx.settings), month }
+
+  // Batch cooking : sessions, bases et bowls de la semaine.
+  const batchPlan =
+    ctx.settings.batch.enabled && ctx.settings.batch.sessionDays.length > 0
+      ? planBatch(ctx.recipes, ctx.settings, ctx.ingredients, ctx.weekStart, rng, energySplit(ctx.targets.proteinG, ctx.targets.fatG, ctx.targets.carbsG))
+      : null
+  const batch: WeekPlan['batch'] = batchPlan ? { sessions: batchPlan.sessions } : null
+  scoreOpt.batch = Boolean(batch)
+  const bowls = [...(batchPlan?.bowls ?? [])]
+  for (const b of opts.previous?.bowls ?? []) if (!bowls.some((x) => x.id === b.id)) bowls.push(b)
+  bowls.forEach((b) => byId.set(b.id, b))
 
   // Compte d'utilisation : on intègre d'abord tous les plats verrouillés de la semaine.
   const uses = new Map<string, number>()
@@ -230,9 +288,11 @@ function generateOnce(ctx: GeneratorContext, opts: GenerateOptions): WeekPlan {
         }
         // Dernier recours, seulement si aucune combinaison valide n'a été trouvée : on assouplit la limite hebdomadaire.
         const relax = best === null && attempt > ATTEMPTS_PER_DAY * 0.8
-        const candidates = pools[slot].filter(
+        const pool = slot === 'dejeuner' || slot === 'diner' ? [...pools[slot], ...bowlForDay(batch, ctx.weekStart, byId, d)] : pools[slot]
+        const candidates = pool.filter(
           (r) =>
             !chosen.some((c) => c.id === r.id) && // jamais deux fois le même plat dans la journée
+            batchAllowed(batch, ctx.weekStart, byId, r, d, slot) &&
             (relax || (uses.get(r.id) ?? 0) < maxUses(r, ctx.settings)) &&
             kosherOk(ctx, prev, r, hour) &&
             // un plat verrouillé plus tard dans la journée doit rester compatible
@@ -241,11 +301,20 @@ function generateOnce(ctx: GeneratorContext, opts: GenerateOptions): WeekPlan {
               return !l || l.id !== r.id
             }),
         )
+        // Batch cooking : le menu est construit autour des bases. Au déjeuner, on sert le bowl
+        // de la session dès qu'il est disponible (conservation OK, limite hebdomadaire non atteinte).
+        if (batch && slot === 'dejeuner') {
+          const bowl = candidates.find((r) => r.components)
+          if (bowl) candidates.splice(0, candidates.length, bowl)
+        }
         const weights = candidates.map((r) => {
           let w = 1 / (1 + (uses.get(r.id) ?? 0)) // varier les plats
           if (previousDay[i]?.id === r.id) w *= 0.25 // éviter le même plat deux jours de suite
           if (!r.season.includes(month)) w *= 0.3 // préférer la saison
           if (ctx.settings.lowBudget && r.tags.includes('petit-budget')) w *= 2
+          // Batch cooking : le bowl est le déjeuner type, les plats mijotés sont privilégiés le soir.
+          if (r.components) w *= slot === 'dejeuner' ? 8 : 1.5
+          else if (batch && isBatchCooked(r, slot)) w *= 1.8
           w *= profileMatch(r, targetSplit)
           return w
         })
@@ -285,6 +354,11 @@ function generateOnce(ctx: GeneratorContext, opts: GenerateOptions): WeekPlan {
     targets: { ...ctx.targets },
     lowBudget: ctx.settings.lowBudget,
     days,
+    batch,
+    // On ne garde que les bowls des sessions ou effectivement utilisés.
+    bowls: bowls.filter(
+      (b) => batch?.sessions.some((s) => s.bowlId === b.id) || days.some((d) => d.meals.some((m) => m.recipeId === b.id)),
+    ),
   }
 }
 
@@ -297,12 +371,11 @@ export function generateWeek(ctx: GeneratorContext, opts: GenerateOptions = {}):
   let plan = generateOnce(ctx, { ...opts, costWeight: weight })
   const budget = ctx.settings.weeklyBudgetChf
   if (!budget) return plan
-  const byId = new Map(ctx.recipes.map((r) => [r.id, r]))
-  let cost = weekSummary(plan, byId).costChf
+  let cost = weekSummary(plan, planLookup(plan, ctx.recipes)).costChf
   for (let i = 0; i < 4 && cost > budget; i++) {
     weight *= 2.5
     const candidate = generateOnce(ctx, { ...opts, costWeight: weight })
-    const c = weekSummary(candidate, byId).costChf
+    const c = weekSummary(candidate, planLookup(candidate, ctx.recipes)).costChf
     if (c < cost) {
       plan = candidate
       cost = c
@@ -319,7 +392,7 @@ export function generateWeek(ctx: GeneratorContext, opts: GenerateOptions = {}):
  * `variant` permet d'obtenir une proposition différente à chaque clic.
  */
 export function replaceMeal(plan: WeekPlan, ctx: GeneratorContext, dayIndex: number, slot: MealSlot, variant = 0): WeekPlan {
-  const byId = new Map(ctx.recipes.map((r) => [r.id, r]))
+  const byId = planLookup(plan, ctx.recipes)
   const day = plan.days[dayIndex]
   const slots = day.meals.map((m) => m.slot)
   const idx = slots.indexOf(slot)
@@ -338,13 +411,14 @@ export function replaceMeal(plan: WeekPlan, ctx: GeneratorContext, dayIndex: num
     return { recipe: byId.get(last.recipeId)!, hour: SLOT_HOUR[last.slot] }
   }
 
-  const pool = buildPools(ctx)[slot]
+  const pool = [...buildPools(ctx)[slot], ...(slot === 'dejeuner' || slot === 'diner' ? bowlForDay(plan.batch, plan.weekStart, byId, dayIndex) : [])]
   const month = Number(plan.weekStart.slice(5, 7))
-  const scoreOpt = { costWeight: defaultCostWeight(ctx.settings), month }
+  const scoreOpt = { costWeight: defaultCostWeight(ctx.settings), month, batch: Boolean(plan.batch) }
   const scored = pool
     .filter(
       (r) =>
         r.id !== current &&
+        batchAllowed(plan.batch, plan.weekStart, byId, r, dayIndex, slot) &&
         !dayRecipes.some((c, i) => i !== idx && c.id === r.id) &&
         (uses.get(r.id) ?? 0) < maxUses(r, ctx.settings) &&
         kosherOk(ctx, prevMeal(idx), r, SLOT_HOUR[slot]) &&
@@ -441,7 +515,7 @@ export function mondayOf(isoDate: string): string {
  * (après une pesée ou une modification du profil).
  */
 export function refitPortions(plan: WeekPlan, ctx: GeneratorContext): WeekPlan {
-  const byId = new Map(ctx.recipes.map((r) => [r.id, r]))
+  const byId = planLookup(plan, ctx.recipes)
   const scoreOpt = { costWeight: 0, month: Number(plan.weekStart.slice(5, 7)) }
   return {
     ...plan,

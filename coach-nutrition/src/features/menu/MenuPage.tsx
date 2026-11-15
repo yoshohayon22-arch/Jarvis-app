@@ -4,7 +4,8 @@
  */
 import { useState } from 'react'
 import { BookOpen, CalendarDays, Lock, LockOpen, RefreshCw, Shuffle, Sparkles, Wallet } from 'lucide-react'
-import { RECIPE_MAP } from '../../domain/catalog'
+import type { Recipe } from '../../domain/catalog'
+import { isBatchCooked } from '../../domain/menu/batch'
 import { daySummary, mealValues } from '../../domain/menu/generator'
 import { SLOT_LABELS } from '../../domain/menu/slots'
 import { todayIso } from '../../domain/nutrition'
@@ -53,7 +54,7 @@ export function MenuPage() {
 }
 
 function WeekView() {
-  const { ctx, plan, summary, stale, generate, replace, toggleLock, refit, setLowBudget } = useMenu()
+  const { ctx, plan, summary, recipes, stale, generate, replace, toggleLock, refit, setLowBudget } = useMenu()
   const today = todayIso()
   const todayIndex = plan ? plan.days.findIndex((d) => d.date === today) : -1
   const [selected, setSelected] = useState(Math.max(0, todayIndex))
@@ -159,7 +160,7 @@ function WeekView() {
       <nav aria-label="Jours de la semaine">
         <ul className="grid grid-cols-7 gap-1.5 sm:gap-3">
           {plan.days.map((d, i) => {
-            const s = daySummary(d, RECIPE_MAP, plan.lowBudget)
+            const s = daySummary(d, recipes, plan.lowBudget)
             const isSel = i === selected
             return (
               <li key={d.date}>
@@ -190,6 +191,8 @@ function WeekView() {
         targets={plan.targets}
         lowBudget={plan.lowBudget}
         showKashrut={isKosher}
+        recipes={recipes}
+        batch={Boolean(plan.batch)}
         onOpen={(meal) => setOpen({ meal })}
         onReplace={(slot) => {
           const key = `${selected}-${slot}`
@@ -203,10 +206,10 @@ function WeekView() {
       <Dialog
         open={open !== null}
         onClose={() => setOpen(null)}
-        title={open ? RECIPE_MAP.get(open.meal.recipeId)!.name : ''}
+        title={open ? recipes.get(open.meal.recipeId)!.name : ''}
         size="xl"
       >
-        {open && <RecipeDetail recipe={RECIPE_MAP.get(open.meal.recipeId)!} showKashrut={isKosher} portions={open.meal.portions} />}
+        {open && <RecipeDetail recipe={recipes.get(open.meal.recipeId)!} showKashrut={isKosher} portions={open.meal.portions} />}
       </Dialog>
     </div>
   )
@@ -257,6 +260,8 @@ function DayDetail({
   targets,
   lowBudget,
   showKashrut,
+  recipes,
+  batch,
   onOpen,
   onReplace,
   onToggleLock,
@@ -266,11 +271,13 @@ function DayDetail({
   targets: { kcal: number; proteinG: number; fatG: number; carbsG: number }
   lowBudget: boolean
   showKashrut: boolean
+  recipes: ReadonlyMap<string, Recipe>
+  batch: boolean
   onOpen: (meal: PlannedMeal) => void
   onReplace: (slot: PlannedMeal['slot']) => void
   onToggleLock: (slot: PlannedMeal['slot']) => void
 }) {
-  const s = daySummary(day, RECIPE_MAP, lowBudget)
+  const s = daySummary(day, recipes, lowBudget)
   const rows = [
     { label: 'Calories', value: s.kcal, target: targets.kcal, unit: 'kcal' },
     { label: 'Protéines', value: s.protein, target: targets.proteinG, unit: 'g' },
@@ -285,7 +292,7 @@ function DayDetail({
         </h2>
         <ul className="flex flex-col gap-3">
           {day.meals.map((m) => {
-            const r = RECIPE_MAP.get(m.recipeId)!
+            const r = recipes.get(m.recipeId)!
             const v = mealValues(m, r, lowBudget)
             return (
               <li key={m.slot} className={`rounded-xl border p-4 ${m.locked ? 'border-brand-300 bg-brand-50/50' : 'border-slate-100'}`}>
@@ -301,6 +308,7 @@ function DayDetail({
                       <span>{Math.round(v.protein)} g prot.</span>
                       <span>{formatChf(v.costChf)}</span>
                       {showKashrut && <Pill tone="slate">{KASHRUT_LABELS[r.kashrut].split(' ')[0]}</Pill>}
+                      {batch && isBatchCooked(r, m.slot) && <Pill tone="brand">Préparé en batch</Pill>}
                     </p>
                   </div>
                   <div className="flex gap-2">

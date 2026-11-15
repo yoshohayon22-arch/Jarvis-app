@@ -10,6 +10,8 @@ import { Dashboard } from './features/dashboard/Dashboard'
 import { ProfilePage } from './features/profile/ProfilePage'
 import { ComingSoon } from './features/ComingSoon'
 import { MenuPage } from './features/menu/MenuPage'
+import { BatchPage } from './features/batch/BatchPage'
+import { ShoppingPage } from './features/shopping/ShoppingPage'
 
 function AppRoutes() {
   const { activeProfile } = useAppData()
@@ -29,26 +31,8 @@ function AppRoutes() {
       <Route element={<Layout />}>
         <Route index element={<Dashboard />} />
         <Route path="menu" element={<MenuPage />} />
-        <Route
-          path="batch"
-          element={
-            <ComingSoon
-              title="Batch cooking"
-              phase={4}
-              description="Tes sessions de cuisine minutées, avec 3 ou 4 bases à combiner dans la semaine."
-            />
-          }
-        />
-        <Route
-          path="courses"
-          element={
-            <ComingSoon
-              title="Liste de courses"
-              phase={4}
-              description="Générée depuis ton menu, classée par rayon, avec le prix estimé en CHF."
-            />
-          }
-        />
+        <Route path="batch" element={<BatchPage />} />
+        <Route path="courses" element={<ShoppingPage />} />
         <Route
           path="suivi"
           element={

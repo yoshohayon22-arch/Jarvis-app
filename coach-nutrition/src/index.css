@@ -64,7 +64,18 @@
 }
 
 @media print {
-  .no-print {
+  .no-print,
+  footer {
     display: none !important;
+  }
+  body {
+    background: white;
+  }
+  /* Une liste de courses par page à l'impression. */
+  .print-break + .print-break {
+    break-before: page;
+  }
+  .break-inside-avoid {
+    break-inside: avoid;
   }
 }

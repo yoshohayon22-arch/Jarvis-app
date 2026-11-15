@@ -10,6 +10,7 @@ import {
   KCAL_TOLERANCE,
   MAX_USES_PER_WEEK,
   mondayOf,
+  planLookup,
   planningWeekStart,
   refitPortions,
   targetsChanged,
@@ -167,10 +168,11 @@ describe('Générateur de menu — variété', () => {
   it('les plats de batch peuvent revenir plus souvent si le batch cooking est activé', () => {
     const ctx = context({ ...PROFILES['homme, perte, 3 repas'][0], batch: { enabled: true, sessionDays: [6] } }, 80)
     const plan = generateWeek(ctx)
+    const lookup = planLookup(plan, RECIPES)
     const count = new Map<string, number>()
     plan.days.forEach((d) => d.meals.forEach((m) => count.set(m.recipeId, (count.get(m.recipeId) ?? 0) + 1)))
     for (const [id, n] of count) {
-      if (n > MAX_USES_PER_WEEK) expect(byId.get(id)!.tags).toContain('batch-friendly')
+      if (n > MAX_USES_PER_WEEK) expect(lookup.get(id)!.tags).toContain('batch-friendly')
     }
   })
 })

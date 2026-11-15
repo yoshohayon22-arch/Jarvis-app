@@ -26,6 +26,7 @@ Tout est dans `src/data/` :
 - **`prices.json`** — prix par ingrédient (CHF), avec magasin, conditionnement et date de mise à jour.
   Change `priceChf` ou `packageSize`, mets à jour `updatedAt`, puis lance `npm run recipes:update`.
   `"source": "relevé"` = prix constaté en ligne (avec `url` et `checkedAt`) ; `"estimation"` = valeur approximative.
+  `"byWeight": true` = vendu au poids (vrac, coupe) : la liste de courses compte la quantité prise.
 - **`ingredients.json`** — valeurs nutritionnelles pour 100 g, rayon, conditionnements, tags
   (`porc`, `lait`, `gluten`, `alcool`…). Les filtres casher, halal, etc. se basent sur ces tags.
 - **`recipes.json`** — recettes (ingrédients en grammes pour toute la recette, étapes, conservation…).

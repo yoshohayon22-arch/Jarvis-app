@@ -69,6 +69,36 @@ export interface WeighIn {
   kg: number
 }
 
+/** Créneaux de repas dans la journée, dans l'ordre chronologique. */
+export type MealSlot = 'petit-dej' | 'collation-matin' | 'dejeuner' | 'collation-apres-midi' | 'diner'
+
+export interface PlannedMeal {
+  slot: MealSlot
+  recipeId: string
+  /** Nombre de portions de la recette (ex. 1,3) pour atteindre les besoins. */
+  portions: number
+  /** Plat verrouillé : conservé lors d'une régénération du menu. */
+  locked: boolean
+}
+
+export interface DayPlan {
+  /** Date AAAA-MM-JJ. */
+  date: string
+  meals: PlannedMeal[]
+}
+
+/** Menu de la semaine (lundi → dimanche). */
+export interface WeekPlan {
+  weekStart: string
+  createdAt: string
+  /** Graine du hasard : même graine + mêmes réglages = même menu. */
+  seed: number
+  /** Cibles utilisées lors de la génération (pour détecter un changement de besoins). */
+  targets: { kcal: number; proteinG: number; fatG: number; carbsG: number }
+  lowBudget: boolean
+  days: DayPlan[]
+}
+
 export interface Profile {
   id: string
   name: string
@@ -76,6 +106,8 @@ export interface Profile {
   updatedAt: string
   settings: ProfileSettings
   weighIns: WeighIn[]
+  /** Menu de la semaine en cours (null tant qu'aucun menu n'a été généré). */
+  menu: WeekPlan | null
 }
 
 /** Données complètes de l'application, telles que stockées dans le navigateur. */

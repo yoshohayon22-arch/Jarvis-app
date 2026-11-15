@@ -9,7 +9,7 @@ import { Onboarding } from './features/onboarding/Onboarding'
 import { Dashboard } from './features/dashboard/Dashboard'
 import { ProfilePage } from './features/profile/ProfilePage'
 import { ComingSoon } from './features/ComingSoon'
-import { RecipesPage } from './features/recipes/RecipesPage'
+import { MenuPage } from './features/menu/MenuPage'
 
 function AppRoutes() {
   const { activeProfile } = useAppData()
@@ -28,7 +28,7 @@ function AppRoutes() {
       <Route path="/nouveau-profil" element={<Onboarding />} />
       <Route element={<Layout />}>
         <Route index element={<Dashboard />} />
-        <Route path="menu" element={<RecipesPage />} />
+        <Route path="menu" element={<MenuPage />} />
         <Route
           path="batch"
           element={

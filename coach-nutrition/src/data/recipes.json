@@ -5550,6 +5550,449 @@
     ]
   },
   {
+    "id": "sere-proteine-banane",
+    "name": "Séré protéiné, banane et flocons",
+    "mealTypes": [
+      "petit-dej"
+    ],
+    "servings": 1,
+    "prepMin": 5,
+    "cookMin": 0,
+    "ingredients": [
+      {
+        "id": "sere-maigre",
+        "grams": 250
+      },
+      {
+        "id": "bananes",
+        "grams": 100
+      },
+      {
+        "id": "flocons-avoine",
+        "grams": 30
+      },
+      {
+        "id": "cannelle",
+        "grams": 1
+      }
+    ],
+    "steps": [
+      "Écraser la moitié de la banane dans le séré.",
+      "Ajouter le reste de la banane en rondelles.",
+      "Parsemer de flocons et de cannelle."
+    ],
+    "kashrut": "halavi",
+    "tags": [
+      "rapide",
+      "petit-budget"
+    ],
+    "season": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "fridgeDays": 1,
+    "freezerMonths": 0,
+    "perServing": {
+      "kcal": 382,
+      "protein": 35.2,
+      "fat": 3.2,
+      "carbs": 49.3,
+      "priceChf": 1,
+      "priceBudgetChf": 1
+    },
+    "compatibleWith": [
+      "casher",
+      "halal",
+      "vegetarien",
+      "sans-arachides"
+    ]
+  },
+  {
+    "id": "tofu-quinoa-legumes",
+    "name": "Tofu sauté, quinoa et légumes",
+    "mealTypes": [
+      "dejeuner",
+      "diner"
+    ],
+    "servings": 1,
+    "prepMin": 10,
+    "cookMin": 15,
+    "ingredients": [
+      {
+        "id": "tofu-nature",
+        "grams": 200
+      },
+      {
+        "id": "quinoa",
+        "grams": 60
+      },
+      {
+        "id": "melange-legumes-surgeles",
+        "grams": 200
+      },
+      {
+        "id": "sauce-soja",
+        "grams": 10
+      },
+      {
+        "id": "huile-colza",
+        "grams": 8
+      }
+    ],
+    "steps": [
+      "Cuire le quinoa (ou utiliser une base cuite).",
+      "Dorer le tofu en cubes dans l’huile 6 à 8 min.",
+      "Ajouter les légumes, cuire 5 min, déglacer à la sauce soja et servir sur le quinoa."
+    ],
+    "kashrut": "parve",
+    "tags": [
+      "petit-budget"
+    ],
+    "season": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "fridgeDays": 3,
+    "freezerMonths": 0,
+    "perServing": {
+      "kcal": 627,
+      "protein": 39.2,
+      "fat": 27.3,
+      "carbs": 50.4,
+      "priceChf": 2.99,
+      "priceBudgetChf": 2.01
+    },
+    "compatibleWith": [
+      "casher",
+      "halal",
+      "vegetarien",
+      "sans-lactose",
+      "sans-arachides"
+    ]
+  },
+  {
+    "id": "omelette-cottage-salade",
+    "name": "Omelette au cottage cheese et salade",
+    "mealTypes": [
+      "dejeuner",
+      "diner"
+    ],
+    "servings": 1,
+    "prepMin": 5,
+    "cookMin": 8,
+    "ingredients": [
+      {
+        "id": "oeufs",
+        "grams": 165
+      },
+      {
+        "id": "cottage-cheese",
+        "grams": 100
+      },
+      {
+        "id": "salade-verte",
+        "grams": 80
+      },
+      {
+        "id": "tomates",
+        "grams": 100
+      },
+      {
+        "id": "huile-olive",
+        "grams": 5
+      },
+      {
+        "id": "pain-complet",
+        "grams": 50
+      }
+    ],
+    "steps": [
+      "Battre les œufs avec le cottage cheese, saler et poivrer.",
+      "Cuire l’omelette à feu moyen dans l’huile 4 min.",
+      "Servir avec la salade, la tomate et le pain."
+    ],
+    "kashrut": "halavi",
+    "tags": [
+      "rapide"
+    ],
+    "season": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "fridgeDays": 0,
+    "freezerMonths": 0,
+    "perServing": {
+      "kcal": 522,
+      "protein": 39,
+      "fat": 27.4,
+      "carbs": 29.1,
+      "priceChf": 3.4,
+      "priceBudgetChf": 3.25
+    },
+    "compatibleWith": [
+      "casher",
+      "halal",
+      "vegetarien",
+      "sans-arachides"
+    ]
+  },
+  {
+    "id": "bolognaise-lentilles",
+    "name": "Pâtes complètes, bolognaise de lentilles",
+    "mealTypes": [
+      "dejeuner",
+      "diner"
+    ],
+    "servings": 4,
+    "prepMin": 15,
+    "cookMin": 30,
+    "ingredients": [
+      {
+        "id": "pates-completes",
+        "grams": 400
+      },
+      {
+        "id": "lentilles-corail",
+        "grams": 200
+      },
+      {
+        "id": "tomates-pelees-conserve",
+        "grams": 800
+      },
+      {
+        "id": "oignons",
+        "grams": 150
+      },
+      {
+        "id": "carottes",
+        "grams": 150
+      },
+      {
+        "id": "huile-olive",
+        "grams": 15
+      },
+      {
+        "id": "herbes-provence",
+        "grams": 3
+      }
+    ],
+    "steps": [
+      "Faire revenir oignons et carottes en petits dés dans l’huile 5 min.",
+      "Ajouter lentilles rincées, tomates, herbes et 300 ml d’eau ; mijoter 20 min.",
+      "Cuire les pâtes et servir avec la sauce."
+    ],
+    "kashrut": "parve",
+    "tags": [
+      "batch-friendly",
+      "petit-budget"
+    ],
+    "season": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "fridgeDays": 4,
+    "freezerMonths": 3,
+    "perServing": {
+      "kcal": 616,
+      "protein": 28,
+      "fat": 7.6,
+      "carbs": 101.1,
+      "priceChf": 1.05,
+      "priceBudgetChf": 1.05
+    },
+    "compatibleWith": [
+      "casher",
+      "halal",
+      "vegetarien",
+      "sans-lactose",
+      "sans-arachides"
+    ]
+  },
+  {
+    "id": "cottage-pomme-cannelle",
+    "name": "Cottage cheese, pomme et cannelle",
+    "mealTypes": [
+      "collation"
+    ],
+    "servings": 1,
+    "prepMin": 3,
+    "cookMin": 0,
+    "ingredients": [
+      {
+        "id": "cottage-cheese",
+        "grams": 200
+      },
+      {
+        "id": "pommes",
+        "grams": 100
+      },
+      {
+        "id": "cannelle",
+        "grams": 1
+      }
+    ],
+    "steps": [
+      "Couper la pomme en dés.",
+      "Mélanger avec le cottage cheese et la cannelle."
+    ],
+    "kashrut": "halavi",
+    "tags": [
+      "rapide"
+    ],
+    "season": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "fridgeDays": 1,
+    "freezerMonths": 0,
+    "perServing": {
+      "kcal": 247,
+      "protein": 24.3,
+      "fat": 8.2,
+      "carbs": 17.6,
+      "priceChf": 2.31,
+      "priceBudgetChf": 2.31
+    },
+    "compatibleWith": [
+      "casher",
+      "halal",
+      "vegetarien",
+      "sans-gluten",
+      "sans-arachides"
+    ]
+  },
+  {
+    "id": "salade-pois-chiches-oeufs-feta",
+    "name": "Salade pois chiches, œufs et feta",
+    "mealTypes": [
+      "dejeuner",
+      "diner"
+    ],
+    "servings": 1,
+    "prepMin": 10,
+    "cookMin": 9,
+    "ingredients": [
+      {
+        "id": "pois-chiches-conserve",
+        "grams": 150
+      },
+      {
+        "id": "oeufs",
+        "grams": 110
+      },
+      {
+        "id": "feta",
+        "grams": 40
+      },
+      {
+        "id": "concombre",
+        "grams": 100
+      },
+      {
+        "id": "tomates",
+        "grams": 100
+      },
+      {
+        "id": "huile-olive",
+        "grams": 8
+      },
+      {
+        "id": "citron",
+        "grams": 10
+      }
+    ],
+    "steps": [
+      "Cuire les œufs 9 min, les écaler.",
+      "Couper concombre et tomates, émietter la feta.",
+      "Mélanger avec les pois chiches, l’huile et le citron, ajouter les œufs."
+    ],
+    "kashrut": "halavi",
+    "tags": [
+      "rapide"
+    ],
+    "season": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "fridgeDays": 2,
+    "freezerMonths": 0,
+    "perServing": {
+      "kcal": 549,
+      "protein": 31.8,
+      "fat": 31.9,
+      "carbs": 29.4,
+      "priceChf": 2.96,
+      "priceBudgetChf": 2.87
+    },
+    "compatibleWith": [
+      "casher",
+      "halal",
+      "vegetarien",
+      "sans-gluten",
+      "sans-arachides"
+    ]
+  },
+  {
     "id": "pomme-amandes",
     "name": "Pomme et amandes",
     "mealTypes": [

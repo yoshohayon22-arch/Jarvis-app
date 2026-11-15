@@ -1,6 +1,5 @@
 /**
  * Bibliothèque de recettes, filtrée selon le profil actif (restrictions + aliments détestés).
- * Sert aussi de base visuelle au menu de la semaine (phase 3).
  */
 import { useMemo, useState } from 'react'
 import { ChefHat, Clock, Search, Wallet } from 'lucide-react'
@@ -24,7 +23,7 @@ const FILTERS: { value: MealType | 'tout'; label: string }[] = [
 /** Recherche insensible aux accents et à la casse. */
 const norm = (s: string) => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
 
-export function RecipesPage() {
+export function RecipeLibrary() {
   const { activeProfile } = useAppData()
   const [meal, setMeal] = useState<MealType | 'tout'>('tout')
   const [query, setQuery] = useState('')
@@ -58,11 +57,6 @@ export function RecipesPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div>
-        <h1 className="text-3xl font-bold">Menu</h1>
-        <p className="text-muted">Le générateur de menu de la semaine arrive à la prochaine étape. En attendant, voici les recettes adaptées à ton profil.</p>
-      </div>
-
       <Card as="div" className="flex flex-col gap-4">
         <div className="flex flex-col gap-3 md:flex-row md:items-center">
           <div className="relative flex-1">

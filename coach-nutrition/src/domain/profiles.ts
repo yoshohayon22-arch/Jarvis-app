@@ -2,7 +2,7 @@
  * Opérations pures sur les profils (création, mise à jour, suppression, pesées).
  * Elles renvoient toujours une nouvelle copie des données, sans rien modifier sur place.
  */
-import type { AppData, Profile, ProfileSettings, WeighIn } from './types'
+import type { AppData, Profile, ProfileSettings, WeekPlan, WeighIn } from './types'
 import { todayIso } from './nutrition'
 
 export function newId(): string {
@@ -25,6 +25,7 @@ export function createProfile(
     settings,
     // La première pesée est le poids de départ saisi à l'onboarding.
     weighIns: [{ date: todayIso(now), kg: settings.startWeightKg }],
+    menu: null,
   }
 }
 
@@ -82,4 +83,12 @@ export function upsertWeighIn(data: AppData, profileId: string, entry: WeighIn):
 export function latestWeight(profile: Profile): number {
   const last = profile.weighIns[profile.weighIns.length - 1]
   return last ? last.kg : profile.settings.startWeightKg
+}
+
+/** Enregistre (ou efface) le menu de la semaine d'un profil. */
+export function setMenu(data: AppData, profileId: string, menu: WeekPlan | null): AppData {
+  return {
+    ...data,
+    profiles: data.profiles.map((p) => (p.id === profileId ? { ...p, menu } : p)),
+  }
 }

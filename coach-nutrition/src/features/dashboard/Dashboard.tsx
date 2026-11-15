@@ -11,6 +11,8 @@ import { useAppData } from '../../state/AppDataContext'
 import { computeTargets, todayIso } from '../../domain/nutrition'
 import { latestWeight } from '../../domain/profiles'
 import { progressPercent } from '../../domain/progress'
+import { RECIPE_MAP } from '../../domain/catalog'
+import { SLOT_LABELS } from '../../domain/menu/slots'
 import { formatDate, formatKg } from '../../lib/format'
 import { MacroBar } from '../onboarding/TargetsSummary'
 import { WeighInDialog } from '../tracking/WeighInDialog'
@@ -28,6 +30,7 @@ export function Dashboard() {
   if (!activeProfile || !targets) return null
 
   const { settings } = activeProfile
+  const todayPlan = activeProfile.menu?.days.find((d) => d.date === todayIso())
   const pct = progressPercent(settings.startWeightKg, current, settings.targetWeightKg)
   const hello = hour < 12 ? 'Bonjour' : hour < 18 ? 'Bon après-midi' : 'Bonsoir'
 
@@ -104,17 +107,38 @@ export function Dashboard() {
           )}
         </Card>
 
-        {/* Repas du jour — arrive en phase 3 */}
+        {/* Repas du jour, tirés du menu de la semaine */}
         <Card className="lg:col-span-2" aria-labelledby="meals-title">
-          <h2 id="meals-title" className="mb-2 flex items-center gap-2 text-lg font-bold">
+          <h2 id="meals-title" className="mb-3 flex items-center gap-2 text-lg font-bold">
             <CalendarDays size={20} aria-hidden="true" className="text-brand-600" /> Repas du jour
           </h2>
-          <p className="text-muted">
-            Le menu de la semaine sera bientôt généré ici, selon tes {settings.mealsPerDay} repas par jour et tes
-            préférences.
-          </p>
+          {todayPlan ? (
+            <ul className="divide-y divide-slate-100">
+              {todayPlan.meals.map((m) => {
+                const r = RECIPE_MAP.get(m.recipeId)
+                if (!r) return null
+                return (
+                  <li key={m.slot} className="flex items-center justify-between gap-4 py-2.5">
+                    <div className="min-w-0">
+                      <p className="text-xs font-semibold uppercase tracking-wide text-muted">{SLOT_LABELS[m.slot]}</p>
+                      <p className="truncate font-semibold">{r.name}</p>
+                    </div>
+                    <span className="shrink-0 text-sm font-semibold text-brand-700">
+                      {Math.round(r.perServing.kcal * m.portions)} kcal
+                    </span>
+                  </li>
+                )
+              })}
+            </ul>
+          ) : (
+            <p className="text-muted">
+              {activeProfile.menu
+                ? 'Pas de menu prévu pour aujourd’hui : génère celui de la semaine.'
+                : `Génère ton menu de la semaine, calé sur tes ${settings.mealsPerDay} repas par jour et tes préférences.`}
+            </p>
+          )}
           <Link to="/menu" className="mt-3 inline-block font-semibold text-brand-700 underline-offset-4 hover:underline">
-            Voir le menu
+            {todayPlan ? 'Voir le menu de la semaine' : 'Aller au menu'}
           </Link>
         </Card>
 

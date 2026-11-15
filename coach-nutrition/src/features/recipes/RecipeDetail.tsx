@@ -5,8 +5,27 @@ import { Pill } from '../../components/ui'
 import { formatChf } from '../../lib/format'
 import { DIET_LABELS, formatQuantity, formatSeason, KASHRUT_LABELS, MEAL_LABELS } from './recipe-labels'
 
-export function RecipeDetail({ recipe, showKashrut }: { recipe: Recipe; showKashrut: boolean }) {
-  const v = recipe.perServing
+export function RecipeDetail({
+  recipe,
+  showKashrut,
+  portions,
+}: {
+  recipe: Recipe
+  showKashrut: boolean
+  /** Si fourni : valeurs et quantités pour la portion prévue au menu (ex. 1,3 portion). */
+  portions?: number
+}) {
+  const factor = portions ?? 1
+  const base = recipe.perServing
+  const v = {
+    ...base,
+    kcal: Math.round(base.kcal * factor),
+    protein: base.protein * factor,
+    fat: base.fat * factor,
+    carbs: base.carbs * factor,
+    priceChf: base.priceChf * factor,
+    priceBudgetChf: base.priceBudgetChf * factor,
+  }
   return (
     <div className="flex max-h-[70vh] flex-col gap-5 overflow-y-auto pr-1">
       <div className="flex flex-wrap gap-2">
@@ -21,10 +40,15 @@ export function RecipeDetail({ recipe, showKashrut }: { recipe: Recipe; showKash
       </div>
 
       <dl className="grid grid-cols-2 gap-3 text-sm sm:grid-cols-4">
-        <Info icon={<Flame size={16} />} label="Par portion" value={`${v.kcal} kcal`} />
+        <Info
+          icon={<Flame size={16} />}
+          label={portions ? 'Ta portion' : 'Par portion'}
+          value={`${v.kcal} kcal`}
+          detail={portions ? `${portions.toLocaleString('fr-CH')} portion${portions >= 2 ? 's' : ''}` : undefined}
+        />
         <Info icon={<Clock size={16} />} label="Temps" value={`${recipe.prepMin + recipe.cookMin} min`} detail={`dont ${recipe.cookMin} min de cuisson`} />
         <Info icon={<Users size={16} />} label="Portions" value={String(recipe.servings)} />
-        <Info icon={<Wallet size={16} />} label="Prix / portion" value={formatChf(v.priceChf)} detail={`petit budget : ${formatChf(v.priceBudgetChf)}`} />
+        <Info icon={<Wallet size={16} />} label={portions ? 'Prix de ta portion' : 'Prix / portion'} value={formatChf(v.priceChf)} detail={`petit budget : ${formatChf(v.priceBudgetChf)}`} />
       </dl>
 
       <div className="grid grid-cols-3 gap-2 text-center text-sm">
@@ -34,20 +58,34 @@ export function RecipeDetail({ recipe, showKashrut }: { recipe: Recipe; showKash
       </div>
 
       <section>
-        <h3 className="mb-2 font-bold">
-          Ingrédients <span className="font-normal text-muted">({recipe.servings} portion{recipe.servings > 1 ? 's' : ''})</span>
-        </h3>
-        <ul className="divide-y divide-slate-100 rounded-xl border border-slate-100">
-          {recipe.ingredients.map(({ id, grams }) => {
-            const ing = INGREDIENT_MAP.get(id)!
-            return (
-              <li key={id} className="flex justify-between gap-4 px-3 py-2 text-sm">
-                <span>{ing.name}</span>
-                <span className="shrink-0 font-semibold tabular-nums">{formatQuantity(ing, grams)}</span>
-              </li>
-            )
-          })}
-        </ul>
+        <h3 className="mb-2 font-bold">Ingrédients</h3>
+        <table className="w-full overflow-hidden rounded-xl border border-slate-100 text-sm">
+          <thead className="bg-slate-50 text-left text-xs text-muted">
+            <tr>
+              <th scope="col" className="px-3 py-2 font-semibold">Ingrédient</th>
+              {portions && <th scope="col" className="px-3 py-2 text-right font-semibold">Ta portion</th>}
+              <th scope="col" className="px-3 py-2 text-right font-semibold">
+                Recette ({recipe.servings} portion{recipe.servings > 1 ? 's' : ''})
+              </th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-100">
+            {recipe.ingredients.map(({ id, grams }) => {
+              const ing = INGREDIENT_MAP.get(id)!
+              return (
+                <tr key={id}>
+                  <th scope="row" className="px-3 py-2 text-left font-normal">{ing.name}</th>
+                  {portions && (
+                    <td className="px-3 py-2 text-right font-semibold tabular-nums text-brand-700">
+                      {formatQuantity(ing, (grams / recipe.servings) * portions)}
+                    </td>
+                  )}
+                  <td className="px-3 py-2 text-right tabular-nums">{formatQuantity(ing, grams)}</td>
+                </tr>
+              )
+            })}
+          </tbody>
+        </table>
       </section>
 
       <section>

@@ -27,7 +27,7 @@ export function RecipeDetail({
     priceBudgetChf: base.priceBudgetChf * factor,
   }
   return (
-    <div className="flex max-h-[70vh] flex-col gap-5 overflow-y-auto pr-1">
+    <div className="flex max-h-[70vh] flex-col gap-5 overflow-y-auto pr-1" tabIndex={0} role="region" aria-label={`Détail de la recette ${recipe.name}`}>
       <div className="flex flex-wrap gap-2">
         {recipe.mealTypes.map((m) => (
           <Pill key={m} tone="slate">

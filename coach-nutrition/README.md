@@ -33,8 +33,23 @@ Tout est dans `src/data/` :
   Après une modification, `npm run recipes:update` recalcule kcal, macros, prix par portion,
   classement casher, tag « petit-budget » et régimes compatibles. `npm test` vérifie la cohérence.
 
+## Sauvegarde des données
+
+Tout reste dans le navigateur (localStorage). Dans **Profil → Mes données** :
+« Exporter mes données » télécharge un fichier JSON, « Importer » le recharge, « Tout effacer »
+supprime tout (avec confirmation). Sur un nouvel ordinateur, l'écran d'accueil propose directement
+« J'ai déjà une sauvegarde : importer mon fichier ».
+
+## Qualité
+
+- `npm test` : 180+ tests (calculs, garde-fous, restrictions casher/halal, générateur, batch, courses, suivi, coach).
+- Accessibilité vérifiée avec axe-core (WCAG 2.1 AA) sur tous les écrans, navigation complète au clavier.
+
 ## Déploiement (Netlify)
 
-Base directory : `coach-nutrition` — la commande de build et le dossier `dist` sont lus depuis `netlify.toml`.
+1. Sur Netlify : « Add new site » → « Import an existing project » → ce dépôt GitHub.
+2. **Base directory : `coach-nutrition`** — la commande (`npm run build`), le dossier publié (`dist`)
+   et la redirection des routes vers `index.html` sont lus depuis `netlify.toml`.
+3. Chaque push sur la branche choisie redéploie le site automatiquement.
 
 > Cette application donne des repères généraux et ne remplace pas l'avis d'un médecin ou d'un diététicien.

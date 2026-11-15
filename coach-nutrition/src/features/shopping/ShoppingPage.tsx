@@ -127,7 +127,7 @@ function ListCard({ anchor, list, checked, onToggle }: { anchor: string; list: S
 
       <div className="grid gap-6 md:grid-cols-2">
         {list.aisles.map((a) => (
-          <section key={a.aisle} aria-labelledby={`${anchor}-${a.aisle}`} className="break-inside-avoid">
+          <div key={a.aisle} role="group" aria-labelledby={`${anchor}-${a.aisle}`} className="break-inside-avoid">
             <h3 id={`${anchor}-${a.aisle}`} className="mb-2 border-b border-slate-100 pb-1 text-sm font-bold uppercase tracking-wide text-brand-800">
               {a.label}
             </h3>
@@ -136,7 +136,7 @@ function ListCard({ anchor, list, checked, onToggle }: { anchor: string; list: S
                 <ItemRow key={item.ingredient.id} item={item} checked={checked.includes(item.ingredient.id)} onToggle={() => onToggle(item.ingredient.id)} />
               ))}
             </ul>
-          </section>
+          </div>
         ))}
       </div>
 

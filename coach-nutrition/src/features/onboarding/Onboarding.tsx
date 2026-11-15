@@ -15,6 +15,7 @@ import { draftToSettings, emptyDraft, parseNumber, STEP_IDS, validateStep, type 
 import { StepFields } from './StepFields'
 import { STEP_TITLES } from './options'
 import { TargetsSummary } from './TargetsSummary'
+import { ImportError } from '../../storage/storage'
 
 export function Onboarding() {
   const { data, update } = useAppData()
@@ -76,7 +77,7 @@ export function Onboarding() {
   const progress = ((index + 1) / STEP_IDS.length) * 100
 
   return (
-    <div className="mx-auto flex min-h-screen max-w-2xl flex-col px-4 py-8 sm:py-12">
+    <main className="mx-auto flex min-h-screen max-w-2xl flex-col px-4 py-8 sm:py-12">
       <header className="mb-6 flex items-center gap-2 text-brand-700">
         <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-600 text-white">
           <Leaf size={20} aria-hidden="true" />
@@ -90,9 +91,12 @@ export function Onboarding() {
       </header>
 
       {index === 0 && isFirstProfile && (
-        <p className="mb-4 text-muted">
-          Bienvenue ! En 2 minutes, on calcule tes besoins et on prépare la suite : menus, courses et suivi.
-        </p>
+        <div className="mb-4 flex flex-col gap-2">
+          <p className="text-muted">
+            Bienvenue ! En 2 minutes, on calcule tes besoins et on prépare la suite : menus, courses et suivi.
+          </p>
+          <ImportBackup />
+        </div>
       )}
 
       <div className="mb-2 flex items-center justify-between text-sm text-muted">
@@ -151,6 +155,42 @@ export function Onboarding() {
       </Card>
 
       <p className="mt-6 text-center text-xs text-muted">{HEALTH_DISCLAIMER}</p>
+    </main>
+  )
+}
+
+/** Nouvel ordinateur ou navigateur vidé : on peut repartir d'un fichier de sauvegarde. */
+function ImportBackup() {
+  const { storage, replaceAll } = useAppData()
+  const fileRef = useRef<HTMLInputElement>(null)
+  const [error, setError] = useState<string | null>(null)
+  return (
+    <div className="text-sm">
+      <button type="button" onClick={() => fileRef.current?.click()} className="font-semibold text-brand-700 underline underline-offset-4">
+        J’ai déjà une sauvegarde : importer mon fichier
+      </button>
+      <input
+        ref={fileRef}
+        type="file"
+        accept="application/json,.json"
+        className="hidden"
+        aria-label="Fichier de sauvegarde à importer"
+        onChange={async (e) => {
+          const f = e.target.files?.[0]
+          e.target.value = ''
+          if (!f) return
+          try {
+            replaceAll(storage.importJson(await f.text()))
+          } catch (err) {
+            setError(err instanceof ImportError ? err.message : 'Impossible de lire ce fichier.')
+          }
+        }}
+      />
+      {error && (
+        <p role="alert" className="mt-1 text-accent-800">
+          {error}
+        </p>
+      )}
     </div>
   )
 }

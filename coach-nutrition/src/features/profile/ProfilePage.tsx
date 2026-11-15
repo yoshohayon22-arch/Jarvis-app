@@ -29,10 +29,28 @@ export function ProfilePage() {
   const { activeProfile } = useAppData()
   if (!activeProfile) return null
   // La clé force la réinitialisation du formulaire quand on change de profil.
-  return <ProfileEditor key={activeProfile.id} />
+  return <ProfileEditorWithMessage key={activeProfile.id} />
 }
 
-function ProfileEditor() {
+/** Message d'import gardé hors du formulaire : il survit au changement de profil actif. */
+type ImportMessage = { tone: 'success' | 'attention'; text: string } | null
+let lastImportMessage: ImportMessage = null
+
+function ProfileEditorWithMessage() {
+  const [importMsg, setImportMsgState] = useState<ImportMessage>(() => {
+    const m = lastImportMessage
+    lastImportMessage = null
+    return m
+  })
+  const setImportMsg = (m: ImportMessage) => {
+    lastImportMessage = m // si l'import change de profil, le nouvel écran le récupère…
+    setTimeout(() => (lastImportMessage = null), 1000) // …mais pas lors d'une visite ultérieure
+    setImportMsgState(m)
+  }
+  return <ProfileEditor importMsg={importMsg} setImportMsg={setImportMsg} />
+}
+
+function ProfileEditor({ importMsg, setImportMsg }: { importMsg: ImportMessage; setImportMsg: (m: ImportMessage) => void }) {
   const { data, activeProfile, update, replaceAll, clearAll, storage } = useAppData()
   const navigate = useNavigate()
   const profile = activeProfile!
@@ -41,7 +59,6 @@ function ProfileEditor() {
   const [errors, setErrors] = useState<DraftErrors>({})
   const [saved, setSaved] = useState(false)
   const [confirm, setConfirm] = useState<null | 'profil' | 'tout'>(null)
-  const [importMsg, setImportMsg] = useState<{ tone: 'success' | 'attention'; text: string } | null>(null)
   const fileRef = useRef<HTMLInputElement>(null)
 
   const set = (patch: Partial<Draft>) => {

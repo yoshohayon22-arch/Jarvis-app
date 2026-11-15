@@ -13,8 +13,8 @@
   --color-brand-300: #6ee7a6;
   --color-brand-400: #34d37f;
   --color-brand-500: #12b862;
-  --color-brand-600: #07964f; /* bouton principal : contraste AA avec du blanc */
-  --color-brand-700: #087742;
+  --color-brand-600: #067d45; /* bouton principal : contraste 5,2:1 avec du blanc (WCAG AA) */
+  --color-brand-700: #05683a;
   --color-brand-800: #0b5e37;
   --color-brand-900: #0b4d2f;
 

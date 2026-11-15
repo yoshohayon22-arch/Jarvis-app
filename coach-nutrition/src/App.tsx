@@ -2,16 +2,29 @@
  * Routes de l'application.
  * Tant qu'aucun profil n'existe, toutes les pages redirigent vers l'onboarding.
  */
+import { lazy, Suspense } from 'react'
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { AppDataProvider, useAppData } from './state/AppDataContext'
 import { Layout } from './components/Layout'
-import { Onboarding } from './features/onboarding/Onboarding'
-import { Dashboard } from './features/dashboard/Dashboard'
-import { ProfilePage } from './features/profile/ProfilePage'
-import { TrackingPage } from './features/tracking/TrackingPage'
-import { MenuPage } from './features/menu/MenuPage'
-import { BatchPage } from './features/batch/BatchPage'
-import { ShoppingPage } from './features/shopping/ShoppingPage'
+
+// Chaque écran est chargé à la demande : la première page s'affiche plus vite,
+// et la bibliothèque de graphiques n'est téléchargée que sur l'écran Suivi.
+const Onboarding = lazy(() => import('./features/onboarding/Onboarding').then((m) => ({ default: m.Onboarding })))
+const Dashboard = lazy(() => import('./features/dashboard/Dashboard').then((m) => ({ default: m.Dashboard })))
+const ProfilePage = lazy(() => import('./features/profile/ProfilePage').then((m) => ({ default: m.ProfilePage })))
+const TrackingPage = lazy(() => import('./features/tracking/TrackingPage').then((m) => ({ default: m.TrackingPage })))
+const MenuPage = lazy(() => import('./features/menu/MenuPage').then((m) => ({ default: m.MenuPage })))
+const BatchPage = lazy(() => import('./features/batch/BatchPage').then((m) => ({ default: m.BatchPage })))
+const ShoppingPage = lazy(() => import('./features/shopping/ShoppingPage').then((m) => ({ default: m.ShoppingPage })))
+
+/** Affiché pendant le chargement d'un écran (en général imperceptible). */
+function Loading() {
+  return (
+    <p role="status" className="p-8 text-center text-muted">
+      Chargement…
+    </p>
+  )
+}
 
 function AppRoutes() {
   const { activeProfile } = useAppData()
@@ -46,7 +59,9 @@ export default function App() {
   return (
     <AppDataProvider>
       <BrowserRouter>
-        <AppRoutes />
+        <Suspense fallback={<Loading />}>
+          <AppRoutes />
+        </Suspense>
       </BrowserRouter>
     </AppDataProvider>
   )

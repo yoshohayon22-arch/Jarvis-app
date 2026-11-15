@@ -8,7 +8,7 @@ import { CalendarDays, ChefHat, Home, Leaf, LineChart, ShoppingCart, UserRound, 
 import { useAppData } from '../state/AppDataContext'
 import { setActiveProfile } from '../domain/profiles'
 import { HEALTH_DISCLAIMER } from '../domain/safety'
-import { useId } from 'react'
+import { Suspense, useId } from 'react'
 
 const NAV = [
   { to: '/', label: 'Accueil', icon: Home, end: true },
@@ -100,8 +100,11 @@ export function Layout() {
         </div>
       </header>
 
-      <main id="contenu" className="mx-auto max-w-6xl px-4 py-6 sm:py-8">
-        <Outlet />
+      <main id="contenu" tabIndex={-1} className="mx-auto max-w-6xl px-4 py-6 outline-none sm:py-8">
+        {/* Suspense local : la barre de navigation reste affichée pendant le chargement d'un écran. */}
+        <Suspense fallback={<p role="status" className="p-8 text-center text-muted">Chargement…</p>}>
+          <Outlet />
+        </Suspense>
       </main>
 
       <footer className="mx-auto max-w-6xl px-4 pb-8 text-center text-xs text-muted">{HEALTH_DISCLAIMER}</footer>

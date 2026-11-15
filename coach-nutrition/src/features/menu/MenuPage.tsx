@@ -347,20 +347,18 @@ function DayDetail({
           {rows.map((row) => {
             const pct = Math.round((row.value / row.target - 1) * 100)
             return (
-              <div key={row.label}>
-                <div className="flex justify-between text-sm">
-                  <dt className="font-semibold">{row.label}</dt>
-                  <dd>
-                    {Math.round(row.value)} / {row.target} {row.unit}{' '}
-                    <span className="text-muted">
-                      ({pct > 0 ? '+' : ''}
-                      {pct} %)
-                    </span>
-                  </dd>
-                </div>
-                <div className="mt-1 h-2 overflow-hidden rounded-full bg-slate-100" aria-hidden="true">
+              <div key={row.label} className="grid grid-cols-[1fr_auto] gap-x-2 text-sm">
+                <dt className="font-semibold">{row.label}</dt>
+                <dd>
+                  {Math.round(row.value)} / {row.target} {row.unit}{' '}
+                  <span className="text-muted">
+                    ({pct > 0 ? '+' : ''}
+                    {pct} %)
+                  </span>
+                </dd>
+                <dd className="col-span-2 mt-1 h-2 overflow-hidden rounded-full bg-slate-100" aria-hidden="true">
                   <div className="h-full rounded-full bg-brand-500" style={{ width: `${Math.min(100, (row.value / row.target) * 100)}%` }} />
-                </div>
+                </dd>
               </div>
             )
           })}

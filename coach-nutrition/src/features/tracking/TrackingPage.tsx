@@ -19,7 +19,7 @@ import { parseNumber } from '../onboarding/draft'
 import { CoachCard } from '../coach/CoachCard'
 import { WeighInDialog } from './WeighInDialog'
 
-/** Couleurs du graphique (validées : contraste et daltonisme). */
+/** Couleurs du graphique (validées : contraste ≥ 3:1 pour les tracés et séparation daltonisme). */
 const COLORS = { raw: '#0284c7', avg: '#07964f', target: '#d95c06', grid: '#e8edea', axis: '#52645b' }
 const RANGES = [
   { id: '30', label: '1 mois', days: 30 },

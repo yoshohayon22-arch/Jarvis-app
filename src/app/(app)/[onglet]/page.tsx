@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { MeteoView } from "@/components/meteo/meteo-view";
 import { TabView } from "@/components/tab-view";
 import { getTab, TAB_IDS } from "@/lib/tabs";
 
@@ -17,5 +18,7 @@ export default async function TabPage({ params }: PageProps<"/[onglet]">) {
   const { onglet } = await params;
   const tab = getTab(onglet);
   if (!tab) notFound();
+  // Onglets déjà branchés sur de vraies données ; les autres affichent leurs cartes prévues.
+  if (tab.id === "meteo") return <MeteoView />;
   return <TabView tabId={tab.id} />;
 }

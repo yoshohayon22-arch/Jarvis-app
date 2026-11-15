@@ -5,3 +5,7 @@
 
 [build.environment]
   NODE_VERSION = "22"
+
+# Adaptateur Next.js de Netlify (rendu serveur, proxy, routes /auth). Version non figée : Netlify la met à jour.
+[[plugins]]
+  package = "@netlify/plugin-nextjs"

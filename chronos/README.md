@@ -146,7 +146,29 @@ Deux préréglages (définis dans `client/data/quality.json`), touche **G** en j
 
 On peut forcer un préréglage par l'URL : `http://localhost:5173/?quality=low`.
 
-## Direction artistique (stylisé-réaliste)
+## Son
+- **Bruitages** : pas (pavés ou terre, selon le quartier), coups, cris de douleur, pièces, pouvoirs, chaînes à l'arrestation, carnet et carte.
+- **Voix** : chaque habitant a un timbre (deux masculins, deux féminins). Il « parle » par courtes syllabes quand il répond, et l'on entend des bribes de conversation en passant près des gens, placées dans l'espace (gauche/droite, distance).
+- **Ambiance** : oiseaux le jour, grillons la nuit, rumeur de foule selon le nombre de personnes autour, brouhaha de la taverne quand on s'en approche.
+- **Musique** : trois thèmes médiévaux (marché, auberge le soir, exploration) qui s'enchaînent en fondu selon le lieu et l'heure.
+- Volume et musique se règlent dans le menu Pause. Le son démarre au premier clic (les navigateurs l'exigent).
+- Tous les fichiers sont CC0 (voir Crédits) ; `client/src/audio/` contient le moteur (`audio.ts`) et les décisions de mixage testées (`mix.ts`).
+
+## Histoire principale et carte
+- **Histoire principale** (`data/packs/medieval/missions.json`, clé `story`) : cinq chapitres écrits à la main, « L'éclat fissuré » → « Valdren n'a pas brûlé ». Chaque chapitre a ses étapes, un délai et deux fins (héroïque ou sombre). Ils passent par le même validateur que les missions générées et se débloquent l'un après l'autre. Un chapitre échoué peut être repris. Aucune IA n'est nécessaire.
+- **Travaux** : les missions générées (J7) restent disponibles auprès des mêmes personnages, en dehors de leur chapitre.
+- **Mini-carte** (en haut à droite) : centrée sur Kael, nord en haut. Losange = objectif en cours, pastille dorée « ! » = suite de l'histoire, pastille grise « ! » = travail à prendre, rouge = garde à tes trousses. Un repère hors champ est épinglé sur le bord, dans sa direction.
+- **Grande carte** (touche **C**) : tout le bourg avec les noms des quartiers et des bâtiments, les repères, et la liste des missions avec leur état.
+- **Suivi** : chaque objectif affiche la distance et la direction (« à 42 m au nord-est ») ; une balise lumineuse marque l'endroit dans le monde. Sans mission en cours, le suivi indique chez qui l'histoire continue.
+
+## Direction artistique (réaliste)
+- **Personnages** : « Modular RPG Characters » de System G6 (CC0), proportions réalistes, 14 tenues assemblées par groupe (villageois, artisans, gardes en armure, mages, voleurs, Kael) avec leurs animations : marche, course, travail, prière, coup porté, geste de sort. Conversion : `tools/blender/convert_characters.py` puis `tools/import-people.mjs`.
+- **Bâtiments** : village médiéval de Daniel Andersson (CC0) : maisons à colombages, taverne, église, forge, scierie, porte fortifiée, puits. Conversion : `tools/blender/convert_buildings.py` puis `tools/import-village.mjs`. Ils sont posés à 0,6–0,95 de leur taille d'origine pour tenir dans le plan du bourg.
+- **Nature** : arbres, rochers et chariot du « 3TD Starter Pack » de Ron Kapaun (CC0), `tools/import-nature.mjs`.
+- **Sol** : textures photographiques Poly Haven (herbe, terre, pavés), `tools/import-polyhaven.mjs`.
+- Restent issus de KayKit, assombris et désaturés pour s'accorder : le rempart, les portes et les petits accessoires.
+
+### Ancienne direction (stylisé-réaliste)
 - Modèles : packs CC0 **KayKit** (bâtiments, nature, props, personnages) au format glTF dans `client/public/assets/kaykit/`.
 - Rendu des matériaux : un shader ajoute du relief (normal maps triplanaires pierre/bois/feuillage choisies selon la couleur), des variations d'albédo et de rugosité, et de la salissure au pied des murs (`client/src/render/materials.ts`).
 - Éclairage : HDRI CC0 Poly Haven (via `@pmndrs/assets`) pour l'éclairage par image, soleil + `HemisphereLight`, ombres douces, brouillard lavande.
@@ -166,6 +188,11 @@ Galerie des modèles (en développement) : http://localhost:5173/gallery.html?ca
 ## Crédits
 - KayKit Medieval Hexagon Pack 1.0 et Adventurers Character Pack 1.0 — Kay Lousberg (www.kaylousberg.com), CC0.
 - HDRI Poly Haven et normal maps, via `@pmndrs/assets` — CC0.
+- Personnages : « Modular RPG Characters », System G6 — CC0 (opengameart.org/content/modular-rpg-characters).
+- Bâtiments : village médiéval de Daniel Andersson — CC0 (OpenGameArt : medieval-house-pack, medieval-tavern, medieval-church, medieval-blacksmith, medieval-gatehouse, medieval-well, medieval-waterpowered-sawmill).
+- Arbres, rochers, chariot : « 3TD Starter Pack #1 », Ron Kapaun — CC0.
+- Textures de sol : Poly Haven (leafy_grass, dirt, cobblestone_floor_04) — CC0.
+- Sons (tous CC0, OpenGameArt) : pas « Fantozzi's Footsteps » ; coups « 37 hits/punches » (Independent.nu) ; voix « Dialog vocal samples » ; cris « 15 vocal male strain/hurt/pain » et « Female hurt grunts » ; « Swishes sound pack » ; « 80 CC0 RPG SFX » ; « 50 RPG sound effects » (Kenney) ; ambiances « AMB morning sounds », « Ambient bird sounds », « Crickets ambient noise », « Crowd shouting/speaking ambience », « Crowded pub » ; musiques « Medieval: Market Day », « Medieval: The Old Tower Inn », « Medieval: Exploration ».
 
 ## Tests
 ```bash
@@ -190,9 +217,10 @@ Le test e2e utilise Playwright, qui doit être installé (`npx playwright instal
 | 7 | boucle cruelle (voie sombre, à débloquer) |
 | 8 | écho du passé : revoir ce qui s'est passé ici |
 | 9 | changer de visage : prendre celui de la personne visée (appuyer de nouveau pour l'ôter) |
-| F | parler à un habitant (texte libre avec les personnages clés) |
+| F | parler à un habitant : il te salue, puis tu écris ou tu cliques une réplique toute faite (les figurants répondent aussi) |
 | M | demander une mission à un personnage clé ; Entrée accepter, Retour arrière refuser |
-| E / V / N / B | près d'un habitant : faire l'aumône / voler / menacer (ou faire chanter) / frapper |
+| E / V / N / B | près d'un habitant : faire l'aumône / voler / menacer (ou faire chanter) / frapper (Kael porte le coup, la victime recule et crie) |
+| C | carte de Brumeval (objectifs, histoire, travaux) |
 | J | journal : réputations et ce que l'on sait de toi |
 | T | vitesse du temps : ×1 → ×10 → ×60 → figé |
 | G | qualité graphique basse / haute |

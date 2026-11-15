@@ -10,7 +10,22 @@ const assets = join(dist, "assets");
 const MAX_RAW = 8 * 1024 * 1024; // ≈ 11 MB of JSON per pack
 
 const walk = (dir) => readdirSync(dir).flatMap((f) => (statSync(join(dir, f)).isDirectory() ? walk(join(dir, f)) : [join(dir, f)]));
-const binaries = walk(assets).filter((f) => /\.(glb|exr)$/.test(f)).sort();
+// Only the models the pack's visuals actually reference are shipped.
+const visuals = readFileSync(new URL("../client/data/packs/medieval/visuals.json", import.meta.url), "utf8");
+const base = JSON.parse(visuals).assetsBase;
+const used = new Set([...visuals.matchAll(/"((?:\.\.\/)?[a-z_0-9]+\/[A-Za-z_0-9]+)"/g)].map((m) => (m[1].startsWith("../") ? m[1].slice(3) : base + m[1]) + ".glb"));
+let dropped = 0;
+const binaries = walk(assets)
+  .filter((f) => /\.(glb|exr)$/.test(f))
+  .filter((f) => {
+    const rel = relative(assets, f).replaceAll("\\", "/");
+    if (f.endsWith(".exr") || used.has(rel)) return true;
+    rmSync(f);
+    dropped++;
+    return false;
+  })
+  .sort();
+console.log(`${dropped} unreferenced models left out`);
 mkdirSync(join(assets, "packs"), { recursive: true });
 const packs = [];
 let current = {};

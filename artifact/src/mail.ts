@@ -56,9 +56,9 @@ interface SampleError {
 type Sample = ((input: string, options?: Record<string, unknown>) => Promise<{ text: string; truncated: boolean }>) & {
   json<T>(input: string, options?: Record<string, unknown>): Promise<T>;
 };
-const samplePromise: Promise<Sample | null> = window.claude ? (window.claude.use("sample") as Promise<Sample | null>).catch(() => null) : Promise.resolve(null);
+export const samplePromise: Promise<Sample | null> = window.claude ? (window.claude.use("sample") as Promise<Sample | null>).catch(() => null) : Promise.resolve(null);
 
-function sampleMessage(e: unknown): string {
+export function sampleMessage(e: unknown): string {
   switch ((e as SampleError)?.code) {
     case "not_granted":
     case "sampling_disabled":

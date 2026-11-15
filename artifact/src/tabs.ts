@@ -14,7 +14,7 @@ export const TABS: ArtifactTab[] = [
   { id: "mail", label: "Mail", short: "Mail", icon: "mail", group: "Communication", live: true, planned: [] },
   { id: "cerveau", label: "Le Cerveau", short: "Cerveau", icon: "brain", group: "Communication", planned: [["Notes et documents", "à définir ensemble"], ["Recherche", "plein texte et sémantique"]] },
   { id: "meteo", label: "Météo Genève", short: "Météo", icon: "cloud-sun", group: "Vie pratique", live: true, planned: [] },
-  { id: "budget", label: "Budget", short: "Budget", icon: "wallet", group: "Vie pratique", planned: [["Ce mois-ci", "tes saisies"], ["Abonnements", "tes saisies"], ["Import CSV", "relevé bancaire"]] },
+  { id: "budget", label: "Budget", short: "Budget", icon: "wallet", group: "Vie pratique", live: true, planned: [] },
   { id: "la-une", label: "La Une", short: "La Une", icon: "newspaper", group: "Infos et savoir", live: true, planned: [] },
   { id: "veille-ia", label: "Veille IA", short: "Veille IA", icon: "sparkles", group: "Infos et savoir", planned: [["Nouveautés", "blog Anthropic, versions de Claude Code"], ["Comment l'utiliser", "Claude"]] },
   { id: "culture-g", label: "Culture G", short: "Culture", icon: "lightbulb", group: "Infos et savoir", planned: [["Ce jour-là", "Wikipédia"], ["Quiz du jour", "Claude"]] },

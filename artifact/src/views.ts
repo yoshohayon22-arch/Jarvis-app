@@ -37,12 +37,12 @@ export function skeleton(lines = 3): HTMLElement {
 }
 
 /** Ouvre le détail d'une carte dans une fenêtre (Échap ou clic sur le fond pour fermer). */
-function openDetail(title: string, content: Node[], opener: HTMLElement): void {
+export function openDialog(title: string, content: Node[], opener?: HTMLElement | null): () => void {
   const close = () => {
     overlay.classList.remove("open");
     document.removeEventListener("keydown", onKey);
     setTimeout(() => overlay.remove(), 180);
-    opener.focus();
+    opener?.focus();
   };
   const onKey = (e: KeyboardEvent) => e.key === "Escape" && close();
   const closeBtn = h("button", { class: "icon-btn", type: "button", "aria-label": "Fermer la vue détaillée", onclick: close }, icon("x"));
@@ -55,6 +55,7 @@ function openDetail(title: string, content: Node[], opener: HTMLElement): void {
   document.addEventListener("keydown", onKey);
   requestAnimationFrame(() => overlay.classList.add("open"));
   closeBtn.focus();
+  return close;
 }
 
 export function card(title: string, body: (Node | string | null | false)[], opts: { badge?: Node | string; detail?: () => Node[] } = {}): HTMLElement {
@@ -68,7 +69,7 @@ export function card(title: string, body: (Node | string | null | false)[], opts
     const detail = opts.detail;
     const btn: HTMLButtonElement = h(
       "button",
-      { class: "link-btn", type: "button", "aria-label": `Détails : ${title}`, onclick: () => openDetail(title, detail(), btn) },
+      { class: "link-btn", type: "button", "aria-label": `Détails : ${title}`, onclick: () => void openDialog(title, detail(), btn) },
       icon("maximize-2"),
       "Détails",
     );

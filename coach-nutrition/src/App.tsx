@@ -8,7 +8,7 @@ import { Layout } from './components/Layout'
 import { Onboarding } from './features/onboarding/Onboarding'
 import { Dashboard } from './features/dashboard/Dashboard'
 import { ProfilePage } from './features/profile/ProfilePage'
-import { ComingSoon } from './features/ComingSoon'
+import { TrackingPage } from './features/tracking/TrackingPage'
 import { MenuPage } from './features/menu/MenuPage'
 import { BatchPage } from './features/batch/BatchPage'
 import { ShoppingPage } from './features/shopping/ShoppingPage'
@@ -33,16 +33,7 @@ function AppRoutes() {
         <Route path="menu" element={<MenuPage />} />
         <Route path="batch" element={<BatchPage />} />
         <Route path="courses" element={<ShoppingPage />} />
-        <Route
-          path="suivi"
-          element={
-            <ComingSoon
-              title="Suivi du poids"
-              phase={5}
-              description="Ta courbe avec moyenne sur 7 jours, ta tendance par semaine et les conseils du coach. Tu peux déjà te peser depuis l’accueil."
-            />
-          }
-        />
+        <Route path="suivi" element={<TrackingPage />} />
         <Route path="profil" element={<ProfilePage />} />
         <Route path="bienvenue" element={<Navigate to="/" replace />} />
         <Route path="*" element={<Navigate to="/" replace />} />

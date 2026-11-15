@@ -4,6 +4,7 @@
  */
 import type { AppData, Profile, ProfileSettings, WeekPlan, WeighIn } from './types'
 import { todayIso } from './nutrition'
+import { trendWeight } from './tracking'
 
 export function newId(): string {
   if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) return crypto.randomUUID()
@@ -77,6 +78,22 @@ export function upsertWeighIn(data: AppData, profileId: string, entry: WeighIn):
       const weighIns = [...others, entry].sort((a, b) => a.date.localeCompare(b.date))
       return { ...p, weighIns }
     }),
+  }
+}
+
+/**
+ * Poids utilisé pour calculer les besoins : la moyenne des 7 derniers jours (tendance),
+ * pour qu'une variation d'eau d'un jour ne change pas les calories du lendemain.
+ */
+export function referenceWeightFor(profile: Profile): number {
+  return Math.round((trendWeight(profile.weighIns) ?? profile.settings.startWeightKg) * 10) / 10
+}
+
+/** Supprime une pesée. */
+export function removeWeighIn(data: AppData, profileId: string, date: string): AppData {
+  return {
+    ...data,
+    profiles: data.profiles.map((p) => (p.id === profileId ? { ...p, weighIns: p.weighIns.filter((w) => w.date !== date) } : p)),
   }
 }
 

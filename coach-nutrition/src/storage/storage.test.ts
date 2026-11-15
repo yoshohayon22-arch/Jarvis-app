@@ -53,6 +53,16 @@ describe('Stockage', () => {
     expect(data.profiles[0].weighIns).toEqual([])
   })
 
+  it('dédoublonne les pesées d’un fichier importé (une par date)', () => {
+    const s = createStorage(createMemoryBackend())
+    const file = {
+      schemaVersion: 1,
+      activeProfileId: 'x',
+      profiles: [{ id: 'x', name: 'A', createdAt: '', updatedAt: '', settings: {}, weighIns: [{ date: '2026-11-02', kg: 80 }, { date: '2026-11-01', kg: 81 }, { date: '2026-11-02', kg: 79.5 }] }],
+    }
+    expect(s.importJson(JSON.stringify(file)).profiles[0].weighIns).toEqual([{ date: '2026-11-01', kg: 81 }, { date: '2026-11-02', kg: 79.5 }])
+  })
+
   it('met de côté des données corrompues au lieu de les perdre', () => {
     const backend = createMemoryBackend({ [STORAGE_KEY]: '{corrompu' })
     const s = createStorage(backend)

@@ -1,15 +1,15 @@
 /**
- * Accueil en mode tableau de bord.
- * Phase 1 : besoins du jour, progression vers l'objectif, bouton « Peser ».
- * Les repas du jour (phase 3) et le coach complet (phase 5) viendront s'ajouter ici.
+ * Accueil en mode tableau de bord : calories du jour, progression vers l'objectif,
+ * repas du jour, message du coach et bouton « Peser ».
  */
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { CalendarDays, MessageCircleHeart, Scale, Target } from 'lucide-react'
+import { CalendarDays, Scale, Target } from 'lucide-react'
 import { Button, Card, Pill } from '../../components/ui'
 import { useAppData } from '../../state/AppDataContext'
 import { computeTargets, todayIso } from '../../domain/nutrition'
-import { latestWeight } from '../../domain/profiles'
+import { referenceWeightFor } from '../../domain/profiles'
+import { CoachCard } from '../coach/CoachCard'
 import { progressPercent } from '../../domain/progress'
 import { RECIPE_MAP } from '../../domain/catalog'
 import { planLookup } from '../../domain/menu/generator'
@@ -23,7 +23,7 @@ export function Dashboard() {
   const [weighOpen, setWeighOpen] = useState(false)
   const [hour] = useState(() => new Date().getHours())
 
-  const current = activeProfile ? latestWeight(activeProfile) : 0
+  const current = activeProfile ? referenceWeightFor(activeProfile) : 0
   const targets = useMemo(
     () => (activeProfile ? computeTargets(activeProfile.settings, current) : null),
     [activeProfile, current],
@@ -91,7 +91,7 @@ export function Dashboard() {
                   <dd className="font-bold">{formatKg(settings.startWeightKg)}</dd>
                 </div>
                 <div>
-                  <dt className="text-muted">Actuel</dt>
+                  <dt className="text-muted">Actuel <span className="text-xs">(moy. 7 j)</span></dt>
                   <dd className="font-bold text-brand-700">{formatKg(current)}</dd>
                 </div>
                 <div>
@@ -143,16 +143,8 @@ export function Dashboard() {
           </Link>
         </Card>
 
-        {/* Message du coach — version complète en phase 5 */}
-        <Card aria-labelledby="coach-title" className="bg-gradient-to-br from-brand-50 to-white">
-          <h2 id="coach-title" className="mb-2 flex items-center gap-2 text-lg font-bold">
-            <MessageCircleHeart size={20} aria-hidden="true" className="text-accent-500" /> Message du coach
-          </h2>
-          <p>
-            Bienvenue ! Pèse-toi une à deux fois par semaine, le matin, dans les mêmes conditions : c’est la tendance qui
-            compte, pas le chiffre d’un jour.
-          </p>
-        </Card>
+        {/* Message du coach (règles : plateau, rythme, régularité, objectif, rappel) */}
+        <CoachCard onWeigh={() => setWeighOpen(true)} />
       </div>
 
       <WeighInDialog open={weighOpen} onClose={() => setWeighOpen(false)} />

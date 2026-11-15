@@ -5,7 +5,7 @@
 import { useMemo } from 'react'
 import { INGREDIENT_MAP, RECIPES, RECIPE_MAP } from '../../domain/catalog'
 import { computeTargets, todayIso } from '../../domain/nutrition'
-import { latestWeight, setMenu, updateProfile } from '../../domain/profiles'
+import { referenceWeightFor, setMenu, updateProfile } from '../../domain/profiles'
 import {
   generateWeek,
   planLookup,
@@ -25,7 +25,7 @@ export function useMenu() {
 
   const ctx = useMemo<GeneratorContext | null>(() => {
     if (!activeProfile) return null
-    const t = computeTargets(activeProfile.settings, latestWeight(activeProfile))
+    const t = computeTargets(activeProfile.settings, referenceWeightFor(activeProfile))
     return {
       settings: activeProfile.settings,
       targets: { kcal: t.targetKcal, proteinG: t.macros.proteinG, fatG: t.macros.fatG, carbsG: t.macros.carbsG },

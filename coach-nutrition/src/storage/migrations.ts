@@ -5,7 +5,7 @@
  * une étape dans MIGRATIONS. Ainsi, un ancien fichier exporté ou d'anciennes données
  * dans le navigateur restent toujours lisibles.
  */
-import type { AppData, ProfileSettings } from '../domain/types'
+import type { AppData, ProfileSettings, WeighIn } from '../domain/types'
 
 export const CURRENT_SCHEMA_VERSION = 1
 
@@ -36,13 +36,20 @@ const MIGRATIONS: Record<number, Migration> = {
   // 1: (d) => ({ ...d, schemaVersion: 2, profiles: d.profiles.map(...) }),
 }
 
+/** Une seule pesée par date (la dernière l'emporte), triées par date. */
+function dedupeWeighIns(list: WeighIn[]): WeighIn[] {
+  const byDate = new Map<string, WeighIn>()
+  for (const w of list) if (w && typeof w.date === 'string' && Number.isFinite(w.kg)) byDate.set(w.date, w)
+  return [...byDate.values()].sort((a, b) => a.date.localeCompare(b.date))
+}
+
 /** Complète les champs manquants d'un profil avec les valeurs par défaut. */
 function normalize(data: AppData): AppData {
   return {
     ...data,
     profiles: data.profiles.map((p) => ({
       ...p,
-      weighIns: Array.isArray(p.weighIns) ? p.weighIns : [],
+      weighIns: dedupeWeighIns(Array.isArray(p.weighIns) ? p.weighIns : []),
       menu: p.menu ? { ...p.menu, batch: p.menu.batch ?? null, bowls: p.menu.bowls ?? [] } : null,
       shoppingChecks: p.shoppingChecks ?? {},
       settings: {

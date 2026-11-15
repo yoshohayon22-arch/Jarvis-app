@@ -3,6 +3,7 @@
 /** Réglages : thème, ordre / masquage / favoris des onglets, consommation IA, compte. */
 import { motion } from "motion/react";
 import { ChevronDown, ChevronUp, Eye, EyeOff, LogOut, Star } from "lucide-react";
+import { BackupSection } from "@/components/perso/backup";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { useMotionPreset } from "@/lib/motion/use-motion-preset";
@@ -154,6 +155,10 @@ export function SettingsView() {
         <Button variant="ghost" className="self-start" onClick={reset}>
           Rétablir l&apos;ordre par défaut
         </Button>
+      </Section>
+
+      <Section title="Mes données" description="Budget, projets, écoles, notes et films sont enregistrés sur cet appareil uniquement. Une sauvegarde permet de les garder ou de les copier sur un autre appareil.">
+        <BackupSection />
       </Section>
 
       <Section title="Consommation IA" description="Tokens utilisés ce mois-ci par les agents.">

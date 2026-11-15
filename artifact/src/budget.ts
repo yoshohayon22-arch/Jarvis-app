@@ -3,7 +3,7 @@
  * Uniquement tes propres saisies (ou ton relevé importé) : aucun chiffre n'est inventé.
  * Les données sont enregistrées dans l'espace privé de la page (voir budget-store.ts).
  */
-import { extractLines, guessColumns, parseAmount, parseCsv, type CsvGuess, type CsvLine, type SignMode } from "./budget-csv";
+import { extractLines, guessColumns, parseAmount, parseCsv, type CsvGuess, type CsvLine, type SignMode } from "@/lib/budget/csv";
 import { budget, CATEGORIES, categoryLabel, connectBudget, newId, onBudgetChange, saveMonths, saveSettings, type Line } from "./budget-store";
 import { h, icon } from "./dom";
 import { sampleMessage, samplePromise } from "./mail";

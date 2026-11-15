@@ -1,5 +1,10 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { BudgetView } from "@/components/perso/budget-view";
+import { CerveauView } from "@/components/perso/cerveau-view";
+import { EtudesView } from "@/components/perso/etudes-view";
+import { FilmsView } from "@/components/perso/films-view";
+import { ProjetsView } from "@/components/perso/projets-view";
 import { CultureView } from "@/components/culture/culture-view";
 import { MatchsView } from "@/components/matchs/matchs-view";
 import { MeteoView } from "@/components/meteo/meteo-view";
@@ -30,6 +35,11 @@ export default async function TabPage({ params }: PageProps<"/[onglet]">) {
   if (tab.id === "la-une") return <NewsView tab="une" />;
   if (tab.id === "foot") return <NewsView tab="foot" />;
   if (tab.id === "real-madrid") return <RealMadridView />;
+  if (tab.id === "budget") return <BudgetView />;
+  if (tab.id === "projets") return <ProjetsView />;
+  if (tab.id === "etudes") return <EtudesView />;
+  if (tab.id === "cerveau") return <CerveauView />;
+  if (tab.id === "films") return <FilmsView />;
   if (tab.id === "veille-ia") return <NewsView tab="ia" />;
   if (tab.id === "culture-g") return <CultureView />;
   if (tab.id === "matchs-tv") return <MatchsView />;

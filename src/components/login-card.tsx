@@ -1,9 +1,9 @@
 "use client";
 
-/** Carte de connexion : Google uniquement (un seul compte autorisé). */
+/** Carte de connexion : code à usage unique par email, et Google quand il est configuré (un seul compte autorisé). */
 import { motion } from "motion/react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useMotionPreset } from "@/lib/motion/use-motion-preset";
@@ -27,13 +27,24 @@ function GoogleLogo() {
   );
 }
 
+/** Le bouton Google n'apparaît que lorsque Google Cloud est configuré (variable NEXT_PUBLIC_GOOGLE_LOGIN=1). */
+const GOOGLE_ENABLED = process.env.NEXT_PUBLIC_GOOGLE_LOGIN === "1";
+
+const inputClass =
+  "h-12 w-full rounded-control border-[length:var(--border-width)] border-border bg-surface-2 px-3 text-base text-text placeholder:text-text-2";
+
 export function LoginCard() {
   const params = useSearchParams();
-  const error = params.get("erreur");
-  const [pending, setPending] = useState(false);
+  const urlError = params.get("erreur");
   const preset = useMotionPreset();
+  const router = useRouter();
+  const [pending, setPending] = useState(false);
+  const [step, setStep] = useState<"email" | "code">("email");
+  const [email, setEmail] = useState("");
+  const [code, setCode] = useState("");
+  const [message, setMessage] = useState<string | null>(null);
 
-  const signIn = async () => {
+  const signInWithGoogle = async () => {
     const supabasePromise = getSupabaseBrowserClient();
     if (!supabasePromise) return;
     setPending(true);
@@ -42,13 +53,51 @@ export function LoginCard() {
       provider: "google",
       options: {
         redirectTo: `${window.location.origin}/auth/callback`,
-        // Seulement l'identité pour l'instant ; les droits Gmail seront demandés en Phase 2.
         scopes: "openid email profile",
         queryParams: { prompt: "select_account" },
       },
     });
     if (err) setPending(false);
   };
+
+  const sendCode = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPending(true);
+    setMessage(null);
+    const res = await fetch("/auth/code/envoyer", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email }),
+    }).catch(() => null);
+    setPending(false);
+    if (res?.ok) {
+      setStep("code");
+    } else if (res?.status === 429) {
+      setMessage("Trop de demandes : attends quelques minutes avant de redemander un code.");
+    } else {
+      setMessage("L'envoi du code a échoué. Réessaie dans un instant.");
+    }
+  };
+
+  const verifyCode = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPending(true);
+    setMessage(null);
+    const res = await fetch("/auth/code/verifier", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, code }),
+    }).catch(() => null);
+    if (res?.ok) {
+      router.replace("/");
+      router.refresh();
+      return;
+    }
+    setPending(false);
+    setMessage("Code incorrect ou expiré. Vérifie le dernier email reçu ou redemande un code.");
+  };
+
+  const alert = message ?? (urlError ? ERRORS[urlError] : null);
 
   return (
     <motion.div
@@ -59,21 +108,16 @@ export function LoginCard() {
     >
       <div>
         <h1 className="text-3xl">Dashboard</h1>
-        <p className="mt-1 text-sm text-text-2">Espace privé. Connexion avec ton compte Google.</p>
+        <p className="mt-1 text-sm text-text-2">Espace privé, réservé à son propriétaire.</p>
       </div>
 
-      {error && ERRORS[error] ? (
+      {alert ? (
         <p role="alert" className="rounded-control border-[length:var(--border-width)] border-border bg-accent-soft px-3 py-2 text-sm text-text">
-          {ERRORS[error]}
+          {alert}
         </p>
       ) : null}
 
-      {isSupabaseConfigured ? (
-        <Button variant="primary" onClick={signIn} disabled={pending} className="w-full">
-          <GoogleLogo />
-          {pending ? "Redirection vers Google…" : "Continuer avec Google"}
-        </Button>
-      ) : (
+      {!isSupabaseConfigured ? (
         <div className="flex flex-col gap-3 text-sm text-text-2">
           <p>Supabase n&apos;est pas encore configuré : la connexion est désactivée.</p>
           {process.env.NODE_ENV !== "production" ? (
@@ -82,7 +126,69 @@ export function LoginCard() {
             </Link>
           ) : null}
         </div>
+      ) : step === "email" ? (
+        <form onSubmit={sendCode} className="flex flex-col gap-3">
+          <label htmlFor="email" className="text-sm font-medium">
+            Ton adresse email
+          </label>
+          <input
+            id="email"
+            type="email"
+            required
+            autoComplete="email"
+            inputMode="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="prenom@exemple.com"
+            className={inputClass}
+          />
+          <Button type="submit" variant="primary" disabled={pending} className="w-full">
+            {pending ? "Envoi…" : "Recevoir un code par email"}
+          </Button>
+        </form>
+      ) : (
+        <form onSubmit={verifyCode} className="flex flex-col gap-3">
+          <p className="text-sm text-text-2">
+            Si cette adresse est autorisée, un code vient d&apos;être envoyé. Il est valable quelques minutes (pense à regarder les spams).
+          </p>
+          <label htmlFor="code" className="text-sm font-medium">
+            Code reçu par email
+          </label>
+          <input
+            id="code"
+            required
+            autoFocus
+            autoComplete="one-time-code"
+            inputMode="numeric"
+            pattern="[0-9 ]{6,12}"
+            value={code}
+            onChange={(e) => setCode(e.target.value)}
+            placeholder="123456"
+            className={`${inputClass} text-center text-xl tracking-[0.3em]`}
+          />
+          <Button type="submit" variant="primary" disabled={pending} className="w-full">
+            {pending ? "Vérification…" : "Se connecter"}
+          </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={() => {
+              setStep("email");
+              setCode("");
+              setMessage(null);
+            }}
+          >
+            Changer d&apos;adresse ou redemander un code
+          </Button>
+        </form>
       )}
+
+      {isSupabaseConfigured && GOOGLE_ENABLED ? (
+        <Button variant="secondary" onClick={signInWithGoogle} disabled={pending} className="w-full">
+          <GoogleLogo />
+          Continuer avec Google
+        </Button>
+      ) : null}
     </motion.div>
   );
 }

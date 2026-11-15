@@ -72,7 +72,7 @@ function DemoBanner() {
   return (
     <div role="note" className="mx-auto mt-4 w-full max-w-7xl px-4 md:px-8">
       <p className="rounded-control border-[length:var(--border-width)] border-border bg-accent-soft px-4 py-2 text-sm text-text">
-        Mode local : Supabase n&apos;est pas encore configuré, la connexion Google est désactivée et les préférences restent sur cet appareil.
+        Mode local : Supabase n&apos;est pas encore configuré, la connexion est désactivée et les préférences restent sur cet appareil.
       </p>
     </div>
   );

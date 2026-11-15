@@ -308,7 +308,7 @@ export const TABS: readonly TabDefinition[] = [
       { title: "Heure par heure", description: "Prochaines 24 h.", source: "Open-Meteo (MétéoSuisse ICON-CH)" },
       { title: "7 jours", description: "ICON-CH2 jusqu'à J+5, ECMWF au-delà (source indiquée).", source: "Open-Meteo" },
       { title: "Qualité de l'air", description: "Indice et polluants.", source: "Open-Meteo Air Quality" },
-      { title: "Alertes", description: "Dangers naturels en cours.", source: "MétéoSuisse (open data)" },
+      { title: "Alertes", description: "Avis de danger en cours.", source: "Meteoalarm (avis MétéoSuisse)" },
     ],
   },
 ];

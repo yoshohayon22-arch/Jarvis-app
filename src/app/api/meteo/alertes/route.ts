@@ -3,8 +3,8 @@
  * Source : Meteoalarm (réseau EUMETNET), qui relaie les avis de danger de MétéoSuisse.
  * Appel côté serveur (la source n'autorise pas les appels directs du navigateur), cache de 10 minutes.
  */
-import { cacheLife } from "next/cache";
 import { connection } from "next/server";
+import { cached } from "@/lib/server-cache";
 import type { AlertsPayload, WeatherAlert } from "@/lib/meteo/types";
 
 const FEED = "https://feeds.meteoalarm.org/api/v1/warnings/feeds-switzerland";
@@ -29,10 +29,7 @@ interface CapWarning {
 }
 
 async function loadAlerts(): Promise<AlertsPayload> {
-  "use cache";
-  cacheLife({ stale: 300, revalidate: 600, expire: 3600 });
-
-  const res = await fetch(FEED, { headers: { Accept: "application/json" } });
+  const res = await fetch(FEED, { headers: { Accept: "application/json" }, cache: "no-store", signal: AbortSignal.timeout(8000) });
   if (!res.ok) throw new Error(`Meteoalarm a répondu ${res.status}`);
   const data = (await res.json()) as { warnings?: CapWarning[] };
 
@@ -77,10 +74,10 @@ async function loadAlerts(): Promise<AlertsPayload> {
 }
 
 export async function GET() {
-  // Toujours exécuté à la demande (jamais figé au moment du build) ; le cache est dans loadAlerts().
+  // Toujours exécuté à la demande (jamais figé au moment du build) ; réponse gardée 10 minutes en mémoire.
   await connection();
   try {
-    return Response.json(await loadAlerts());
+    return Response.json(await cached("meteo-alertes", 10 * 60 * 1000, loadAlerts));
   } catch (e) {
     return Response.json({ erreur: e instanceof Error ? e.message : "Source indisponible" }, { status: 502 });
   }

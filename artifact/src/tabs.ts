@@ -12,7 +12,7 @@ export interface ArtifactTab {
 
 export const TABS: ArtifactTab[] = [
   { id: "mail", label: "Mail", short: "Mail", icon: "mail", group: "Communication", live: true, planned: [] },
-  { id: "cerveau", label: "Le Cerveau", short: "Cerveau", icon: "brain", group: "Communication", planned: [["Notes et documents", "à définir ensemble"], ["Recherche", "plein texte et sémantique"]] },
+  { id: "cerveau", label: "Le Cerveau", short: "Cerveau", icon: "brain", group: "Communication", live: true, planned: [] },
   { id: "meteo", label: "Météo Genève", short: "Météo", icon: "cloud-sun", group: "Vie pratique", live: true, planned: [] },
   { id: "budget", label: "Budget", short: "Budget", icon: "wallet", group: "Vie pratique", live: true, planned: [] },
   { id: "la-une", label: "La Une", short: "La Une", icon: "newspaper", group: "Infos et savoir", live: true, planned: [] },
@@ -26,10 +26,10 @@ export const TABS: ArtifactTab[] = [
   { id: "cours", label: "Cours Torah-Box", short: "Cours", icon: "circle-play", group: "Vie juive", live: true, planned: [] },
   { id: "real-madrid", label: "Real Madrid", short: "Real", icon: "trophy", group: "Foot", live: true, planned: [] },
   { id: "foot", label: "Foot général", short: "Foot", icon: "goal", group: "Foot", live: true, planned: [] },
-  { id: "matchs-tv", label: "Matchs TV", short: "TV", icon: "tv", group: "Foot", planned: [["Aujourd'hui", "à étudier"], ["Cette semaine", "à étudier"]] },
+  { id: "matchs-tv", label: "Matchs de la journée", short: "Matchs", icon: "tv", group: "Foot", live: true, planned: [] },
   { id: "etudes", label: "Études", short: "Études", icon: "graduation-cap", group: "Études et projets", live: true, planned: [] },
   { id: "projets", label: "Projets Claude Code", short: "Projets", icon: "folder-kanban", group: "Études et projets", live: true, planned: [] },
-  { id: "films", label: "Films & Séries", short: "Films", icon: "clapperboard", group: "Loisirs", planned: [["Agent ciné", "TMDB + Claude"], ["Mes listes", "tes saisies"], ["Où regarder", "TMDB (Suisse)"]] },
+  { id: "films", label: "Films & Séries", short: "Films", icon: "clapperboard", group: "Loisirs", live: true, planned: [] },
   { id: "musique", label: "Musique", short: "Musique", icon: "music", group: "Loisirs", planned: [["Lecteur", "Spotify"]] },
   { id: "youtube", label: "YouTube", short: "YouTube", icon: "monitor-play", group: "Loisirs", planned: [["Nouvelles vidéos", "YouTube"]] },
 ];

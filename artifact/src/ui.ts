@@ -70,3 +70,26 @@ export function daysFromToday(date: string): { days: number; label: string } {
   return { days, label: relative.format(days, "day") };
 }
 export const dayLabel = (date: string) => `${date.slice(8, 10)}.${date.slice(5, 7)}.${date.slice(0, 4)}`;
+
+/** Bouton de suppression avec confirmation sur place (la suppression est définitive). */
+export function deleteZone(label: string, question: string, onYes: () => void): HTMLElement {
+  const zone = h("div", { class: "actions" });
+  const idle = () =>
+    zone.replaceChildren(
+      h(
+        "button",
+        {
+          class: "btn",
+          type: "button",
+          onclick: () => {
+            const no = h("button", { class: "btn", type: "button", onclick: idle }, "Non, garder");
+            zone.replaceChildren(h("span", { class: "small-2" }, question), h("button", { class: "btn primary", type: "button", onclick: onYes }, "Oui, supprimer"), no);
+            no.focus();
+          },
+        },
+        label,
+      ),
+    );
+  idle();
+  return zone;
+}

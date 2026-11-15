@@ -68,7 +68,7 @@ export function projetsView(root: HTMLElement): void {
     },
     h("label", { class: "sr-only", for: "p-idee" }, "Nouvelle idée de projet"),
     ideaInput,
-    h("button", { class: "btn primary", type: "submit" }, icon("plus"), h("span", { class: "btn-label" }, "Ajouter une idée")),
+    h("button", { class: "btn primary", type: "submit", "aria-label": "Ajouter une idée" }, icon("plus"), h("span", { class: "btn-label" }, "Ajouter une idée")),
   );
   ideaInput.id = "p-idee";
 

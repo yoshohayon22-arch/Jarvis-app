@@ -133,7 +133,7 @@ function unwrapJson(raw: string): string {
   return decodeEntities(pre ? pre[1] : text.replace(/<[^>]+>/g, ""));
 }
 
-const loadJson: JsonLoader = async <T>(url: string): Promise<T> => {
+export const loadJson: JsonLoader = async <T>(url: string): Promise<T> => {
   let data: (T & { error?: boolean; reason?: string }) | null = null;
   try {
     data = JSON.parse(unwrapJson(await readUrl(url)));

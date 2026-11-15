@@ -5,6 +5,7 @@ import { GROUP_LABELS, REAL_MADRID_PATTERN, type NewsGroup, type NewsTab } from 
 import type { Article, NewsPayload } from "@/lib/rss/types";
 import { DataError, loadAir, loadAlerts, loadForecast, loadNews, newsMaxAgeDays, newsSourceCount, type Cached } from "./data";
 import { h, icon, svg } from "./dom";
+import { realMadridSections } from "./foot";
 import type { ArtifactTab } from "./tabs";
 
 const TZ = "Europe/Zurich";
@@ -94,7 +95,7 @@ export function errorCard(title: string, error: unknown, source: string, retry: 
 }
 
 /** Une section qui se charge seule : squelette, puis contenu ou explication de l'échec. */
-function asyncSection<T>(slot: HTMLElement, title: string, source: string, load: (force: boolean) => Promise<Cached<T>>, render: (value: Cached<T>) => HTMLElement): (force: boolean) => Promise<void> {
+export function asyncSection<T>(slot: HTMLElement, title: string, source: string, load: (force: boolean) => Promise<Cached<T>>, render: (value: Cached<T>) => HTMLElement): (force: boolean) => Promise<void> {
   const run = async (force: boolean) => {
     if (!slot.firstChild) slot.replaceChildren(skeleton());
     try {
@@ -496,22 +497,19 @@ export function realMadridView(root: HTMLElement): void {
     );
   });
 
-  const missing = (title: string) =>
-    card(title, [
-      emptyState("Pas disponible dans l'artefact", "Cette donnée vient de football-data.org, qui exige un jeton secret. Une page d'artefact ne peut pas garder de secret : elle s'affiche dans la version en ligne du Dashboard."),
-      h("p", { class: "note" }, "Source : football-data.org"),
-    ]);
+  const foot = realMadridSections();
 
   root.append(
     h(
       "div",
       { class: "toolbar" },
-      h("p", { class: "muted" }, `Les actus lisent ${count} flux (${count} crédits Firecrawl), gardés 30 minutes.`),
-      h("button", { class: "btn", type: "button", onclick: () => void run(true) }, icon("refresh-cw"), h("span", { class: "btn-label" }, "Actualiser")),
+      h("p", { class: "muted" }, `Matchs et classements : ESPN (5 lectures, gardées 10 minutes). Actus : ${count} flux, gardés 30 minutes. Une lecture = 1 crédit Firecrawl.`),
+      h("button", { class: "btn", type: "button", onclick: () => (void run(true), foot.refresh(true)) }, icon("refresh-cw"), h("span", { class: "btn-label" }, "Actualiser")),
     ),
-    h("div", { class: "grid" }, slot, missing("Prochain match et score"), missing("Classements LaLiga et Ligue des champions"), missing("Buteurs et effectif")),
+    h("div", { class: "grid" }, ...foot.slots, slot),
   );
   void run(false);
+  foot.refresh(false);
 }
 
 // ---------- Onglets pas encore branchés ----------

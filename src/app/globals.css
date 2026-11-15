@@ -173,6 +173,11 @@ h3,
   }
 }
 
+/* ---------- Texte hébreu (étude) : police à empattements lisible avec les voyelles et la cantillation ---------- */
+.hebrew-text {
+  font-family: "SBL Hebrew", "Ezra SIL", "Frank Ruehl CLM", "Taamey Frank CLM", "Times New Roman", serif;
+}
+
 /* ---------- Icônes météo animées ---------- */
 .wx-animated .wx-sun {
   animation: wx-spin 24s linear infinite;

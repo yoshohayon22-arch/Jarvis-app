@@ -7,8 +7,8 @@ import { loadNews } from "@/lib/rss/load";
 
 export async function GET(request: NextRequest) {
   const tab = request.nextUrl.searchParams.get("onglet");
-  if (tab !== "une" && tab !== "foot" && tab !== "real") {
-    return Response.json({ erreur: "Paramètre « onglet » attendu : une, foot ou real." }, { status: 400 });
+  if (tab !== "une" && tab !== "foot" && tab !== "real" && tab !== "cours") {
+    return Response.json({ erreur: "Paramètre « onglet » attendu : une, foot, real ou cours." }, { status: 400 });
   }
   return Response.json(await loadNews(tab));
 }

@@ -144,7 +144,7 @@ export const loadAlerts = (force: boolean): Promise<Cached<AlertsPayload>> =>
 
 // ---------- Presse ----------
 const PER_SOURCE = 10;
-const MAX_AGE_MS = 3 * 24 * 60 * MINUTE;
+const maxAge = (tab: NewsTab) => (tab === "cours" ? 60 : 3) * 24 * 60 * MINUTE;
 
 async function fetchNews(tab: NewsTab): Promise<NewsPayload> {
   const sources = sourcesForTab(tab);
@@ -165,7 +165,7 @@ async function fetchNews(tab: NewsTab): Promise<NewsPayload> {
     }
     const onlyReal = tab === "real" && source.tab !== "real";
     const recent = result.value
-      .filter((item) => !item.publishedAt || now - new Date(item.publishedAt).getTime() < MAX_AGE_MS)
+      .filter((item) => !item.publishedAt || now - new Date(item.publishedAt).getTime() < maxAge(tab))
       .filter((item) => !onlyReal || REAL_MADRID_PATTERN.test(`${item.title} ${item.summary}`))
       .sort((a, b) => (b.publishedAt ?? "").localeCompare(a.publishedAt ?? ""))
       .slice(0, PER_SOURCE);

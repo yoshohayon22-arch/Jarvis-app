@@ -3,6 +3,9 @@ import { notFound } from "next/navigation";
 import { MeteoView } from "@/components/meteo/meteo-view";
 import { NewsView } from "@/components/presse/news-view";
 import { RealMadridView } from "@/components/real-madrid/real-madrid-view";
+import { CalendarView } from "@/components/vie-juive/calendar-view";
+import { CoursView } from "@/components/vie-juive/cours-view";
+import { StudyView } from "@/components/vie-juive/study-view";
 import { TabView } from "@/components/tab-view";
 import { getTab, TAB_IDS } from "@/lib/tabs";
 
@@ -25,5 +28,8 @@ export default async function TabPage({ params }: PageProps<"/[onglet]">) {
   if (tab.id === "la-une") return <NewsView tab="une" />;
   if (tab.id === "foot") return <NewsView tab="foot" />;
   if (tab.id === "real-madrid") return <RealMadridView />;
+  if (tab.id === "calendrier") return <CalendarView />;
+  if (tab.id === "paracha" || tab.id === "tehilim" || tab.id === "halakha" || tab.id === "rambam") return <StudyView section={tab.id} />;
+  if (tab.id === "cours") return <CoursView />;
   return <TabView tabId={tab.id} />;
 }

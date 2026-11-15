@@ -6,8 +6,9 @@ import { REAL_MADRID_PATTERN, sourcesForTab, type NewsTab } from "./sources";
 import type { Article, NewsPayload, SourceStatus } from "./types";
 
 const PER_SOURCE = 12;
-/** On ignore les articles de plus de 3 jours (certains flux gardent de vieux contenus en tête). */
-const MAX_AGE_MS = 3 * 24 * 60 * 60 * 1000;
+/** On ignore les articles de plus de 3 jours (certains flux gardent de vieux contenus en tête) ; 60 jours pour les cours vidéo. */
+const DAY_MS = 24 * 60 * 60 * 1000;
+const maxAge = (tab: NewsTab) => (tab === "cours" ? 60 : 3) * DAY_MS;
 
 const TEN_MINUTES = 10 * 60 * 1000;
 
@@ -45,10 +46,10 @@ export async function loadNews(tab: NewsTab): Promise<NewsPayload> {
     // Onglet Real Madrid : les sources foot généralistes ne gardent que les articles qui parlent du Real.
     const onlyReal = tab === "real" && source.tab !== "real";
     const recent = result.value
-      .filter((item) => !item.publishedAt || now - new Date(item.publishedAt).getTime() < MAX_AGE_MS)
+      .filter((item) => !item.publishedAt || now - new Date(item.publishedAt).getTime() < maxAge(tab))
       .filter((item) => !onlyReal || REAL_MADRID_PATTERN.test(`${item.title} ${item.summary}`))
       .sort((a, b) => (b.publishedAt ?? "").localeCompare(a.publishedAt ?? ""))
-      .slice(0, PER_SOURCE);
+      .slice(0, tab === "cours" ? 15 : PER_SOURCE);
     for (const item of recent) {
       articles.push({
         id: `${source.id}:${item.link}`,

@@ -2,9 +2,9 @@
  * Sources de presse (flux RSS publics des éditeurs), vérifiées le 15.11.2026.
  * Non incluses faute de flux public : Reuters (flux RSS supprimés) et i24NEWS (aucun flux trouvé).
  */
-export type NewsTab = "une" | "foot" | "real";
+export type NewsTab = "une" | "foot" | "real" | "cours";
 
-export type NewsGroup = "suisse" | "france" | "international" | "moyen-orient" | "foot-fr" | "foot-es" | "foot-en";
+export type NewsGroup = "suisse" | "france" | "international" | "moyen-orient" | "foot-fr" | "foot-es" | "foot-en" | "torah";
 
 export const GROUP_LABELS: Record<NewsGroup, string> = {
   suisse: "Suisse romande",
@@ -14,6 +14,7 @@ export const GROUP_LABELS: Record<NewsGroup, string> = {
   "foot-fr": "En français",
   "foot-es": "En espagnol",
   "foot-en": "En anglais",
+  torah: "Cours de Torah",
 };
 
 export interface NewsSource {
@@ -50,6 +51,8 @@ export const NEWS_SOURCES: readonly NewsSource[] = [
   { id: "as", name: "AS", url: "https://feeds.as.com/mrss-s/pages/as/site/as.com/section/futbol/portada/", tab: "foot", group: "foot-es", lang: "es" },
   { id: "athletic", name: "The Athletic", url: "https://www.nytimes.com/athletic/rss/football/", tab: "foot", group: "foot-en", lang: "en", paywall: true },
   { id: "marca-real", name: "Marca · Real Madrid", url: "https://e00-marca.uecdn.es/rss/futbol/real-madrid.xml", tab: "real", group: "foot-es", lang: "es" },
+  // --- Cours (chaîne YouTube officielle de Torah-Box, flux public) ---
+  { id: "torahbox", name: "Torah-Box (YouTube)", url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCNgEEqkr9UeSqxJAHxe6-KA", tab: "cours", group: "torah", lang: "fr", noSummary: true },
   { id: "romano", name: "Fabrizio Romano (YouTube)", url: "https://www.youtube.com/feeds/videos.xml?channel_id=UCX1em-uaFMS02Rrk_Bowyng", tab: "foot", group: "foot-en", lang: "en", noSummary: true },
 ];
 

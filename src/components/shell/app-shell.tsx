@@ -10,7 +10,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 import { useMotionPreset } from "@/lib/motion/use-motion-preset";
-import { isSupabaseConfigured } from "@/lib/supabase/config";
+import { AUTH_MODE } from "@/lib/auth/mode";
 import { getTab } from "@/lib/tabs";
 import { BottomNav } from "./bottom-nav";
 import { CommandPaletteProvider, usePalette } from "./command-palette";
@@ -27,7 +27,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <Sidebar />
         <div className="flex min-w-0 flex-1 flex-col">
           <Header />
-          {!isSupabaseConfigured ? <DemoBanner /> : null}
+          {AUTH_MODE === "aucun" ? <DemoBanner /> : null}
           <AnimatedContent>{children}</AnimatedContent>
         </div>
       </div>
@@ -72,7 +72,7 @@ function DemoBanner() {
   return (
     <div role="note" className="mx-auto mt-4 w-full max-w-7xl px-4 md:px-8">
       <p className="rounded-control border-[length:var(--border-width)] border-border bg-accent-soft px-4 py-2 text-sm text-text">
-        Mode local : Supabase n&apos;est pas encore configuré, la connexion est désactivée et les préférences restent sur cet appareil.
+        Mode local : aucune connexion n&apos;est configurée et les préférences restent sur cet appareil.
       </p>
     </div>
   );

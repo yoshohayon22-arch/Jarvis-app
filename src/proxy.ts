@@ -1,5 +1,7 @@
 /**
  * Proxy Next.js 16 (anciennement « middleware »).
+ * Mode « mot de passe » : vérifie le cookie de session signé, sinon redirige vers /connexion.
+ * Mode « supabase » :
  * 1. Rafraîchit la session Supabase à chaque requête (cookies).
  * 2. Redirige vers /connexion si personne n'est connecté.
  * 3. Déconnecte et refuse tout compte qui n'est pas dans la liste blanche.
@@ -10,6 +12,8 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { isEmailAllowed } from "@/lib/auth/allowlist";
+import { AUTH_MODE } from "@/lib/auth/mode";
+import { getSessionSecret, isSessionValid, SESSION_COOKIE } from "@/lib/auth/session";
 import { isSupabaseConfigured, SUPABASE_PUBLISHABLE_KEY, SUPABASE_URL } from "@/lib/supabase/config";
 
 const PUBLIC_PATHS = ["/connexion", "/auth/"];
@@ -29,8 +33,23 @@ function redirectTo(request: NextRequest, pathname: string, params?: Record<stri
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  if (!isSupabaseConfigured) {
-    // En local, sans Supabase, l'app reste consultable (mode démo, bandeau affiché).
+  // --- Mode « mot de passe » : cookie de session signé ---
+  if (AUTH_MODE === "motdepasse") {
+    const valid = await isSessionValid(request.cookies.get(SESSION_COOKIE)?.value, getSessionSecret());
+    if (!valid) {
+      if (isPublic(pathname)) return NextResponse.next();
+      // Les appels de données reçoivent une erreur claire plutôt qu'une redirection vers une page HTML.
+      if (pathname.startsWith("/api/")) return NextResponse.json({ erreur: "non connecté" }, { status: 401 });
+      return redirectTo(request, "/connexion");
+    }
+    if (pathname === "/connexion") return redirectTo(request, "/");
+    const res = NextResponse.next();
+    res.headers.set("Cache-Control", "private, no-store");
+    return res;
+  }
+
+  if (AUTH_MODE === "aucun" || !isSupabaseConfigured) {
+    // En local, sans configuration, l'app reste consultable (mode démo, bandeau affiché).
     // En production, on ferme tout tant que la configuration n'est pas faite.
     if (process.env.NODE_ENV !== "production" || isPublic(pathname)) return NextResponse.next();
     return redirectTo(request, "/connexion", { erreur: "config" });

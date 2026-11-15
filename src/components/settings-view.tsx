@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { useMotionPreset } from "@/lib/motion/use-motion-preset";
 import { usePrefs } from "@/lib/prefs/prefs-provider";
-import { isSupabaseConfigured } from "@/lib/supabase/config";
+import { AUTH_MODE } from "@/lib/auth/mode";
 import { getTab, MAX_FAVORITES } from "@/lib/tabs";
 import { THEMES, THEME_LABELS, type ThemeId } from "@/lib/themes";
 import { cn } from "@/lib/utils";
@@ -64,7 +64,7 @@ export function SettingsView() {
 
   return (
     <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-2">
-      <Section title="Thème" description="Mémorisé sur cet appareil et dans ton compte.">
+      <Section title="Thème" description={AUTH_MODE === "supabase" ? "Mémorisé sur cet appareil et dans ton compte." : "Mémorisé sur cet appareil."}>
         <div className="grid grid-cols-2 gap-3" role="radiogroup" aria-label="Thème">
           {THEMES.map((theme) => {
             const active = prefs.theme === theme;
@@ -161,14 +161,14 @@ export function SettingsView() {
       </Section>
 
       <Section title="Compte">
-        {isSupabaseConfigured ? (
+        {AUTH_MODE !== "aucun" ? (
           <form action="/auth/deconnexion" method="post">
             <Button type="submit" variant="secondary">
               <LogOut aria-hidden /> Se déconnecter
             </Button>
           </form>
         ) : (
-          <EmptyState title="Connexion non configurée" reason="Supabase n'est pas encore relié : l'app tourne en mode local." />
+          <EmptyState title="Connexion non configurée" reason="Aucune connexion n'est configurée : l'app tourne en mode local." />
         )}
       </Section>
     </div>

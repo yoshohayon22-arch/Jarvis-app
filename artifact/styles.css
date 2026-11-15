@@ -324,3 +324,12 @@ select.field option { background: var(--card-solid); color: var(--text); }
 .right { text-align: right; }
 td.wrap { white-space: normal; min-width: 140px; overflow-wrap: anywhere; }
 td.right, th.right { padding-right: 0; }
+
+/* ---- Projets et études ---- */
+.board { grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr)); }
+.column-list { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.card-foot { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 44px; }
+.search-row .btn { align-self: stretch; }
+textarea.draft { display: block; }
+.meta .over { display: inline-flex; color: var(--text); }
+.meta a, .card-foot a { min-height: 24px; display: inline-flex; align-items: center; }

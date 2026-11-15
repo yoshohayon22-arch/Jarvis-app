@@ -6,6 +6,8 @@ import { clear, h, icon, store } from "./dom";
 import { DEFAULT_FAVORITES, getTab, TABS, type ArtifactTab } from "./tabs";
 import { meteoView, newsView, plannedView, realMadridView } from "./views";
 import { budgetView } from "./budget";
+import { etudesView } from "./etudes";
+import { projetsView } from "./projets";
 import { mailView } from "./mail";
 import { calendarView, coursView, studyView } from "./views-juif";
 
@@ -127,6 +129,8 @@ function renderView(): void {
   if (id === "reglages") settingsView(view);
   else if (id === "mail") mailView(view);
   else if (id === "budget") budgetView(view);
+  else if (id === "projets") projetsView(view);
+  else if (id === "etudes") etudesView(view);
   else if (id === "meteo") meteoView(view);
   else if (id === "la-une") newsView(view, "une");
   else if (id === "foot") newsView(view, "foot");

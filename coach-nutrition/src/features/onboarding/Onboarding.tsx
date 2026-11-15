@@ -8,7 +8,9 @@ import { useNavigate } from 'react-router-dom'
 import { ArrowLeft, ArrowRight, Check, Leaf } from 'lucide-react'
 import { Button, Card } from '../../components/ui'
 import { useAppData } from '../../state/AppDataContext'
-import { addProfile, createProfile } from '../../domain/profiles'
+import { addProfile, createProfile, upsertWeighIn } from '../../domain/profiles'
+import { addDays, todayIso } from '../../domain/nutrition'
+import { DEFAULT_SETTINGS } from '../../storage/migrations'
 import { computeTargets } from '../../domain/nutrition'
 import { HEALTH_DISCLAIMER } from '../../domain/safety'
 import { draftToSettings, emptyDraft, parseNumber, STEP_IDS, validateStep, type Draft, type DraftErrors } from './draft'
@@ -96,6 +98,7 @@ export function Onboarding() {
             Bienvenue ! En 2 minutes, on calcule tes besoins et on prépare la suite : menus, courses et suivi.
           </p>
           <ImportBackup />
+          {import.meta.env.VITE_DEMO === '1' && <DemoProfile />}
         </div>
       )}
 
@@ -192,5 +195,32 @@ function ImportBackup() {
         </p>
       )}
     </div>
+  )
+}
+
+/**
+ * Version de démonstration uniquement : crée un profil « Exemple » avec 5 semaines de pesées
+ * (données fictives, clairement nommées), pour explorer tous les écrans sans rien saisir.
+ */
+function DemoProfile() {
+  const { update } = useAppData()
+  const create = () => {
+    const today = todayIso()
+    const start = addDays(today, -35)
+    const settings = { ...DEFAULT_SETTINGS, sex: 'homme' as const, age: 34, heightCm: 178, startWeightKg: 86.4, targetWeightKg: 78, activityLevel: 3 as const, mealsPerDay: 4 as const, weeklyBudgetChf: 90 }
+    const profile = createProfile('Exemple', settings, new Date(`${start}T08:00:00`))
+    update((d) => {
+      let next = addProfile(d, profile)
+      for (let i = 2; i <= 35; i += 2) {
+        const noise = [0.4, -0.3, 0.5, -0.4, 0.1, -0.2][i % 6]
+        next = upsertWeighIn(next, profile.id, { date: addDays(start, i), kg: Math.round((86.4 - (0.5 * i) / 7 + noise) * 10) / 10 })
+      }
+      return next
+    })
+  }
+  return (
+    <button type="button" onClick={create} className="self-start rounded-xl bg-accent-100 px-3 py-2 text-sm font-semibold text-accent-800 hover:bg-accent-200">
+      Explorer avec un profil d’exemple (données fictives)
+    </button>
   )
 }

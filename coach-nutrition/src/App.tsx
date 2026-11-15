@@ -3,7 +3,7 @@
  * Tant qu'aucun profil n'existe, toutes les pages redirigent vers l'onboarding.
  */
 import { lazy, Suspense } from 'react'
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
+import { BrowserRouter, MemoryRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { AppDataProvider, useAppData } from './state/AppDataContext'
 import { Layout } from './components/Layout'
 
@@ -55,14 +55,20 @@ function AppRoutes() {
   )
 }
 
+/**
+ * Routeur : adresses classiques (/menu, /suivi…) sur le site publié ;
+ * navigation en mémoire pour l'aperçu intégré à une autre page (build « VITE_ROUTER=memory »).
+ */
+const Router = import.meta.env.VITE_ROUTER === 'memory' ? MemoryRouter : BrowserRouter
+
 export default function App() {
   return (
     <AppDataProvider>
-      <BrowserRouter>
+      <Router>
         <Suspense fallback={<Loading />}>
           <AppRoutes />
         </Suspense>
-      </BrowserRouter>
+      </Router>
     </AppDataProvider>
   )
 }

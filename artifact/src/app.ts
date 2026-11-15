@@ -5,6 +5,7 @@
 import { clear, h, icon, store } from "./dom";
 import { DEFAULT_FAVORITES, getTab, TABS, type ArtifactTab } from "./tabs";
 import { meteoView, newsView, plannedView, realMadridView } from "./views";
+import { mailView } from "./mail";
 import { calendarView, coursView, studyView } from "./views-juif";
 
 type Theme = "nuit" | "glass" | "brutal" | "dessine";
@@ -123,6 +124,7 @@ function renderView(): void {
   clear(main);
   main.append(view);
   if (id === "reglages") settingsView(view);
+  else if (id === "mail") mailView(view);
   else if (id === "meteo") meteoView(view);
   else if (id === "la-une") newsView(view, "une");
   else if (id === "foot") newsView(view, "foot");
@@ -339,8 +341,15 @@ function settingsView(view: HTMLElement): void {
       h(
         "section",
         { class: "card" },
-        h("div", { class: "card-head" }, h("h2", null, "Données en direct")),
-        h("p", { class: "muted" }, "Cette page ne peut pas appeler Internet elle-même : la météo et les flux des journaux sont lus par ton connecteur Firecrawl, avec ton accord. Chaque lecture consomme un crédit Firecrawl ; les réponses sont gardées 20 à 30 minutes pour en utiliser le moins possible."),
+        h("div", { class: "card-head" }, h("h2", null, "Données et connecteurs")),
+        h("p", { class: "muted" }, "Cette page ne peut pas appeler Internet elle-même. Elle passe par tes connecteurs Claude, avec ton accord à la première utilisation :"),
+        h(
+          "ul",
+          { class: "bullets muted" },
+          h("li", null, "Firecrawl lit la météo, les journaux, Hebcal et Sefaria. Chaque lecture consomme un crédit ; les réponses sont gardées de 15 minutes à plusieurs heures."),
+          h("li", null, "Gmail lit tes mails, enregistre des brouillons et pose des libellés, uniquement quand tu le demandes. Rien n'est jamais envoyé ni supprimé."),
+          h("li", null, "Claude résume, trie et rédige sur ton propre compte : chaque demande compte dans ton usage."),
+        ),
       ),
     ),
   );

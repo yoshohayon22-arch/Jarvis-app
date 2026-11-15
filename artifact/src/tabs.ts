@@ -11,7 +11,7 @@ export interface ArtifactTab {
 }
 
 export const TABS: ArtifactTab[] = [
-  { id: "mail", label: "Mail", short: "Mail", icon: "mail", group: "Communication", planned: [["Mails importants", "Gmail"], ["Tri et priorités", "Gmail"], ["Brouillons à valider", "Gmail"], ["Recherche", "Gmail + Claude"]] },
+  { id: "mail", label: "Mail", short: "Mail", icon: "mail", group: "Communication", live: true, planned: [] },
   { id: "cerveau", label: "Le Cerveau", short: "Cerveau", icon: "brain", group: "Communication", planned: [["Notes et documents", "à définir ensemble"], ["Recherche", "plein texte et sémantique"]] },
   { id: "meteo", label: "Météo Genève", short: "Météo", icon: "cloud-sun", group: "Vie pratique", live: true, planned: [] },
   { id: "budget", label: "Budget", short: "Budget", icon: "wallet", group: "Vie pratique", planned: [["Ce mois-ci", "tes saisies"], ["Abonnements", "tes saisies"], ["Import CSV", "relevé bancaire"]] },

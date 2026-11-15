@@ -45,25 +45,25 @@ export class DataError extends Error {
 
 const mcpPromise: Promise<Mcp | null> = window.claude ? (window.claude.use("mcp") as Promise<Mcp | null>).catch(() => null) : Promise.resolve(null);
 
-function explain(error: McpError): DataError {
+function explain(error: McpError, server = SERVER): DataError {
   const code = error.code ?? "upstream_error";
   switch (code) {
     case "server_not_connected":
     case "selection_required":
     case "server_not_found":
-      return new DataError("Le connecteur Firecrawl n'est pas disponible. Ajoute-le dans claude.ai : Réglages → Connecteurs.", code);
+      return new DataError(`Le connecteur ${server} n'est pas disponible. Ajoute-le dans claude.ai : Réglages → Connecteurs.`, code);
     case "needs_reauth":
-      return new DataError("Le connecteur Firecrawl doit être reconnecté dans claude.ai : Réglages → Connecteurs.", code);
+      return new DataError(`Le connecteur ${server} doit être reconnecté dans claude.ai : Réglages → Connecteurs.`, code);
     case "not_in_manifest":
     case "approval_required":
     case "consent_required":
     case "not_granted":
-      return new DataError("Tu n'as pas autorisé Firecrawl pour cette page. Autorise-le pour afficher les données en direct.", code);
+      return new DataError(`Tu n'as pas autorisé ${server} pour cette page. Autorise-le pour afficher ces données.`, code);
     case "blocked_by_policy":
-      return new DataError("L'utilisation de Firecrawl depuis cette page est bloquée par les règles de ton organisation.", code);
+      return new DataError(`L'utilisation de ${server} depuis cette page est bloquée par les règles de ton organisation.`, code);
     case "server_unavailable":
     case "rate_limited":
-      return new DataError("Firecrawl ne répond pas pour le moment. Réessaie dans un instant.", code);
+      return new DataError(`${server} ne répond pas pour le moment. Réessaie dans un instant.`, code);
     case "tool_error":
       return new DataError("la source n'a pas pu être lue", code);
     default:
@@ -72,6 +72,26 @@ function explain(error: McpError): DataError {
 }
 
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+/**
+ * Appelle un outil d'un connecteur et renvoie sa réponse (« payload »).
+ * `retry` : une seule nouvelle tentative si le connecteur l'indique — à réserver aux lectures.
+ */
+export async function callConnector<T>(server: string, tool: string, input: unknown, options: { cache?: unknown; retry?: boolean } = {}, retried = false): Promise<T> {
+  const mcp = await mcpPromise;
+  if (!mcp) throw new DataError(`Cette fonction n'est disponible que dans Claude, avec le connecteur ${server}.`, "no_mcp");
+  try {
+    const result = await mcp.callTool(server, tool, input, options.cache === undefined ? undefined : { cache: options.cache });
+    return result.payload as T;
+  } catch (e) {
+    const error = (e ?? {}) as McpError;
+    if (options.retry && error.retryable && !retried) {
+      await wait(Math.min(error.retryAfterMs ?? 1500, 8000) + Math.random() * 500);
+      return callConnector<T>(server, tool, input, options, true);
+    }
+    throw e instanceof DataError ? e : explain(error, server);
+  }
+}
 
 /** Lit le contenu brut d'une adresse publique via Firecrawl. */
 async function readUrl(url: string, retried = false): Promise<string> {

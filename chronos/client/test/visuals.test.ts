@@ -1,3 +1,5 @@
+import { existsSync } from "node:fs";
+import villageJson from "../data/village-manifest.json";
 import { describe, expect, it } from "vitest";
 import layoutJson from "../data/packs/medieval/layout.json";
 import visualsJson from "../data/packs/medieval/visuals.json";
@@ -18,6 +20,7 @@ const visuals = visualsJson as unknown as {
 const manifest = manifestJson as unknown as Record<string, Record<string, Bounds>>;
 
 function bounds(path: string): Bounds | undefined {
+  if (path.startsWith("../village/")) return (villageJson as unknown as Record<string, Bounds>)[path.slice(11)];
   const [dir, name] = path.split("/");
   return manifest[dir!]?.[name!];
 }
@@ -33,7 +36,11 @@ describe("pack visuals ↔ imported assets", () => {
       ...Object.values(visuals.scenery).flatMap((s) => s.models),
       ...Object.values(visuals.characters).map((c) => c.model),
     ];
-    for (const p of paths) expect(bounds(p), p).toBeTruthy();
+    for (const p of paths) {
+      // "../folder/name" points at a sibling asset folder (converted packs without a manifest).
+      if (p.startsWith("../")) expect(existsSync(new URL(`../public/assets/${p.slice(3)}.glb`, import.meta.url)), p).toBe(true);
+      else expect(bounds(p), p).toBeTruthy();
+    }
   });
 
   it("gives every building a model", () => {
@@ -44,8 +51,11 @@ describe("pack visuals ↔ imported assets", () => {
     for (const b of layout.buildings) {
       const v = visuals.buildings[b.id]!;
       const bb = bounds(v.model)!;
-      const w = (bb.max[0]! - bb.min[0]!) * v.scale;
-      const d = (bb.max[2]! - bb.min[2]!) * v.scale;
+      const turned = !!(v as { yaw?: number }).yaw;
+      const mw = (bb.max[0]! - bb.min[0]!) * v.scale;
+      const md = (bb.max[2]! - bb.min[2]!) * v.scale;
+      const w = turned ? md : mw;
+      const d = turned ? mw : md;
       expect(Math.abs(w - b.size[0]), `${b.id} width`).toBeLessThan(0.1);
       expect(Math.abs(d - b.size[1]), `${b.id} depth`).toBeLessThan(0.1);
     }

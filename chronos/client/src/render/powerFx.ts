@@ -163,6 +163,17 @@ export class PowerFxView {
     }
   }
 
+  /** A blow landing: a short white burst at chest height. */
+  impact(x: number, z: number): void {
+    const mat = new THREE.MeshBasicMaterial({ color: 0xfff2d0, transparent: true, depthWrite: false, fog: false, blending: THREE.AdditiveBlending });
+    const burst = new THREE.Mesh(new THREE.IcosahedronGeometry(0.22, 1), mat);
+    burst.position.set(x, 1.25, z);
+    this.add(burst, 0.22, (t) => {
+      burst.scale.setScalar(1 + t * 2.4);
+      mat.opacity = 0.9 * (1 - t);
+    });
+  }
+
   /**
    * Echo of the Past: translucent figures replay where each event happened.
    * The author stands tall; the one it was done to is paler; erased moments flicker.

@@ -25,6 +25,7 @@ interface ClipInfo {
 interface BakedLook {
   geometry: THREE.BufferGeometry;
   texture: THREE.DataTexture;
+  normals: THREE.DataTexture;
   vertexCount: number;
   clips: Record<AgentAnim, ClipInfo>;
   map: THREE.Texture | null;
@@ -81,6 +82,10 @@ function bakeLook(model: LoadedModel, look: LookDef, def: CrowdDef): BakedLook {
 
   const height = Math.ceil((total * vertexCount) / VAT_WIDTH);
   const raw = new Float32Array(VAT_WIDTH * height * 4);
+  // Skinned normals too: lighting must follow the pose, not the bind pose.
+  const rawN = new Float32Array(VAT_WIDTH * height * 4);
+  const n0 = new THREE.Vector3();
+  const nm = new THREE.Matrix3();
   const v = new THREE.Vector3();
   let minY = Infinity;
   let maxY = -Infinity;
@@ -96,8 +101,19 @@ function bakeLook(model: LoadedModel, look: LookDef, def: CrowdDef): BakedLook {
         const sk = m as THREE.SkinnedMesh;
         if (sk.isSkinnedMesh) sk.skeleton.update();
         const count = m.geometry.getAttribute("position").count;
+        const posAttr = m.geometry.getAttribute("position");
+        const norAttr = m.geometry.getAttribute("normal");
+        nm.getNormalMatrix(m.matrixWorld);
         for (let i = 0; i < count; i++) {
-          m.getVertexPosition(i, v).applyMatrix4(m.matrixWorld);
+          // A point slightly along the normal, skinned like the vertex, gives the skinned normal.
+          n0.fromBufferAttribute(posAttr, i).addScaledVector(v.fromBufferAttribute(norAttr, i), 0.01);
+          if (sk.isSkinnedMesh) sk.applyBoneTransform(i, n0);
+          m.getVertexPosition(i, v);
+          n0.sub(v).applyMatrix3(nm).normalize();
+          v.applyMatrix4(m.matrixWorld);
+          rawN[offset] = n0.x;
+          rawN[offset + 1] = n0.y;
+          rawN[offset + 2] = n0.z;
           raw[offset] = v.x;
           raw[offset + 1] = v.y;
           raw[offset + 2] = v.z;
@@ -121,22 +137,43 @@ function bakeLook(model: LoadedModel, look: LookDef, def: CrowdDef): BakedLook {
   texture.minFilter = texture.magFilter = THREE.NearestFilter;
   texture.generateMipmaps = false;
   texture.needsUpdate = true;
+  const dataN = new Uint16Array(rawN.length);
+  for (let i = 0; i < rawN.length; i++) dataN[i] = THREE.DataUtils.toHalfFloat(rawN[i] as number);
+  const normals = new THREE.DataTexture(dataN, VAT_WIDTH, height, THREE.RGBAFormat, THREE.HalfFloatType);
+  normals.minFilter = normals.magFilter = THREE.NearestFilter;
+  normals.generateMipmaps = false;
+  normals.needsUpdate = true;
 
   // Bounds for the rest pose are meaningless once animated; culling is disabled on the mesh.
   const map = ((meshes[0] as THREE.Mesh).material as THREE.MeshStandardMaterial).map ?? null;
-  return { geometry, texture, vertexCount, clips, map };
+  return { geometry, texture, normals, vertexCount, clips, map };
 }
 
 const VAT_PARS = /* glsl */ `
 attribute float vid;
 attribute vec3 aAnim; // x: first frame of the clip, y: frame count, z: phase 0..1
 uniform highp sampler2D uVat;
+uniform highp sampler2D uVatN;
 uniform float uVerts;
 vec3 vatFetch(float frame) {
   float idx = frame * uVerts + vid;
   float y = floor(idx / ${VAT_WIDTH}.0);
   return texelFetch(uVat, ivec2(int(idx - y * ${VAT_WIDTH}.0), int(y)), 0).xyz;
+}
+vec3 vatNormal(float frame) {
+  float idx = frame * uVerts + vid;
+  float y = floor(idx / ${VAT_WIDTH}.0);
+  return texelFetch(uVatN, ivec2(int(idx - y * ${VAT_WIDTH}.0), int(y)), 0).xyz;
 }`;
+
+const VAT_NORMAL = /* glsl */ `
+float vatNF = aAnim.z * aAnim.y;
+float vatNF0 = floor(vatNF);
+float vatNF1 = mod(vatNF0 + 1.0, aAnim.y);
+vec3 objectNormal = normalize(mix(vatNormal(aAnim.x + vatNF0), vatNormal(aAnim.x + vatNF1), vatNF - vatNF0));
+#ifdef USE_TANGENT
+  vec3 objectTangent = vec3(tangent.xyz);
+#endif`;
 
 const VAT_BEGIN = /* glsl */ `
 float vatF = aAnim.z * aAnim.y;
@@ -147,9 +184,11 @@ vec3 transformed = mix(vatFetch(aAnim.x + vatF0), vatFetch(aAnim.x + vatF1), vat
 function patchVat(material: THREE.Material, baked: BakedLook, key: string): void {
   material.onBeforeCompile = (shader) => {
     shader.uniforms.uVat = { value: baked.texture };
+    shader.uniforms.uVatN = { value: baked.normals };
     shader.uniforms.uVerts = { value: baked.vertexCount };
     shader.vertexShader = shader.vertexShader
       .replace("#include <common>", `#include <common>\n${VAT_PARS}`)
+      .replace("#include <beginnormal_vertex>", VAT_NORMAL)
       .replace("#include <begin_vertex>", VAT_BEGIN);
   };
   material.customProgramCacheKey = () => key;
@@ -223,7 +262,7 @@ export class Crowd {
       if (!look) throw new Error(`Unknown look "${lookId}"`);
       const model = await lib.load(`${assetsBase}${look.model}.glb`);
       const baked = bakeLook(model, look, def);
-      const material = new THREE.MeshStandardMaterial({ map: baked.map, flatShading: true, roughness: 0.85, metalness: 0 });
+      const material = new THREE.MeshStandardMaterial({ map: baked.map, roughness: 0.85, metalness: 0, alphaTest: 0.5, side: THREE.DoubleSide });
       patchVat(material, baked, "chronos-crowd");
       // One spare instance per look for the player's false face.
       const mesh = new THREE.InstancedMesh(baked.geometry, material, list.length + 1);

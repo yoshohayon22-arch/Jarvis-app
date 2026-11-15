@@ -241,6 +241,7 @@ function castPower(id: string): void {
     else hud.toast(CAST_FAILURES[r.reason ?? ""] ?? "Impossible.");
     return;
   }
+  animatedKael?.gesture("cast", 0.5);
   if (id === "rewind") hud.flash("time");
   if (id === "echo") showEcho();
   const changes = FACTIONS.map((f) => ({ f, d: social.reputation.factions[f] - before[f] }))
@@ -638,6 +639,16 @@ function playerAct(actId: string, target: Agent): void {
     clock.totalMinutes,
   );
   if (actId === "pickpocket") coins += (1 + Math.floor(social.rng.next() * 5)) * powers.theftMultiplier;
+  if (actId === "assault") {
+    // The blow itself: Kael swings, the victim staggers back.
+    player.facing = Math.atan2(target.x - player.x, target.z - player.z);
+    animatedKael?.gesture("attack", 0.45);
+    const k = 0.7 / d;
+    const nx = target.x - toPlayerX * k;
+    const nz = target.z - toPlayerZ * k;
+    if (agents.places.nav.isWalkable(nx, nz)) Object.assign(target, { x: nx, z: nz });
+    powerFx.impact(target.x, target.z);
+  }
   // Striking or threatening someone breaks the Shadow.
   if (actId === "assault" || actId === "intimidate" || actId === "blackmail") powers.reveal();
   if (blackmail) {

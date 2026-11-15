@@ -20,6 +20,10 @@ export interface DetailTextures {
   cobble: THREE.Texture;
   ground: THREE.Texture;
   soil: THREE.Texture;
+  /** Photographic ground albedo (Poly Haven, CC0). */
+  grassAlbedo: THREE.Texture;
+  dirtAlbedo: THREE.Texture;
+  cobbleAlbedo: THREE.Texture;
 }
 
 export async function loadDetailTextures(manager?: THREE.LoadingManager): Promise<DetailTextures> {
@@ -34,7 +38,15 @@ export async function loadDetailTextures(manager?: THREE.LoadingManager): Promis
   const [stone, wood, foliage, cobble, ground, soil] = await Promise.all(
     ["stone", "wood", "bark", "pebbles", "ground", "soil"].map(load),
   );
-  return { stone: stone!, wood: wood!, foliage: foliage!, cobble: cobble!, ground: ground!, soil: soil! };
+  const albedo = async (name: string) => {
+    const t = await loader.loadAsync(`${ASSET_ROOT}ground/${name}.webp`);
+    t.wrapS = t.wrapT = THREE.RepeatWrapping;
+    t.colorSpace = THREE.SRGBColorSpace;
+    t.anisotropy = 8;
+    return t;
+  };
+  const [grassAlbedo, dirtAlbedo, cobbleAlbedo] = await Promise.all(["grass", "dirt", "cobble"].map(albedo));
+  return { stone: stone!, wood: wood!, foliage: foliage!, cobble: cobble!, ground: ground!, soil: soil!, grassAlbedo: grassAlbedo!, dirtAlbedo: dirtAlbedo!, cobbleAlbedo: cobbleAlbedo! };
 }
 
 const COMMON_GLSL = /* glsl */ `
@@ -169,6 +181,9 @@ export function createTerrainMaterial(tex: DetailTextures | null): THREE.MeshSta
     shader.uniforms.uSoil = { value: tex.soil };
     shader.uniforms.uCobble = { value: tex.cobble };
     shader.uniforms.uDetailStrength = { value: 0.55 };
+    shader.uniforms.uGrassA = { value: tex.grassAlbedo };
+    shader.uniforms.uDirtA = { value: tex.dirtAlbedo };
+    shader.uniforms.uCobbleA = { value: tex.cobbleAlbedo };
     shader.vertexShader = shader.vertexShader
       .replace(
         "#include <common>",
@@ -178,7 +193,7 @@ export function createTerrainMaterial(tex: DetailTextures | null): THREE.MeshSta
     shader.fragmentShader = shader.fragmentShader
       .replace(
         "#include <common>",
-        `#include <common>\nuniform sampler2D uGround;\nuniform sampler2D uSoil;\nuniform sampler2D uCobble;\nuniform float uDetailStrength;\nvarying vec3 vSurface;\n${COMMON_GLSL}`,
+        `#include <common>\nuniform sampler2D uGround;\nuniform sampler2D uSoil;\nuniform sampler2D uCobble;\nuniform sampler2D uGrassA;\nuniform sampler2D uDirtA;\nuniform sampler2D uCobbleA;\nuniform float uDetailStrength;\nvarying vec3 vSurface;\n${COMMON_GLSL}`,
       )
       .replace(
         "#include <color_fragment>",
@@ -194,7 +209,15 @@ export function createTerrainMaterial(tex: DetailTextures | null): THREE.MeshSta
   vec3 soilVar = vec3(0.86 + 0.22 * n2) * mix(0.8, 1.05, n1) * (0.9 + 0.15 * step(0.78, n3));
   // Paving: stone-to-stone tint variation.
   vec3 cobbleVar = vec3(0.8 + 0.3 * dNoise(floor(p * 3.2) + 0.5)) * (0.9 + 0.12 * n2);
-  diffuseColor.rgb *= grassVar * sW.x + soilVar * sW.y + cobbleVar * sW.z;`,
+  diffuseColor.rgb *= grassVar * sW.x + soilVar * sW.y + cobbleVar * sW.z;
+  // Photographic albedo, two scales blended to hide the tiling; the painted color only tints it.
+  vec2 gUv = p.xz;
+  vec3 aG = mix(texture2D(uGrassA, gUv * 0.31).rgb, texture2D(uGrassA, gUv * 0.073 + 0.37).rgb, 0.45);
+  vec3 aD = mix(texture2D(uDirtA, gUv * 0.27).rgb, texture2D(uDirtA, gUv * 0.061 + 0.21).rgb, 0.4);
+  vec3 aC = texture2D(uCobbleA, gUv * 0.22).rgb;
+  vec3 photo = aG * sW.x * 1.25 + aD * sW.y * 1.15 + aC * sW.z * 1.2;
+  float paintLum = dot(diffuseColor.rgb, vec3(0.3, 0.55, 0.15));
+  diffuseColor.rgb = mix(diffuseColor.rgb, photo * (0.55 + 1.6 * paintLum), 0.72);`,
       )
       .replace(
         "#include <roughnessmap_fragment>",

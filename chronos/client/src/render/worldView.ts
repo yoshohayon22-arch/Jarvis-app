@@ -16,7 +16,7 @@ type Range = number | [number, number];
 
 export interface VisualsDef {
   assetsBase: string;
-  buildings: Record<string, { model: string; scale: number }>;
+  buildings: Record<string, { model: string; scale: number; yaw?: number }>;
   props: Record<
     string,
     { models?: string[]; variants?: Record<string, string>; scale?: Range; yaw?: number; placeholder?: string }
@@ -45,7 +45,7 @@ export interface CharacterVisual {
   model: string;
   height: number;
   hiddenNodes: string[];
-  clips: Record<"idle" | "walk" | "run" | "dodge", string>;
+  clips: Record<"idle" | "walk" | "run" | "dodge", string> & Partial<Record<"attack" | "cast", string>>;
   walkSpeed: number;
   runSpeed: number;
 }
@@ -107,7 +107,7 @@ export async function buildWorldView(
       continue;
     }
     buildingModel.set(b.id, path(v.model));
-    add(v.model, { x: b.pos[0], z: b.pos[1], yaw: ((b.rot ?? 0) * Math.PI) / 2, scale: v.scale });
+    add(v.model, { x: b.pos[0], z: b.pos[1], yaw: ((b.rot ?? 0) * Math.PI) / 2 + (v.yaw ?? 0), scale: v.scale });
     if (DOOR_LIGHT_KINDS.has(b.kind)) lightSpots.push({ pos: worldPoint(b, 0, 2.4, b.size[1] / 2 + 1.2), kind: "door" });
   }
 

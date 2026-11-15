@@ -1,0 +1,3 @@
+Buildings: medieval village models by Daniel Andersson, CC0 1.0 (public domain), via OpenGameArt
+(medieval-house-pack, medieval-tavern, medieval-church, medieval-blacksmith, medieval-gatehouse, medieval-well, medieval-waterpowered-sawmill).
+https://opengameart.org/users/daniel-andersson — converted from .blend to glTF for this game.

@@ -37,6 +37,25 @@ export class AnimatedCharacter {
       }
       if (m.isMesh) m.frustumCulled = false; // skinned bounds are bind-pose only
     });
+    // Skinned meshes: measure the posed vertices (the bind geometry may live in another scale).
+    const sv = new THREE.Vector3();
+    let lo = Infinity;
+    let hi = -Infinity;
+    body.traverse((o) => {
+      const sk = o as THREE.SkinnedMesh;
+      if (!sk.isSkinnedMesh || !isVisibleChain(sk)) return;
+      sk.skeleton.update();
+      const count = sk.geometry.getAttribute("position").count;
+      for (let i = 0; i < count; i += 3) {
+        sk.getVertexPosition(i, sv).applyMatrix4(sk.matrixWorld);
+        lo = Math.min(lo, sv.y);
+        hi = Math.max(hi, sv.y);
+      }
+    });
+    if (hi > lo) {
+      box.min.y = lo;
+      box.max.y = hi;
+    }
     const h = box.max.y - box.min.y;
     body.scale.setScalar(h > 0.1 ? def.height / h : 1);
     this.root.add(body);
@@ -46,7 +65,7 @@ export class AnimatedCharacter {
       const clip = THREE.AnimationClip.findByName(model.animations, clipName);
       if (!clip) continue;
       const action = this.mixer.clipAction(clip);
-      if (key === "dodge") {
+      if (key === "dodge" || key === "attack" || key === "cast") {
         action.setLoop(THREE.LoopOnce, 1);
         action.clampWhenFinished = true;
       }
@@ -55,13 +74,14 @@ export class AnimatedCharacter {
     this.play("idle", 0);
 
     if (withShard) {
-      const hand = body.getObjectByName("handslot.r") ?? body.getObjectByName("hand.r");
+      const hand = body.getObjectByName("handslot.r") ?? body.getObjectByName("hand.r") ?? body.getObjectByName("wep_pos_R") ?? body.getObjectByName("palm_R");
       if (hand) {
         const shard = new THREE.Mesh(
           new THREE.OctahedronGeometry(0.07, 0),
           new THREE.MeshStandardMaterial({ color: PALETTE.material.shardCore, emissive: PALETTE.light.shard, emissiveIntensity: 3 }),
         );
-        shard.scale.setScalar(1 / body.scale.x);
+        hand.updateWorldMatrix(true, false);
+        shard.scale.setScalar(1 / (hand.getWorldScale(new THREE.Vector3()).x || 1));
         hand.add(shard);
         const light = new THREE.PointLight(PALETTE.light.shard, 0.8, 3.5, 2);
         hand.add(light);
@@ -114,12 +134,26 @@ export class AnimatedCharacter {
     this.current = key;
   }
 
+  /** Plays a one-shot gesture (a blow, a spell) over the movement clips. */
+  gesture(key: "attack" | "cast", seconds = 0.5): void {
+    const a = this.actions.get(key);
+    if (!a) return;
+    this.current = null;
+    this.mixer.stopAllAction();
+    a.reset().setEffectiveWeight(1);
+    a.timeScale = a.getClip().duration / seconds;
+    a.play();
+    this.current = key;
+    this.dodgeHold = seconds;
+  }
+
   update(dt: number, speed: number, state: MoveState): void {
     this.time += dt;
     if (state === "dodge" && this.current !== "dodge") {
       this.play("dodge", 0.08);
       const a = this.actions.get("dodge");
       if (a) a.timeScale = a.getClip().duration / 0.55;
+      a?.reset().play();
       this.dodgeHold = 0.42;
     }
     this.dodgeHold -= dt;

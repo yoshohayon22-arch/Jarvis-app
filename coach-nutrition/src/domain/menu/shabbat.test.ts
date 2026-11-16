@@ -127,3 +127,31 @@ describe('Jeûne intermittent (2 repas)', () => {
     }
   })
 })
+
+describe('Délai de 4 heures entre lait et viande', () => {
+  it('viande → lait : 4 h minimum', () => {
+    expect(canFollow('bassari', 'halavi', 3.5, 4)).toBe(false) // déjeuner 12h30 → collation 16h
+    expect(canFollow('bassari', 'halavi', 4, 4)).toBe(true)
+  })
+  it('lait → viande : seulement si l’option est activée', () => {
+    expect(canFollow('halavi', 'bassari', 2.5, 4)).toBe(true)
+    expect(canFollow('halavi', 'bassari', 2.5, 4, true)).toBe(false) // collation 10h → déjeuner 12h30
+    expect(canFollow('halavi', 'bassari', 5, 4, true)).toBe(true) // petit-déjeuner 7h30 → déjeuner 12h30
+  })
+  for (const waitAfterMilk of [false, true]) {
+    for (const seed of [1, 3, 8]) {
+      it(`menu de 5 repas, délai 4 h${waitAfterMilk ? ' dans les deux sens' : ''} (graine ${seed})`, () => {
+        const c = ctx({ mealsPerDay: 5, kosher: { waitAfterMeatHours: 4, separateFishAndMeat: true, waitAfterMilk } }, seed)
+        const plan = generateWeek(c)
+        const byId = planLookup(plan, RECIPES)
+        const seq = plan.days.flatMap((d, i) => d.meals.map((m) => ({ h: SLOT_HOUR[m.slot] + 24 * i, k: byId.get(m.recipeId)!.kashrut, id: m.recipeId })))
+        for (let i = 1; i < seq.length; i++) {
+          expect(canFollow(seq[i - 1].k, seq[i].k, seq[i].h - seq[i - 1].h, 4, waitAfterMilk), `${seq[i - 1].id} → ${seq[i].id}`).toBe(true)
+        }
+        for (const d of plan.days) {
+          expect(Math.abs(daySummary(d, byId, plan.lowBudget).kcal / c.targets.kcal - 1)).toBeLessThanOrEqual(KCAL_TOLERANCE)
+        }
+      })
+    }
+  }
+})

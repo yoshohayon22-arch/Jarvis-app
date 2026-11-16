@@ -86,11 +86,13 @@ export const MEAL_HOURS: Record<'petit-dej' | 'collation-matin' | 'dejeuner' | '
 
 /**
  * Un repas peut-il suivre le précédent selon les règles casher ?
+ * Option `waitAfterMilk` : le même délai s'applique aussi du lait vers la viande.
  * Après du bassari, il faut attendre `waitHours` avant un repas halavi.
  * (Dans l'autre sens — viande après lait — un simple rinçage de bouche suffit pour la plupart des traditions.)
  */
-export function canFollow(previous: Kashrut, next: Kashrut, hoursBetween: number, waitHours: number): boolean {
+export function canFollow(previous: Kashrut, next: Kashrut, hoursBetween: number, waitHours: number, waitAfterMilk = false): boolean {
   if (previous === 'bassari' && next === 'halavi') return hoursBetween >= waitHours
+  if (waitAfterMilk && previous === 'halavi' && next === 'bassari') return hoursBetween >= waitHours
   return true
 }
 

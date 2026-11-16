@@ -21,7 +21,7 @@ export type Restriction =
   | 'sans-arachides'
 
 /** Délai d'attente (en heures) après un repas bassari avant de consommer du lait. */
-export type KosherWaitHours = 0 | 1 | 3 | 6
+export type KosherWaitHours = 0 | 1 | 3 | 4 | 6
 
 export type GoalMode = 'perte' | 'prise' | 'maintien'
 
@@ -40,6 +40,8 @@ export interface ShabbatOptions {
 export interface KosherOptions {
   /** Heures d'attente après un repas bassari avant un repas ou une collation halavi. */
   waitAfterMeatHours: KosherWaitHours
+  /** Appliquer aussi le délai dans l'autre sens : après un repas lacté, avant de la viande. */
+  waitAfterMilk?: boolean
   /** Ne jamais mélanger poisson et viande dans un même plat. */
   separateFishAndMeat: boolean
 }

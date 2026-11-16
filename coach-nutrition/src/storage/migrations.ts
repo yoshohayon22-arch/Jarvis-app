@@ -19,7 +19,7 @@ export const DEFAULT_SETTINGS: ProfileSettings = {
   activityLevel: 2,
   mealsPerDay: 3,
   restrictions: [],
-  kosher: { waitAfterMeatHours: 3, separateFishAndMeat: true },
+  kosher: { waitAfterMeatHours: 3, separateFishAndMeat: true, waitAfterMilk: false },
   shabbat: { enabled: false, festiveMeals: true, noCookingSaturday: true },
   dislikedFoods: [],
   weeklyBudgetChf: null,

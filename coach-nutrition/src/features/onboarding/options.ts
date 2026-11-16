@@ -51,5 +51,6 @@ export const KOSHER_WAIT_OPTIONS: { value: KosherWaitHours; label: string; descr
   { value: 0, label: 'Aucun délai', description: 'Seulement : pas de mélange dans le même repas.' },
   { value: 1, label: '1 heure', description: 'Tradition néerlandaise.' },
   { value: 3, label: '3 heures', description: 'Tradition allemande.' },
+  { value: 4, label: '4 heures', description: 'Délai intermédiaire, suivi dans certaines familles.' },
   { value: 6, label: '6 heures', description: 'Tradition la plus répandue.' },
 ]

@@ -166,6 +166,14 @@ export function StepFields({ step, draft, set, errors, editMode }: StepProps) {
                 value={draft.kosherWait}
                 onChange={(v) => set({ kosherWait: v as KosherWaitHours })}
               />
+              {draft.kosherWait > 0 && (
+                <Toggle
+                  label="Attendre aussi après un repas lacté"
+                  description={`Le délai de ${draft.kosherWait} h s’applique aussi du lait (halavi) vers la viande (bassari).`}
+                  checked={draft.kosherWaitAfterMilk}
+                  onChange={(kosherWaitAfterMilk) => set({ kosherWaitAfterMilk })}
+                />
+              )}
               <Toggle
                 label="Ne pas mélanger poisson et viande"
                 description="Jamais de poisson et de viande dans un même plat."

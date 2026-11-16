@@ -102,7 +102,7 @@ export function buildPools(ctx: GeneratorContext): Record<MealSlot, Recipe[]> {
 function kosherOk(ctx: GeneratorContext, prev: { recipe: Recipe; hour: number } | null, next: Recipe, hour: number): boolean {
   if (!ctx.settings.restrictions.includes('casher') || !prev) return true
   const gap = hour >= prev.hour ? hour - prev.hour : hour + 24 - prev.hour
-  return canFollow(prev.recipe.kashrut, next.kashrut, gap, ctx.settings.kosher.waitAfterMeatHours)
+  return canFollow(prev.recipe.kashrut, next.kashrut, gap, ctx.settings.kosher.waitAfterMeatHours, ctx.settings.kosher.waitAfterMilk)
 }
 
 interface DayResult {

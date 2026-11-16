@@ -5,6 +5,7 @@
 import { clear, h, icon, store } from "./dom";
 import { DEFAULT_FAVORITES, getTab, TABS, type ArtifactTab } from "./tabs";
 import { meteoView, newsView, plannedView } from "./views";
+import { accueilView } from "./accueil";
 import { openAsk } from "./assistant";
 import { budgetView } from "./budget";
 import { cerveauView } from "./cerveau";
@@ -68,10 +69,12 @@ function applyTheme(theme: Theme, origin?: { x: number; y: number }): void {
 }
 
 // ---------- Navigation ----------
+const HOME = { id: "accueil", label: "Aujourd'hui", icon: "house" };
 const visibleTabs = () => TABS.filter((t) => !state.hidden.includes(t.id));
 const currentId = () => {
   const id = location.hash.replace(/^#/, "");
-  return id === "reglages" || getTab(id) ? id : (state.favorites.find((f) => !state.hidden.includes(f)) ?? visibleTabs()[0]?.id ?? "reglages");
+  // Sans onglet demandé, on arrive sur la page d'accueil « Aujourd'hui ».
+  return id === "reglages" || id === HOME.id || getTab(id) ? id : HOME.id;
 };
 const go = (id: string) => {
   if (location.hash === `#${id}`) renderAll();
@@ -96,6 +99,7 @@ function renderChrome(): void {
   for (const t of visibleTabs()) groups.set(t.group, [...(groups.get(t.group) ?? []), t]);
   sidebar.replaceChildren(
     h("p", { class: "brand" }, "Dashboard"),
+    h("div", { class: "side-home" }, navLink(HOME, active === HOME.id, "side-link")),
     h(
       "nav",
       { class: "side-scroll" },
@@ -114,7 +118,7 @@ function renderChrome(): void {
   // « Demander à Claude » : une question sur ce que l'onglet affiche.
   const askBtn: HTMLButtonElement | null = tab ? h("button", { class: "icon-btn boxed ask-btn", type: "button", "aria-label": `Demander à Claude à propos de ${tab.label}`, title: "Demander à Claude", onclick: () => openAsk(tab.id, tab.label, main, askBtn as HTMLButtonElement) }, icon("sparkles")) : null;
   header.replaceChildren(
-    h("h1", null, active === "reglages" ? "Réglages" : (tab?.label ?? "Dashboard")),
+    h("h1", null, active === "reglages" ? "Réglages" : active === HOME.id ? HOME.label : (tab?.label ?? "Dashboard")),
     h("button", { class: "search-btn boxed", type: "button", "aria-label": "Rechercher (Ctrl + K)", onclick: openPalette }, icon("search"), h("span", { class: "wide-only" }, "Rechercher…"), h("kbd", { class: "wide-only" }, "Ctrl K")),
     ...(askBtn ? [askBtn] : []),
     themeBtn,
@@ -124,8 +128,9 @@ function renderChrome(): void {
 
   // Barre du bas (téléphone) : favoris + « Plus ».
   const favorites = state.favorites.map(getTab).filter((t): t is ArtifactTab => Boolean(t) && !state.hidden.includes(t!.id));
-  const inMore = !favorites.some((f) => f.id === active);
+  const inMore = active !== HOME.id && !favorites.some((f) => f.id === active);
   bottom.replaceChildren(
+    navLink(HOME, active === HOME.id, "bottom-link", "Accueil"),
     ...favorites.map((t) => navLink(t, t.id === active, "bottom-link", t.short)),
     h("button", { class: `bottom-link${inMore ? " active" : ""}`, type: "button", "aria-haspopup": "dialog", onclick: openMore }, icon("ellipsis"), h("span", null, "Plus")),
   );
@@ -143,6 +148,7 @@ function renderView(): void {
   clear(main);
   main.append(view);
   if (id === "reglages") settingsView(view);
+  else if (id === HOME.id) accueilView(view);
   else if (id === "mail") mailView(view);
   else if (id === "budget") budgetView(view);
   else if (id === "cerveau") cerveauView(view);
@@ -232,6 +238,7 @@ function openMore(): void {
   const closeBtn = h("button", { class: "icon-btn", type: "button", "aria-label": "Fermer", onclick: close }, icon("x"));
   sheet.append(
     h("div", { class: "card-head" }, h("h2", null, "Tous les onglets"), closeBtn),
+    h("a", { href: `#${HOME.id}`, class: `side-link${active === HOME.id ? " active" : ""}`, onclick: close }, icon(HOME.icon), h("span", null, HOME.label)),
     ...[...groups].map(([group, tabs]) =>
       h(
         "section",

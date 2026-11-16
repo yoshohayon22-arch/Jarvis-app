@@ -152,6 +152,9 @@ export interface Cached<T> {
   at: number;
 }
 
+/** Lit une donnée déjà en mémoire, sans rien charger (aucun crédit dépensé). */
+export const peekCache = <T>(key: string): Cached<T> | null => store.get<Cached<T>>(`dash-cache:${key}`);
+
 const inFlight = new Map<string, Promise<unknown>>();
 
 export async function cachedLoad<T>(key: string, ttlMs: number, load: () => Promise<T>, force = false): Promise<Cached<T>> {

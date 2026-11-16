@@ -629,3 +629,22 @@ tr.mine td:first-child { padding-left: 6px; }
 .fiche .kv > span:first-child { flex: none; width: 92px; }
 .fiche .kv > span:last-child { text-align: right; overflow-wrap: anywhere; }
 .form-grid.wide-fields { grid-template-columns: repeat(auto-fill, minmax(min(100%, 220px), 1fr)); }
+
+/* ---- Page d'accueil « Aujourd'hui » ---- */
+.side-home { padding: 0 12px 4px; }
+.home-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 250px), 1fr)); gap: 16px; }
+.home-tile { gap: 12px; padding: 18px 20px; text-decoration: none; color: inherit; min-height: 150px; transition: transform 220ms var(--glide); animation: rise-sm 460ms var(--glide) backwards; }
+.home-tile:nth-child(2) { animation-delay: 50ms; } .home-tile:nth-child(3) { animation-delay: 100ms; } .home-tile:nth-child(4) { animation-delay: 150ms; }
+.home-tile:nth-child(5) { animation-delay: 200ms; } .home-tile:nth-child(6) { animation-delay: 250ms; } .home-tile:nth-child(n + 7) { animation-delay: 300ms; }
+@media (hover: hover) { .home-tile:hover { transform: translateY(-3px); } .home-tile:hover .home-go { transform: translateX(4px); opacity: 1; } }
+.home-tile:active { transform: scale(0.985); }
+.home-go { margin-left: auto; opacity: 0.5; transition: transform 220ms var(--spring), opacity 200ms; display: inline-flex; }
+.home-body { display: flex; flex-direction: column; gap: 6px; min-width: 0; animation: fade 300ms ease-out backwards; }
+.home-big { font-family: var(--ff-heading); font-weight: var(--heading-weight); font-size: 30px; line-height: 1.1; letter-spacing: var(--heading-tracking); }
+.home-row { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.home-wx { width: 44px; height: 44px; }
+.home-vs { font-family: var(--ff-heading); font-weight: var(--heading-weight); font-size: 20px; }
+.home-list { display: flex; flex-direction: column; gap: 6px; font-size: 13.5px; line-height: 1.4; }
+.home-list li { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.briefing { font-size: 15.5px; line-height: 1.65; max-width: 70ch; }
+@media (max-width: 420px) { .bottom-link { font-size: 10px; } }

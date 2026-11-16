@@ -27,7 +27,7 @@ interface Projet {
   maj: number;
 }
 
-const projets = liveList<Projet>("projets", "liste", (id, d) => {
+export const projets = liveList<Projet>("projets", "liste", (id, d) => {
   const titre = str(d.titre, 120).trim();
   if (!titre) return null;
   const statut = STATUTS.some(([s]) => s === d.statut) ? (d.statut as Statut) : "idee";

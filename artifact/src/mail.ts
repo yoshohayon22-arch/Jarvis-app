@@ -112,6 +112,9 @@ function toRow(thread: GmailThread): Row {
   };
 }
 
+/** Mails non lus de la boîte de réception (pour la page d'accueil). */
+export const loadUnread = () => searchThreads("in:inbox is:unread", 20);
+
 async function searchThreads(query: string, pageSize: number): Promise<Row[]> {
   const data = await callConnector<{ threads?: GmailThread[] }>(GMAIL, "search_threads", { query, pageSize, view: "THREAD_VIEW_SUMMARY" }, { retry: true, cache: { staleTime: 60_000, gcTime: 600_000 } });
   return (data?.threads ?? []).filter((t) => t?.id).map(toRow);

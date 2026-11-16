@@ -22,7 +22,7 @@ async function events(url: string, competition = ""): Promise<Match[]> {
 const loadSummary = (m: Match, force: boolean) =>
   cachedLoad(`foot-match-${m.id}-${m.state}`, m.state === "post" ? 24 * 60 * 60 * 1000 : m.state === "in" ? 2 * 60 * 1000 : 60 * 60 * 1000, async () => parseSummary(await loadJson<Raw>(`${ESPN}/site/v2/sports/soccer/${m.league}/summary?event=${m.id}`)), force);
 
-const loadUpcoming = (force: boolean) => cachedLoad("foot-avenir", TEN_MINUTES, () => events(`${ESPN}/site/v2/sports/soccer/all/teams/${REAL}/schedule?fixture=true`), force);
+export const loadUpcoming = (force: boolean) => cachedLoad("foot-avenir", TEN_MINUTES, () => events(`${ESPN}/site/v2/sports/soccer/all/teams/${REAL}/schedule?fixture=true`), force);
 const loadResults = (force: boolean) =>
   cachedLoad(
     "foot-resultats",

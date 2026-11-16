@@ -110,7 +110,7 @@ export function asyncSection<T>(slot: HTMLElement, title: string, source: string
 }
 
 // ---------- Icône météo animée ----------
-function weatherIcon(kind: WeatherKind, isDay: boolean, animated: boolean, cls: string): SVGElement {
+export function weatherIcon(kind: WeatherKind, isDay: boolean, animated: boolean, cls: string): SVGElement {
   const cloudy = kind !== "clair";
   const sunVisible = kind === "clair" || kind === "peu-nuageux" || kind === "averses";
   const drops = kind === "pluie" || kind === "averses" || kind === "bruine" || kind === "orage";

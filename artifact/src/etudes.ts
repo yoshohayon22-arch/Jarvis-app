@@ -35,7 +35,7 @@ interface Ecole {
   maj: number;
 }
 
-const ecoles = liveList<Ecole>("etudes", "ecoles", (id, d) => {
+export const ecoles = liveList<Ecole>("etudes", "ecoles", (id, d) => {
   const nom = str(d.nom, 160).trim();
   if (!nom) return null;
   const echeance = /^\d{4}-\d{2}-\d{2}$/.test(String(d.echeance)) ? String(d.echeance) : "";

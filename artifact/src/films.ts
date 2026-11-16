@@ -27,7 +27,7 @@ interface Titre {
   maj: number;
 }
 
-const titres = liveList<Titre>("films", "titres", (id, d) => {
+export const titres = liveList<Titre>("films", "titres", (id, d) => {
   const titre = str(d.titre, 160).trim();
   if (!titre) return null;
   const note = Math.round(num(d.note));

@@ -13,7 +13,7 @@ interface Note {
   maj: number;
 }
 
-const notes = liveList<Note>("cerveau", "notes", (id, d) => {
+export const notes = liveList<Note>("cerveau", "notes", (id, d) => {
   const titre = str(d.titre, 160).trim();
   const texte = str(d.texte, 20000);
   return titre || texte.trim() ? { id, titre: titre || "(sans titre)", texte, maj: num(d.maj) } : null;

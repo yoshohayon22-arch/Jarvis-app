@@ -6,6 +6,7 @@ import { clear, h, icon, store } from "./dom";
 import { DEFAULT_FAVORITES, getTab, TABS, type ArtifactTab } from "./tabs";
 import { meteoView, newsView, plannedView } from "./views";
 import { accueilView } from "./accueil";
+import { agentsView } from "./agents";
 import { openAsk } from "./assistant";
 import { budgetView } from "./budget";
 import { cerveauView } from "./cerveau";
@@ -149,6 +150,7 @@ function renderView(): void {
   main.append(view);
   if (id === "reglages") settingsView(view);
   else if (id === HOME.id) accueilView(view);
+  else if (id === "agents") agentsView(view);
   else if (id === "mail") mailView(view);
   else if (id === "budget") budgetView(view);
   else if (id === "cerveau") cerveauView(view);

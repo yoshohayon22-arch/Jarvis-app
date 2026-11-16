@@ -11,6 +11,7 @@ export interface ArtifactTab {
 }
 
 export const TABS: ArtifactTab[] = [
+  { id: "agents", label: "Agents IA", short: "Agents", icon: "bot", group: "Communication", live: true, planned: [] },
   { id: "mail", label: "Mail", short: "Mail", icon: "mail", group: "Communication", live: true, planned: [] },
   { id: "cerveau", label: "Le Cerveau", short: "Cerveau", icon: "brain", group: "Communication", live: true, planned: [] },
   { id: "meteo", label: "Météo Genève", short: "Météo", icon: "cloud-sun", group: "Vie pratique", live: true, planned: [] },

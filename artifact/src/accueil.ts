@@ -19,7 +19,7 @@ import { dayLabel, daysFromToday, runner } from "./ui";
 import { timeFmt, weatherIcon } from "./views";
 
 // ---------- Programme de la journée (enregistré dans l'espace privé de la page) ----------
-interface Tache {
+export interface Tache {
   id: string;
   /** Jour prévu, aaaa-mm-jj. */
   date: string;
@@ -29,7 +29,7 @@ interface Tache {
   fait: boolean;
   cree: number;
 }
-const taches = liveList<Tache>("programme", "taches", (id, d) => {
+export const taches = liveList<Tache>("programme", "taches", (id, d) => {
   const titre = str(d.titre, 200).trim();
   return titre && /^\d{4}-\d{2}-\d{2}$/.test(String(d.date)) ? { id, date: String(d.date), heure: /^\d{2}:\d{2}$/.test(String(d.heure)) ? String(d.heure) : "", titre, fait: d.fait === true, cree: num(d.cree) } : null;
 });

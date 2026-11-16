@@ -33,6 +33,18 @@ Tout est dans `src/data/` :
   Après une modification, `npm run recipes:update` recalcule kcal, macros, prix par portion,
   classement casher, tag « petit-budget » et régimes compatibles. `npm test` vérifie la cohérence.
 
+## Variété des menus
+
+Règles appliquées par le générateur (`src/domain/menu/generator.ts`), testées dans `generator.test.ts` :
+
+- **Plats principaux** : une même recette 3 fois par semaine au plus, jamais deux jours de suite ;
+  une même famille d'aliments (poulet, riz, pâtes, quinoa…) 4 fois au plus sur les 14 déjeuners/dîners,
+  jamais deux jours de suite (6 fois pour les profils très protéinés, où la précision passe avant).
+- **Petit-déjeuner et collations** : une même recette 2 fois par semaine au plus (`MAX_SIDE_USES_PER_WEEK`),
+  sauf si le profil n'a pas assez de recettes autorisées.
+- **« Nouveau menu »** : les plats du menu actuel (non verrouillés) sont évités, la semaine suivante change vraiment.
+- Le repas de Shabbat, traditionnel, passe avant ces règles ; le bowl de batch cooking revient un jour sur deux.
+
 ## Sauvegarde des données
 
 Tout reste dans le navigateur (localStorage). Dans **Profil → Mes données** :

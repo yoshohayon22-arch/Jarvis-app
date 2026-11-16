@@ -5,7 +5,7 @@
 import { describe, expect, it } from 'vitest'
 import { INGREDIENTS, INGREDIENT_MAP, PRICES, RECIPES } from '../domain/catalog'
 import { computeRecipeValues } from '../domain/recipe-values'
-import { compatibleDiets } from '../domain/restrictions'
+import { compatibleDiets, isRecipeAllowed, type DietProfile } from '../domain/restrictions'
 
 const meals = RECIPES.filter((r) => !r.mealTypes.includes('base'))
 
@@ -117,5 +117,22 @@ describe('Recettes', () => {
   it('chaque recette de saison froide est disponible en novembre (assez de choix en hiver)', () => {
     const november = meals.filter((r) => r.season.includes(11))
     expect(november.length).toBeGreaterThanOrEqual(50)
+  })
+
+  it('les profils les plus restreints gardent du choix (variété des menus)', () => {
+    const profiles: DietProfile['restrictions'][] = [
+      ['sans-gluten', 'sans-lactose', 'vegetarien'],
+      ['casher', 'sans-gluten'],
+      ['casher', 'vegetarien', 'sans-lactose'],
+      ['halal', 'sans-gluten'],
+    ]
+    for (const restrictions of profiles) {
+      const p: DietProfile = { restrictions, kosher: { waitAfterMeatHours: 6, separateFishAndMeat: true }, dislikedFoods: [] }
+      const ok = meals.filter((r) => isRecipeAllowed(r, p, INGREDIENT_MAP))
+      const count = (t: string) => ok.filter((r) => r.mealTypes.includes(t as never)).length
+      expect(count('petit-dej'), restrictions.join('+')).toBeGreaterThanOrEqual(8)
+      expect(count('dejeuner'), restrictions.join('+')).toBeGreaterThanOrEqual(18)
+      expect(count('collation'), restrictions.join('+')).toBeGreaterThanOrEqual(10)
+    }
   })
 })

@@ -59,7 +59,9 @@ export function useMenu() {
       const seed = Math.floor(Math.random() * 1_000_000_000)
       // On garde les verrous seulement si l'ancien menu porte sur la même semaine.
       const previous = plan && plan.weekStart === ctx.weekStart ? plan : null
-      const next = generateWeek({ ...ctx, seed }, { previous })
+      // Les plats du menu actuel (non verrouillés) sont évités : le nouveau menu change vraiment.
+      const avoid = plan ? plan.days.flatMap((d) => d.meals.filter((m) => !m.locked).map((m) => m.recipeId)) : []
+      const next = generateWeek({ ...ctx, seed }, { previous, avoid })
       update((d) => setMenu(d, activeProfile.id, next))
     },
     replace: (dayIndex: number, slot: MealSlot, variant: number) => ctx && save((p) => replaceMeal(p, ctx, dayIndex, slot, variant)),

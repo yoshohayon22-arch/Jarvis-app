@@ -1992,6 +1992,91 @@
       "packages": [
         500
       ]
+    },
+    {
+      "id": "aubergine",
+      "name": "Aubergine",
+      "aisle": "fruits-legumes",
+      "unit": "g",
+      "per100g": {
+        "kcal": 25,
+        "protein": 1,
+        "fat": 0.2,
+        "carbs": 3.5
+      },
+      "tags": [],
+      "packages": [
+        500
+      ]
+    },
+    {
+      "id": "gnocchi",
+      "name": "Gnocchis de pommes de terre",
+      "aisle": "epicerie",
+      "unit": "g",
+      "per100g": {
+        "kcal": 150,
+        "protein": 3.5,
+        "fat": 0.3,
+        "carbs": 33
+      },
+      "tags": [
+        "gluten"
+      ],
+      "packages": [
+        500
+      ]
+    },
+    {
+      "id": "nouilles-riz",
+      "name": "Nouilles de riz",
+      "aisle": "epicerie",
+      "unit": "g",
+      "per100g": {
+        "kcal": 360,
+        "protein": 6,
+        "fat": 0.6,
+        "carbs": 80
+      },
+      "tags": [],
+      "packages": [
+        250
+      ]
+    },
+    {
+      "id": "pain-pita",
+      "name": "Pain pita",
+      "aisle": "boulangerie",
+      "unit": "g",
+      "per100g": {
+        "kcal": 270,
+        "protein": 9,
+        "fat": 1.5,
+        "carbs": 55
+      },
+      "tags": [
+        "gluten",
+        "cert-casher"
+      ],
+      "packages": [
+        300
+      ]
+    },
+    {
+      "id": "gingembre",
+      "name": "Gingembre frais",
+      "aisle": "fruits-legumes",
+      "unit": "g",
+      "per100g": {
+        "kcal": 80,
+        "protein": 1.8,
+        "fat": 0.8,
+        "carbs": 16
+      },
+      "tags": [],
+      "packages": [
+        100
+      ]
     }
   ]
 }

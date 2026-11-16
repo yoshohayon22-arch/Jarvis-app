@@ -1695,6 +1695,90 @@
         "budgetLine": false,
         "source": "estimation"
       }
+    ],
+    "aubergine": [
+      {
+        "store": "Coop",
+        "label": "Aubergines (au kg)",
+        "priceChf": 4.5,
+        "packageSize": 1000,
+        "budgetLine": false,
+        "source": "estimation",
+        "byWeight": true
+      },
+      {
+        "store": "Migros",
+        "label": "Aubergines (500 g)",
+        "priceChf": 2.6,
+        "packageSize": 500,
+        "budgetLine": false,
+        "source": "estimation"
+      }
+    ],
+    "gnocchi": [
+      {
+        "store": "Coop",
+        "label": "Gnocchis frais",
+        "priceChf": 2.8,
+        "packageSize": 500,
+        "budgetLine": false,
+        "source": "estimation"
+      },
+      {
+        "store": "Lidl",
+        "label": "Gnocchis Lidl",
+        "priceChf": 1.79,
+        "packageSize": 500,
+        "budgetLine": true,
+        "source": "estimation"
+      }
+    ],
+    "nouilles-riz": [
+      {
+        "store": "Migros",
+        "label": "Nouilles de riz",
+        "priceChf": 2.5,
+        "packageSize": 250,
+        "budgetLine": false,
+        "source": "estimation"
+      }
+    ],
+    "pain-pita": [
+      {
+        "store": "Coop",
+        "label": "Pains pita (6 pièces)",
+        "priceChf": 2.4,
+        "packageSize": 300,
+        "budgetLine": false,
+        "source": "estimation"
+      },
+      {
+        "store": "Aldi",
+        "label": "Pita Aldi",
+        "priceChf": 1.49,
+        "packageSize": 300,
+        "budgetLine": true,
+        "source": "estimation"
+      }
+    ],
+    "gingembre": [
+      {
+        "store": "Migros",
+        "label": "Gingembre (au kg)",
+        "priceChf": 9.0,
+        "packageSize": 1000,
+        "budgetLine": false,
+        "source": "estimation",
+        "byWeight": true
+      },
+      {
+        "store": "Coop",
+        "label": "Gingembre (100 g)",
+        "priceChf": 1.2,
+        "packageSize": 100,
+        "budgetLine": false,
+        "source": "estimation"
+      }
     ]
   }
 }

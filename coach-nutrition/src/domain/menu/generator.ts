@@ -23,6 +23,8 @@ export const KCAL_TOLERANCE = 0.05
 export const MAX_USES_PER_WEEK = 3
 /** Plats de batch : cuisinés en grande quantité, ils peuvent revenir plus souvent. */
 export const MAX_USES_BATCH = 5
+/** Petit-déjeuner et collations : la même recette au plus 2 fois par semaine (si le choix le permet). */
+export const MAX_SIDE_USES_PER_WEEK = 2
 /** Une même famille d'aliments principale (poulet, riz, quinoa…) apparaît au plus 4 fois sur les 14 déjeuners et dîners. */
 export const MAX_KEY_PER_WEEK = 4
 /** Combinaisons essayées par jour. */
@@ -154,6 +156,7 @@ function portionProblem(slots: MealSlot[], recipes: Recipe[], ctx: GeneratorCont
     const ideal = ((share[slots[i]] ?? 0.2) * ctx.targets.kcal) / Math.max(r.perServing.kcal, 1)
     return Math.min(hi, Math.max(lo, ideal))
   })
+  const festive = slots.some((s) => festiveTag(ctx.settings, dayIndex, s))
   // Le repas de Shabbat reste le plus copieux : au moins 85 % de sa part prévue.
   const mins = slots.map((s, i) =>
     festiveTag(ctx.settings, dayIndex, s) ? Math.min(anchors[i], Math.max(PORTION_BOUNDS[s][0], anchors[i] * 0.85)) : PORTION_BOUNDS[s][0],
@@ -162,7 +165,10 @@ function portionProblem(slots: MealSlot[], recipes: Recipe[], ctx: GeneratorCont
     items: recipes.map(toVector),
     anchors,
     min: mins,
-    max: slots.map((s) => PORTION_BOUNDS[s][1] * scale),
+    // Jour de fête : les autres repas restent proches de leur part (≤ 115 %), le repas de Shabbat reste le plus copieux.
+    max: slots.map((s, i) =>
+      festive && !festiveTag(ctx.settings, dayIndex, s) ? Math.max(PORTION_BOUNDS[s][0], Math.min(PORTION_BOUNDS[s][1] * scale, anchors[i] * 1.15)) : PORTION_BOUNDS[s][1] * scale,
+    ),
     target: targetVector(ctx.targets),
   }
 }
@@ -240,6 +246,8 @@ interface ScoreOptions {
   batch?: boolean
   /** Jour de la semaine (0 = lundi), pour les règles du Shabbat. */
   dayIndex?: number
+  /** Recettes du menu précédent, à éviter si possible. */
+  avoid?: ReadonlySet<string>
 }
 
 /** Évalue une combinaison : précision nutritionnelle + coût + saison. Plus le score est bas, mieux c'est. */
@@ -265,8 +273,14 @@ function evaluate(slots: MealSlot[], recipes: Recipe[], ctx: GeneratorContext, o
     // Plat principal déjà servi cette semaine : légère pénalité (hors bowls et plats de batch).
     recipes.forEach((r, i) => {
       if ((slots[i] === 'dejeuner' || slots[i] === 'diner') && !r.components && !(opt.batch && isBatchCooked(r, slots[i]))) {
-        score += 0.02 * (opt.recipeUses!.get(r.id) ?? 0)
+        score += 0.035 * (opt.recipeUses!.get(r.id) ?? 0)
       }
+    })
+  }
+  // Plat principal déjà au menu précédent : pénalité (un nouveau menu doit vraiment changer).
+  if (opt.avoid?.size) {
+    recipes.forEach((r, i) => {
+      if ((slots[i] === 'dejeuner' || slots[i] === 'diner') && !r.components && opt.avoid!.has(r.id)) score += 0.06
     })
   }
   // Batch cooking : on veut utiliser ce qu'on a cuisiné en session (bowls, plats mijotés).
@@ -323,6 +337,8 @@ export interface GenerateOptions {
   previous?: WeekPlan | null
   /** Poids du coût dans le choix (augmenté automatiquement si le budget est dépassé). */
   costWeight?: number
+  /** Recettes à éviter si possible (ex. celles du menu qu'on remplace) : la semaine suivante change vraiment. */
+  avoid?: readonly string[]
 }
 
 /** Poids du coût par défaut : faible en mode normal, plus fort en mode petit budget. */
@@ -370,6 +386,12 @@ function generateOnce(ctx: GeneratorContext, opts: GenerateOptions): WeekPlan {
   // Profils très protéinés : un peu plus de marge, la précision nutritionnelle passe avant.
   const strictVariety = varietyStrength(ctx.targets) === 1
   const keyCap = strictVariety ? MAX_KEY_PER_WEEK : MAX_KEY_PER_WEEK + 2
+  const avoid = new Set(opts.avoid ?? [])
+  // Petit-déjeuner / collations : 2 fois la même recette au plus, sauf si le profil n'a pas assez de choix.
+  const sideCap = (slot: MealSlot) => {
+    const sameKind = slots.filter((s) => pools[s] === pools[slot] || (s.startsWith('collation') && slot.startsWith('collation'))).length
+    return Math.max(MAX_SIDE_USES_PER_WEEK, Math.ceil((7 * sameKind) / Math.max(1, pools[slot].length)))
+  }
   let lastMeal: { recipe: Recipe; hour: number } | null = null
 
   for (let d = 0; d < 7; d++) {
@@ -402,8 +424,10 @@ function generateOnce(ctx: GeneratorContext, opts: GenerateOptions): WeekPlan {
             (relax ||
               (slot !== 'dejeuner' && slot !== 'diner') ||
               festiveTag(ctx.settings, d, slot) !== null ||
-              keyIngredients(r, ctx.ingredients).every((k) => (keyUses.get(k) ?? 0) < keyCap && (!strictVariety || !previousDayKeys.has(k)))) &&
-            (relax || (uses.get(r.id) ?? 0) < maxUses(r, ctx.settings)) &&
+              (keyIngredients(r, ctx.ingredients).every((k) => (keyUses.get(k) ?? 0) < keyCap && !previousDayKeys.has(k)) &&
+                // jamais le même plat principal deux jours de suite (hors bowl et plats cuisinés en session)
+                (r.components || (batch && isBatchCooked(r, slot)) || !previousDay.some((p, pi) => p.id === r.id && (slots[pi] === 'dejeuner' || slots[pi] === 'diner'))))) &&
+            (relax || (uses.get(r.id) ?? 0) < (slot === 'dejeuner' || slot === 'diner' ? maxUses(r, ctx.settings) : sideCap(slot))) &&
             kosherOk(ctx, prev, r, hour) &&
             // un plat verrouillé plus tard dans la journée doit rester compatible
             slots.slice(i + 1).every((s2) => {
@@ -429,6 +453,7 @@ function generateOnce(ctx: GeneratorContext, opts: GenerateOptions): WeekPlan {
           if ((slot === 'dejeuner' || slot === 'diner') && (uses.get(r.id) ?? 0) > 0) w *= 0.4 // un plat principal déjà servi revient rarement
           if (previousDay[i]?.id === r.id) w *= 0.25 // éviter le même plat deux jours de suite
           if (!r.season.includes(month)) w *= 0.3 // préférer la saison
+          if (avoid.has(r.id) && !r.components) w *= 0.15 // déjà au menu précédent : on change
           if (ctx.settings.lowBudget && r.tags.includes('petit-budget')) w *= 2
           // Batch cooking : le bowl est le déjeuner type, les plats mijotés sont privilégiés le soir.
           if (r.components) w *= slot === 'dejeuner' ? 8 : 1.5
@@ -453,7 +478,7 @@ function generateOnce(ctx: GeneratorContext, opts: GenerateOptions): WeekPlan {
       }
       if (!ok) continue
       // Le dernier repas doit aussi permettre le premier du lendemain (casher : dîner → petit-déj).
-      const result = evaluate(slots, chosen, ctx, { ...scoreOpt, dayIndex: d, keyUses, recipeUses: uses })
+      const result = evaluate(slots, chosen, ctx, { ...scoreOpt, dayIndex: d, keyUses, recipeUses: uses, avoid })
       if (!best || result.score < best.score) best = result
     }
     if (!best) throw new Error(`Impossible de composer le jour ${d + 1} avec ces restrictions.`)

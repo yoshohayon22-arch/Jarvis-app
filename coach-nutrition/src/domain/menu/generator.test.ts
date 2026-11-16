@@ -9,6 +9,7 @@ import {
   generateWeek,
   KCAL_TOLERANCE,
   MAX_USES_PER_WEEK,
+  MAX_SIDE_USES_PER_WEEK,
   keyIngredients,
   varietyStrength,
   mondayOf,
@@ -299,5 +300,44 @@ describe('Variété des ingrédients', () => {
     // Émincé et cuisses de poulet comptent comme la même famille « poulet ».
     expect(keyIngredients(RECIPES.find((r) => r.id === 'cuisses-poulet-four-legumes')!, INGREDIENT_MAP)).toContain('poulet')
     expect(keyIngredients(RECIPES.find((r) => r.id === 'bowl-poulet-riz-legumes')!, INGREDIENT_MAP)).toContain('poulet')
+  })
+})
+
+describe('Grande variété des menus', () => {
+  const countBy = (plan: WeekPlan, keep: (slot: string) => boolean) => {
+    const n = new Map<string, number>()
+    for (const d of plan.days) for (const m of d.meals) if (keep(m.slot)) n.set(m.recipeId, (n.get(m.recipeId) ?? 0) + 1)
+    return n
+  }
+  const isMain = (slot: string) => slot === 'dejeuner' || slot === 'diner'
+
+  it('petit-déjeuner et collations : la même recette au plus 2 fois par semaine (profils avec assez de choix)', () => {
+    for (const { name, plan } of plans.filter((p) => !p.name.includes('casher'))) {
+      for (const [id, n] of countBy(plan, (s) => !isMain(s))) expect(n, `${name} : ${id}`).toBeLessThanOrEqual(MAX_SIDE_USES_PER_WEEK)
+    }
+  })
+
+  it('au moins 10 plats différents sur les 14 déjeuners et dîners', () => {
+    for (const { name, plan } of plans) {
+      const mains = countBy(plan, isMain)
+      expect(mains.size, name).toBeGreaterThanOrEqual(10)
+    }
+  })
+
+  it('le menu suivant change vraiment : la plupart des plats du menu précédent sont évités', () => {
+    for (const [s, w] of Object.values(PROFILES)) {
+      const first = generateWeek(context(s, w, 3))
+      const avoid = first.days.flatMap((d) => d.meals.map((m) => m.recipeId))
+      const next = generateWeek(context(s, w, 4), { avoid })
+      const nextIds = next.days.flatMap((d) => d.meals.filter((m) => isMain(m.slot)).map((m) => m.recipeId))
+      const repeated = nextIds.filter((id) => avoid.includes(id) && !id.startsWith('bowl-batch')).length
+      // Profils très protéinés (≥ 33 % des kcal) : peu de plats assez denses, la précision passe avant.
+      expect(repeated / nextIds.length).toBeLessThanOrEqual(varietyStrength(next.targets) === 1 ? 0.35 : 0.4)
+      // Et les besoins restent tenus.
+      for (const d of next.days) {
+        const kcal = daySummary(d, planLookup(next, RECIPES), false).kcal
+        expect(Math.abs(kcal - next.targets.kcal) / next.targets.kcal).toBeLessThanOrEqual(KCAL_TOLERANCE + 1e-9)
+      }
+    }
   })
 })

@@ -17,7 +17,29 @@ export function sections(key: string, list: Section[]): HTMLElement {
   let current = list.some((s) => s.id === saved) ? (saved as string) : list[0].id;
   const tabs = list.map((s) => h("button", { class: "seg", type: "button", role: "tab", id: `seg-${key}-${s.id}`, "aria-controls": `pan-${key}-${s.id}` }, s.label));
   const panels = list.map((s) => h("div", { class: "stack", role: "tabpanel", id: `pan-${key}-${s.id}`, "aria-labelledby": `seg-${key}-${s.id}`, tabindex: 0 }, ...s.nodes));
+  // Pastille de sélection : elle glisse d'un bouton à l'autre (animation sur transform uniquement).
+  const pill = h("span", { class: "seg-pill", "aria-hidden": "true" });
+  const bar = h("div", { class: "segs", role: "tablist", "data-no-swipe": "" }, pill, ...tabs);
+  let placed = false;
+  const movePill = (animate: boolean) => {
+    const tab = tabs[list.findIndex((s) => s.id === current)];
+    if (!tab || !tab.offsetWidth) return;
+    const from = pill.getBoundingClientRect();
+    pill.style.width = `${tab.offsetWidth}px`;
+    pill.style.transform = `translateX(${tab.offsetLeft}px)`;
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (animate && placed && !reduced && from.width) {
+      const to = pill.getBoundingClientRect();
+      const brutal = document.documentElement.getAttribute("data-dash") === "brutal";
+      pill.animate([{ transform: `translateX(${tab.offsetLeft + from.left - to.left}px) scaleX(${from.width / to.width})` }, { transform: `translateX(${tab.offsetLeft}px) scaleX(1)` }], { duration: brutal ? 160 : 380, easing: brutal ? "steps(3, end)" : "cubic-bezier(0.34, 1.3, 0.64, 1)" });
+    }
+    placed = true;
+  };
+  // La rangée n'a pas de taille tant qu'elle n'est pas affichée : on place la pastille dès qu'elle en a une.
+  if (typeof ResizeObserver !== "undefined") new ResizeObserver(() => movePill(false)).observe(bar);
+
   const show = (id: string, focus = false) => {
+    const changed = id !== current;
     current = id;
     store.set(`dash-section:${key}`, id);
     list.forEach((s, i) => {
@@ -28,6 +50,7 @@ export function sections(key: string, list: Section[]): HTMLElement {
       panels[i].hidden = !on;
       if (on && focus) tabs[i].focus();
     });
+    movePill(changed);
   };
   tabs.forEach((tab, i) => {
     tab.addEventListener("click", () => show(list[i].id));
@@ -39,7 +62,7 @@ export function sections(key: string, list: Section[]): HTMLElement {
     });
   });
   show(current);
-  return h("div", { class: "stack" }, h("div", { class: "segs", role: "tablist", "data-no-swipe": "" }, ...tabs), ...panels);
+  return h("div", { class: "stack" }, bar, ...panels);
 }
 
 /**

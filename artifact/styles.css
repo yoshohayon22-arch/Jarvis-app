@@ -369,9 +369,12 @@ tr.mine td:first-child { padding-left: 6px; }
 .segs { position: relative; display: flex; gap: 6px; padding: 5px; overflow-x: auto; scrollbar-width: none; background: var(--surface); border: var(--border-width) solid var(--border); border-radius: 999px; align-self: flex-start; max-width: 100%; }
 .seg { flex: none; min-height: 44px; padding: 0 18px; border: 0; border-radius: 999px; background: none; color: var(--text-2); font-size: 14px; white-space: nowrap; }
 .seg:hover { color: var(--text); }
-.seg.on { background: var(--accent); color: var(--on-accent); font-weight: 600; }
-[data-dash="brutal"] .segs, [data-dash="brutal"] .seg { border-radius: 0; }
-[data-dash="brutal"] .seg.on { outline: 3px solid #000; }
+.seg { position: relative; z-index: 1; transition: color 200ms ease-out, transform 120ms ease-out; }
+.seg:active { transform: scale(0.96); }
+.seg.on { color: var(--on-accent); font-weight: 600; }
+.seg-pill { position: absolute; top: 5px; left: 0; height: 44px; width: 0; border-radius: 999px; background: var(--accent); transform-origin: left center; pointer-events: none; }
+[data-dash="brutal"] .segs, [data-dash="brutal"] .seg, [data-dash="brutal"] .seg-pill { border-radius: 0; }
+[data-dash="brutal"] .seg-pill { outline: 3px solid #000; outline-offset: -3px; }
 [role="tabpanel"]:focus-visible { outline-offset: 6px; }
 
 /* L'essentiel en haut de page. */
@@ -436,3 +439,85 @@ tr.mine td:first-child { padding-left: 6px; }
 .info-line a { color: inherit; }
 .card > .link-btn + .card-info { margin-top: -4px; }
 @media (max-width: 420px) { .match-line { font-size: 14px; gap: 6px; } .badge { width: 28px; height: 28px; font-size: 9px; } .versus-team .badge { width: 48px; height: 48px; } }
+
+
+/* ================= Motion design =================
+ * Seuls transform et opacity sont animés. Les entrées utilisent « backwards » : une fois jouées,
+ * elles rendent la main aux styles normaux (survol, pression). Le thème Brutaliste passe en paliers nets.
+ */
+:root { --spring: cubic-bezier(0.34, 1.45, 0.64, 1); --glide: cubic-bezier(0.22, 1, 0.36, 1); }
+@supports (animation-timing-function: linear(0, 1)) {
+  :root { --spring: linear(0, 0.009, 0.035 2.1%, 0.141 4.4%, 0.723 12.9%, 0.938 16.7%, 1.017, 1.077, 1.121, 1.149 24.3%, 1.159, 1.163, 1.161, 1.154 29.9%, 1.129 32.8%, 1.051 39.6%, 1.017 43.1%, 0.991, 0.977 51%, 0.974 53.8%, 0.975 57.1%, 0.997 69.8%, 1.003 76.9%, 1.004 83.8%, 1); }
+}
+[data-dash="brutal"] { --spring: steps(3, end); --glide: steps(4, end); }
+
+@keyframes rise { from { opacity: 0; transform: translateY(14px); } }
+@keyframes rise-sm { from { opacity: 0; transform: translateY(6px); } }
+@keyframes fade { from { opacity: 0; } }
+@keyframes pop { from { opacity: 0; transform: scale(0.4); } }
+@keyframes grow-x { from { transform: scaleX(0); } }
+@keyframes from-left { from { opacity: 0; transform: translateX(-22px); } }
+@keyframes from-right { from { opacity: 0; transform: translateX(22px); } }
+@keyframes zoom { from { opacity: 0; transform: scale(0.85); } }
+
+/* Arrivée d'un onglet : ses blocs montent l'un après l'autre. */
+.view > * { animation: rise 460ms var(--glide) backwards; }
+.view > :nth-child(2) { animation-delay: 50ms; }
+.view > :nth-child(3) { animation-delay: 100ms; }
+.view > :nth-child(4) { animation-delay: 150ms; }
+.view > :nth-child(n + 5) { animation-delay: 200ms; }
+/* Une donnée qui arrive remplace son squelette en douceur. */
+.slot > * { animation: fade 320ms ease-out backwards; }
+.grid > .slot:nth-child(2) > * { animation-delay: 70ms; }
+.grid > .slot:nth-child(3) > * { animation-delay: 140ms; }
+.grid > .slot:nth-child(n + 4) > * { animation-delay: 210ms; }
+/* Changement de sous-section. */
+[role="tabpanel"]:not([hidden]) { animation: rise-sm 340ms var(--glide) backwards; }
+
+/* Listes : les lignes entrent en cascade (les premières seulement, pour rester rapide). */
+.matches > .match, .grid > .article, .mails > li, .kpis > .kpi, .meters > li, .trend > li { animation: rise-sm 420ms var(--glide) backwards; }
+:is(.matches, .mails, .kpis, .meters, .trend) > :nth-child(2), .grid > .article:nth-child(2) { animation-delay: 45ms; }
+:is(.matches, .mails, .kpis, .meters, .trend) > :nth-child(3), .grid > .article:nth-child(3) { animation-delay: 90ms; }
+:is(.matches, .mails, .kpis, .meters, .trend) > :nth-child(4), .grid > .article:nth-child(4) { animation-delay: 135ms; }
+:is(.matches, .mails, .kpis, .meters, .trend) > :nth-child(5), .grid > .article:nth-child(5) { animation-delay: 180ms; }
+:is(.matches, .mails, .kpis, .meters, .trend) > :nth-child(n + 6), .grid > .article:nth-child(n + 6) { animation-delay: 225ms; }
+
+/* L'essentiel du Real : les deux équipes arrivent de chaque côté, l'heure ou le score surgit au centre. */
+.versus-team:first-child { animation: from-left 560ms var(--spring) 120ms backwards; }
+.versus-team:last-child { animation: from-right 560ms var(--spring) 120ms backwards; }
+.versus-mid { animation: zoom 520ms var(--spring) 260ms backwards; }
+/* Pastilles de forme : elles « poppent » une à une. */
+.forms > .form { animation: pop 440ms var(--spring) backwards; }
+.forms > .form:nth-child(1) { animation-delay: 380ms; }
+.forms > .form:nth-child(2) { animation-delay: 450ms; }
+.forms > .form:nth-child(3) { animation-delay: 520ms; }
+.forms > .form:nth-child(4) { animation-delay: 590ms; }
+.forms > .form:nth-child(5) { animation-delay: 660ms; }
+.match .form { animation: pop 380ms var(--spring) 200ms backwards; }
+
+/* Barres et jauges : elles se remplissent depuis la gauche. */
+.bar-fill, .range span { transform-origin: left center; animation: grow-x 800ms var(--glide) 180ms backwards; }
+.bar-mark { animation: fade 300ms ease-out 700ms backwards; }
+
+/* Survol et pression. */
+.card.article, .card.mail, .kpi, .tile, .theme-choice { transition: transform 220ms var(--glide); }
+@media (hover: hover) {
+  .card.article:hover, .card.mail:hover { transform: translateY(-3px); }
+  .kpi:hover { transform: translateY(-2px); }
+  .side-link .ic { transition: transform 220ms var(--spring); }
+  .side-link:hover .ic { transform: translateX(3px) scale(1.08); }
+  .icon-btn .ic { transition: transform 300ms var(--spring); }
+  .icon-btn:hover .ic { transform: rotate(-12deg) scale(1.1); }
+}
+.icon-btn:active .ic { transform: scale(0.85); }
+/* Barre du bas et liste latérale : l'icône de l'onglet choisi rebondit. */
+.bottom-link.active .ic, .side-link.active .ic { animation: pop 420ms var(--spring) backwards; }
+/* Précisions dépliées, fenêtres. */
+.info[open] .info-body { animation: rise-sm 260ms var(--glide) backwards; }
+.live-row .match-score { animation: zoom 500ms var(--spring) backwards; }
+.badge { transition: transform 260ms var(--spring); }
+@media (hover: hover) { .match:hover .badge { transform: scale(1.12); } }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-delay: 0s !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+}

@@ -4,6 +4,7 @@ import type { Article } from "@/lib/rss/types";
 import { loadCalendar, loadNews, loadStudy } from "./data";
 import { h, icon, store } from "./dom";
 import { sections } from "./layout";
+import { tracker } from "./suivi";
 import { card, dateFmt, emptyState, errorCard, skeleton, sourceNote, timeFmt } from "./views";
 
 const longDate = new Intl.DateTimeFormat("fr-CH", { timeZone: "Europe/Zurich", weekday: "long", day: "numeric", month: "long" });
@@ -182,7 +183,7 @@ export function calendarView(root: HTMLElement): void {
       { id: "chabbat", label: "Chabbat", nodes: [shabbatSlot] },
       { id: "fetes", label: "Fêtes", nodes: [holidaySlot] },
     ]),
-    h("p", { class: "note" }, "Horaires calculés pour Genève. Chaque lecture utilise 4 crédits Firecrawl, gardée 15 minutes."),
+    h("p", { class: "note" }, "Horaires calculés pour Genève. Chaque lecture utilise 4 crédits Firecrawl, gardée 30 minutes."),
   );
   void run(false);
   // Le « prochain horaire » avance tout seul : on redessine chaque minute avec les données déjà chargées.
@@ -321,6 +322,7 @@ export function studyView(root: HTMLElement, section: StudySection): void {
   root.append(
     refreshBar("Programme du jour et texte lus via Firecrawl (2 à 3 crédits), gardés plusieurs heures.", () => void run(true)),
     section === "rambam" ? picker : "",
+    tracker(section),
     content,
   );
   void run(false);

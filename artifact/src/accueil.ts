@@ -13,6 +13,7 @@ import { loadUpcoming } from "./foot";
 import { teamBadge } from "./layout";
 import { loadUnread, sampleMessage, samplePromise } from "./mail";
 import { projets } from "./projets";
+import { isDone, lectures, SECTIONS } from "./suivi";
 import { dayLabel, daysFromToday } from "./ui";
 import { timeFmt, weatherIcon } from "./views";
 
@@ -81,6 +82,7 @@ export function accueilView(root: HTMLElement): void {
 
   // --- Vie juive ---
   const juif = tile("calendrier", "Calendrier hébraïque", "calendar-days");
+  const studyLine = h("p", { class: "muted small-2" });
   loadCalendar(store.get<number>("dash-bougies") ?? 18, false)
     .then(({ data }) => {
       hebrew.textContent = `${data.hebrewDate.afterSunset ? "Ce soir : " : ""}${data.hebrewDate.text}`;
@@ -92,9 +94,20 @@ export function accueilView(root: HTMLElement): void {
         ...(soon ? big(time(candles), `Allumage des bougies · ${weekday.format(new Date(candles))}`) : data.shabbat.havdalah && Date.parse(data.shabbat.havdalah) > now ? big(time(data.shabbat.havdalah), "Havdala · sortie de chabbat") : big(data.hebrewDate.text)),
         next ? h("p", { class: "muted small-2" }, `Prochain horaire : ${next.label.replace(/\s*\(.*\)$/, "")} à ${time(next.time)}`) : null,
         data.shabbat.parasha ? h("p", { class: "muted small-2" }, data.shabbat.parasha) : null,
+        studyLine,
       ]);
     })
     .catch(() => set(juif.body, failed("Calendrier")));
+
+  // Suivi d'étude : combien de lectures du jour sont cochées.
+  function renderStudy(): void {
+    if (lectures.status !== "pret") return;
+    const done = SECTIONS.filter((s) => isDone(s)).length;
+    studyLine.textContent = `Étude du jour : ${done} sur ${SECTIONS.length} lue${done > 1 ? "s" : ""}`;
+  }
+  lectures.start();
+  const stopStudy = lectures.onChange(() => (root.isConnected ? renderStudy() : stopStudy()));
+  renderStudy();
 
   // --- Mail ---
   const mail = tile("mail", "Mail", "mail");
@@ -197,6 +210,6 @@ export function accueilView(root: HTMLElement): void {
       briefInfo,
     ),
     grid,
-    h("p", { class: "note" }, "Chaque tuile lit la même source que son onglet (météo, calendrier et Real Madrid : environ 7 crédits Firecrawl, gardés 10 à 20 minutes). La Une n'est affichée que si ses titres sont déjà en mémoire."),
+    h("p", { class: "note" }, "Chaque tuile lit la même source que son onglet (météo, calendrier et Real Madrid : environ 7 crédits Firecrawl, gardés 20 minutes à 1 heure). La Une n'est affichée que si ses titres sont déjà en mémoire."),
   );
 }

@@ -307,7 +307,8 @@ export function createJudaism(get: JsonGet, cache: Cache) {
   const getCalendar = (candleMinutes: number) =>
     cache(
       `hebcal:calendrier:${candleMinutes}:${todayInGeneva()}`,
-      15 * MINUTE,
+      // Les horaires d'un jour ne changent pas ; 30 minutes suffisent pour suivre le passage du coucher du soleil.
+      30 * MINUTE,
       () => loadCalendar(candleMinutes),
     );
   const getLearning = () =>

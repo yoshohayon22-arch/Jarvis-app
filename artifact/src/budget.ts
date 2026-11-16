@@ -7,6 +7,7 @@ import { extractLines, guessColumns, parseAmount, parseCsv, type CsvGuess, type 
 import { budget, CATEGORIES, categoryLabel, connectBudget, newId, onBudgetChange, saveMonths, saveSettings, type Line } from "./budget-store";
 import { h, icon } from "./dom";
 import { sampleMessage, samplePromise } from "./mail";
+import { sections } from "./layout";
 import { card, emptyState, openDialog, skeleton } from "./views";
 
 const chf = new Intl.NumberFormat("fr-CH", { style: "currency", currency: "CHF" });
@@ -159,6 +160,41 @@ export function budgetView(root: HTMLElement): void {
     );
   }
 
+  // ----- L'essentiel du mois -----
+  const heroSlot = h("div", { class: "slot" });
+  function renderHero(lines: Line[]): void {
+    const total = sum(lines);
+    const planned = Object.values(budget.settings.budgets).reduce((n, v) => n + v, 0);
+    const byCat = new Map<string, number>();
+    for (const l of lines) byCat.set(l.cat, (byCat.get(l.cat) ?? 0) + l.c);
+    const top = [...byCat].sort((a, b) => b[1] - a[1])[0];
+    const subsMonthly = budget.settings.abonnements.reduce((n, s) => n + (s.per === "an" ? s.c / 12 : s.c), 0);
+    const over = planned > 0 && total > planned;
+    const kpi = (label: string, value: string, sub = "") => h("div", { class: "kpi" }, h("dt", null, label), h("dd", null, h("span", { class: "kpi-value num" }, value)), sub ? h("dd", { class: "muted small" }, sub) : null);
+    heroSlot.replaceChildren(
+      h(
+        "section",
+        { class: "hero", "aria-label": "L'essentiel du mois" },
+        h(
+          "div",
+          { class: "hero-main" },
+          h("p", { class: "eyebrow" }, `Dépensé en ${monthLong.format(monthDate(month))}`),
+          h("p", { class: "hero-title num" }, money(total)),
+          planned ? h("div", { class: "bar hero-bar", "aria-hidden": "true" }, h("span", { class: "bar-fill", style: `width:${Math.min(100, (total / planned) * 100).toFixed(1)}%` })) : null,
+          planned ? h("p", { class: over ? "over" : "muted" }, over ? icon("triangle-alert", "ic ic-sm") : null, over ? ` Budget dépassé de ${money(total - planned)}` : `${Math.round((total / planned) * 100)} % de ton budget de ${money(planned)}`) : h("p", { class: "muted" }, lines.length ? "Aucun budget fixé pour comparer." : "Aucune dépense saisie pour ce mois."),
+        ),
+        h(
+          "dl",
+          { class: "kpis" },
+          planned ? kpi(over ? "Dépassement" : "Reste ce mois", money(Math.abs(planned - total))) : null,
+          kpi("Dépenses", String(lines.length), lines.length ? `moyenne ${money(Math.round(total / lines.length))}` : ""),
+          top ? kpi("Premier poste", categoryLabel(top[0]), `${money(top[1])} · ${Math.round((top[1] / (total || 1)) * 100)} %`) : null,
+          subsMonthly ? kpi("Abonnements", money(Math.round(subsMonthly)), "par mois") : null,
+        ),
+      ),
+    );
+  }
+
   function renderSummary(lines: Line[]): void {
     const total = sum(lines);
     const budgets = budget.settings.budgets;
@@ -221,8 +257,10 @@ export function budgetView(root: HTMLElement): void {
           { class: "expenses" },
           ...shown.map((line) => {
             const actions = h("div", { class: "row-actions" });
+            const editBtn: HTMLButtonElement = h("button", { class: "icon-btn", type: "button", "aria-label": `Modifier la dépense du ${dayLabel(line.date)}, ${money(line.c)}`, onclick: () => openEdit(line, editBtn) }, icon("pencil"));
             const idle = () =>
               actions.replaceChildren(
+                editBtn,
                 h(
                   "button",
                   {
@@ -307,6 +345,48 @@ export function budgetView(root: HTMLElement): void {
         ]
       : [emptyState("Pas encore de données", "Aucune dépense sur ces six mois.")];
     trendSlot.replaceChildren(card("Six derniers mois", content));
+  }
+
+  // ----- Modifier une dépense -----
+  function openEdit(line: Line, opener: HTMLElement): void {
+    const amount = h("input", { class: "field", type: "text", inputmode: "decimal", autocomplete: "off", value: (line.c / 100).toFixed(2) });
+    const date = h("input", { class: "field", type: "date", value: line.date });
+    const cat = categorySelect(line.cat);
+    const note = h("input", { class: "field", type: "text", maxlength: 140, autocomplete: "off", value: line.note });
+    const error = h("p", { class: "note error", role: "alert" });
+    const formEl = h(
+      "form",
+      {
+        class: "stack",
+        onsubmit: (e: Event) => {
+          e.preventDefault();
+          const cents = parseAmount(amount.value);
+          if (cents === null || cents <= 0) return void (error.textContent = "Montant illisible. Exemple : 12.50");
+          if (!/^\d{4}-\d{2}-\d{2}$/.test(date.value)) return void (error.textContent = "Choisis une date.");
+          const next: Line = { ...line, c: cents, date: date.value, cat: cat.value, note: note.value.trim() };
+          const from = line.date.slice(0, 7);
+          const to = next.date.slice(0, 7);
+          close();
+          // Si la date change de mois, la dépense quitte l'ancien mois et rejoint le nouveau.
+          void run(
+            saveMonths((months) => {
+              const out = new Map<string, Line[]>();
+              if (from === to) out.set(from, (months.get(from) ?? []).map((l) => (l.id === line.id ? next : l)));
+              else {
+                out.set(from, (months.get(from) ?? []).filter((l) => l.id !== line.id));
+                out.set(to, [...(months.get(to) ?? []), next]);
+              }
+              return out;
+            }),
+            "Dépense modifiée.",
+          );
+        },
+      },
+      h("div", { class: "form-grid" }, field("Montant (CHF)", amount, "b-e-montant"), field("Date", date, "b-e-date"), field("Catégorie", cat, "b-e-cat"), field("Note", note, "b-e-note")),
+      error,
+      h("div", { class: "actions" }, h("button", { class: "btn primary", type: "submit" }, "Enregistrer")),
+    );
+    const close = openDialog("Modifier la dépense", [formEl], opener);
   }
 
   // ----- Budgets par catégorie -----
@@ -488,10 +568,21 @@ export function budgetView(root: HTMLElement): void {
     }
     if (!built) {
       built = true;
-      body.replaceChildren(nav, h("div", { class: "grid two" }, formCard, summarySlot), listSlot, h("div", { class: "grid two" }, card("Abonnements", [subsSlot, subForm, h("p", { class: "note" }, "Les abonnements ne sont pas ajoutés automatiquement aux dépenses du mois, pour éviter les doublons avec un relevé importé.")]), trendSlot), h("p", { class: "note" }, SOURCE));
+      body.replaceChildren(
+        nav,
+        heroSlot,
+        sections("budget", [
+          { id: "mois", label: "Ce mois", nodes: [h("div", { class: "grid two" }, formCard, summarySlot)] },
+          { id: "depenses", label: "Dépenses", nodes: [listSlot] },
+          { id: "abonnements", label: "Abonnements", nodes: [card("Abonnements", [subsSlot, subForm, h("p", { class: "note" }, "Les abonnements ne sont pas ajoutés automatiquement aux dépenses du mois, pour éviter les doublons avec un relevé importé.")])] },
+          { id: "tendance", label: "Six mois", nodes: [trendSlot] },
+        ]),
+        h("p", { class: "note" }, SOURCE),
+      );
     }
     const lines = budget.months.get(month) ?? [];
     renderNav();
+    renderHero(lines);
     renderSummary(lines);
     renderList(lines);
     renderSubs();

@@ -1,7 +1,7 @@
 /**
  * Football : matchs et classements lus sur l'API publique d'ESPN (sans clé), via Firecrawl.
  */
-import { cachedLoad, DataError, loadJson, type Cached } from "./data";
+import { cachedLoad, DataError, loadJson, peekCache, type Cached } from "./data";
 import { ESPN_API as ESPN, ESPN_REAL_MADRID as REAL, parseMatches, parseRoster, parseStandings, parseSummary, POSITION_LABELS, type Match, type MatchSummary, type RosterPlayer, type StandingRow } from "@/lib/football/espn";
 import { h, icon } from "./dom";
 import { sections, teamBadge } from "./layout";
@@ -22,11 +22,21 @@ async function events(url: string, competition = ""): Promise<Match[]> {
 const loadSummary = (m: Match, force: boolean) =>
   cachedLoad(`foot-match-${m.id}-${m.state}`, m.state === "post" ? 24 * 60 * 60 * 1000 : m.state === "in" ? 2 * 60 * 1000 : 60 * 60 * 1000, async () => parseSummary(await loadJson<Raw>(`${ESPN}/site/v2/sports/soccer/${m.league}/summary?event=${m.id}`)), force);
 
-export const loadUpcoming = (force: boolean) => cachedLoad("foot-avenir", TEN_MINUTES, () => events(`${ESPN}/site/v2/sports/soccer/all/teams/${REAL}/schedule?fixture=true`), force);
+const HOUR = 60 * 60 * 1000;
+/**
+ * Durée de garde du calendrier du Real : 2 minutes si un match est en cours ou commence dans les 3 heures,
+ * sinon 1 heure (un calendrier ne bouge presque jamais ; chaque lecture coûte un crédit).
+ */
+function scheduleTtl(): number {
+  const known = peekCache<Match[]>("foot-avenir")?.data ?? [];
+  const now = Date.now();
+  return known.some((m) => m.state === "in" || (m.state === "pre" && Date.parse(m.date) - now < 3 * HOUR && Date.parse(m.date) - now > -3 * HOUR)) ? 2 * 60 * 1000 : HOUR;
+}
+export const loadUpcoming = (force: boolean) => cachedLoad("foot-avenir", scheduleTtl(), () => events(`${ESPN}/site/v2/sports/soccer/all/teams/${REAL}/schedule?fixture=true`), force);
 const loadResults = (force: boolean) =>
   cachedLoad(
     "foot-resultats",
-    TEN_MINUTES,
+    scheduleTtl() < HOUR ? TEN_MINUTES : HOUR,
     async () => {
       const lists = await Promise.allSettled([events(`${ESPN}/site/v2/sports/soccer/esp.1/teams/${REAL}/schedule`, "LaLiga"), events(`${ESPN}/site/v2/sports/soccer/uefa.champions/teams/${REAL}/schedule`, "Ligue des champions")]);
       const ok = lists.filter((l): l is PromiseFulfilledResult<Match[]> => l.status === "fulfilled");
@@ -38,7 +48,7 @@ const loadResults = (force: boolean) =>
 const loadTable = (league: string, force: boolean) =>
   cachedLoad(
     `foot-classement-${league}`,
-    TEN_MINUTES,
+    scheduleTtl() < HOUR ? TEN_MINUTES : HOUR,
     async () => {
       const rows = parseStandings(await loadJson<Raw>(`${ESPN}/v2/sports/soccer/${league}/standings`));
       if (!rows.length) throw new DataError("classement vide ou illisible", "tool_error");
@@ -346,7 +356,7 @@ export function realMadridView(root: HTMLElement): void {
       { id: "equipe", label: "Équipe", nodes: [h("div", { class: "grid two" }, slots[4], slots[5])] },
       { id: "actus", label: "Actus", nodes: [news.slot] },
     ]),
-    h("p", { class: "note" }, `Matchs, classements et effectif : ESPN, 6 lectures gardées 10 minutes. Actus : ${news.count} flux gardés 30 minutes. Une lecture = 1 crédit Firecrawl.`),
+    h("p", { class: "note" }, `Matchs, classements et effectif : ESPN, 6 lectures gardées 1 heure (2 à 10 minutes autour d'un match). Actus : ${news.count} flux gardés 30 minutes. Une lecture = 1 crédit Firecrawl.`),
   );
   refresh(false);
 }

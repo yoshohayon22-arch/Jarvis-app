@@ -216,7 +216,7 @@ tbody th { font-weight: 500; text-transform: capitalize; }
 a.btn { text-decoration: none; }
 .mails { display: flex; flex-direction: column; gap: 10px; }
 .mail { gap: 6px; padding: 14px 16px; }
-.mail-open { align-self: flex-start; min-height: 44px; margin: -6px 0; padding: 0; background: none; border: 0; text-align: left; font: inherit; }
+.mail-open { align-self: flex-start; min-height: 45px; margin: -6px 0; padding: 0; background: none; border: 0; text-align: left; font: inherit; }
 .mail-subject { font-family: var(--ff-heading); font-weight: var(--heading-weight); font-size: 16px; line-height: 1.3; }
 .mail-open:hover .mail-subject { text-decoration: underline; }
 .mail.unread .mail-subject { font-weight: 700; }
@@ -648,3 +648,22 @@ tr.mine td:first-child { padding-left: 6px; }
 .home-list li { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .briefing { font-size: 15.5px; line-height: 1.65; max-width: 70ch; }
 @media (max-width: 420px) { .bottom-link { font-size: 10px; } }
+
+/* ---- Budget : essentiel ---- */
+.hero-bar { height: 12px; max-width: 520px; }
+.kpi-value { overflow-wrap: anywhere; }
+
+/* ---- Suivi d'étude ---- */
+.tracker { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 18px; }
+.tracker:empty { display: none; }
+.tracker .note { flex-basis: 100%; }
+.streak { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; }
+.streak .ic { color: var(--accent); }
+[data-dash="brutal"] .streak .ic, [data-dash="dessine"] .streak .ic { color: var(--text); }
+.week { display: flex; gap: 6px; }
+.week li { display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; border-radius: 50%; border: var(--border-width) solid var(--border); font: 600 11px/1 var(--ff-body); color: var(--text-2); animation: pop 380ms var(--spring) backwards; }
+.week li:nth-child(2) { animation-delay: 40ms; } .week li:nth-child(3) { animation-delay: 80ms; } .week li:nth-child(4) { animation-delay: 120ms; } .week li:nth-child(5) { animation-delay: 160ms; } .week li:nth-child(6) { animation-delay: 200ms; } .week li:nth-child(7) { animation-delay: 240ms; }
+.week .read { background: var(--accent); color: var(--on-accent); border-color: transparent; }
+.week .rest { border-style: dashed; }
+.week .today { outline: 2px solid var(--text-2); outline-offset: 2px; }
+[data-dash="brutal"] .week li { border-radius: 0; }

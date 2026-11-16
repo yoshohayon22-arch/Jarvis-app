@@ -2,7 +2,7 @@
  * Football : matchs et classements lus sur l'API publique d'ESPN (sans clé), via Firecrawl.
  */
 import { cachedLoad, DataError, loadJson, type Cached } from "./data";
-import { ESPN_API as ESPN, ESPN_REAL_MADRID as REAL, parseMatches, parseStandings, type Match, type StandingRow } from "@/lib/football/espn";
+import { ESPN_API as ESPN, ESPN_REAL_MADRID as REAL, parseMatches, parseRoster, parseStandings, POSITION_LABELS, type Match, type RosterPlayer, type StandingRow } from "@/lib/football/espn";
 import { h, icon } from "./dom";
 import { asyncSection, card, emptyState, sourceNote, timeFmt } from "./views";
 
@@ -37,6 +37,18 @@ const loadTable = (league: string, force: boolean) =>
       const rows = parseStandings(await loadJson<Raw>(`${ESPN}/v2/sports/soccer/${league}/standings`));
       if (!rows.length) throw new DataError("classement vide ou illisible", "tool_error");
       return rows;
+    },
+    force,
+  );
+
+const loadRoster = (force: boolean) =>
+  cachedLoad(
+    "foot-effectif",
+    6 * 60 * 60 * 1000,
+    async () => {
+      const players = parseRoster(await loadJson<Raw>(`${ESPN}/site/v2/sports/soccer/esp.1/teams/${REAL}/roster`));
+      if (!players.length) throw new DataError("effectif vide ou illisible", "tool_error");
+      return players;
     },
     force,
   );
@@ -108,7 +120,7 @@ function table(rows: StandingRow[], highlight: string, full: boolean): HTMLEleme
 
 /** Cartes « matchs et classements » de l'onglet Real Madrid. */
 export function realMadridSections(): { slots: HTMLElement[]; refresh(force: boolean): void } {
-  const slots = Array.from({ length: 4 }, () => h("div", { class: "slot" }));
+  const slots = Array.from({ length: 6 }, () => h("div", { class: "slot" }));
 
   const next = asyncSection(slots[0], "Prochains matchs", SOURCE, loadUpcoming, ({ data, at }: Cached<Match[]>) => {
     const now = Date.now();
@@ -159,7 +171,26 @@ export function realMadridSections(): { slots: HTMLElement[]; refresh(force: boo
   const liga = standing(slots[2], "esp.1", "Classement LaLiga");
   const europe = standing(slots[3], "uefa.champions", "Classement Ligue des champions");
 
-  return { slots, refresh: (force) => void Promise.all([next(force), results(force), liga(force), europe(force)]) };
+  const playerRow = (p: RosterPlayer, value: string) => h("li", null, h("div", { class: "grow-2" }, h("p", { class: "expense-title" }, p.name), h("p", { class: "meta" }, [POSITION_LABELS[p.position] ?? p.position, p.nationality].filter(Boolean).join(" · "))), value ? h("span", { class: "num" }, value) : null);
+  const scorers = asyncSection(slots[4], "Buteurs du Real (LaLiga)", SOURCE, loadRoster, ({ data, at }: Cached<RosterPlayer[]>) => {
+    const list = data.filter((p) => p.goals > 0).sort((a, b) => b.goals - a.goals || (b.assists ?? 0) - (a.assists ?? 0));
+    const row = (p: RosterPlayer) => playerRow(p, `${p.goals} but${p.goals > 1 ? "s" : ""}${p.assists ? ` · ${p.assists} passe${p.assists > 1 ? "s" : ""} déc.` : ""}`);
+    return card("Buteurs du Real (LaLiga)", [list.length ? h("ul", { class: "expenses" }, ...list.slice(0, 5).map(row)) : emptyState("Pas encore de données", "Aucun but enregistré cette saison d'après ESPN."), sourceNote(SOURCE, at)], {
+      detail: list.length > 5 ? () => [h("ul", { class: "expenses" }, ...list.slice(5).map(row))] : undefined,
+    });
+  });
+  const squad = asyncSection(slots[5], "Effectif", SOURCE, loadRoster, ({ data, at }: Cached<RosterPlayer[]>) => {
+    const order = ["Goalkeeper", "Defender", "Midfielder", "Forward"];
+    const sorted = [...data].sort((a, b) => order.indexOf(a.position) - order.indexOf(b.position) || a.name.localeCompare(b.name));
+    const count = (position: string) => data.filter((p) => p.position === position).length;
+    return card(
+      "Effectif",
+      [h("p", null, h("span", { class: "big-2 num" }, String(data.length)), h("span", { class: "muted" }, ` joueurs · ${count("Goalkeeper")} gardiens, ${count("Defender")} défenseurs, ${count("Midfielder")} milieux, ${count("Forward")} attaquants`)), h("p", { class: "note" }, "Entraîneur, blessures et suspensions : non fournis de façon fiable par cette source."), sourceNote(SOURCE, at)],
+      { detail: () => [h("ul", { class: "expenses" }, ...sorted.map((p) => playerRow(p, p.appearances ? `${p.appearances} match${p.appearances > 1 ? "s" : ""}` : "")))] },
+    );
+  });
+
+  return { slots, refresh: (force) => void Promise.all([next(force), results(force), liga(force), europe(force), scorers(force), squad(force)]) };
 }
 
 // ---------- Onglet Matchs ----------

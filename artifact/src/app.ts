@@ -8,6 +8,7 @@ import { meteoView, newsView, plannedView, realMadridView } from "./views";
 import { budgetView } from "./budget";
 import { cerveauView } from "./cerveau";
 import { filmsView } from "./films";
+import { musiqueView, youtubeView } from "./loisirs";
 import { matchsView } from "./foot";
 import { cultureView } from "./culture";
 import { etudesView } from "./etudes";
@@ -135,6 +136,8 @@ function renderView(): void {
   else if (id === "budget") budgetView(view);
   else if (id === "cerveau") cerveauView(view);
   else if (id === "films") filmsView(view);
+  else if (id === "youtube") youtubeView(view);
+  else if (id === "musique") musiqueView(view);
   else if (id === "matchs-tv") matchsView(view);
   else if (id === "projets") projetsView(view);
   else if (id === "etudes") etudesView(view);

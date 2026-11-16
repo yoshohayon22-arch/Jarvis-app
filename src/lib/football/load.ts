@@ -1,7 +1,7 @@
 import "server-only";
 
 import { cached } from "@/lib/server-cache";
-import { ESPN_API, ESPN_REAL_MADRID, parseMatches, parseStandings, type Match as EspnMatch } from "./espn";
+import { ESPN_API, ESPN_REAL_MADRID, parseMatches, parseRoster, parseStandings, POSITION_LABELS, type Match as EspnMatch } from "./espn";
 import {
   REAL_MADRID_ID,
   type Match,
@@ -91,40 +91,23 @@ async function loadEspnStandings(league: string) {
 }
 
 // ---------- Effectif et buteurs du club (fiche d'équipe ESPN) ----------
-const POSITIONS: Record<string, string> = { Goalkeeper: "Gardien", Defender: "Défenseur", Midfielder: "Milieu", Forward: "Attaquant" };
-type Raw = Record<string, unknown>;
-const obj = (v: unknown): Raw => (v && typeof v === "object" ? (v as Raw) : {});
-const list = (v: unknown): Raw[] => (Array.isArray(v) ? (v as Raw[]) : []);
-
-function athleteStat(athlete: Raw, name: string): number | null {
-  for (const category of list(obj(obj(athlete.statistics).splits).categories)) {
-    const value = list(category.stats).find((s) => s.name === name)?.value;
-    if (typeof value === "number" && Number.isFinite(value)) return value;
-  }
-  return null;
-}
-
 const loadRoster = () =>
   cached("espn:effectif", 60 * MINUTE, async () => {
-    const athletes = list((await espn(`/site/v2/sports/soccer/esp.1/teams/${ESPN_REAL_MADRID}/roster`)).athletes).filter((a) => typeof a.displayName === "string" && a.displayName);
-    if (!athletes.length) throw new Error("effectif vide ou illisible");
-    return athletes;
+    const players = parseRoster(await espn(`/site/v2/sports/soccer/esp.1/teams/${ESPN_REAL_MADRID}/roster`));
+    if (!players.length) throw new Error("effectif vide ou illisible");
+    return players;
   });
 
 async function loadScorers(): Promise<Scorer[]> {
   const real = espnTeam(ESPN_REAL_MADRID, "Real Madrid");
   return (await loadRoster())
-    .map((a) => ({ name: String(a.displayName), team: real, played: athleteStat(a, "appearances"), goals: athleteStat(a, "totalGoals") ?? 0, assists: athleteStat(a, "goalAssists"), penalties: null }))
-    .filter((s) => s.goals > 0)
+    .filter((p) => p.goals > 0)
+    .map((p) => ({ name: p.name, team: real, played: p.appearances, goals: p.goals, assists: p.assists, penalties: null }))
     .sort((a, b) => b.goals - a.goals || (b.assists ?? 0) - (a.assists ?? 0));
 }
 
 async function loadSquad() {
-  const players: SquadPlayer[] = (await loadRoster()).map((a) => {
-    const position = String(obj(a.position).displayName ?? "");
-    const born = typeof a.dateOfBirth === "string" && !Number.isNaN(Date.parse(a.dateOfBirth)) ? new Date(a.dateOfBirth).toISOString().slice(0, 10) : null;
-    return { name: String(a.displayName), position: POSITIONS[position] ?? (position || "Poste non précisé"), nationality: typeof a.citizenship === "string" && a.citizenship ? a.citizenship : null, dateOfBirth: born };
-  });
+  const players: SquadPlayer[] = (await loadRoster()).map((p) => ({ name: p.name, position: POSITION_LABELS[p.position] ?? (p.position || "Poste non précisé"), nationality: p.nationality, dateOfBirth: p.dateOfBirth }));
   // L'entraîneur et le stade ne sont pas repris : la fiche ESPN ne les donne pas de façon fiable.
   return { coach: null, venue: null, players };
 }

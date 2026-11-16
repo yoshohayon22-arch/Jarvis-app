@@ -100,3 +100,39 @@ export function parseStandings(raw: unknown): StandingRow[] {
   return rows.sort((a, b) => a.rank - b.rank);
 }
 
+
+export interface RosterPlayer {
+  name: string;
+  /** Poste tel que donné par ESPN (Goalkeeper, Defender, Midfielder, Forward). */
+  position: string;
+  nationality: string | null;
+  /** aaaa-mm-jj */
+  dateOfBirth: string | null;
+  appearances: number | null;
+  goals: number;
+  assists: number | null;
+}
+
+export const POSITION_LABELS: Record<string, string> = { Goalkeeper: "Gardien", Defender: "Défenseur", Midfielder: "Milieu", Forward: "Attaquant" };
+
+/** Effectif d'une équipe (fiche « roster » d'ESPN), avec buts et passes décisives de la saison en championnat. */
+export function parseRoster(raw: unknown): RosterPlayer[] {
+  const stat = (athlete: Raw, name: string): number | null => {
+    for (const category of arr(obj(obj(athlete.statistics).splits).categories)) {
+      const value = arr(category.stats).find((s) => s.name === name)?.value;
+      if (typeof value === "number" && Number.isFinite(value)) return value;
+    }
+    return null;
+  };
+  return arr(obj(raw).athletes)
+    .filter((a) => typeof a.displayName === "string" && a.displayName)
+    .map((a) => ({
+      name: String(a.displayName),
+      position: text(obj(a.position).displayName),
+      nationality: typeof a.citizenship === "string" && a.citizenship ? a.citizenship : null,
+      dateOfBirth: typeof a.dateOfBirth === "string" && !Number.isNaN(Date.parse(a.dateOfBirth)) ? new Date(a.dateOfBirth).toISOString().slice(0, 10) : null,
+      appearances: stat(a, "appearances"),
+      goals: stat(a, "totalGoals") ?? 0,
+      assists: stat(a, "goalAssists"),
+    }));
+}

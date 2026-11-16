@@ -503,7 +503,7 @@ export function realMadridView(root: HTMLElement): void {
     h(
       "div",
       { class: "toolbar" },
-      h("p", { class: "muted" }, `Matchs et classements : ESPN (5 lectures, gardées 10 minutes). Actus : ${count} flux, gardés 30 minutes. Une lecture = 1 crédit Firecrawl.`),
+      h("p", { class: "muted" }, `Matchs, classements et effectif : ESPN (6 lectures, gardées 10 minutes). Actus : ${count} flux, gardés 30 minutes. Une lecture = 1 crédit Firecrawl.`),
       h("button", { class: "btn", type: "button", onclick: () => (void run(true), foot.refresh(true)) }, icon("refresh-cw"), h("span", { class: "btn-label" }, "Actualiser")),
     ),
     h("div", { class: "grid" }, ...foot.slots, slot),

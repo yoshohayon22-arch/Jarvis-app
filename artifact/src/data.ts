@@ -96,7 +96,7 @@ export async function callConnector<T>(server: string, tool: string, input: unkn
 }
 
 /** Lit le contenu brut d'une adresse publique via Firecrawl. */
-async function readUrl(url: string, retried = false): Promise<string> {
+export async function readUrl(url: string, retried = false): Promise<string> {
   const mcp = await mcpPromise;
   if (!mcp) throw new DataError("Les données en direct ne sont disponibles que dans Claude, avec le connecteur Firecrawl.", "no_mcp");
   try {

@@ -30,8 +30,8 @@ export const TABS: ArtifactTab[] = [
   { id: "etudes", label: "Études", short: "Études", icon: "graduation-cap", group: "Études et projets", live: true, planned: [] },
   { id: "projets", label: "Projets Claude Code", short: "Projets", icon: "folder-kanban", group: "Études et projets", live: true, planned: [] },
   { id: "films", label: "Films & Séries", short: "Films", icon: "clapperboard", group: "Loisirs", live: true, planned: [] },
-  { id: "musique", label: "Musique", short: "Musique", icon: "music", group: "Loisirs", planned: [["Lecteur", "Spotify"]] },
-  { id: "youtube", label: "YouTube", short: "YouTube", icon: "monitor-play", group: "Loisirs", planned: [["Nouvelles vidéos", "YouTube"]] },
+  { id: "musique", label: "Musique", short: "Musique", icon: "music", group: "Loisirs", live: true, planned: [] },
+  { id: "youtube", label: "YouTube", short: "YouTube", icon: "monitor-play", group: "Loisirs", live: true, planned: [] },
 ];
 
 export const DEFAULT_FAVORITES = ["mail", "meteo", "la-une", "calendrier"];

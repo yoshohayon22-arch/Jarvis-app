@@ -12,6 +12,8 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   cacheComponents: true,
   partialPrefetching: true,
+  // Bibliothèques de courrier (IMAP) : chargées telles quelles côté serveur, sans être regroupées.
+  serverExternalPackages: ["imapflow", "mailparser"],
   turbopack: {
     rules: {
       "*.css": {

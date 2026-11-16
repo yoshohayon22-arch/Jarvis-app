@@ -752,3 +752,10 @@ tr.mine td:first-child { padding-left: 6px; }
 .wa-empty-ic { width: 44px; height: 44px; color: var(--text-2); }
 .wa-confirm { margin: 10px 14px 0; display: flex; flex-wrap: wrap; align-items: center; gap: 10px; flex: none; }
 @media (prefers-reduced-motion: reduce) { .wa-typing i { animation: none; } }
+
+/* ---- Agents : échanges entre agents ---- */
+.wa-exchange { width: 100%; padding: 2px 12px; border-radius: 12px; border: var(--border-width) dashed var(--border); font-size: 13px; color: var(--text-2); }
+.wa-exchange summary { display: flex; align-items: center; gap: 8px; min-height: 44px; cursor: pointer; list-style: none; }
+.wa-exchange summary::-webkit-details-marker { display: none; }
+.wa-exchange[open] { padding-bottom: 10px; color: var(--text); }
+.wa-exchange p { padding: 4px 0; line-height: 1.5; overflow-wrap: anywhere; white-space: pre-wrap; }

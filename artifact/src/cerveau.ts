@@ -19,6 +19,17 @@ export const notes = liveList<Note>("cerveau", "notes", (id, d) => {
   return titre || texte.trim() ? { id, titre: titre || "(sans titre)", texte, maj: num(d.maj) } : null;
 });
 
+/** Mémoire : des faits sur toi, que tu as écrits ou validés. Tous les agents les lisent. */
+export interface Souvenir {
+  id: string;
+  texte: string;
+  cree: number;
+}
+export const souvenirs = liveList<Souvenir>("cerveau", "memoire", (id, d) => {
+  const texte = str(d.texte, 400).trim();
+  return texte ? { id, texte, cree: num(d.cree) } : null;
+});
+
 const fold = (s: string) => s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
 const words = (s: string) => fold(s).split(/[^a-z0-9]+/).filter((w) => w.length > 2);
 
@@ -125,6 +136,38 @@ export function cerveauView(root: HTMLElement): void {
     info,
   );
 
+  // ----- Ce que mes agents savent sur moi -----
+  souvenirs.start();
+  const memorySlot = h("div", { class: "stack" });
+  const memoryInput = textInput({ maxlength: 400, placeholder: "Ex. : je suis en dernière année de collège à Genève" });
+  memoryInput.id = "c-souvenir";
+  const memoryForm = h(
+    "form",
+    {
+      class: "search-row",
+      onsubmit: (e: Event) => {
+        e.preventDefault();
+        const texte = memoryInput.value.trim();
+        if (!texte) return;
+        memoryInput.value = "";
+        void run(souvenirs.save({ id: newId(), texte, cree: Date.now() }), "Information ajoutée : tes agents la connaissent désormais.");
+      },
+    },
+    h("label", { class: "sr-only", for: "c-souvenir" }, "Nouvelle information sur moi"),
+    memoryInput,
+    h("button", { class: "btn primary", type: "submit", "aria-label": "Ajouter cette information" }, icon("plus"), h("span", { class: "btn-label" }, "Ajouter")),
+  );
+  function renderMemory(): void {
+    if (souvenirs.status !== "pret") return memorySlot.replaceChildren();
+    const list = [...souvenirs.items].sort((a, b) => b.cree - a.cree);
+    memorySlot.replaceChildren(
+      list.length
+        ? h("ul", { class: "expenses" }, ...list.map((s) => h("li", null, h("span", { class: "grow-2 expense-title" }, s.texte), deleteZone("Oublier", "Oublier cette information ?", () => void run(souvenirs.remove(s.id), "Information oubliée.")))))
+        : emptyState("Pas encore de données", "Tes agents ne savent encore rien de particulier sur toi. Ajoute ce qui est utile : ta classe, tes objectifs, tes goûts, tes contraintes."),
+    );
+  }
+  const stopMemory = souvenirs.onChange(() => (root.isConnected ? renderMemory() : stopMemory()));
+
   let built = false;
   function render(): void {
     if (!gate(notes, body, "Le Cerveau")) return void (built = false);
@@ -132,8 +175,10 @@ export function cerveauView(root: HTMLElement): void {
       built = true;
       body.replaceChildren(
         h("div", { class: "grid two" }, card("Mes notes", [h("div", { class: "search-row" }, h("label", { class: "sr-only", for: "c-recherche" }, "Chercher dans mes notes"), search, addBtn), listSlot]), card("Interroger mes notes", [askForm])),
-        h("p", { class: "note" }, "Source : tes notes, enregistrées dans l'espace privé de cette page. Elles ne sont envoyées à Claude que lorsque tu poses une question."),
+        card("Ce que mes agents savent sur moi", [h("p", { class: "muted small-2" }, "Des faits que tu écris toi-même, ou qu'un agent t'a proposé de retenir. Tous tes agents les lisent à chaque message."), memoryForm, memorySlot]),
+        h("p", { class: "note" }, "Source : tes notes, enregistrées dans l'espace privé de cette page. Elles ne sont envoyées à Claude que lorsque tu poses une question ou que tu écris à un agent."),
       );
+      renderMemory();
       search.id = "c-recherche";
     }
     renderList();

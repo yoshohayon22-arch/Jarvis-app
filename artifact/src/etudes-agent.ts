@@ -32,7 +32,7 @@ const NIVEAUX: [string, string][] = [
   ["passerelle", "Année préparatoire ou passerelle"],
   ["continue", "Formation continue / certificat"],
 ];
-const profils = liveList<Profil>("etudes", "profil", (id, d) => ({ id, niveau: str(d.niveau, 20), domaine: str(d.domaine, 200), parcours: str(d.parcours, 300), lieux: str(d.lieux, 200), langues: str(d.langues, 120), budget: str(d.budget, 120), rentree: str(d.rentree, 60), autres: str(d.autres, 600) }));
+export const profils = liveList<Profil>("etudes", "profil", (id, d) => ({ id, niveau: str(d.niveau, 20), domaine: str(d.domaine, 200), parcours: str(d.parcours, 300), lieux: str(d.lieux, 200), langues: str(d.langues, 120), budget: str(d.budget, 120), rentree: str(d.rentree, 60), autres: str(d.autres, 600) }));
 const EMPTY: Profil = { id: "moi", niveau: "", domaine: "", parcours: "", lieux: "", langues: "", budget: "", rentree: "", autres: "" };
 
 export interface Proposition {

@@ -6,6 +6,8 @@ import { EtudesView } from "@/components/perso/etudes-view";
 import { FilmsView } from "@/components/perso/films-view";
 import { ProjetsView } from "@/components/perso/projets-view";
 import { CultureView } from "@/components/culture/culture-view";
+import { MusiqueView } from "@/components/loisirs/musique-view";
+import { YoutubeView } from "@/components/loisirs/youtube-view";
 import { MailView } from "@/components/mail/mail-view";
 import { MatchsView } from "@/components/matchs/matchs-view";
 import { MeteoView } from "@/components/meteo/meteo-view";
@@ -36,6 +38,8 @@ export default async function TabPage({ params }: PageProps<"/[onglet]">) {
   if (tab.id === "la-une") return <NewsView tab="une" />;
   if (tab.id === "foot") return <NewsView tab="foot" />;
   if (tab.id === "real-madrid") return <RealMadridView />;
+  if (tab.id === "youtube") return <YoutubeView />;
+  if (tab.id === "musique") return <MusiqueView />;
   if (tab.id === "mail") return <MailView />;
   if (tab.id === "budget") return <BudgetView />;
   if (tab.id === "projets") return <ProjetsView />;

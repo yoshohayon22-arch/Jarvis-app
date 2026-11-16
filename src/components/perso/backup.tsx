@@ -6,7 +6,7 @@ import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { LOCAL_PREFIX, notifyLocalData, today } from "@/lib/local/store";
 
-const KEYS = ["budget", "projets", "etudes", "cerveau", "films"];
+const KEYS = ["budget", "projets", "etudes", "cerveau", "films", "youtube", "musique"];
 
 export function BackupSection() {
   const [message, setMessage] = useState("");

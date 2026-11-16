@@ -15,6 +15,11 @@ export interface Match {
   away: string;
   homeId: string;
   awayId: string;
+  /** Sigle (ex. « RMA ») et couleur du club quand ESPN les fournit. */
+  homeAbbr: string;
+  awayAbbr: string;
+  homeColor: string;
+  awayColor: string;
   homeScore: number | null;
   awayScore: number | null;
   state: "pre" | "in" | "post";
@@ -74,6 +79,10 @@ export function parseMatches(events: unknown, fallbackCompetition = ""): Match[]
       away: awayName,
       homeId: text(obj(home.team).id),
       awayId: text(obj(away.team).id),
+      homeAbbr: text(obj(home.team).abbreviation),
+      awayAbbr: text(obj(away.team).abbreviation),
+      homeColor: text(obj(home.team).color),
+      awayColor: text(obj(away.team).color),
       // Avant le coup d'envoi, ESPN renvoie parfois « 0 » : ce n'est pas un score.
       homeScore: played ? score(home.score) : null,
       awayScore: played ? score(away.score) : null,

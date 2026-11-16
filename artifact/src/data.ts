@@ -152,12 +152,21 @@ export interface Cached<T> {
   at: number;
 }
 
+const inFlight = new Map<string, Promise<unknown>>();
+
 export async function cachedLoad<T>(key: string, ttlMs: number, load: () => Promise<T>, force = false): Promise<Cached<T>> {
   const hit = store.get<Cached<T>>(`dash-cache:${key}`);
   if (!force && hit && Date.now() - hit.at < ttlMs) return hit;
-  const fresh = { data: await load(), at: Date.now() };
-  store.set(`dash-cache:${key}`, fresh);
-  return fresh;
+  // Deux cartes qui demandent la même donnée en même temps partagent une seule lecture (un seul crédit).
+  const running = inFlight.get(key) as Promise<Cached<T>> | undefined;
+  if (running) return running;
+  const promise = (async () => {
+    const fresh = { data: await load(), at: Date.now() };
+    store.set(`dash-cache:${key}`, fresh);
+    return fresh;
+  })().finally(() => inFlight.delete(key));
+  inFlight.set(key, promise);
+  return promise;
 }
 
 /** Au démarrage : retire du stockage les réponses de plus de 2 jours (les clés datées s'accumuleraient sinon). */

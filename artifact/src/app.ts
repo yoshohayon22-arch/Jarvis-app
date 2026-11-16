@@ -4,12 +4,13 @@
  */
 import { clear, h, icon, store } from "./dom";
 import { DEFAULT_FAVORITES, getTab, TABS, type ArtifactTab } from "./tabs";
-import { meteoView, newsView, plannedView, realMadridView } from "./views";
+import { meteoView, newsView, plannedView } from "./views";
 import { budgetView } from "./budget";
 import { cerveauView } from "./cerveau";
 import { filmsView } from "./films";
 import { musiqueView, youtubeView } from "./loisirs";
-import { matchsView } from "./foot";
+import { matchsView, realMadridView } from "./foot";
+import { foldNotes } from "./layout";
 import { cultureView } from "./culture";
 import { etudesView } from "./etudes";
 import { projetsView } from "./projets";
@@ -151,6 +152,8 @@ function renderView(): void {
   else if (id === "paracha" || id === "tehilim" || id === "halakha" || id === "rambam") studyView(view, id);
   else if (id === "cours") coursView(view);
   else if (tab) plannedView(view, tab);
+  // Les réglages gardent leurs explications visibles ; ailleurs, sources et précisions se replient derrière un « i ».
+  if (id !== "reglages") foldNotes(view);
   window.scrollTo(0, 0);
 }
 

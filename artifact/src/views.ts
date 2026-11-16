@@ -5,7 +5,7 @@ import { GROUP_LABELS, REAL_MADRID_PATTERN, type NewsGroup, type NewsTab } from 
 import type { Article, NewsPayload } from "@/lib/rss/types";
 import { DataError, loadAir, loadAlerts, loadForecast, loadNews, newsMaxAgeDays, newsSourceCount, type Cached } from "./data";
 import { h, icon, svg } from "./dom";
-import { realMadridSections } from "./foot";
+import { sections } from "./layout";
 import type { ArtifactTab } from "./tabs";
 
 const TZ = "Europe/Zurich";
@@ -331,10 +331,15 @@ export function meteoView(root: HTMLElement): void {
     h(
       "div",
       { class: "toolbar" },
-      h("p", { class: "muted" }, "Genève · prévisions calculées par des modèles. Chaque actualisation utilise 4 crédits Firecrawl ; les données sont gardées 20 à 30 minutes."),
+      h("p", { class: "note" }, "Genève · prévisions calculées par des modèles. Chaque actualisation utilise 4 crédits Firecrawl ; les données sont gardées 20 à 30 minutes."),
       h("button", { class: "btn", type: "button", onclick: () => all(true) }, icon("refresh-cw"), h("span", { class: "btn-label" }, "Actualiser")),
     ),
-    h("div", { class: "grid" }, ...slots),
+    slots[0],
+    sections("meteo", [
+      { id: "heures", label: "Heure par heure", nodes: [slots[1]] },
+      { id: "jours", label: "7 jours", nodes: [slots[2]] },
+      { id: "air", label: "Air et alertes", nodes: [h("div", { class: "grid two" }, slots[3], slots[4])] },
+    ]),
   );
   all(false);
 }
@@ -466,7 +471,7 @@ export function newsView(root: HTMLElement, tab: NewsTab): void {
     h(
       "div",
       { class: "toolbar" },
-      h("p", { class: "muted" }, `Chaque actualisation lit ${count} flux, soit ${count} crédits Firecrawl ; les articles sont gardés 30 minutes.`),
+      h("p", { class: "note" }, `Chaque actualisation lit ${count} flux, soit ${count} crédits Firecrawl ; les articles sont gardés 30 minutes.`),
       h("button", { class: "btn", type: "button", onclick: () => void run(true) }, icon("refresh-cw"), h("span", { class: "btn-label" }, "Actualiser")),
     ),
     content,
@@ -475,9 +480,9 @@ export function newsView(root: HTMLElement, tab: NewsTab): void {
 }
 
 // ---------- Real Madrid ----------
-export function realMadridView(root: HTMLElement): void {
+/** Actus du Real Madrid (carte utilisée par l'onglet Real Madrid). */
+export function realNewsSlot(): { slot: HTMLElement; run: (force: boolean) => Promise<void>; count: number } {
   const slot = h("div", { class: "slot" });
-  const count = newsSourceCount("real");
   const run = asyncSection(slot, "Actus Real Madrid", "flux RSS", (force) => loadNews("real", force), ({ data, at }) => {
     const item = (a: Article) =>
       h(
@@ -490,26 +495,13 @@ export function realMadridView(root: HTMLElement): void {
     return card(
       "Actus Real Madrid",
       [
-        data.articles.length ? h("ul", { class: "links" }, ...data.articles.slice(0, 6).map(item)) : emptyState("Aucune actu récente", "Aucun article de moins de 3 jours ne parle du Real Madrid dans les flux suivis."),
+        data.articles.length ? h("ul", { class: "links" }, ...data.articles.slice(0, 10).map(item)) : emptyState("Aucune actu récente", "Aucun article de moins de 3 jours ne parle du Real Madrid dans les flux suivis."),
         sourceNote(names.length ? `flux RSS de ${names.join(", ")} (lus via Firecrawl)` : "flux RSS (lus via Firecrawl)", at),
       ],
-      { detail: data.articles.length > 6 ? () => [h("ul", { class: "links sep" }, ...data.articles.slice(6, 30).map(item))] : undefined },
+      { detail: data.articles.length > 10 ? () => [h("ul", { class: "links sep" }, ...data.articles.slice(10, 40).map(item))] : undefined },
     );
   });
-
-  const foot = realMadridSections();
-
-  root.append(
-    h(
-      "div",
-      { class: "toolbar" },
-      h("p", { class: "muted" }, `Matchs, classements et effectif : ESPN (6 lectures, gardées 10 minutes). Actus : ${count} flux, gardés 30 minutes. Une lecture = 1 crédit Firecrawl.`),
-      h("button", { class: "btn", type: "button", onclick: () => (void run(true), foot.refresh(true)) }, icon("refresh-cw"), h("span", { class: "btn-label" }, "Actualiser")),
-    ),
-    h("div", { class: "grid" }, ...foot.slots, slot),
-  );
-  void run(false);
-  foot.refresh(false);
+  return { slot, run, count: newsSourceCount("real") };
 }
 
 // ---------- Onglets pas encore branchés ----------

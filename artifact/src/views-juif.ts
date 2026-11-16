@@ -14,7 +14,7 @@ function refreshBar(text: string, onRefresh: () => void): HTMLElement {
   return h(
     "div",
     { class: "toolbar" },
-    h("p", { class: "muted" }, text),
+    h("p", { class: "note" }, text),
     h("button", { class: "btn", type: "button", onclick: onRefresh }, icon("refresh-cw"), h("span", { class: "btn-label" }, "Actualiser")),
   );
 }

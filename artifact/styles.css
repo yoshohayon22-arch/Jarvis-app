@@ -355,3 +355,84 @@ textarea.draft { display: block; }
 tr.mine th, tr.mine td { font-weight: 700; background: var(--accent-soft); }
 tr.mine td:first-child { padding-left: 6px; }
 @media (prefers-reduced-motion: reduce) { .live .dot { animation: none; } }
+
+/* ================= Nouvelle structure des onglets ================= */
+/* Plus d'air : cartes moins serrées, titres plus nets. */
+.view { gap: 22px; }
+.grid, .grid.two { gap: 20px; }
+.card { padding: 22px; gap: 16px; }
+.card-head h2 { font-size: 17px; }
+.mail, .article { padding: 16px 18px; }
+@media (min-width: 900px) { .card { padding: 24px; } }
+
+/* Sous-sections : une rangée de boutons, une seule section visible. */
+.segs { position: relative; display: flex; gap: 6px; padding: 5px; overflow-x: auto; scrollbar-width: none; background: var(--surface); border: var(--border-width) solid var(--border); border-radius: 999px; align-self: flex-start; max-width: 100%; }
+.seg { flex: none; min-height: 44px; padding: 0 18px; border: 0; border-radius: 999px; background: none; color: var(--text-2); font-size: 14px; white-space: nowrap; }
+.seg:hover { color: var(--text); }
+.seg.on { background: var(--accent); color: var(--on-accent); font-weight: 600; }
+[data-dash="brutal"] .segs, [data-dash="brutal"] .seg { border-radius: 0; }
+[data-dash="brutal"] .seg.on { outline: 3px solid #000; }
+[role="tabpanel"]:focus-visible { outline-offset: 6px; }
+
+/* L'essentiel en haut de page. */
+.hero { display: flex; flex-direction: column; gap: 20px; padding: 24px; border-radius: calc(var(--radius) + 4px); border: var(--border-width) solid var(--border); background: linear-gradient(140deg, var(--accent-soft), transparent 60%), var(--surface); box-shadow: var(--card-shadow); }
+[data-dash="brutal"] .hero, [data-dash="dessine"] .hero { background: var(--surface); }
+.hero-main { display: flex; flex-direction: column; gap: 14px; }
+.eyebrow { display: flex; align-items: center; gap: 10px; font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-2); font-family: var(--ff-body); }
+.versus { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 12px; }
+.versus-team { display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center; font-family: var(--ff-heading); font-weight: var(--heading-weight); font-size: 17px; overflow-wrap: anywhere; }
+.versus-team .badge { width: 56px; height: 56px; font-size: 15px; }
+.versus-mid { font-family: var(--ff-heading); font-size: clamp(30px, 8vw, 44px); line-height: 1; white-space: nowrap; }
+.center { text-align: center; justify-content: center; }
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; }
+.kpi { display: flex; flex-direction: column; gap: 4px; padding: 14px 16px; background: var(--surface-2); border-radius: var(--radius-sm); min-width: 0; }
+.kpi dt { font-size: 12px; color: var(--text-2); }
+.kpi dd { font-size: 14px; }
+.kpi-value { font-family: var(--ff-heading); font-weight: var(--heading-weight); font-size: 26px; line-height: 1.1; }
+.forms { display: flex; gap: 6px; align-items: center; min-height: 29px; }
+.page-head { display: flex; justify-content: flex-end; margin-bottom: -8px; }
+.toolbar > .btn:last-child, .toolbar > .icon-btn:last-child { margin-left: auto; }
+
+/* Pastilles : équipe, résultat. */
+.badge { display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; flex: none; border-radius: 50%; background: var(--surface-2); border: var(--border-width) solid var(--border); font: 600 10px/1 var(--ff-body); letter-spacing: 0.02em; color: var(--text); }
+[data-dash="brutal"] .badge { border-radius: 0; border-color: #000; }
+.form { display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; flex: none; border-radius: 50%; font: 700 12px/1 var(--ff-body); border: var(--border-width) solid var(--border); background: var(--surface-2); color: var(--text); }
+.form-v { background: var(--accent); color: var(--on-accent); border-color: transparent; }
+.form-d { background: none; color: var(--text-2); border-style: dashed; }
+
+/* Lignes de match. */
+.matches { display: flex; flex-direction: column; }
+.match { display: flex; flex-direction: column; gap: 6px; padding: 12px 0; border-bottom: 1px solid color-mix(in srgb, var(--border) 60%, transparent); }
+.match:last-child { border-bottom: 0; padding-bottom: 0; }
+.match:first-child { padding-top: 0; }
+.match-line { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 10px; font-size: 15px; }
+.side { display: flex; align-items: center; justify-content: flex-end; gap: 8px; min-width: 0; text-align: right; }
+.side.away { justify-content: flex-start; text-align: left; }
+.team-name { overflow-wrap: anywhere; min-width: 0; }
+.match-score { font-family: var(--ff-heading); font-size: 19px; white-space: nowrap; min-width: 58px; text-align: center; }
+.match-score.is-live { color: var(--accent); }
+[data-dash="brutal"] .match-score.is-live, [data-dash="dessine"] .match-score.is-live { color: var(--text); text-decoration: underline; }
+.match-time { min-width: 58px; text-align: center; padding: 4px 8px; border-radius: 999px; background: var(--surface-2); font-size: 14px; }
+.live-row { background: var(--accent-soft); margin-inline: -10px; padding-inline: 10px !important; border-radius: var(--radius-sm); }
+.squad { display: flex; flex-direction: column; gap: 14px; }
+.squad-names { font-size: 14px; line-height: 1.7; }
+.scorer .bar { height: 8px; }
+
+/* Sources et précisions repliées. */
+.folded { display: none !important; }
+.info { font-size: 12px; color: var(--text-2); }
+.info summary { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; cursor: pointer; list-style: none; border-radius: var(--radius-sm); }
+.info summary::-webkit-details-marker { display: none; }
+.info summary:hover { color: var(--text); }
+.card-info { margin: -10px 0 -12px; }
+/* Replié, le « i » se loge dans le coin de la carte au lieu d'occuper une ligne. */
+.card-info:not([open]) { position: absolute; right: 6px; bottom: 4px; margin: 0; }
+.card-info:not([open]) summary { margin: 0; }
+.card:has(> .card-info:not([open])) { padding-bottom: 44px; }
+.card:has(> .link-btn):has(> .card-info:not([open])) { padding-bottom: 22px; }
+.card-info summary { font-size: 0; gap: 0; width: 44px; justify-content: center; margin-left: -12px; }
+.card-info summary .ic { width: 16px; height: 16px; }
+.info-body { display: flex; flex-direction: column; gap: 6px; padding: 4px 0 10px; }
+.info-line a { color: inherit; }
+.card > .link-btn + .card-info { margin-top: -4px; }
+@media (max-width: 420px) { .match-line { font-size: 14px; gap: 6px; } .badge { width: 28px; height: 28px; font-size: 9px; } .versus-team .badge { width: 48px; height: 48px; } }

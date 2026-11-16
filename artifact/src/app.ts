@@ -105,10 +105,16 @@ function renderChrome(): void {
 
   // En-tête.
   const themeBtn: HTMLButtonElement = h("button", { class: "icon-btn boxed", type: "button", "aria-label": "Changer de thème", "aria-haspopup": "menu", onclick: () => openThemeMenu(themeBtn) }, icon("palette"));
+  // Plein écran : proposé seulement là où le navigateur le permet (ordinateur ; pas sur iPhone).
+  const full = Boolean(document.fullscreenElement);
+  const fullBtn = document.fullscreenEnabled
+    ? h("button", { class: "icon-btn boxed wide-only-flex", type: "button", "aria-label": full ? "Quitter le plein écran (touche F)" : "Plein écran (touche F)", title: full ? "Quitter le plein écran (F)" : "Plein écran (F)", "aria-pressed": String(full), onclick: toggleFullscreen }, icon(full ? "minimize" : "maximize"))
+    : null;
   header.replaceChildren(
     h("h1", null, active === "reglages" ? "Réglages" : (tab?.label ?? "Dashboard")),
     h("button", { class: "search-btn boxed", type: "button", "aria-label": "Rechercher (Ctrl + K)", onclick: openPalette }, icon("search"), h("span", { class: "wide-only" }, "Rechercher…"), h("kbd", { class: "wide-only" }, "Ctrl K")),
     themeBtn,
+    ...(fullBtn ? [fullBtn] : []),
     h("a", { class: "icon-btn boxed narrow-only", href: "#reglages", "aria-label": "Réglages" }, icon("settings")),
   );
 
@@ -385,10 +391,36 @@ app.append(
   bottom,
 );
 window.addEventListener("hashchange", renderAll);
+
+// ---------- Plein écran ----------
+/** Petit message temporaire en bas de l'écran (annoncé aux lecteurs d'écran). */
+function toast(message: string): void {
+  document.querySelector(".toast")?.remove();
+  const el = h("p", { class: "toast", role: "status" }, message);
+  document.body.append(el);
+  setTimeout(() => el.remove(), 5000);
+}
+
+function toggleFullscreen(): void {
+  if (document.fullscreenElement) return void document.exitFullscreen().catch(() => undefined);
+  // Certaines vues (application mobile, aperçu intégré) refusent le plein écran : on l'explique au lieu de ne rien faire.
+  root.requestFullscreen().catch(() => toast("Plein écran refusé dans cette vue. Ouvre le Dashboard dans son propre onglet du navigateur, puis réessaie."));
+}
+document.addEventListener("fullscreenchange", () => {
+  renderChrome();
+  if (document.fullscreenElement) toast("Plein écran activé. Touche F ou Échap pour en sortir.");
+});
 window.addEventListener("keydown", (e) => {
   if (e.key.toLowerCase() === "k" && (e.metaKey || e.ctrlKey)) {
     e.preventDefault();
     openPalette();
+  }
+  // Touche F seule (hors saisie de texte) : plein écran.
+  const target = e.target as HTMLElement | null;
+  const typing = target?.closest("input, textarea, select, [contenteditable]");
+  if (e.key.toLowerCase() === "f" && !e.metaKey && !e.ctrlKey && !e.altKey && !typing && document.fullscreenEnabled && !document.querySelector(".overlay")) {
+    e.preventDefault();
+    toggleFullscreen();
   }
 });
 

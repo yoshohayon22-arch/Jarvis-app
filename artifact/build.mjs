@@ -14,7 +14,7 @@ const ICONS = [
   "calendar-days", "book-open", "scroll-text", "scale", "library", "circle-play", "clapperboard", "music", "monitor-play",
   "wallet", "cloud-sun", "ellipsis", "settings", "palette", "search", "x", "maximize-2", "info", "refresh-cw",
   "external-link", "lock", "droplets", "wind", "sunrise", "sunset", "star", "eye", "eye-off", "check",
-  "plus", "trash-2", "chevron-left", "chevron-right", "upload", "triangle-alert",
+  "plus", "trash-2", "chevron-left", "chevron-right", "upload", "triangle-alert", "maximize", "minimize",
 ];
 const icons = {};
 const iconsDir = join(root, "node_modules/lucide-react/dist/esm/icons");

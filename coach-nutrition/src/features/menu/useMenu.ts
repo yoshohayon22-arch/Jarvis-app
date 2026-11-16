@@ -17,24 +17,27 @@ import {
   weekSummary,
   type GeneratorContext,
 } from '../../domain/menu/generator'
-import type { MealSlot } from '../../domain/types'
+import { activeTechnique, withTechnique } from '../../domain/techniques'
+import type { MealSlot, Profile, ProfileSettings, TechniqueId } from '../../domain/types'
 import { useAppData } from '../../state/AppDataContext'
+
+/** Contexte du générateur pour un profil et des réglages donnés (ceux du profil, ou des réglages modifiés). */
+function contextFor(profile: Profile, settings: ProfileSettings): GeneratorContext {
+  const t = computeTargets(settings, referenceWeightFor(profile))
+  return {
+    settings,
+    targets: { kcal: t.targetKcal, proteinG: t.macros.proteinG, fatG: t.macros.fatG, carbsG: t.macros.carbsG },
+    recipes: RECIPES,
+    ingredients: INGREDIENT_MAP,
+    weekStart: planningWeekStart(todayIso()),
+    seed: 1,
+  }
+}
 
 export function useMenu() {
   const { activeProfile, update } = useAppData()
 
-  const ctx = useMemo<GeneratorContext | null>(() => {
-    if (!activeProfile) return null
-    const t = computeTargets(activeProfile.settings, referenceWeightFor(activeProfile))
-    return {
-      settings: activeProfile.settings,
-      targets: { kcal: t.targetKcal, proteinG: t.macros.proteinG, fatG: t.macros.fatG, carbsG: t.macros.carbsG },
-      recipes: RECIPES,
-      ingredients: INGREDIENT_MAP,
-      weekStart: planningWeekStart(todayIso()),
-      seed: 1,
-    }
-  }, [activeProfile])
+  const ctx = useMemo(() => (activeProfile ? contextFor(activeProfile, activeProfile.settings) : null), [activeProfile])
 
   const plan = activeProfile?.menu ?? null
   const recipes = useMemo(() => (plan ? planLookup(plan, RECIPE_MAP.values()) : RECIPE_MAP), [plan])
@@ -52,7 +55,9 @@ export function useMenu() {
     /** Recettes du catalogue + bowls du menu. */
     recipes,
     /** Les besoins ont changé depuis la génération du menu. */
-    stale: Boolean(plan && ctx && (targetsChanged(plan, ctx.targets) || plan.lowBudget !== ctx.settings.lowBudget)),
+    stale: Boolean(
+      plan && ctx && (targetsChanged(plan, ctx.targets) || plan.lowBudget !== ctx.settings.lowBudget || (plan.technique ?? null) !== activeTechnique(ctx.settings)),
+    ),
     /** Génère un nouveau menu (en gardant les plats verrouillés). */
     generate: () => {
       if (!activeProfile || !ctx) return
@@ -63,6 +68,19 @@ export function useMenu() {
       const avoid = plan ? plan.days.flatMap((d) => d.meals.filter((m) => !m.locked).map((m) => m.recipeId)) : []
       const next = generateWeek({ ...ctx, seed }, { previous, avoid })
       update((d) => setMenu(d, activeProfile.id, next))
+    },
+    /**
+     * Applique (ou retire avec `null`) une technique de nutrition : réglage du profil + nouveau menu
+     * de la semaine en une seule fois. Les plats verrouillés sont gardés si leur créneau existe encore.
+     */
+    applyTechnique: (id: TechniqueId | null) => {
+      if (!activeProfile) return
+      const settings = withTechnique(activeProfile.settings, id)
+      const next = contextFor(activeProfile, settings)
+      const previous = plan && plan.weekStart === next.weekStart ? plan : null
+      const avoid = plan ? plan.days.flatMap((d) => d.meals.filter((m) => !m.locked).map((m) => m.recipeId)) : []
+      const menu = generateWeek({ ...next, seed: Math.floor(Math.random() * 1_000_000_000) }, { previous, avoid })
+      update((d) => setMenu(updateProfile(d, activeProfile.id, { settings }), activeProfile.id, menu))
     },
     replace: (dayIndex: number, slot: MealSlot, variant: number) => ctx && save((p) => replaceMeal(p, ctx, dayIndex, slot, variant)),
     toggleLock: (dayIndex: number, slot: MealSlot) => save((p) => toggleLock(p, dayIndex, slot)),

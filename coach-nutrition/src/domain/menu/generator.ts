@@ -9,6 +9,7 @@
  * Les calories de chaque jour restent dans la marge de ±5 % autour de la cible.
  */
 import type { Ingredient, Recipe } from '../catalog'
+import { activeTechnique, hasRedMeat, MAX_RED_MEAT_PER_WEEK, techniqueBonus, techniqueWeight } from '../techniques'
 import { addDays } from '../nutrition'
 import { canFollow, isRecipeAllowed } from '../restrictions'
 import type { DayPlan, MealSlot, PlannedMeal, ProfileSettings, WeekPlan } from '../types'
@@ -277,6 +278,8 @@ function evaluate(slots: MealSlot[], recipes: Recipe[], ctx: GeneratorContext, o
       }
     })
   }
+  // Technique de nutrition active : bonus pour les repas qui la respectent.
+  score += techniqueBonus(recipes, slots, activeTechnique(ctx.settings), ctx.ingredients)
   // Plat principal déjà au menu précédent : pénalité (un nouveau menu doit vraiment changer).
   if (opt.avoid?.size) {
     recipes.forEach((r, i) => {
@@ -387,6 +390,9 @@ function generateOnce(ctx: GeneratorContext, opts: GenerateOptions): WeekPlan {
   const strictVariety = varietyStrength(ctx.targets) === 1
   const keyCap = strictVariety ? MAX_KEY_PER_WEEK : MAX_KEY_PER_WEEK + 2
   const avoid = new Set(opts.avoid ?? [])
+  const technique = activeTechnique(ctx.settings)
+  // Méditerranéen : viande rouge et charcuterie au plus une fois par semaine.
+  let redMeatMains = 0
   // Petit-déjeuner / collations : 2 fois la même recette au plus, sauf si le profil n'a pas assez de choix.
   const sideCap = (slot: MealSlot) => {
     const sameKind = slots.filter((s) => pools[s] === pools[slot] || (s.startsWith('collation') && slot.startsWith('collation'))).length
@@ -428,6 +434,7 @@ function generateOnce(ctx: GeneratorContext, opts: GenerateOptions): WeekPlan {
                 // jamais le même plat principal deux jours de suite (hors bowl et plats cuisinés en session)
                 (r.components || (batch && isBatchCooked(r, slot)) || !previousDay.some((p, pi) => p.id === r.id && (slots[pi] === 'dejeuner' || slots[pi] === 'diner'))))) &&
             (relax || (uses.get(r.id) ?? 0) < (slot === 'dejeuner' || slot === 'diner' ? maxUses(r, ctx.settings) : sideCap(slot))) &&
+            (relax || technique !== 'mediterraneen' || (slot !== 'dejeuner' && slot !== 'diner') || !hasRedMeat(r) || redMeatMains < MAX_RED_MEAT_PER_WEEK) &&
             kosherOk(ctx, prev, r, hour) &&
             // un plat verrouillé plus tard dans la journée doit rester compatible
             slots.slice(i + 1).every((s2) => {
@@ -454,6 +461,7 @@ function generateOnce(ctx: GeneratorContext, opts: GenerateOptions): WeekPlan {
           if (previousDay[i]?.id === r.id) w *= 0.25 // éviter le même plat deux jours de suite
           if (!r.season.includes(month)) w *= 0.3 // préférer la saison
           if (avoid.has(r.id) && !r.components) w *= 0.15 // déjà au menu précédent : on change
+          w *= techniqueWeight(r, technique, slot, ctx.ingredients)
           if (ctx.settings.lowBudget && r.tags.includes('petit-budget')) w *= 2
           // Batch cooking : le bowl est le déjeuner type, les plats mijotés sont privilégiés le soir.
           if (r.components) w *= slot === 'dejeuner' ? 8 : 1.5
@@ -492,6 +500,7 @@ function generateOnce(ctx: GeneratorContext, opts: GenerateOptions): WeekPlan {
         previousDayKeys.add(k)
       })
     })
+    redMeatMains += best.recipes.filter((r, i) => (slots[i] === 'dejeuner' || slots[i] === 'diner') && hasRedMeat(r)).length
     previousDay = best.recipes
     lastMeal = { recipe: best.recipes[best.recipes.length - 1], hour: SLOT_HOUR[slots[slots.length - 1]] }
     days.push({
@@ -511,6 +520,7 @@ function generateOnce(ctx: GeneratorContext, opts: GenerateOptions): WeekPlan {
     seed: ctx.seed,
     targets: { ...ctx.targets },
     lowBudget: ctx.settings.lowBudget,
+    technique: activeTechnique(ctx.settings),
     days,
     batch,
     // On ne garde que les bowls des sessions ou effectivement utilisés.

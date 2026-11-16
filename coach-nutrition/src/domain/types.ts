@@ -75,7 +75,14 @@ export interface ProfileSettings {
   gainSurplusKcal: number
   /** Passe à « maintien » une fois l'objectif atteint. */
   maintenanceMode: boolean
+  /** Technique de nutrition appliquée au menu (assiette équilibrée, méditerranéen…), facultative. */
+  technique?: TechniqueId | null
+  /** Nombre de repas avant le jeûne 16:8, rétabli quand on le retire. */
+  mealsBeforeFasting?: MealsPerDay
 }
+
+/** Techniques de nutrition proposées (voir domain/techniques.ts). */
+export type TechniqueId = 'assiette' | 'mediterraneen' | 'proteines' | 'jeune-16-8'
 
 export interface WeighIn {
   /** Date au format AAAA-MM-JJ. */
@@ -120,6 +127,8 @@ export interface WeekPlan {
   /** Cibles utilisées lors de la génération (pour détecter un changement de besoins). */
   targets: { kcal: number; proteinG: number; fatG: number; carbsG: number }
   lowBudget: boolean
+  /** Technique active lors de la génération (null ou absent : aucune). */
+  technique?: TechniqueId | null
   days: DayPlan[]
   /** Organisation batch cooking (null si le batch cooking n'est pas activé). */
   batch: { sessions: BatchSession[] } | null

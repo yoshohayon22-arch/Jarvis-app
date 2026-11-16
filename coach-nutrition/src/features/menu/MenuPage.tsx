@@ -4,7 +4,7 @@
  */
 import { useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { BookOpen, Calculator, CalendarDays, UtensilsCrossed, ChefHat, Check, Flame, Lock, LockOpen, RefreshCw, Shuffle, Sparkles } from 'lucide-react'
+import { BookOpen, Calculator, CalendarDays, Lightbulb, UtensilsCrossed, ChefHat, Check, Flame, Lock, LockOpen, RefreshCw, Shuffle, Sparkles } from 'lucide-react'
 import type { Recipe } from '../../domain/catalog'
 import { isBatchCooked } from '../../domain/menu/batch'
 import { daySummary, mealValues } from '../../domain/menu/generator'
@@ -21,8 +21,10 @@ import { useMenu } from './useMenu'
 import { CountUp } from '../../components/CountUp'
 import { MealCalculator, type CalculatorState } from './MealCalculator'
 import { MealIdeas } from './MealIdeas'
+import { Techniques } from './Techniques'
+import { TECHNIQUE_MAP } from '../../domain/techniques'
 
-type Tab = 'semaine' | 'idee' | 'recettes' | 'calcul'
+type Tab = 'semaine' | 'idee' | 'techniques' | 'recettes' | 'calcul'
 
 export function MenuPage() {
   // L'accueil peut ouvrir directement l'onglet « Un repas ».
@@ -34,11 +36,12 @@ export function MenuPage() {
     <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <h1 className="text-3xl font-bold">Menu</h1>
-        <div role="tablist" aria-label="Affichage" className="flex w-full rounded-xl bg-slate-100 p-1 sm:w-auto">
+        <div role="tablist" aria-label="Affichage" className="flex w-full overflow-x-auto rounded-xl bg-slate-100 p-1 sm:w-auto">
           {(
             [
               ['semaine', 'Semaine', CalendarDays],
               ['idee', 'Un repas', UtensilsCrossed],
+              ['techniques', 'Techniques', Lightbulb],
               ['recettes', 'Recettes', BookOpen],
               ['calcul', 'Calculer', Calculator],
             ] as const
@@ -49,7 +52,7 @@ export function MenuPage() {
               type="button"
               aria-selected={tab === id}
               onClick={() => setTab(id)}
-              className={`flex flex-1 items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold transition sm:flex-none sm:px-4 ${
+              className={`flex flex-1 shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-lg px-2.5 py-2 text-sm font-semibold transition sm:flex-none sm:px-4 ${
                 tab === id ? 'bg-white text-brand-700 shadow-sm' : 'text-muted hover:text-ink'
               }`}
             >
@@ -58,7 +61,8 @@ export function MenuPage() {
           ))}
         </div>
       </div>
-      {tab === 'semaine' && <WeekView />}
+      {tab === 'semaine' && <WeekView onTechniques={() => setTab('techniques')} />}
+      {tab === 'techniques' && <Techniques onShowWeek={() => setTab('semaine')} />}
       {tab === 'idee' && <MealIdeas />}
       {tab === 'recettes' && <RecipeLibrary />}
       {tab === 'calcul' && <MealCalculator state={calc} setState={setCalc} />}
@@ -66,7 +70,7 @@ export function MenuPage() {
   )
 }
 
-function WeekView() {
+function WeekView({ onTechniques }: { onTechniques: () => void }) {
   const { ctx, plan, summary, recipes, stale, generate, replace, toggleLock, refit, setLowBudget } = useMenu()
   const today = todayIso()
   const todayIndex = plan ? plan.days.findIndex((d) => d.date === today) : -1
@@ -116,6 +120,15 @@ function WeekView() {
           <p className="text-lg font-bold">
             {formatDate(plan.weekStart, { day: 'numeric' })} – {formatDate(plan.days[6].date, { day: 'numeric', month: 'long' })}
           </p>
+          {plan.technique && (
+            <button
+              type="button"
+              onClick={onTechniques}
+              className="mt-1 inline-flex items-center gap-1 rounded-full bg-brand-50 px-2.5 py-0.5 text-xs font-semibold text-brand-800 hover:bg-brand-100"
+            >
+              <Lightbulb size={12} aria-hidden="true" /> {TECHNIQUE_MAP.get(plan.technique)!.name}
+            </button>
+          )}
           {summary && (
             <p className="text-sm text-muted">
               <CountUp value={summary.costChf} format={formatChf} /> la semaine · {formatChf(summary.costPerDayChf)} / jour

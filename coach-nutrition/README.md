@@ -45,6 +45,16 @@ Règles appliquées par le générateur (`src/domain/menu/generator.ts`), testé
 - **« Nouveau menu »** : les plats du menu actuel (non verrouillés) sont évités, la semaine suivante change vraiment.
 - Le repas de Shabbat, traditionnel, passe avant ces règles ; le bowl de batch cooking revient un jour sur deux.
 
+## Techniques de nutrition
+
+Onglet **Menu → Techniques** (`src/domain/techniques.ts`, testé dans `techniques.test.ts`) :
+assiette équilibrée suisse (OSAV/SSN 2025 : 2/5 légumes et fruits, 2/5 féculents, 1/5 protéines),
+alimentation méditerranéenne, riche en protéines et jeûne intermittent 16:8. Chaque fiche explique le principe,
+donne des conseils et des repas adaptés au profil. « Appliquer à mon menu » enregistre la technique dans le profil
+et régénère la semaine : les recettes qui la respectent sont privilégiées (méditerranéen : viande rouge 1 fois par
+semaine au plus ; jeûne : 2 repas par jour, nombre de repas d'avant rétabli au retrait). Calories et protéines restent
+calculées comme d'habitude.
+
 ## Sauvegarde des données
 
 Tout reste dans le navigateur (localStorage). Dans **Profil → Mes données** :

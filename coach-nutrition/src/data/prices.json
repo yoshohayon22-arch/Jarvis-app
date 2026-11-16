@@ -1675,6 +1675,26 @@
         "budgetLine": false,
         "source": "estimation"
       }
+    ],
+    "challah": [
+      {
+        "store": "Coop",
+        "label": "Challah / tresse parvé (boulangerie casher)",
+        "priceChf": 5.5,
+        "packageSize": 400,
+        "budgetLine": false,
+        "source": "estimation"
+      }
+    ],
+    "orge-perle": [
+      {
+        "store": "Migros",
+        "label": "Orge perlée",
+        "priceChf": 2.2,
+        "packageSize": 500,
+        "budgetLine": false,
+        "source": "estimation"
+      }
     ]
   }
 }

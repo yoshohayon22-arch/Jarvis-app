@@ -214,6 +214,10 @@ export const FAQ: FaqEntry[] = [
     a: 'En général 3 à 4 jours au frigo (moins pour le poisson), et 2 à 3 mois au congélateur pour les plats mijotés. L’app ne prévoit jamais un plat au-delà de sa durée de conservation : sinon, elle t’indique de le congeler et de le sortir la veille. Refroidis vite, ferme bien les boîtes et note la date dessus.',
   },
   {
+    q: 'Le jeûne intermittent, c’est pour moi ?',
+    a: 'Le 16:8 (2 repas entre 12 h et 20 h) aide certaines personnes à mieux contrôler leurs apports, mais il ne fait pas maigrir plus qu’un autre rythme à calories égales. Choisis-le s’il te convient au quotidien. Il est déconseillé en cas de grossesse, de diabète traité, d’antécédents de troubles alimentaires, ou chez les sportifs avec des entraînements le matin : demande l’avis d’un professionnel.',
+  },
+  {
     q: 'Faut-il boire beaucoup d’eau ?',
     a: 'Environ 1,5 à 2 litres par jour en temps normal, davantage avec le sport ou la chaleur. Une urine claire est un bon repère. L’eau du robinet suisse est d’excellente qualité.',
   },

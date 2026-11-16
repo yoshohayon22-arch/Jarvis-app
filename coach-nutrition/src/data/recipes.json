@@ -105,7 +105,8 @@
     "kashrut": "halavi",
     "tags": [
       "rapide",
-      "batch-friendly"
+      "batch-friendly",
+      "prepare-veille"
     ],
     "season": [
       1,
@@ -182,6 +183,7 @@
     "tags": [
       "rapide",
       "batch-friendly",
+      "prepare-veille",
       "petit-budget"
     ],
     "season": [
@@ -601,7 +603,8 @@
     ],
     "kashrut": "parve",
     "tags": [
-      "batch-friendly"
+      "batch-friendly",
+      "prepare-veille"
     ],
     "season": [
       1,
@@ -2311,7 +2314,8 @@
     ],
     "kashrut": "bassari",
     "tags": [
-      "batch-friendly"
+      "batch-friendly",
+      "prepare-veille"
     ],
     "season": [
       1,
@@ -2406,6 +2410,7 @@
     "kashrut": "parve",
     "tags": [
       "batch-friendly",
+      "prepare-veille",
       "petit-budget"
     ],
     "season": [
@@ -2498,6 +2503,7 @@
     "kashrut": "parve",
     "tags": [
       "batch-friendly",
+      "prepare-veille",
       "petit-budget"
     ],
     "season": [
@@ -2586,6 +2592,7 @@
     "kashrut": "parve",
     "tags": [
       "batch-friendly",
+      "prepare-veille",
       "petit-budget"
     ],
     "season": [
@@ -3713,7 +3720,8 @@
     ],
     "kashrut": "halavi",
     "tags": [
-      "batch-friendly"
+      "batch-friendly",
+      "prepare-veille"
     ],
     "season": [
       5,
@@ -3790,6 +3798,7 @@
     "kashrut": "parve",
     "tags": [
       "batch-friendly",
+      "prepare-veille",
       "petit-budget"
     ],
     "season": [
@@ -4277,6 +4286,7 @@
     "kashrut": "parve",
     "tags": [
       "batch-friendly",
+      "prepare-veille",
       "petit-budget"
     ],
     "season": [
@@ -4503,7 +4513,8 @@
     ],
     "kashrut": "bassari",
     "tags": [
-      "batch-friendly"
+      "batch-friendly",
+      "prepare-veille"
     ],
     "season": [
       10,
@@ -4584,7 +4595,8 @@
     ],
     "kashrut": "bassari",
     "tags": [
-      "batch-friendly"
+      "batch-friendly",
+      "prepare-veille"
     ],
     "season": [
       1,
@@ -4662,6 +4674,7 @@
     "kashrut": "bassari",
     "tags": [
       "batch-friendly",
+      "prepare-veille",
       "petit-budget"
     ],
     "season": [
@@ -4753,6 +4766,7 @@
     "kashrut": "parve",
     "tags": [
       "batch-friendly",
+      "prepare-veille",
       "petit-budget"
     ],
     "season": [
@@ -5589,6 +5603,7 @@
     ],
     "kashrut": "parve",
     "tags": [
+      "prepare-veille",
       "petit-budget"
     ],
     "season": [
@@ -5950,6 +5965,7 @@
     "kashrut": "parve",
     "tags": [
       "batch-friendly",
+      "prepare-veille",
       "petit-budget"
     ],
     "season": [
@@ -6094,7 +6110,8 @@
     ],
     "kashrut": "halavi",
     "tags": [
-      "rapide"
+      "rapide",
+      "prepare-veille"
     ],
     "season": [
       1,
@@ -6413,7 +6430,8 @@
     ],
     "kashrut": "parve",
     "tags": [
-      "batch-friendly"
+      "batch-friendly",
+      "prepare-veille"
     ],
     "season": [
       1,
@@ -6584,7 +6602,8 @@
     ],
     "kashrut": "parve",
     "tags": [
-      "batch-friendly"
+      "batch-friendly",
+      "prepare-veille"
     ],
     "season": [
       1,
@@ -6903,6 +6922,7 @@
     "kashrut": "parve",
     "tags": [
       "batch-friendly",
+      "prepare-veille",
       "petit-budget"
     ],
     "season": [
@@ -6997,6 +7017,678 @@
       "halal",
       "vegetarien",
       "sans-gluten",
+      "sans-arachides"
+    ]
+  },
+  {
+    "id": "poulet-roti-shabbat",
+    "name": "Poulet rôti de Shabbat, pommes de terre et carottes",
+    "mealTypes": [
+      "dejeuner",
+      "diner"
+    ],
+    "servings": 4,
+    "prepMin": 20,
+    "cookMin": 60,
+    "ingredients": [
+      {
+        "id": "cuisses-poulet",
+        "grams": 800
+      },
+      {
+        "id": "pommes-de-terre",
+        "grams": 800
+      },
+      {
+        "id": "carottes",
+        "grams": 400
+      },
+      {
+        "id": "oignons",
+        "grams": 150
+      },
+      {
+        "id": "ail",
+        "grams": 10
+      },
+      {
+        "id": "paprika",
+        "grams": 4
+      },
+      {
+        "id": "huile-olive",
+        "grams": 25
+      },
+      {
+        "id": "challah",
+        "grams": 240
+      }
+    ],
+    "steps": [
+      "Préchauffer le four à 190 °C.",
+      "Disposer pommes de terre, carottes et oignons en morceaux dans un grand plat, avec l’huile, l’ail et le paprika.",
+      "Poser le poulet dessus et rôtir 55 à 60 min en arrosant à mi-cuisson.",
+      "Servir avec la challah (bénédiction du pain)."
+    ],
+    "kashrut": "bassari",
+    "tags": [
+      "shabbat-soir",
+      "prepare-veille",
+      "batch-friendly"
+    ],
+    "season": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "fridgeDays": 3,
+    "freezerMonths": 3,
+    "perServing": {
+      "kcal": 760,
+      "protein": 48.6,
+      "fat": 28.5,
+      "carbs": 75.1,
+      "priceChf": 3.64,
+      "priceBudgetChf": 3.34
+    },
+    "compatibleWith": [
+      "casher",
+      "halal",
+      "sans-lactose",
+      "sans-arachides"
+    ]
+  },
+  {
+    "id": "soupe-poulet-shabbat",
+    "name": "Soupe de poulet aux légumes et challah",
+    "mealTypes": [
+      "dejeuner",
+      "diner"
+    ],
+    "servings": 4,
+    "prepMin": 20,
+    "cookMin": 75,
+    "ingredients": [
+      {
+        "id": "cuisses-poulet",
+        "grams": 500
+      },
+      {
+        "id": "carottes",
+        "grams": 300
+      },
+      {
+        "id": "celeri-rave",
+        "grams": 200
+      },
+      {
+        "id": "poireau",
+        "grams": 200
+      },
+      {
+        "id": "oignons",
+        "grams": 100
+      },
+      {
+        "id": "pates",
+        "grams": 120
+      },
+      {
+        "id": "challah",
+        "grams": 240
+      }
+    ],
+    "steps": [
+      "Mettre le poulet dans 2 L d’eau froide salée, porter à frémissement et écumer.",
+      "Ajouter carottes, céleri, poireau et oignon en morceaux ; mijoter 1 h.",
+      "Effilocher le poulet, remettre dans la soupe avec les pâtes fines, cuire 8 min.",
+      "Servir avec la challah."
+    ],
+    "kashrut": "bassari",
+    "tags": [],
+    "season": [
+      9,
+      10,
+      11,
+      12,
+      1,
+      2,
+      3
+    ],
+    "fridgeDays": 3,
+    "freezerMonths": 3,
+    "perServing": {
+      "kcal": 546,
+      "protein": 34.9,
+      "fat": 15.8,
+      "carbs": 63.7,
+      "priceChf": 2.66,
+      "priceBudgetChf": 2.59
+    },
+    "compatibleWith": [
+      "casher",
+      "halal",
+      "sans-lactose",
+      "sans-arachides"
+    ]
+  },
+  {
+    "id": "saumon-shabbat",
+    "name": "Saumon au four, salade de betterave et challah",
+    "mealTypes": [
+      "dejeuner",
+      "diner"
+    ],
+    "servings": 4,
+    "prepMin": 20,
+    "cookMin": 20,
+    "ingredients": [
+      {
+        "id": "saumon-filet",
+        "grams": 600
+      },
+      {
+        "id": "betterave-cuite",
+        "grams": 400
+      },
+      {
+        "id": "concombre",
+        "grams": 300
+      },
+      {
+        "id": "citron",
+        "grams": 40
+      },
+      {
+        "id": "huile-olive",
+        "grams": 20
+      },
+      {
+        "id": "challah",
+        "grams": 240
+      }
+    ],
+    "steps": [
+      "Cuire le saumon 15 à 18 min à 200 °C avec un filet d’huile et de citron.",
+      "Couper betterave et concombre en dés, assaisonner d’huile et de citron.",
+      "Servir chaud le vendredi soir, ou froid le samedi midi, avec la challah."
+    ],
+    "kashrut": "parve",
+    "tags": [
+      "shabbat-soir",
+      "prepare-veille"
+    ],
+    "season": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "fridgeDays": 2,
+    "freezerMonths": 0,
+    "perServing": {
+      "kcal": 577,
+      "protein": 37.1,
+      "fat": 28.3,
+      "carbs": 40.9,
+      "priceChf": 5.81,
+      "priceBudgetChf": 4.58
+    },
+    "compatibleWith": [
+      "casher",
+      "halal",
+      "sans-lactose",
+      "sans-arachides"
+    ]
+  },
+  {
+    "id": "kugel-pommes-de-terre",
+    "name": "Kugel de pommes de terre, salades et challah",
+    "mealTypes": [
+      "dejeuner",
+      "diner"
+    ],
+    "servings": 6,
+    "prepMin": 25,
+    "cookMin": 60,
+    "ingredients": [
+      {
+        "id": "pommes-de-terre",
+        "grams": 1200
+      },
+      {
+        "id": "oeufs",
+        "grams": 220
+      },
+      {
+        "id": "oignons",
+        "grams": 200
+      },
+      {
+        "id": "huile-colza",
+        "grams": 60
+      },
+      {
+        "id": "challah",
+        "grams": 300
+      },
+      {
+        "id": "concombre",
+        "grams": 300
+      },
+      {
+        "id": "tomates",
+        "grams": 300
+      },
+      {
+        "id": "lentilles-vertes",
+        "grams": 150
+      }
+    ],
+    "steps": [
+      "Préchauffer le four à 200 °C et huiler un plat.",
+      "Râper pommes de terre et oignons, bien presser, mélanger avec les œufs, l’huile, sel et poivre.",
+      "Cuire 55 à 60 min jusqu’à ce que le dessus soit bien doré.",
+      "Servir avec une salade de lentilles, concombre et tomates, et la challah. Se mange aussi tiède le samedi."
+    ],
+    "kashrut": "parve",
+    "tags": [
+      "shabbat-soir",
+      "prepare-veille",
+      "petit-budget"
+    ],
+    "season": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "fridgeDays": 3,
+    "freezerMonths": 2,
+    "perServing": {
+      "kcal": 551,
+      "protein": 20,
+      "fat": 17.5,
+      "carbs": 76.4,
+      "priceChf": 2.26,
+      "priceBudgetChf": 1.69
+    },
+    "compatibleWith": [
+      "casher",
+      "halal",
+      "vegetarien",
+      "sans-lactose",
+      "sans-arachides"
+    ]
+  },
+  {
+    "id": "cholent",
+    "name": "Cholent (bœuf, pommes de terre, haricots et orge)",
+    "mealTypes": [
+      "dejeuner",
+      "diner"
+    ],
+    "servings": 6,
+    "prepMin": 25,
+    "cookMin": 720,
+    "ingredients": [
+      {
+        "id": "boeuf-ragout",
+        "grams": 600
+      },
+      {
+        "id": "pommes-de-terre",
+        "grams": 800
+      },
+      {
+        "id": "haricots-blancs-conserve",
+        "grams": 480
+      },
+      {
+        "id": "orge-perle",
+        "grams": 150
+      },
+      {
+        "id": "oignons",
+        "grams": 200
+      },
+      {
+        "id": "paprika",
+        "grams": 5
+      },
+      {
+        "id": "huile-colza",
+        "grams": 15
+      }
+    ],
+    "steps": [
+      "Le vendredi : dorer les oignons et la viande dans une grande cocotte.",
+      "Ajouter pommes de terre en gros morceaux, haricots, orge, paprika, sel et eau à hauteur.",
+      "Porter à ébullition avant le Shabbat, couvrir et laisser mijoter toute la nuit au four à 95 °C ou sur la plata.",
+      "Servir chaud le samedi midi."
+    ],
+    "kashrut": "bassari",
+    "tags": [
+      "shabbat-midi",
+      "prepare-veille"
+    ],
+    "season": [
+      9,
+      10,
+      11,
+      12,
+      1,
+      2,
+      3
+    ],
+    "fridgeDays": 3,
+    "freezerMonths": 3,
+    "perServing": {
+      "kcal": 447,
+      "protein": 32.3,
+      "fat": 9.5,
+      "carbs": 54.9,
+      "priceChf": 3.93,
+      "priceBudgetChf": 3.72
+    },
+    "compatibleWith": [
+      "casher",
+      "halal",
+      "sans-lactose",
+      "sans-arachides"
+    ]
+  },
+  {
+    "id": "dafina",
+    "name": "Dafina (bœuf, pois chiches, pommes de terre et œufs)",
+    "mealTypes": [
+      "dejeuner",
+      "diner"
+    ],
+    "servings": 6,
+    "prepMin": 25,
+    "cookMin": 720,
+    "ingredients": [
+      {
+        "id": "boeuf-ragout",
+        "grams": 600
+      },
+      {
+        "id": "pois-chiches-conserve",
+        "grams": 480
+      },
+      {
+        "id": "pommes-de-terre",
+        "grams": 600
+      },
+      {
+        "id": "patate-douce",
+        "grams": 400
+      },
+      {
+        "id": "oeufs",
+        "grams": 330
+      },
+      {
+        "id": "oignons",
+        "grams": 150
+      },
+      {
+        "id": "cumin",
+        "grams": 4
+      },
+      {
+        "id": "paprika",
+        "grams": 4
+      },
+      {
+        "id": "huile-olive",
+        "grams": 20
+      }
+    ],
+    "steps": [
+      "Le vendredi : dorer oignons et viande avec les épices dans une cocotte.",
+      "Ajouter pois chiches, pommes de terre, patate douce et les œufs entiers dans leur coquille ; couvrir d’eau.",
+      "Porter à ébullition avant le Shabbat, puis laisser mijoter toute la nuit au four à 95 °C ou sur la plata.",
+      "Servir chaud le samedi midi, avec les œufs écalés."
+    ],
+    "kashrut": "bassari",
+    "tags": [
+      "shabbat-midi",
+      "prepare-veille"
+    ],
+    "season": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "fridgeDays": 3,
+    "freezerMonths": 3,
+    "perServing": {
+      "kcal": 490,
+      "protein": 37.1,
+      "fat": 17.3,
+      "carbs": 44.8,
+      "priceChf": 4.69,
+      "priceBudgetChf": 4.04
+    },
+    "compatibleWith": [
+      "casher",
+      "halal",
+      "sans-gluten",
+      "sans-lactose",
+      "sans-arachides"
+    ]
+  },
+  {
+    "id": "cholent-vegetarien",
+    "name": "Cholent végétarien (haricots, orge et patate douce)",
+    "mealTypes": [
+      "dejeuner",
+      "diner"
+    ],
+    "servings": 6,
+    "prepMin": 20,
+    "cookMin": 720,
+    "ingredients": [
+      {
+        "id": "haricots-rouges-conserve",
+        "grams": 480
+      },
+      {
+        "id": "haricots-blancs-conserve",
+        "grams": 480
+      },
+      {
+        "id": "orge-perle",
+        "grams": 200
+      },
+      {
+        "id": "patate-douce",
+        "grams": 500
+      },
+      {
+        "id": "oignons",
+        "grams": 200
+      },
+      {
+        "id": "oeufs",
+        "grams": 330
+      },
+      {
+        "id": "paprika",
+        "grams": 6
+      },
+      {
+        "id": "huile-colza",
+        "grams": 20
+      }
+    ],
+    "steps": [
+      "Le vendredi : faire revenir les oignons dans l’huile avec le paprika.",
+      "Ajouter haricots, orge, patate douce en gros cubes, les œufs dans leur coquille et de l’eau à hauteur.",
+      "Porter à ébullition avant le Shabbat et laisser mijoter toute la nuit à 95 °C ou sur la plata.",
+      "Servir chaud le samedi midi."
+    ],
+    "kashrut": "parve",
+    "tags": [
+      "shabbat-midi",
+      "prepare-veille",
+      "petit-budget"
+    ],
+    "season": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "fridgeDays": 4,
+    "freezerMonths": 3,
+    "perServing": {
+      "kcal": 478,
+      "protein": 23.7,
+      "fat": 10.3,
+      "carbs": 67.5,
+      "priceChf": 2.34,
+      "priceBudgetChf": 1.77
+    },
+    "compatibleWith": [
+      "casher",
+      "halal",
+      "vegetarien",
+      "sans-lactose",
+      "sans-arachides"
+    ]
+  },
+  {
+    "id": "assiette-shabbat-froide",
+    "name": "Assiette froide de Shabbat : challah, houmous, salades et œufs",
+    "mealTypes": [
+      "dejeuner",
+      "diner"
+    ],
+    "servings": 4,
+    "prepMin": 25,
+    "cookMin": 10,
+    "ingredients": [
+      {
+        "id": "challah",
+        "grams": 240
+      },
+      {
+        "id": "pois-chiches-conserve",
+        "grams": 240
+      },
+      {
+        "id": "tahini",
+        "grams": 40
+      },
+      {
+        "id": "citron",
+        "grams": 30
+      },
+      {
+        "id": "concombre",
+        "grams": 300
+      },
+      {
+        "id": "tomates",
+        "grams": 300
+      },
+      {
+        "id": "carottes",
+        "grams": 200
+      },
+      {
+        "id": "oeufs",
+        "grams": 220
+      },
+      {
+        "id": "huile-olive",
+        "grams": 15
+      }
+    ],
+    "steps": [
+      "Le vendredi : cuire les œufs 9 min, préparer le houmous (pois chiches, tahini, citron, huile).",
+      "Couper concombre, tomates et carottes en salade.",
+      "Garder au frigo et servir froid le samedi, avec la challah."
+    ],
+    "kashrut": "parve",
+    "tags": [
+      "shabbat-midi",
+      "prepare-veille"
+    ],
+    "season": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "fridgeDays": 2,
+    "freezerMonths": 0,
+    "perServing": {
+      "kcal": 462,
+      "protein": 19.6,
+      "fat": 20.1,
+      "carbs": 48.6,
+      "priceChf": 2.72,
+      "priceBudgetChf": 2.26
+    },
+    "compatibleWith": [
+      "casher",
+      "halal",
+      "vegetarien",
+      "sans-lactose",
       "sans-arachides"
     ]
   }

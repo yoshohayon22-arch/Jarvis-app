@@ -1954,6 +1954,44 @@
       "packages": [
         40
       ]
+    },
+    {
+      "id": "challah",
+      "name": "Challah (pain tressé parvé, sans lait)",
+      "aisle": "boulangerie",
+      "unit": "g",
+      "per100g": {
+        "kcal": 290,
+        "protein": 8.5,
+        "fat": 6,
+        "carbs": 50
+      },
+      "tags": [
+        "gluten",
+        "oeuf",
+        "cert-casher"
+      ],
+      "packages": [
+        400
+      ]
+    },
+    {
+      "id": "orge-perle",
+      "name": "Orge perlée",
+      "aisle": "epicerie",
+      "unit": "g",
+      "per100g": {
+        "kcal": 352,
+        "protein": 10,
+        "fat": 1.2,
+        "carbs": 74
+      },
+      "tags": [
+        "gluten"
+      ],
+      "packages": [
+        500
+      ]
     }
   ]
 }

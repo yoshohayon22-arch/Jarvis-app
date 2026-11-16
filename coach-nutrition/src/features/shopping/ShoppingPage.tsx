@@ -19,7 +19,7 @@ export function ShoppingPage() {
   const { plan, recipes } = useMenu()
   const { hash } = useLocation()
   const lists = useMemo(
-    () => (plan && activeProfile ? buildShoppingLists(plan, recipes, INGREDIENT_MAP, PRICES.items, activeProfile.settings.restrictions) : []),
+    () => (plan && activeProfile ? buildShoppingLists(plan, recipes, INGREDIENT_MAP, PRICES.items, activeProfile.settings.restrictions, activeProfile.settings.shabbat.enabled) : []),
     [plan, recipes, activeProfile],
   )
 

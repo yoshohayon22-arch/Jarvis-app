@@ -1,10 +1,10 @@
 /**
- * Mise en page commune : en-tête (logo + sélecteur de profil), navigation,
- * contenu, et mention santé en pied de page.
- * Sur mobile, la navigation passe en barre fixe en bas de l'écran.
+ * Mise en page commune : en-tête (logo, sélecteur de profil, accès au profil), navigation
+ * à 4 onglets (Accueil · Menu · Courses · Suivi), contenu, et mention santé en pied de page.
+ * Le batch cooking s'ouvre depuis l'écran Menu ; sur mobile, la navigation est en bas de l'écran.
  */
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
-import { CalendarDays, ChefHat, Home, Leaf, LineChart, ShoppingCart, UserRound, UserPlus } from 'lucide-react'
+import { CalendarDays, Home, Leaf, LineChart, ShoppingCart, UserRound } from 'lucide-react'
 import { useAppData } from '../state/AppDataContext'
 import { setActiveProfile } from '../domain/profiles'
 import { HEALTH_DISCLAIMER } from '../domain/safety'
@@ -12,11 +12,10 @@ import { Suspense, useId } from 'react'
 
 const NAV = [
   { to: '/', label: 'Accueil', icon: Home, end: true },
-  { to: '/menu', label: 'Menu', icon: CalendarDays },
-  { to: '/batch', label: 'Batch', icon: ChefHat },
+  // L'onglet Menu reste actif sur l'écran Batch (qui s'ouvre depuis le menu).
+  { to: '/menu', label: 'Menu', icon: CalendarDays, also: '/batch' },
   { to: '/courses', label: 'Courses', icon: ShoppingCart },
   { to: '/suivi', label: 'Suivi', icon: LineChart },
-  { to: '/profil', label: 'Profil', icon: UserRound },
 ]
 
 function ProfileSwitcher() {
@@ -44,15 +43,17 @@ function ProfileSwitcher() {
         ))}
         <option value="__new__">+ Nouveau profil</option>
       </select>
-      <button
-        type="button"
-        onClick={() => navigate('/nouveau-profil')}
-        className="hidden rounded-xl p-2 text-brand-700 hover:bg-brand-50 sm:inline-flex"
-        aria-label="Ajouter un profil"
-        title="Ajouter un profil"
+      <NavLink
+        to="/profil"
+        className={({ isActive }) =>
+          `flex items-center gap-1.5 rounded-xl px-2.5 py-2 text-sm font-semibold transition ${isActive ? 'bg-brand-50 text-brand-700' : 'text-muted hover:bg-slate-50 hover:text-ink'}`
+        }
+        aria-label="Mon profil et mes données"
+        title="Mon profil et mes données"
       >
-        <UserPlus size={20} aria-hidden="true" />
-      </button>
+        <UserRound size={20} aria-hidden="true" />
+        <span className="hidden lg:inline">Profil</span>
+      </NavLink>
     </div>
   )
 }
@@ -76,14 +77,14 @@ export function Layout() {
           {/* Navigation principale (ordinateur / tablette) */}
           <nav aria-label="Navigation principale" className="ml-4 hidden md:block">
             <ul className="flex gap-1">
-              {NAV.map(({ to, label, icon: Icon, end }) => (
+              {NAV.map(({ to, label, icon: Icon, end, also }) => (
                 <li key={to}>
                   <NavLink
                     to={to}
                     end={end}
                     className={({ isActive }) =>
                       `flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold transition ${
-                        isActive ? 'bg-brand-50 text-brand-700' : 'text-muted hover:bg-slate-50 hover:text-ink'
+                        isActive || (also && location.pathname.startsWith(also)) ? 'bg-brand-50 text-brand-700' : 'text-muted hover:bg-slate-50 hover:text-ink'
                       }`
                     }
                   >
@@ -117,15 +118,15 @@ export function Layout() {
         aria-label="Navigation principale"
         className="no-print fixed inset-x-0 bottom-0 z-30 border-t border-slate-200 bg-white md:hidden"
       >
-        <ul className="grid grid-cols-6">
-          {NAV.map(({ to, label, icon: Icon, end }) => (
+        <ul className="grid grid-cols-4">
+          {NAV.map(({ to, label, icon: Icon, end, also }) => (
             <li key={to}>
               <NavLink
                 to={to}
                 end={end}
                 className={({ isActive }) =>
-                  `flex flex-col items-center gap-0.5 py-2.5 text-[11px] font-semibold ${
-                    isActive ? 'text-brand-700' : 'text-muted'
+                  `flex flex-col items-center gap-0.5 py-2.5 text-xs font-semibold ${
+                    isActive || (also && location.pathname.startsWith(also)) ? 'text-brand-700' : 'text-muted'
                   }`
                 }
               >

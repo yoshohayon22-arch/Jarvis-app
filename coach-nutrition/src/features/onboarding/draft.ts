@@ -28,6 +28,9 @@ export interface Draft {
   restrictions: Restriction[]
   kosherWait: KosherWaitHours
   separateFishAndMeat: boolean
+  shabbat: boolean
+  shabbatFestive: boolean
+  shabbatNoCooking: boolean
   dislikedFoods: string[]
   weeklyBudgetChf: string
   lowBudget: boolean
@@ -62,6 +65,9 @@ export function emptyDraft(): Draft {
     restrictions: [],
     kosherWait: DEFAULT_SETTINGS.kosher.waitAfterMeatHours,
     separateFishAndMeat: DEFAULT_SETTINGS.kosher.separateFishAndMeat,
+    shabbat: DEFAULT_SETTINGS.shabbat.enabled,
+    shabbatFestive: DEFAULT_SETTINGS.shabbat.festiveMeals,
+    shabbatNoCooking: DEFAULT_SETTINGS.shabbat.noCookingSaturday,
     dislikedFoods: [],
     weeklyBudgetChf: '',
     lowBudget: false,
@@ -155,6 +161,7 @@ export function draftToSettings(d: Draft, previous?: ProfileSettings): ProfileSe
     mealsPerDay: d.mealsPerDay,
     restrictions: d.restrictions,
     kosher: { waitAfterMeatHours: d.kosherWait, separateFishAndMeat: d.separateFishAndMeat },
+    shabbat: { enabled: d.shabbat, festiveMeals: d.shabbatFestive, noCookingSaturday: d.shabbatNoCooking },
     dislikedFoods: d.dislikedFoods,
     weeklyBudgetChf: Number.isFinite(budget) ? budget : null,
     lowBudget: d.lowBudget,
@@ -181,6 +188,9 @@ export function settingsToDraft(name: string, s: ProfileSettings, currentWeightK
     restrictions: s.restrictions,
     kosherWait: s.kosher.waitAfterMeatHours,
     separateFishAndMeat: s.kosher.separateFishAndMeat,
+    shabbat: s.shabbat.enabled,
+    shabbatFestive: s.shabbat.festiveMeals,
+    shabbatNoCooking: s.shabbat.noCookingSaturday,
     dislikedFoods: s.dislikedFoods,
     weeklyBudgetChf: s.weeklyBudgetChf == null ? '' : fmt(s.weeklyBudgetChf),
     lowBudget: s.lowBudget,

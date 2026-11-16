@@ -194,7 +194,7 @@ export function compatibleDiets(recipe: Pick<Recipe, 'ingredients'>, ingredients
 }
 
 /** Rappels à afficher dans la liste de courses selon les restrictions. */
-export function shoppingReminders(restrictions: Restriction[]): string[] {
+export function shoppingReminders(restrictions: Restriction[], shabbat = false): string[] {
   const out: string[] = []
   if (restrictions.includes('casher')) {
     out.push(
@@ -204,6 +204,11 @@ export function shoppingReminders(restrictions: Restriction[]): string[] {
   if (restrictions.includes('halal')) {
     out.push(
       'Halal : choisis de la viande et de la volaille halal certifiées, et vérifie l’absence de gélatine porcine et d’alcool dans les produits transformés.',
+    )
+  }
+  if (shabbat) {
+    out.push(
+      'Shabbat : prévois la challah (parvé, sans lait : la tresse au beurre ne convient pas avec un repas de viande), du vin ou du jus de raisin casher pour le kiddouch, et prépare les plats du samedi le vendredi avant l’allumage des bougies.',
     )
   }
   return out

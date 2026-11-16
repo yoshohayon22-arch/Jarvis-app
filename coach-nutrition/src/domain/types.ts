@@ -9,7 +9,8 @@ export type Sex = 'homme' | 'femme'
 /** Niveau d'activité de 1 (sédentaire) à 5 (très actif). */
 export type ActivityLevel = 1 | 2 | 3 | 4 | 5
 
-export type MealsPerDay = 3 | 4 | 5
+/** 2 = jeûne intermittent 16:8 (déjeuner + dîner, fenêtre 12 h – 20 h). */
+export type MealsPerDay = 2 | 3 | 4 | 5
 
 export type Restriction =
   | 'casher'
@@ -26,6 +27,15 @@ export type GoalMode = 'perte' | 'prise' | 'maintien'
 
 /** Jour de la semaine : 0 = lundi … 6 = dimanche (la semaine commence le lundi en Suisse). */
 export type DayOfWeek = 0 | 1 | 2 | 3 | 4 | 5 | 6
+
+/** Shabbat : repas de fête et/ou pas de cuisson le samedi. */
+export interface ShabbatOptions {
+  enabled: boolean
+  /** Vendredi soir et samedi midi : plats traditionnels, part plus grande des calories du jour. */
+  festiveMeals: boolean
+  /** Samedi : uniquement des plats préparés la veille (plata, froid) ou sans cuisson. */
+  noCookingSaturday: boolean
+}
 
 export interface KosherOptions {
   /** Heures d'attente après un repas bassari avant un repas ou une collation halavi. */
@@ -52,6 +62,7 @@ export interface ProfileSettings {
   mealsPerDay: MealsPerDay
   restrictions: Restriction[]
   kosher: KosherOptions
+  shabbat: ShabbatOptions
   /** Aliments détestés, en texte libre (ex. « coriandre », « champignons »). */
   dislikedFoods: string[]
   /** Budget hebdomadaire en CHF, facultatif. */

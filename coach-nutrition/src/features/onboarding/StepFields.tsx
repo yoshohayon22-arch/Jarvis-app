@@ -127,13 +127,22 @@ export function StepFields({ step, draft, set, errors, editMode }: StepProps) {
 
     case 'repas':
       return (
-        <ChoiceGroup
-          legend="Nombre de repas par jour"
-          columns={3}
-          options={MEAL_OPTIONS}
-          value={draft.mealsPerDay}
-          onChange={(v) => set({ mealsPerDay: v as MealsPerDay })}
-        />
+        <div className="flex flex-col gap-4">
+          <ChoiceGroup
+            legend="Nombre de repas par jour"
+            columns={2}
+            options={MEAL_OPTIONS}
+            value={draft.mealsPerDay}
+            onChange={(v) => set({ mealsPerDay: v as MealsPerDay })}
+          />
+          {draft.mealsPerDay === 2 && (
+            <Notice tone="info" title="Jeûne intermittent">
+              Tu manges dans une fenêtre de 8 heures (par exemple 12 h – 20 h) et tu bois de l’eau, du thé ou du café
+              sans sucre le reste du temps. Il ne convient pas à tout le monde : en cas de grossesse, de diabète, de
+              traitement médical ou d’antécédents de troubles alimentaires, demande d’abord l’avis d’un professionnel.
+            </Notice>
+          )}
+        </div>
       )
 
     case 'restrictions':
@@ -163,6 +172,28 @@ export function StepFields({ step, draft, set, errors, editMode }: StepProps) {
                 checked={draft.separateFishAndMeat}
                 onChange={(separateFishAndMeat) => set({ separateFishAndMeat })}
               />
+              <Toggle
+                label="Je respecte le Shabbat"
+                description="Le menu du vendredi soir et du samedi s’adapte."
+                checked={draft.shabbat}
+                onChange={(shabbat) => set({ shabbat })}
+              />
+              {draft.shabbat && (
+                <div className="flex flex-col gap-3 border-l-2 border-brand-200 pl-4">
+                  <Toggle
+                    label="Repas de fête"
+                    description="Vendredi soir et samedi midi : plats traditionnels (poulet rôti, cholent, dafina, kugel…) avec la challah, plus copieux."
+                    checked={draft.shabbatFestive}
+                    onChange={(shabbatFestive) => set({ shabbatFestive })}
+                  />
+                  <Toggle
+                    label="Pas de cuisson le samedi"
+                    description="Le samedi : plats préparés le vendredi (froids ou gardés au chaud sur la plata) ou sans cuisson. Pas de batch cooking ce jour-là."
+                    checked={draft.shabbatNoCooking}
+                    onChange={(shabbatNoCooking) => set({ shabbatNoCooking })}
+                  />
+                </div>
+              )}
             </div>
           )}
           <DislikedFoodsInput value={draft.dislikedFoods} onChange={(dislikedFoods) => set({ dislikedFoods })} />

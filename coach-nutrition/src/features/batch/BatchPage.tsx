@@ -4,11 +4,12 @@
  */
 import { useId, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { ChefHat, Clock, Flame, Package, Refrigerator, ShoppingCart, Snowflake, Timer, Wrench } from 'lucide-react'
+import { ArrowLeft, ChefHat, Clock, Flame, Package, Refrigerator, ShoppingCart, Snowflake, Timer, Wrench } from 'lucide-react'
 import { INGREDIENT_MAP } from '../../domain/catalog'
 import { buildSessionPlans, scaledIngredients, type SessionPlan, type TimelineStep } from '../../domain/batch-plan'
 import { SLOT_LABELS } from '../../domain/menu/slots'
 import { updateProfile } from '../../domain/profiles'
+import { effectiveSessionDays } from '../../domain/menu/shabbat'
 import type { DayOfWeek } from '../../domain/types'
 import { Button, Card, Notice, Toggle } from '../../components/ui'
 import { useAppData } from '../../state/AppDataContext'
@@ -26,6 +27,8 @@ export function BatchPage() {
   const sessions = useMemo(() => (plan ? buildSessionPlans(plan, recipes) : []), [plan, recipes])
   if (!activeProfile) return null
   const batch = activeProfile.settings.batch
+  // Shabbat sans cuisson : pas de session le samedi.
+  const noSaturday = activeProfile.settings.shabbat.enabled && activeProfile.settings.shabbat.noCookingSaturday
 
   const saveBatch = (enabled: boolean, sessionDays: DayOfWeek[]) =>
     update((d) => updateProfile(d, activeProfile.id, { settings: { ...activeProfile.settings, batch: { enabled, sessionDays } } }))
@@ -33,14 +36,19 @@ export function BatchPage() {
   const planMatches =
     plan?.batch &&
     batch.enabled &&
-    JSON.stringify([...new Set(batch.sessionDays)].sort()) ===
+    JSON.stringify([...new Set(effectiveSessionDays(activeProfile.settings))].sort()) ===
       JSON.stringify([...new Set(plan.batch.sessions.map((s) => (new Date(`${s.cookDate}T00:00:00Z`).getUTCDay() + 6) % 7))].sort())
 
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="text-3xl font-bold">Batch cooking</h1>
+      <div>
+        <Link to="/menu" className="mb-1 inline-flex items-center gap-1 text-sm font-semibold text-brand-700 hover:underline">
+          <ArrowLeft size={14} aria-hidden="true" /> Menu
+        </Link>
+        <h1 className="text-3xl font-bold">Batch cooking</h1>
+      </div>
 
-      <SessionSettings enabled={batch.enabled} days={batch.sessionDays} onChange={saveBatch} />
+      <SessionSettings enabled={batch.enabled} days={batch.sessionDays} onChange={saveBatch} noSaturday={noSaturday} />
 
       {batch.enabled && !planMatches && (
         <Notice tone="info" title="Ton menu doit être adapté">
@@ -66,7 +74,17 @@ export function BatchPage() {
   )
 }
 
-function SessionSettings({ enabled, days, onChange }: { enabled: boolean; days: DayOfWeek[]; onChange: (enabled: boolean, days: DayOfWeek[]) => void }) {
+function SessionSettings({
+  enabled,
+  days,
+  onChange,
+  noSaturday,
+}: {
+  enabled: boolean
+  days: DayOfWeek[]
+  onChange: (enabled: boolean, days: DayOfWeek[]) => void
+  noSaturday: boolean
+}) {
   const id = useId()
   const [count, setCount] = useState(Math.min(3, Math.max(1, days.length)))
   const current = [...days, 6, 2, 4].slice(0, count) as DayOfWeek[]
@@ -116,14 +134,22 @@ function SessionSettings({ enabled, days, onChange }: { enabled: boolean; days: 
                 className="rounded-xl border border-slate-200 bg-white px-3 py-2.5"
               >
                 {DAYS.map((day) => (
-                  <option key={day.value} value={day.value} disabled={current.includes(day.value) && day.value !== d}>
+                  <option
+                    key={day.value}
+                    value={day.value}
+                    disabled={(current.includes(day.value) && day.value !== d) || (noSaturday && day.value === 5)}
+                  >
                     {day.label}
+                    {noSaturday && day.value === 5 ? ' (Shabbat)' : ''}
                   </option>
                 ))}
               </select>
             </div>
           ))}
         </div>
+      )}
+      {enabled && noSaturday && (
+        <p className="text-sm text-muted">Shabbat : pas de session le samedi. Une session le vendredi permet de préparer les plats du samedi.</p>
       )}
     </Card>
   )

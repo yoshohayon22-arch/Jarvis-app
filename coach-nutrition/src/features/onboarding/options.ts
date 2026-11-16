@@ -41,6 +41,7 @@ export const DAYS: { value: DayOfWeek; label: string }[] = [
 ]
 
 export const MEAL_OPTIONS: { value: MealsPerDay; label: string; description: string }[] = [
+  { value: 2, label: '2 repas', description: 'Jeûne intermittent 16:8 : déjeuner et dîner, entre 12 h et 20 h.' },
   { value: 3, label: '3 repas', description: 'Petit-déjeuner, déjeuner, dîner.' },
   { value: 4, label: '4 repas', description: '3 repas + 1 collation.' },
   { value: 5, label: '5 repas', description: '3 repas + 2 collations.' },

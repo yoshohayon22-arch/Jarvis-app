@@ -160,7 +160,7 @@ export function buildList(
   byId: ReadonlyMap<string, Recipe>,
   ingredients: ReadonlyMap<string, Ingredient>,
   prices: Record<string, PriceEntry[]>,
-  options: { lowBudget: boolean; restrictions: Restriction[] },
+  options: { lowBudget: boolean; restrictions: Restriction[]; shabbat?: boolean },
   /** Stock restant des listes précédentes (modifié sur place : ce qui reste après cette liste). */
   stock: Map<string, number> = new Map(),
 ): ShoppingList {
@@ -200,7 +200,7 @@ export function buildList(
     })).filter((a) => a.items.length > 0),
     pantry: items.filter((i) => i.pantry).sort(byName),
     totalChf: Math.round(main.reduce((s, i) => s + i.totalChf, 0) * 100) / 100,
-    reminders: shoppingReminders(options.restrictions),
+    reminders: shoppingReminders(options.restrictions, options.shabbat),
   }
 }
 
@@ -211,8 +211,9 @@ export function buildShoppingLists(
   ingredients: ReadonlyMap<string, Ingredient>,
   prices: Record<string, PriceEntry[]>,
   restrictions: Restriction[],
+  shabbat = false,
 ): ShoppingList[] {
-  const options = { lowBudget: plan.lowBudget, restrictions }
+  const options = { lowBudget: plan.lowBudget, restrictions, shabbat }
   const span = (dates: string[]) =>
     `du ${formatDate(dates[0], { weekday: 'long', day: 'numeric', month: 'long' })} au ${formatDate(dates[dates.length - 1], { weekday: 'long', day: 'numeric', month: 'long' })}`
   if (plan.batch && plan.batch.sessions.length > 0) {

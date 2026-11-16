@@ -6,7 +6,7 @@
  */
 import { chat } from "./assistant";
 import { callConnector } from "./data";
-import { h, icon } from "./dom";
+import { h, icon, store } from "./dom";
 import { samplePromise } from "./mail";
 import { liveList, str } from "./store";
 import { field, runner, select, textArea, textInput } from "./ui";
@@ -82,10 +82,14 @@ export function agentSection(ecoles: { items: { nom: string; programme: string; 
   const activity = h("p", { class: "activity", role: "status" });
   const proposalsSlot = h("div", { class: "stack" });
   const sourcesSlot = h("div", { class: "stack" });
-  let proposals: Proposition[] = [];
+  // Le résultat de la dernière recherche est gardé sur l'appareil : on le retrouve en revenant sur la page.
+  const AGENT_KEY = "dash-agent-etudes";
+  const kept = store.get<{ proposals?: Proposition[]; read?: { url: string; title: string }[] }>(AGENT_KEY);
+  let proposals: Proposition[] = Array.isArray(kept?.proposals) ? kept.proposals.filter((p) => p && typeof p.nom === "string" && httpsUrl(p.url)).slice(0, 12) : [];
   /** Adresses réellement vues pendant la recherche en cours (résultats de recherche et pages lues). */
   const seen = new Map<string, string>();
-  const read: { url: string; title: string }[] = [];
+  const read: { url: string; title: string }[] = Array.isArray(kept?.read) ? kept.read.filter((r) => r && httpsUrl(r.url)).slice(0, 20) : [];
+  const keep = () => store.set(AGENT_KEY, { proposals, read });
 
   // --- Formulaire de profil ---
   const inputs = {
@@ -109,6 +113,17 @@ export function agentSection(ecoles: { items: { nom: string; programme: string; 
   };
   const stop = profils.onChange(() => (status.isConnected ? fill() : stop()));
   fill();
+  // Enregistrement automatique : dès qu'un champ est modifié puis quitté, sans avoir à cliquer sur un bouton.
+  let lastSaved = "";
+  const autosave = () => {
+    if (!filled) return;
+    const next = current();
+    const key = JSON.stringify(next);
+    if (key === lastSaved) return;
+    lastSaved = key;
+    void run(profils.save(next), "Profil enregistré automatiquement.");
+  };
+  for (const input of Object.values(inputs)) input.addEventListener("change", autosave);
   const profileForm = h(
     "form",
     {
@@ -130,12 +145,13 @@ export function agentSection(ecoles: { items: { nom: string; programme: string; 
       field("Rentrée visée", inputs.rentree, "ag-rentree"),
     ),
     field("Autres critères", inputs.autres, "ag-autres"),
-    h("div", { class: "actions" }, h("button", { class: "btn", type: "submit" }, "Enregistrer mon profil")),
+    h("p", { class: "muted small-2" }, "Ton profil s'enregistre tout seul dès que tu quittes un champ."),
     status,
   );
 
   // --- Affichage des propositions et des pages consultées ---
   function renderResults(): void {
+    keep();
     proposalsSlot.replaceChildren(
       ...(proposals.length
         ? [
@@ -272,7 +288,8 @@ export function agentSection(ecoles: { items: { nom: string; programme: string; 
     modelTier: "complex",
     activity,
     tools,
-    onAsk: () => {
+    persistKey: "agent-etudes",
+    onClear: () => {
       proposals = [];
       read.length = 0;
       renderResults();
@@ -295,6 +312,9 @@ export function agentSection(ecoles: { items: { nom: string; programme: string; 
       EXPERTISE +
       `\n\nPROFIL DE L'ÉLÈVE\n${profileText()}`,
   });
+
+  // Affiche tout de suite les fiches et les pages gardées d'une visite précédente.
+  renderResults();
 
   const unavailable = h("div", { class: "stack" });
   void (async () => {

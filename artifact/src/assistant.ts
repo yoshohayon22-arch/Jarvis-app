@@ -4,7 +4,7 @@
  * Règle commune : Claude ne répond qu'à partir de ce qu'on lui fournit, et le dit quand l'information manque.
  */
 import type { Article } from "@/lib/rss/types";
-import { h, icon } from "./dom";
+import { h, icon, store } from "./dom";
 import { sampleMessage, samplePromise, type SampleTurn } from "./mail";
 import { openDialog } from "./views";
 
@@ -45,18 +45,48 @@ export interface ChatOptions {
   /** Appelé au début de chaque question (ex. vider une liste de propositions). */
   onAsk?: () => void;
   emptyText: string;
+  /** Si présent, la conversation est gardée sur l'appareil sous cette clé et retrouvée à la prochaine visite. */
+  persistKey?: string;
+  /** Appelé quand l'utilisateur efface la conversation. */
+  onClear?: () => void;
 }
 
 /** Une conversation : la page garde l'historique (Claude ne retient rien entre deux questions). */
 export function chat(options: ChatOptions): HTMLElement {
-  const history: SampleTurn[] = [];
+  const storeKey = options.persistKey ? `dash-conv:${options.persistKey}` : "";
+  const saved = storeKey ? store.get<SampleTurn[]>(storeKey) : null;
+  const history: SampleTurn[] = Array.isArray(saved) ? saved.filter((t) => t && (t.role === "user" || t.role === "assistant") && typeof t.content === "string" && t.content).slice(-20) : [];
   let controller: AbortController | null = null;
-  const log = h("div", { class: "chat-log", "aria-live": "polite" }, h("p", { class: "muted small-2" }, options.emptyText));
+  const log = h("div", { class: "chat-log", "aria-live": "polite" });
+  const empty = () => h("p", { class: "muted small-2" }, options.emptyText);
+  // Conversation retrouvée d'une visite précédente.
+  if (history.length) for (const turn of history) log.append(turn.role === "user" ? h("div", { class: "bubble me" }, turn.content) : h("div", { class: "bubble claude" }, ...linkify(turn.content)));
+  else log.append(empty());
   const info = h("p", { class: "note keep", role: "status" });
   const input = h("textarea", { class: "draft", rows: 2, maxlength: 2000, placeholder: options.placeholder, "aria-label": options.placeholder });
   const sendBtn: HTMLButtonElement = h("button", { class: "btn primary", type: "submit" }, icon("sparkles"), "Envoyer");
   const stopBtn: HTMLButtonElement = h("button", { class: "btn", type: "button", hidden: true, onclick: () => controller?.abort() }, "Arrêter");
   const chips = h("div", { class: "chips wrap" }, ...options.suggestions.map((q) => h("button", { class: "chip", type: "button", onclick: () => void ask(q) }, q)));
+  chips.hidden = history.length > 0;
+  const clearBtn: HTMLButtonElement = h(
+    "button",
+    {
+      class: "btn",
+      type: "button",
+      hidden: !history.length,
+      onclick: () => {
+        if (controller) return;
+        history.length = 0;
+        if (storeKey) store.set(storeKey, []);
+        log.replaceChildren(empty());
+        chips.hidden = false;
+        clearBtn.hidden = true;
+        info.textContent = "";
+        options.onClear?.();
+      },
+    },
+    "Effacer la conversation",
+  );
 
   async function ask(question: string): Promise<void> {
     const q = question.trim();
@@ -81,6 +111,8 @@ export function chat(options: ChatOptions): HTMLElement {
       const result = await sample(turns, { onText: ({ text }: { text: string }) => bubble.replaceChildren(...linkify(text)), signal: controller.signal, modelTier: options.modelTier ?? "default", ...(tools?.length ? { tools } : {}) });
       bubble.replaceChildren(...linkify(result.text));
       history.push({ role: "user", content: q }, { role: "assistant", content: result.text.slice(0, 6000) });
+      if (storeKey) store.set(storeKey, history.slice(-20));
+      clearBtn.hidden = false;
       info.textContent = result.truncated ? "Réponse coupée (trop longue) : demande la suite." : "Réponse de Claude : vérifie les points importants avant de t'y fier.";
     } catch (e) {
       bubble.classList.add("failed");
@@ -104,7 +136,7 @@ export function chat(options: ChatOptions): HTMLElement {
       },
     },
     input,
-    h("div", { class: "actions" }, sendBtn, stopBtn),
+    h("div", { class: "actions" }, sendBtn, stopBtn, clearBtn),
   );
   input.addEventListener("keydown", (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -166,6 +198,7 @@ export function openAsk(tabId: string, tabLabel: string, view: Element, opener: 
         emptyText: `Pose une question sur ce qui est affiché dans l'onglet « ${tabLabel} ». Claude répond à partir de ces données, et le dit quand elles ne suffisent pas.`,
         placeholder: "Ta question",
         suggestions: SUGGESTIONS[tabId] ?? ["Résume-moi ce qui est affiché"],
+        persistKey: `onglet-${tabId}`,
         modelTier: "default",
         instructions: () =>
           `Tu es l'assistant d'un tableau de bord personnel. L'utilisateur regarde l'onglet « ${tabLabel} ». Nous sommes le ${new Intl.DateTimeFormat("fr-CH", { timeZone: "Europe/Zurich", dateStyle: "full", timeStyle: "short" }).format(new Date())} (heure de Genève).\n` +

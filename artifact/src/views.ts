@@ -5,7 +5,7 @@ import { GROUP_LABELS, REAL_MADRID_PATTERN, type NewsGroup, type NewsTab } from 
 import type { Article, NewsPayload } from "@/lib/rss/types";
 import { DataError, loadAir, loadAlerts, loadForecast, loadNews, newsMaxAgeDays, newsSourceCount, type Cached } from "./data";
 import { digest } from "./assistant";
-import { h, icon, svg } from "./dom";
+import { h, icon, store, svg } from "./dom";
 import { sampleMessage } from "./mail";
 import { sections } from "./layout";
 import type { ArtifactTab } from "./tabs";
@@ -476,20 +476,8 @@ export function newsView(root: HTMLElement, tab: NewsTab): void {
           info.textContent = "Claude lit les titres…";
           try {
             const result = await digest(current.data.articles);
-            digestFor = current.at;
-            digestSlot.replaceChildren(
-              h(
-                "section",
-                { class: "hero" },
-                h("p", { class: "eyebrow" }, icon("sparkles", "ic ic-sm"), "L'essentiel en 5 points"),
-                h(
-                  "ol",
-                  { class: "digest" },
-                  ...result.points.map((point) => h("li", null, h("p", null, point.text), h("p", { class: "meta" }, ...point.articles.map((a) => h("a", { href: a.link, target: "_blank", rel: "noopener noreferrer", title: a.title }, a.sourceName))))),
-                ),
-                h("p", { class: "note" }, "Résumé rédigé par Claude à partir des seuls titres et résumés ci-dessous ; chaque point renvoie aux articles d'origine. Une erreur reste possible."),
-              ),
-            );
+            store.set(`dash-essentiel:${tab}`, { at: current.at, points: result.points.map((pt) => ({ text: pt.text, articles: pt.articles.map((x) => ({ link: x.link, title: x.title, sourceName: x.sourceName })) })) });
+            showDigest(result.points, current.at);
           } catch (e) {
             info.textContent = sampleMessage(e);
             btn.disabled = false;
@@ -501,13 +489,35 @@ export function newsView(root: HTMLElement, tab: NewsTab): void {
     );
     return h("div", { class: "stack" }, h("div", { class: "actions" }, btn), info);
   };
+  type DigestPoint = { text: string; articles: { link: string; title: string; sourceName: string }[] };
+  function showDigest(points: DigestPoint[], at: number): void {
+            digestFor = at;
+            digestSlot.replaceChildren(
+              h(
+                "section",
+                { class: "hero" },
+                h("p", { class: "eyebrow" }, icon("sparkles", "ic ic-sm"), "L'essentiel en 5 points"),
+                h(
+                  "ol",
+                  { class: "digest" },
+                  ...points.map((point) => h("li", null, h("p", null, point.text), h("p", { class: "meta" }, ...point.articles.filter((a) => /^https?:\/\//.test(a.link)).map((a) => h("a", { href: a.link, target: "_blank", rel: "noopener noreferrer", title: a.title }, a.sourceName))))),
+                ),
+                h("p", { class: "note" }, "Résumé rédigé par Claude à partir des seuls titres et résumés ci-dessous ; chaque point renvoie aux articles d'origine. Une erreur reste possible."),
+              ),
+            );
+  }
 
   const run = async (force: boolean) => {
     if (!payload) content.replaceChildren(h("div", { class: "grid" }, ...Array.from({ length: 6 }, () => skeleton())));
     try {
       payload = await loadNews(tab, force);
       // Le résumé précédent ne vaut que pour les articles qu'il a lus : on le propose de nouveau après une actualisation.
-      if (tab !== "cours" && payload.data.articles.length >= 5 && digestFor !== payload.at) digestSlot.replaceChildren(digestButton());
+      if (tab !== "cours" && payload.data.articles.length >= 5 && digestFor !== payload.at) {
+        // Un résumé déjà fait pour ces mêmes articles est réaffiché tel quel (pas de nouvelle demande à Claude).
+        const kept = store.get<{ at?: number; points?: DigestPoint[] }>(`dash-essentiel:${tab}`);
+        if (kept?.at === payload.at && Array.isArray(kept.points) && kept.points.length) showDigest(kept.points, payload.at);
+        else digestSlot.replaceChildren(digestButton());
+      }
       render();
     } catch (e) {
       if (!payload) content.replaceChildren(errorCard("Articles", e, "flux RSS des journaux", () => void run(true)));

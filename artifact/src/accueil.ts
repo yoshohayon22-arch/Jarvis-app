@@ -177,7 +177,9 @@ export function accueilView(root: HTMLElement): void {
 
   // --- Mon programme : les choses à faire aujourd'hui (ou demain), à cocher une fois terminées ---
   taches.start();
-  let day: "aujourdhui" | "demain" = "aujourdhui";
+  // Le jour affiché est retenu pour la journée en cours ; le lendemain, on revient sur « Aujourd'hui ».
+  const savedDay = store.get<{ jour?: string; le?: string }>("dash-programme-jour");
+  let day: "aujourdhui" | "demain" = savedDay?.jour === "demain" && savedDay.le === today() ? "demain" : "aujourdhui";
   const tomorrow = () => new Date(Date.parse(`${today()}T12:00:00Z`) + 86_400_000).toISOString().slice(0, 10);
   const planList = h("div", { class: "stack" });
   const planStatus = h("p", { class: "note keep", role: "status" });
@@ -218,9 +220,10 @@ export function accueilView(root: HTMLElement): void {
     const done = list.filter((t) => t.fait).length;
     // Tâches des jours passés restées à faire : on propose de les reporter, sans le faire d'office.
     const late = day === "aujourdhui" ? taches.items.filter((t) => t.date < today() && !t.fait) : [];
-    const chip = (id: typeof day, label: string) => h("button", { class: `chip${day === id ? " on" : ""}`, type: "button", "aria-pressed": String(day === id), onclick: () => ((day = id), renderPlan()) }, label);
+    const count = (d: string) => taches.items.filter((t) => t.date === d && !t.fait).length;
+    const chip = (id: typeof day, label: string, n: number) => h("button", { class: `chip${day === id ? " on" : ""}`, type: "button", "aria-pressed": String(day === id), onclick: () => ((day = id), store.set("dash-programme-jour", { jour: id, le: today() }), renderPlan()) }, n ? `${label} (${n})` : label);
     const nodes: (Node | null)[] = [
-      h("div", { class: "plan-head" }, h("div", { class: "chips", role: "group", "aria-label": "Jour affiché" }, chip("aujourdhui", "Aujourd'hui"), chip("demain", "Demain")), list.length ? h("p", { class: "plan-count num" }, `${done} sur ${list.length} terminée${done > 1 ? "s" : ""}`) : null),
+      h("div", { class: "plan-head" }, h("div", { class: "chips", role: "group", "aria-label": "Jour affiché" }, chip("aujourdhui", "Aujourd'hui", count(today())), chip("demain", "Demain", count(tomorrow()))), list.length ? h("p", { class: "plan-count num" }, `${done} sur ${list.length} terminée${done > 1 ? "s" : ""}`) : null),
       list.length ? h("div", { class: "bar", role: "img", "aria-label": `${done} tâches terminées sur ${list.length}` }, done ? h("span", { class: "bar-fill", style: `width:${((done / list.length) * 100).toFixed(1)}%` }) : null) : null,
       list.length
         ? h(
@@ -236,7 +239,7 @@ export function accueilView(root: HTMLElement): void {
               );
             }),
           )
-        : h("p", { class: "muted small-2" }, day === "demain" ? "Rien de prévu pour demain. Ajoute ce que tu veux faire." : "Rien de noté pour aujourd'hui. Ajoute ce que tu veux faire ci-dessous."),
+        : h("p", { class: "muted small-2" }, day === "demain" ? "Rien de prévu pour demain. Ajoute ce que tu veux faire." : count(tomorrow()) ? `Rien de noté pour aujourd'hui. ${count(tomorrow())} tâche${count(tomorrow()) > 1 ? "s sont prévues" : " est prévue"} demain : appuie sur « Demain » pour les voir.` : "Rien de noté pour aujourd'hui. Ajoute ce que tu veux faire ci-dessous."),
       late.length
         ? h(
             "div",

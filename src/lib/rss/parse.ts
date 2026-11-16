@@ -19,6 +19,8 @@ const NAMED: Record<string, string> = {
   ecirc: "ê", agrave: "à", acirc: "â", ccedil: "ç", ocirc: "ô", ucirc: "û", ugrave: "ù", icirc: "î",
   iuml: "ï", euml: "ë", oelig: "œ", Eacute: "É", Agrave: "À", Ccedil: "Ç", euro: "€", deg: "°",
   aacute: "á", iacute: "í", oacute: "ó", uacute: "ú", ntilde: "ñ", iexcl: "¡", iquest: "¿", uuml: "ü",
+  // Espaces typographiques (fréquents dans les textes hébreux de Sefaria).
+  thinsp: " ", ensp: " ", emsp: " ", zwnj: "", zwj: "", lrm: "", rlm: "", shy: "",
 };
 
 export function decodeEntities(text: string): string {

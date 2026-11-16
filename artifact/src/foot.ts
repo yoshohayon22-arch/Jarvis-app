@@ -2,10 +2,10 @@
  * Football : matchs et classements lus sur l'API publique d'ESPN (sans clé), via Firecrawl.
  */
 import { cachedLoad, DataError, loadJson, type Cached } from "./data";
-import { ESPN_API as ESPN, ESPN_REAL_MADRID as REAL, parseMatches, parseRoster, parseStandings, POSITION_LABELS, type Match, type RosterPlayer, type StandingRow } from "@/lib/football/espn";
+import { ESPN_API as ESPN, ESPN_REAL_MADRID as REAL, parseMatches, parseRoster, parseStandings, parseSummary, POSITION_LABELS, type Match, type MatchSummary, type RosterPlayer, type StandingRow } from "@/lib/football/espn";
 import { h, icon } from "./dom";
 import { sections, teamBadge } from "./layout";
-import { asyncSection, card, emptyState, errorCard, realNewsSlot, skeleton, sourceNote, timeFmt } from "./views";
+import { asyncSection, card, emptyState, errorCard, openDialog, realNewsSlot, skeleton, sourceNote, timeFmt } from "./views";
 
 const SOURCE = "ESPN (lu via Firecrawl)";
 const TEN_MINUTES = 10 * 60 * 1000;
@@ -14,8 +14,13 @@ type Raw = Record<string, unknown>;
 async function events(url: string, competition = ""): Promise<Match[]> {
   const raw = await loadJson<Raw>(url);
   if (!Array.isArray(raw.events)) throw new DataError("réponse inattendue d'ESPN", "tool_error");
-  return parseMatches(raw.events, competition);
+  // L'identifiant de la compétition figure dans l'adresse (…/soccer/esp.1/…) : il sert à lire le détail d'un match.
+  return parseMatches(raw.events, competition, url.match(/\/soccer\/([\w.]+)\//)?.[1] === "all" ? "" : (url.match(/\/soccer\/([\w.]+)\//)?.[1] ?? ""));
 }
+
+/** Détail d'un match. Un match terminé ne change plus : gardé 24 h ; en cours : 2 minutes ; à venir : 1 heure. */
+const loadSummary = (m: Match, force: boolean) =>
+  cachedLoad(`foot-match-${m.id}-${m.state}`, m.state === "post" ? 24 * 60 * 60 * 1000 : m.state === "in" ? 2 * 60 * 1000 : 60 * 60 * 1000, async () => parseSummary(await loadJson<Raw>(`${ESPN}/site/v2/sports/soccer/${m.league}/summary?event=${m.id}`)), force);
 
 const loadUpcoming = (force: boolean) => cachedLoad("foot-avenir", TEN_MINUTES, () => events(`${ESPN}/site/v2/sports/soccer/all/teams/${REAL}/schedule?fixture=true`), force);
 const loadResults = (force: boolean) =>
@@ -86,19 +91,108 @@ function formDot(m: Match, teamId: string): HTMLElement | null {
   return result ? h("span", { class: `form form-${result[0].toLowerCase()}`, title: `${result[1]} : ${m.home} ${m.homeScore} – ${m.awayScore} ${m.away}` }, result[0], h("span", { class: "sr-only" }, ` (${result[1]})`)) : null;
 }
 
-/** Une ligne de match : pastilles et noms des deux équipes, score ou heure au centre. */
+// ---------- Fiche de match ----------
+const EVENT_LABEL = { but: "But", jaune: "Carton jaune", rouge: "Carton rouge", remplacement: "Remplacement" } as const;
+
+function summaryNodes(m: Match, s: MatchSummary, at: number): Node[] {
+  const nodes: (Node | null)[] = [];
+  const main = s.events.filter((e) => e.kind !== "remplacement");
+  const subs = s.events.filter((e) => e.kind === "remplacement");
+  const eventRow = (e: MatchSummary["events"][number]) =>
+    h(
+      "li",
+      { class: `event ${e.side}` },
+      h("span", { class: "event-min num" }, e.minute || "–"),
+      h("span", { class: `event-icon ev-${e.kind}`, title: EVENT_LABEL[e.kind] }, e.kind === "but" ? icon("goal", "ic ic-sm") : e.kind === "remplacement" ? icon("refresh-cw", "ic ic-sm") : null, h("span", { class: "sr-only" }, EVENT_LABEL[e.kind])),
+      h("span", { class: "event-text" }, e.kind === "remplacement" ? `${e.players[0]} entre${e.players[1] ? `, ${e.players[1]} sort` : ""}` : e.players[0], e.detail ? h("span", { class: "muted" }, ` (${e.detail})`) : null, h("span", { class: "muted small" }, ` · ${e.side === "away" ? m.away : m.home}`)),
+    );
+  if (main.length) nodes.push(h("section", { class: "stack" }, h("h3", { class: "eyebrow" }, "Buts et cartons"), h("ol", { class: "events" }, ...main.map(eventRow))));
+  else if (m.state !== "pre") nodes.push(h("p", { class: "muted" }, "Aucun but ni carton enregistré."));
+
+  // Statistiques : une barre partagée par ligne, proportionnelle aux deux valeurs.
+  const stats = s.stats.filter((x) => x.home + x.away > 0);
+  if (stats.length)
+    nodes.push(
+      h(
+        "section",
+        { class: "stack" },
+        h("h3", { class: "eyebrow" }, "Statistiques"),
+        h("p", { class: "stat-legend" }, h("span", null, h("span", { class: "swatch home" }), m.home), h("span", null, m.away, h("span", { class: "swatch away" }))),
+        h(
+          "ul",
+          { class: "duel" },
+          ...stats.map((x) =>
+            h(
+              "li",
+              null,
+              h("div", { class: "duel-head" }, h("strong", { class: "num" }, `${x.home}${x.percent ? " %" : ""}`), h("span", { class: "muted" }, x.label), h("strong", { class: "num" }, `${x.away}${x.percent ? " %" : ""}`)),
+              h("div", { class: "duel-bar", "aria-hidden": "true" }, h("span", { class: "home", style: `flex-grow:${x.home}` }), h("span", { class: "away", style: `flex-grow:${x.away}` })),
+            ),
+          ),
+        ),
+      ),
+    );
+
+  if (s.lineups.length)
+    nodes.push(
+      h(
+        "section",
+        { class: "stack" },
+        h("h3", { class: "eyebrow" }, "Compositions"),
+        h(
+          "div",
+          { class: "lineups" },
+          ...s.lineups.map((l) =>
+            h(
+              "div",
+              { class: "stack" },
+              h("p", null, h("strong", null, l.team), l.formation ? h("span", { class: "pill" }, l.formation) : null),
+              h("ol", { class: "lineup" }, ...l.starters.map((p) => h("li", null, h("span", { class: "jersey num" }, p.jersey || "–"), h("span", null, p.name), p.position ? h("span", { class: "muted small" }, p.position) : null))),
+              l.subs.some((p) => p.cameOn) ? h("p", { class: "muted small-2" }, `Entrés en jeu : ${l.subs.filter((p) => p.cameOn).map((p) => p.name).join(", ")}`) : null,
+            ),
+          ),
+        ),
+      ),
+    );
+  if (subs.length) nodes.push(h("details", { class: "info" }, h("summary", null, icon("refresh-cw", "ic ic-sm"), `Remplacements (${subs.length})`), h("ol", { class: "events" }, ...subs.map(eventRow))));
+  if (m.state === "pre" && !s.lineups.length) nodes.push(emptyState("Pas encore de données", "Les compositions, les buts et les statistiques apparaissent une fois le match commencé."));
+  const facts = [s.venue, s.attendance ? `${new Intl.NumberFormat("fr-CH").format(s.attendance)} spectateurs` : ""].filter(Boolean);
+  if (facts.length) nodes.push(h("p", { class: "muted small-2" }, facts.join(" · ")));
+  nodes.push(sourceNote(SOURCE, at));
+  return nodes.filter((n): n is Node => n !== null);
+}
+
+function openMatch(m: Match, opener: HTMLElement): void {
+  const body = h("div", { class: "stack" }, skeleton(3));
+  const header = h(
+    "div",
+    { class: "versus compact" },
+    h("div", { class: "versus-team" }, teamBadge(m.homeAbbr || m.home, m.homeColor), h("span", null, m.home)),
+    h("strong", { class: "versus-mid num" }, m.state === "pre" ? hour(m.date) : known(m) ? `${m.homeScore} – ${m.awayScore}` : "–"),
+    h("div", { class: "versus-team" }, teamBadge(m.awayAbbr || m.away, m.awayColor), h("span", null, m.away)),
+  );
+  openDialog(`${m.home} – ${m.away}`, [header, h("p", { class: "meta center" }, m.state === "in" ? liveBadge(m) : h("span", { class: "cap" }, `${weekdayLong.format(new Date(m.date))}${m.state === "post" ? " · terminé" : ""}`), m.competition ? h("span", { class: "pill" }, m.competition) : null), body], opener);
+  const load = async (force: boolean) => {
+    try {
+      const { data, at } = await loadSummary(m, force);
+      body.replaceChildren(...summaryNodes(m, data, at));
+    } catch (e) {
+      body.replaceChildren(errorCard("Détail du match", e, SOURCE, () => void load(true)));
+    }
+  };
+  void load(false);
+}
+
+/** Une ligne de match : pastilles et noms des deux équipes, score ou heure au centre. Un clic ouvre la fiche du match. */
 function matchRow(m: Match, teamId?: string, showCompetition = true): HTMLElement {
   const center = m.state === "pre" ? h("span", { class: "match-time num" }, hour(m.date)) : h("strong", { class: `match-score num${m.state === "in" ? " is-live" : ""}` }, known(m) ? `${m.homeScore} – ${m.awayScore}` : "–");
+  const sides = [h("span", { class: "side" }, h("span", { class: "team-name" }, m.home), teamBadge(m.homeAbbr || m.home, m.homeColor)), center, h("span", { class: "side away" }, teamBadge(m.awayAbbr || m.away, m.awayColor), h("span", { class: "team-name" }, m.away))];
+  // La fiche n'existe que si l'on connaît la compétition et l'identifiant du match.
+  const line: HTMLElement = m.league && m.id ? h("button", { class: "match-line match-open", type: "button", "aria-label": `Fiche du match ${m.home} – ${m.away}`, onclick: () => openMatch(m, line) }, ...sides) : h("div", { class: "match-line" }, ...sides);
   return h(
     "li",
     { class: `match${m.state === "in" ? " live-row" : ""}` },
-    h(
-      "div",
-      { class: "match-line" },
-      h("span", { class: "side" }, h("span", { class: "team-name" }, m.home), teamBadge(m.homeAbbr || m.home, m.homeColor)),
-      center,
-      h("span", { class: "side away" }, teamBadge(m.awayAbbr || m.away, m.awayColor), h("span", { class: "team-name" }, m.away)),
-    ),
+    line,
     h("p", { class: "meta center" }, m.state === "in" ? liveBadge(m) : h("span", { class: "cap" }, m.state === "post" ? `${day(m.date)} · terminé` : day(m.date)), showCompetition && m.competition ? h("span", { class: "pill" }, m.competition) : null, teamId && m.state === "post" ? formDot(m, teamId) : null),
   );
 }

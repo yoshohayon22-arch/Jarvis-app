@@ -11,6 +11,8 @@ export interface Match {
   /** Date ISO du coup d'envoi. */
   date: string;
   competition: string;
+  /** Identifiant ESPN de la compétition (ex. « esp.1 »), nécessaire pour lire le détail du match. */
+  league: string;
   home: string;
   away: string;
   homeId: string;
@@ -56,7 +58,7 @@ function score(raw: unknown): number | null {
 }
 
 /** Transforme une liste d'« events » ESPN (calendrier d'équipe ou tableau des scores) en matchs. */
-export function parseMatches(events: unknown, fallbackCompetition = ""): Match[] {
+export function parseMatches(events: unknown, fallbackCompetition = "", fallbackLeague = ""): Match[] {
   const out: Match[] = [];
   for (const event of arr(events)) {
     const competition = obj(arr(event.competitions)[0]);
@@ -75,6 +77,7 @@ export function parseMatches(events: unknown, fallbackCompetition = ""): Match[]
       id: text(event.id),
       date: new Date(date).toISOString(),
       competition: COMPETITIONS[text(league.slug)] ?? (text(league.name) || fallbackCompetition),
+      league: text(league.slug) || fallbackLeague,
       home: homeName,
       away: awayName,
       homeId: text(obj(home.team).id),
@@ -144,4 +147,96 @@ export function parseRoster(raw: unknown): RosterPlayer[] {
       goals: stat(a, "totalGoals") ?? 0,
       assists: stat(a, "goalAssists"),
     }));
+}
+
+// ---------- Détail d'un match (résumé ESPN) ----------
+export interface MatchEvent {
+  minute: string;
+  kind: "but" | "jaune" | "rouge" | "remplacement";
+  /** « home » ou « away ». */
+  side: "home" | "away" | "";
+  /** But, carton : le joueur concerné. Remplacement : celui qui entre, puis celui qui sort. */
+  players: string[];
+  /** But contre son camp ou sur penalty, quand ESPN le précise. */
+  detail: string;
+}
+export interface Lineup {
+  side: "home" | "away";
+  team: string;
+  formation: string;
+  starters: { name: string; jersey: string; position: string }[];
+  subs: { name: string; jersey: string; cameOn: boolean }[];
+}
+export interface MatchStat {
+  label: string;
+  home: number;
+  away: number;
+  /** Vrai si la valeur est un pourcentage (possession, passes réussies). */
+  percent: boolean;
+}
+export interface MatchSummary {
+  events: MatchEvent[];
+  lineups: Lineup[];
+  stats: MatchStat[];
+  venue: string;
+  attendance: number | null;
+}
+
+const EVENT_KINDS: Record<string, MatchEvent["kind"]> = { goal: "but", "goal---header": "but", "goal---free-kick": "but", "penalty---scored": "but", "own-goal": "but", "yellow-card": "jaune", "red-card": "rouge", substitution: "remplacement" };
+const STATS: [string, string, boolean][] = [
+  ["possessionPct", "Possession", true],
+  ["totalShots", "Tirs", false],
+  ["shotsOnTarget", "Tirs cadrés", false],
+  ["wonCorners", "Corners", false],
+  ["foulsCommitted", "Fautes", false],
+  ["offsides", "Hors-jeu", false],
+  ["saves", "Arrêts du gardien", false],
+  ["passPct", "Passes réussies", true],
+];
+
+export function parseSummary(raw: unknown): MatchSummary {
+  const data = obj(raw);
+  const competitors = arr(obj(arr(obj(data.header).competitions)[0]).competitors);
+  const sideOf = (teamId: string): MatchEvent["side"] => (competitors.find((c) => text(obj(c.team).id) === teamId || text(c.id) === teamId)?.homeAway === "away" ? "away" : competitors.some((c) => text(obj(c.team).id) === teamId || text(c.id) === teamId) ? "home" : "");
+
+  const events: MatchEvent[] = [];
+  for (const e of arr(data.keyEvents)) {
+    const slug = text(obj(e.type).type);
+    const kind = EVENT_KINDS[slug] ?? (slug.startsWith("goal") || slug.includes("penalty---scored") ? "but" : undefined);
+    const players = arr(e.participants).map((p) => text(obj(p.athlete).displayName)).filter(Boolean);
+    if (!kind || !players.length) continue;
+    events.push({ minute: text(obj(e.clock).displayValue), kind, side: sideOf(text(obj(e.team).id)), players, detail: slug === "own-goal" ? "contre son camp" : slug.includes("penalty") ? "penalty" : "" });
+  }
+
+  const lineups: Lineup[] = arr(data.rosters)
+    .map((r) => {
+      const players = arr(r.roster).filter((p) => text(obj(p.athlete).displayName));
+      return {
+        side: (r.homeAway === "away" ? "away" : "home") as Lineup["side"],
+        team: text(obj(r.team).displayName),
+        formation: text(r.formation),
+        starters: players.filter((p) => p.starter === true).map((p) => ({ name: text(obj(p.athlete).displayName), jersey: text(p.jersey), position: text(obj(p.position).abbreviation) })),
+        subs: players.filter((p) => p.starter !== true).map((p) => ({ name: text(obj(p.athlete).displayName), jersey: text(p.jersey), cameOn: p.subbedIn === true })),
+      };
+    })
+    .filter((l) => l.starters.length > 0)
+    .sort((a) => (a.side === "home" ? -1 : 1));
+
+  const teams = arr(obj(data.boxscore).teams);
+  const statOf = (side: string, name: string) => {
+    const team = teams.find((t) => t.homeAway === side);
+    const value = Number(text(arr(team?.statistics).find((s) => s.name === name)?.displayValue));
+    return Number.isFinite(value) ? value : NaN;
+  };
+  const stats: MatchStat[] = [];
+  for (const [name, label, percent] of STATS) {
+    let home = statOf("home", name);
+    let away = statOf("away", name);
+    if (!Number.isFinite(home) || !Number.isFinite(away)) continue;
+    // ESPN donne certains pourcentages sous forme de fraction (0,8 pour 80 %).
+    if (percent && home <= 1 && away <= 1) [home, away] = [Math.round(home * 100), Math.round(away * 100)];
+    stats.push({ label, home, away, percent });
+  }
+  const attendance = obj(data.gameInfo).attendance;
+  return { events, lineups, stats, venue: text(obj(obj(data.gameInfo).venue).fullName), attendance: typeof attendance === "number" && attendance > 0 ? attendance : null };
 }

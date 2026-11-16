@@ -533,3 +533,74 @@ tr.mine td:first-child { padding-left: 6px; }
 [data-dash="brutal"] .toast { border-radius: 0; box-shadow: 6px 6px 0 #000; }
 @keyframes toast-in { from { opacity: 0; transform: translate(-50%, 16px); } }
 @media (max-width: 899px) { .toast { bottom: calc(96px + env(safe-area-inset-bottom, 0px)); } }
+
+/* ---- Vie juive : essentiel, frise des horaires, lecture ---- */
+.hero-title { font-family: var(--ff-heading); font-weight: var(--heading-weight); font-size: clamp(26px, 6vw, 38px); line-height: 1.15; letter-spacing: var(--heading-tracking); text-wrap: balance; }
+.hero-hebrew { font-size: 26px; line-height: 1.4; color: var(--text-2); text-align: left; }
+.kpi .small { font-size: 12px; }
+.timeline { display: flex; flex-direction: column; }
+.timeline li { display: grid; grid-template-columns: 56px 18px minmax(0, 1fr); align-items: center; gap: 12px; min-height: 46px; position: relative; font-size: 15px; animation: rise-sm 420ms var(--glide) backwards; }
+.timeline li:nth-child(2) { animation-delay: 40ms; } .timeline li:nth-child(3) { animation-delay: 80ms; } .timeline li:nth-child(4) { animation-delay: 120ms; } .timeline li:nth-child(n + 5) { animation-delay: 160ms; }
+.tl-time { font-weight: 600; text-align: right; }
+.tl-dot { width: 12px; height: 12px; margin: 0 auto; border-radius: 50%; background: var(--surface-2); border: 2px solid var(--border); position: relative; z-index: 1; }
+/* Trait vertical qui relie les points. */
+.timeline li::before { content: ""; position: absolute; left: 76px; top: 0; bottom: 0; width: 2px; background: var(--border); }
+.timeline li:first-child::before { top: 50%; } .timeline li:last-child::before { bottom: 50%; }
+.tl-label { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; min-width: 0; }
+.timeline .past { color: var(--text-2); }
+.timeline .past .tl-time { font-weight: 400; }
+.timeline .next { font-weight: 600; }
+.timeline .next .tl-dot { width: 16px; height: 16px; background: var(--accent); border-color: var(--accent); animation: live-pulse 2s ease-in-out infinite; }
+.timeline .next .pill { background: var(--accent); color: var(--on-accent); border-color: transparent; }
+.holiday { align-items: flex-start !important; }
+.holiday-he { font-size: 17px; }
+.reader { --reader-scale: 1; }
+.reader.wide { max-width: 1100px; }
+.reader-tools { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; }
+.size-a { font-family: var(--ff-heading); font-weight: 700; line-height: 1; }
+.small-a { font-size: 13px; } .big-a { font-size: 21px; }
+.reader .hebrew { font-size: calc(22px * var(--reader-scale)); }
+.reader .translation { font-size: calc(15px * var(--reader-scale)); line-height: 1.65; }
+.reader .hero-hebrew { font-size: 26px; }
+@media (min-width: 900px) {
+  /* Côte à côte : la traduction à gauche, l'hébreu à droite, verset par verset. */
+  .reader.wide .verses li > div { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 28px; align-items: start; }
+  .reader.wide .verses .hebrew { order: 2; }
+  .reader.wide .verses .translation { order: 1; }
+}
+
+/* ---- Fiche de match ---- */
+.match-open { width: 100%; min-height: 44px; padding: 4px 0; background: none; border: 0; border-radius: var(--radius-sm); color: inherit; font: inherit; cursor: pointer; transition: transform 160ms var(--glide); }
+.match-open:hover .team-name { text-decoration: underline; text-underline-offset: 4px; }
+.match-open:active { transform: scale(0.985); }
+.versus.compact .versus-mid { font-size: clamp(26px, 7vw, 36px); }
+.versus.compact .versus-team .badge { width: 44px; height: 44px; font-size: 12px; }
+.events { display: flex; flex-direction: column; gap: 2px; }
+.event { display: grid; grid-template-columns: 48px 26px minmax(0, 1fr); align-items: center; gap: 10px; min-height: 36px; font-size: 14px; animation: rise-sm 380ms var(--glide) backwards; }
+.event-min { text-align: right; color: var(--text-2); }
+.event-icon { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; }
+.ev-jaune::before, .ev-rouge::before { content: ""; width: 13px; height: 18px; border-radius: 3px; border: 1px solid rgb(0 0 0 / 0.35); }
+/* Couleurs réservées aux cartons (jaune et rouge du règlement), toujours accompagnées du libellé pour les lecteurs d'écran. */
+.ev-jaune::before { background: #f6c945; }
+.ev-rouge::before { background: #d92d20; }
+.ev-but { color: var(--accent); }
+[data-dash="brutal"] .ev-but, [data-dash="dessine"] .ev-but { color: var(--text); }
+.event-text { overflow-wrap: anywhere; }
+.stat-legend { display: flex; justify-content: space-between; gap: 12px; font-size: 13px; font-weight: 600; }
+.stat-legend > span { display: inline-flex; align-items: center; gap: 8px; min-width: 0; }
+.swatch { width: 12px; height: 12px; border-radius: 3px; flex: none; }
+.swatch.home, .duel-bar .home { background: var(--accent); }
+.swatch.away, .duel-bar .away { background: var(--text-2); }
+.duel { display: flex; flex-direction: column; gap: 12px; }
+.duel li { display: flex; flex-direction: column; gap: 5px; }
+.duel-head { display: grid; grid-template-columns: 64px minmax(0, 1fr) 64px; align-items: baseline; font-size: 14px; text-align: center; }
+.duel-head strong:first-child { text-align: left; } .duel-head strong:last-child { text-align: right; }
+.duel-bar { display: flex; gap: 2px; height: 8px; }
+.duel-bar span { flex: 0 1 0; min-width: 2px; border-radius: 4px; animation: grow-x 700ms var(--glide) 150ms backwards; }
+.duel-bar .home { transform-origin: right center; } .duel-bar .away { transform-origin: left center; }
+.lineups { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); gap: 20px; }
+.lineups p { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.lineup { display: flex; flex-direction: column; gap: 6px; font-size: 14px; }
+.lineup li { display: grid; grid-template-columns: 28px minmax(0, 1fr) auto; gap: 8px; align-items: baseline; }
+.jersey { text-align: right; color: var(--text-2); }
+.dialog .info summary { font-size: 13px; width: auto; gap: 6px; margin: 0; }

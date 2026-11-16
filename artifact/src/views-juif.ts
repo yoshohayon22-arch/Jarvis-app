@@ -3,6 +3,7 @@ import type { CalendarPayload, StudyPayload, StudySection } from "@/lib/judaisme
 import type { Article } from "@/lib/rss/types";
 import { loadCalendar, loadNews, loadStudy } from "./data";
 import { h, icon, store } from "./dom";
+import { sections } from "./layout";
 import { card, dateFmt, emptyState, errorCard, skeleton, sourceNote, timeFmt } from "./views";
 
 const longDate = new Intl.DateTimeFormat("fr-CH", { timeZone: "Europe/Zurich", weekday: "long", day: "numeric", month: "long" });
@@ -27,30 +28,97 @@ function choice(label: string, active: boolean, onclick: () => void): HTMLElemen
 export function calendarView(root: HTMLElement): void {
   let minutes = store.get<number>("dash-bougies") ?? 18;
   if (!CANDLE_CHOICES.includes(minutes)) minutes = 18;
-  const content = h("div", { class: "grid" });
+  let allTimes = store.get<boolean>("dash-zmanim-tous") === true;
+  let last: { data: CalendarPayload; at: number } | null = null;
+  const hero = h("div", { class: "slot" });
+  const daySlot = h("div", { class: "slot" });
+  const shabbatSlot = h("div", { class: "slot" });
+  const holidaySlot = h("div", { class: "slot" });
 
-  const row = (label: string, value: string) => h("li", { class: "kv" }, h("span", null, label), h("strong", { class: "num" }, value));
-  const holiday = (x: CalendarPayload["holidays"][number]) =>
-    h("li", { class: "kv" }, h("span", null, h("strong", null, x.title), x.hebrewDate ? h("span", { class: "muted" }, ` · ${x.hebrewDate}`) : null), h("span", { class: "muted num" }, dateFmt.format(new Date(`${x.date}T12:00:00Z`))));
+  const relative = new Intl.RelativeTimeFormat("fr", { numeric: "auto" });
+  const until = (iso: string, now: number) => {
+    const minutesLeft = Math.round((Date.parse(iso) - now) / 60000);
+    return minutesLeft < 90 ? relative.format(minutesLeft, "minute") : relative.format(Math.round(minutesLeft / 60), "hour");
+  };
+  const today = () => new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Zurich" }).format(new Date());
+  const daysTo = (date: string) => Math.round((Date.parse(`${date}T00:00:00Z`) - Date.parse(`${today()}T00:00:00Z`)) / 86_400_000);
+  const shortLabel = (label: string) => label.replace(/\s*\(.*\)$/, "");
 
   const render = (data: CalendarPayload, at: number) => {
-    const now = new Date(at);
-    const slot = (label: string, iso: string | null) =>
-      h("div", { class: "tile-stat" }, h("dt", null, label), h("dd", { class: "big-2 num" }, iso ? time(iso) : "–"), h("dd", { class: "note cap" }, iso ? longDate.format(new Date(iso)) : "non communiqué"));
-    content.replaceChildren(
-      card("Aujourd'hui", [
-        h("div", null, h("p", { class: "big-2" }, data.hebrewDate.text), h("p", { class: "hebrew muted", lang: "he", dir: "rtl" }, data.hebrewDate.hebrew)),
-        h("p", { class: "cap" }, `${longDate.format(now)} · ${dateFmt.format(now)}`),
-        data.hebrewDate.afterSunset ? h("p", { class: "note" }, "Le soleil est couché : la date hébraïque affichée est déjà celle du jour qui commence ce soir.") : null,
+    last = { data, at };
+    const now = Date.now();
+    const times = [...data.zmanim].sort((a, b) => a.time.localeCompare(b.time));
+    // Prochain horaire : d'abord parmi les principaux, sinon parmi tous.
+    const future = (z: { time: string }) => Date.parse(z.time) > now;
+    const next = times.filter((z) => z.main).find(future) ?? times.find(future);
+    const nextHoliday = data.holidays.find((x) => daysTo(x.date) >= 0);
+    const kpi = (label: string, value: string, sub: string) => h("div", { class: "kpi" }, h("dt", null, label), h("dd", null, h("span", { class: "kpi-value num" }, value)), sub ? h("dd", { class: "muted small cap" }, sub) : null);
+
+    hero.replaceChildren(
+      h(
+        "section",
+        { class: "hero", "aria-label": "L'essentiel" },
+        h(
+          "div",
+          { class: "hero-main" },
+          h("p", { class: "eyebrow" }, data.hebrewDate.afterSunset ? "Ce soir commence le" : "Aujourd'hui"),
+          h("p", { class: "hero-title" }, data.hebrewDate.text),
+          h("p", { class: "hebrew hero-hebrew", lang: "he", dir: "rtl" }, data.hebrewDate.hebrew),
+          h("p", { class: "muted cap" }, longDate.format(new Date(at))),
+          data.hebrewDate.afterSunset ? h("p", { class: "note" }, "Le soleil est couché : la date hébraïque affichée est déjà celle du jour qui commence ce soir.") : null,
+        ),
+        h(
+          "dl",
+          { class: "kpis" },
+          next ? kpi("Prochain horaire", time(next.time), `${shortLabel(next.label)} · ${until(next.time, now)}`) : kpi("Prochain horaire", "–", "plus d'horaire aujourd'hui"),
+          kpi("Allumage des bougies", data.shabbat.candles ? time(data.shabbat.candles) : "–", data.shabbat.candles ? longDate.format(new Date(data.shabbat.candles)) : "non communiqué"),
+          kpi("Havdala", data.shabbat.havdalah ? time(data.shabbat.havdalah) : "–", data.shabbat.havdalah ? longDate.format(new Date(data.shabbat.havdalah)) : "non communiqué"),
+          nextHoliday ? kpi("Prochaine date", daysTo(nextHoliday.date) === 0 ? "Aujourd'hui" : `${daysTo(nextHoliday.date)} j`, nextHoliday.title) : null,
+        ),
+      ),
+    );
+
+    // --- Horaires du jour : une frise, le prochain horaire mis en avant ---
+    const shown = allTimes ? times : times.filter((z) => z.main);
+    daySlot.replaceChildren(
+      card("Horaires du jour", [
+        h(
+          "div",
+          { class: "chips wrap", role: "radiogroup", "aria-label": "Horaires affichés" },
+          choice("Principaux", !allTimes, () => ((allTimes = false), store.set("dash-zmanim-tous", false), render(data, at))),
+          choice("Tous", allTimes, () => ((allTimes = true), store.set("dash-zmanim-tous", true), render(data, at))),
+        ),
+        h(
+          "ol",
+          { class: "timeline" },
+          ...shown.map((z) => {
+            const past = Date.parse(z.time) <= now;
+            const isNext = z === shown.find(future);
+            return h(
+              "li",
+              { class: `${past ? "past" : ""}${isNext ? " next" : ""}`, "aria-current": isNext ? "time" : null },
+              h("span", { class: "tl-time num" }, time(z.time)),
+              h("span", { class: "tl-dot", "aria-hidden": "true" }),
+              h("span", { class: "tl-label" }, z.label, isNext ? h("span", { class: "pill" }, until(z.time, now)) : null, past ? h("span", { class: "sr-only" }, " (passé)") : null),
+            );
+          }),
+        ),
+        h("p", { class: "note" }, "Écart possible de 1 à 2 minutes. Pour une question pratique sur un horaire, demande à ton rabbin."),
         sourceNote(SOURCE, at),
       ]),
+    );
+
+    // --- Chabbat ---
+    const slot = (label: string, iso: string | null) => h("div", { class: "tile-stat" }, h("dt", null, label), h("dd", { class: "big-2 num" }, iso ? time(iso) : "–"), h("dd", { class: "muted small cap" }, iso ? longDate.format(new Date(iso)) : "non communiqué"));
+    shabbatSlot.replaceChildren(
       card(
         "Chabbat",
         [
+          data.shabbat.parasha ? h("p", null, h("span", { class: "eyebrow" }, "Paracha de la semaine"), h("span", { class: "big-2" }, data.shabbat.parasha), data.shabbat.parashaHebrew ? h("span", { class: "hebrew muted", lang: "he", dir: "rtl" }, ` ${data.shabbat.parashaHebrew}`) : null) : null,
           data.shabbat.candles || data.shabbat.havdalah
             ? h("dl", { class: "stats cols-2" }, slot("Allumage des bougies", data.shabbat.candles), slot("Havdala", data.shabbat.havdalah))
             : emptyState("Pas encore de données", "Hebcal n'indique pas d'horaire de chabbat pour cette semaine."),
-          h("p", { id: "bougies-label" }, "Allumage avant le coucher du soleil"),
+          h("p", { id: "bougies-label", class: "label" }, "Allumage avant le coucher du soleil"),
           h(
             "div",
             { class: "chips wrap", role: "radiogroup", "aria-labelledby": "bougies-label" },
@@ -62,38 +130,63 @@ export function calendarView(root: HTMLElement): void {
               }),
             ),
           ),
+          h("a", { class: "text-link", href: "#paracha" }, "Lire la paracha", icon("book-open", "ic ic-sm")),
           h("p", { class: "note" }, "18 minutes par défaut. Choisis l'usage de ta communauté ; la havdala est calculée à la sortie des étoiles."),
           sourceNote(SOURCE, at),
         ],
-        { badge: data.shabbat.parasha ?? undefined },
       ),
-      card("Zmanim du jour", [h("ul", null, ...data.zmanim.filter((z) => z.main).map((z) => row(z.label, time(z.time)))), sourceNote(SOURCE, at)], {
-        detail: () => [h("ul", { class: "sep" }, ...data.zmanim.map((z) => row(z.label, time(z.time)))), h("p", { class: "note" }, "Pour une question pratique sur un horaire, demande à ton rabbin.")],
-      }),
+    );
+
+    // --- Fêtes ---
+    const holiday = (x: CalendarPayload["holidays"][number]) => {
+      const days = daysTo(x.date);
+      return h(
+        "li",
+        { class: "holiday" },
+        h("div", { class: "grow-2" }, h("p", { class: "expense-title" }, x.title, x.hebrew ? h("span", { class: "hebrew holiday-he muted", lang: "he", dir: "rtl" }, ` ${x.hebrew}`) : null), h("p", { class: "meta" }, h("span", { class: "cap" }, longDate.format(new Date(`${x.date}T12:00:00Z`))), x.hebrewDate ? h("span", null, x.hebrewDate) : null)),
+        h("span", { class: `pill${days <= 7 ? " cat-urgent" : ""}` }, days === 0 ? "aujourd'hui" : days === 1 ? "demain" : `dans ${days} j`),
+      );
+    };
+    const upcoming = data.holidays.filter((x) => daysTo(x.date) >= 0);
+    holidaySlot.replaceChildren(
       card(
         "Fêtes et dates à venir",
         [
-          data.holidays.length ? h("ul", null, ...data.holidays.slice(0, 5).map(holiday)) : emptyState("Pas encore de données", "Hebcal n'annonce aucune fête dans les prochains mois."),
+          upcoming.length ? h("ul", { class: "expenses" }, ...upcoming.slice(0, 8).map(holiday)) : emptyState("Pas encore de données", "Hebcal n'annonce aucune fête dans les prochains mois."),
           h("p", { class: "note" }, "Les fêtes commencent la veille au soir de la date indiquée."),
           sourceNote("Hebcal (lu via Firecrawl)", at),
         ],
-        { detail: data.holidays.length > 5 ? () => [h("ul", { class: "sep" }, ...data.holidays.slice(5).map(holiday))] : undefined },
+        { badge: upcoming.length ? `${upcoming.length} dates` : undefined, detail: upcoming.length > 8 ? () => [h("ul", { class: "expenses" }, ...upcoming.slice(8).map(holiday))] : undefined },
       ),
     );
   };
 
   const run = async (force: boolean) => {
-    content.replaceChildren(...Array.from({ length: 4 }, () => skeleton()));
+    if (!last) [hero, daySlot, shabbatSlot, holidaySlot].forEach((slot, i) => slot.replaceChildren(skeleton(i ? 3 : 2)));
     try {
       const { data, at } = await loadCalendar(minutes, force);
       render(data, at);
     } catch (e) {
-      content.replaceChildren(errorCard("Calendrier hébraïque", e, "Hebcal", () => void run(true)));
+      if (!last) {
+        hero.replaceChildren(errorCard("Calendrier hébraïque", e, "Hebcal", () => void run(true)));
+        [daySlot, shabbatSlot, holidaySlot].forEach((slot) => slot.replaceChildren());
+      }
     }
   };
 
-  root.append(refreshBar("Horaires calculés pour Genève (écart possible de 1 à 2 minutes). Chaque lecture utilise 4 crédits Firecrawl, gardée 15 minutes.", () => void run(true)), content);
+  root.append(
+    h("div", { class: "page-head" }, h("button", { class: "icon-btn boxed", type: "button", "aria-label": "Actualiser", onclick: () => void run(true) }, icon("refresh-cw"))),
+    hero,
+    sections("calendrier", [
+      { id: "jour", label: "Horaires du jour", nodes: [daySlot] },
+      { id: "chabbat", label: "Chabbat", nodes: [shabbatSlot] },
+      { id: "fetes", label: "Fêtes", nodes: [holidaySlot] },
+    ]),
+    h("p", { class: "note" }, "Horaires calculés pour Genève. Chaque lecture utilise 4 crédits Firecrawl, gardée 15 minutes."),
+  );
   void run(false);
+  // Le « prochain horaire » avance tout seul : on redessine chaque minute avec les données déjà chargées.
+  const timer = setInterval(() => (root.isConnected ? last && render(last.data, last.at) : clearInterval(timer)), 60_000);
 }
 
 // ---------- Paracha, Tehilim, Halakha, Rambam ----------
@@ -101,7 +194,13 @@ type Display = "les-deux" | "traduction" | "hebreu";
 
 export function studyView(root: HTMLElement, section: StudySection): void {
   let chapters: 1 | 3 = store.get<number>("dash-rambam") === 3 ? 3 : 1;
-  let display: Display = "les-deux";
+  let display: Display = (store.get<Display>("dash-affichage") ?? "les-deux") as Display;
+  if (!["les-deux", "traduction", "hebreu"].includes(display)) display = "les-deux";
+  // Confort de lecture, mémorisé sur l'appareil : taille du texte (5 crans) et disposition.
+  const SIZES = [0.85, 1, 1.15, 1.3, 1.5];
+  let size = Math.min(SIZES.length - 1, Math.max(0, store.get<number>("dash-taille") ?? 1));
+  let sideBySide = store.get<boolean>("dash-cote-a-cote") === true;
+  let only: number | "tout" = "tout";
   let payload: StudyPayload | null = null;
   const content = h("div", { class: "stack reader" });
 
@@ -115,12 +214,19 @@ export function studyView(root: HTMLElement, section: StudySection): void {
     const showTr = display !== "hebreu" && Boolean(tr);
     const multi = text.sections.length > 1;
     const displays: [Display, string][] = tr ? [["les-deux", "Les deux"], ["traduction", "Traduction"], ["hebreu", "Hébreu"]] : [["hebreu", "Hébreu"]];
+    const numbered = text.sections.filter((x) => x.number != null);
+    const visible = only === "tout" ? text.sections : text.sections.filter((x) => x.number === only);
+    const both = showHe && showTr;
+    content.style.setProperty("--reader-scale", String(SIZES[size]));
+    content.classList.toggle("wide", both && sideBySide);
+    const setDisplay = (id: Display) => ((display = id), store.set("dash-affichage", id), render());
+    const resize = (delta: number) => ((size = Math.min(SIZES.length - 1, Math.max(0, size + delta))), store.set("dash-taille", size), render());
 
     content.replaceChildren(
       h(
         "section",
-        { class: "card" },
-        h("div", null, h("h2", { class: "title-2" }, data.title), data.hebrewTitle ? h("p", { class: "hebrew muted left", lang: "he", dir: "rtl" }, data.hebrewTitle) : null),
+        { class: "hero" },
+        h("div", { class: "hero-main" }, h("p", { class: "eyebrow" }, "Étude du jour"), h("h2", { class: "hero-title" }, data.title), data.hebrewTitle ? h("p", { class: "hebrew hero-hebrew", lang: "he", dir: "rtl" }, data.hebrewTitle) : null),
         h("a", { class: "text-link", href: text.url, target: "_blank", rel: "noopener noreferrer" }, "Lire sur Sefaria avec les commentaires", icon("external-link", "ic ic-sm")),
         tr?.language === "en" ? h("p", { class: "muted" }, "Sefaria n'a pas de traduction française pour ce passage : la traduction affichée est en anglais.") : null,
         !tr ? h("p", { class: "muted" }, "Sefaria ne propose pas de traduction pour ce passage : seul le texte hébreu est affiché.") : null,
@@ -138,8 +244,27 @@ export function studyView(root: HTMLElement, section: StudySection): void {
       h(
         "section",
         { class: "card" },
-        h("div", { class: "chips wrap", role: "radiogroup", "aria-label": "Affichage du texte" }, ...displays.map(([id, label]) => choice(label, display === id, () => ((display = id), render())))),
-        ...text.sections.map((s) =>
+        h(
+          "div",
+          { class: "reader-tools" },
+          h("div", { class: "chips wrap", role: "radiogroup", "aria-label": "Affichage du texte" }, ...displays.map(([id, label]) => choice(label, display === id, () => setDisplay(id)))),
+          h(
+            "div",
+            { class: "row-actions" },
+            both ? h("button", { class: `chip wide-only-flex${sideBySide ? " on" : ""}`, type: "button", "aria-pressed": String(sideBySide), onclick: () => ((sideBySide = !sideBySide), store.set("dash-cote-a-cote", sideBySide), render()) }, "Côte à côte") : null,
+            h("button", { class: "icon-btn boxed", type: "button", "aria-label": "Réduire la taille du texte", disabled: size === 0, onclick: () => resize(-1) }, h("span", { class: "size-a small-a", "aria-hidden": "true" }, "A")),
+            h("button", { class: "icon-btn boxed", type: "button", "aria-label": "Agrandir la taille du texte", disabled: size === SIZES.length - 1, onclick: () => resize(1) }, h("span", { class: "size-a big-a", "aria-hidden": "true" }, "A")),
+          ),
+        ),
+        numbered.length > 1
+          ? h(
+              "div",
+              { class: "chips", role: "radiogroup", "aria-label": `Choisir : ${data.sectionLabel.toLowerCase()}` },
+              choice("Tout", only === "tout", () => ((only = "tout"), render())),
+              ...numbered.map((x) => choice(`${data.sectionLabel} ${x.number}`, only === x.number, () => ((only = x.number as number), render()))),
+            )
+          : null,
+        ...visible.map((s) =>
           h(
             "div",
             { class: "stack" },
@@ -156,7 +281,7 @@ export function studyView(root: HTMLElement, section: StudySection): void {
                     "div",
                     null,
                     showHe && v.hebrew ? h("p", { class: "hebrew", lang: "he", dir: "rtl" }, v.hebrew) : null,
-                    showTr && v.translation ? h("p", { class: showHe ? "muted small-2" : "", lang: tr?.language ?? "" }, v.translation) : null,
+                    showTr && v.translation ? h("p", { class: showHe ? "translation muted" : "translation", lang: tr?.language ?? "" }, v.translation) : null,
                   ),
                 ),
               ),
@@ -171,6 +296,7 @@ export function studyView(root: HTMLElement, section: StudySection): void {
     content.replaceChildren(skeleton(4));
     try {
       payload = (await loadStudy(section, chapters, force)).data;
+      only = "tout";
       render();
     } catch (e) {
       payload = null;

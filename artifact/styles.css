@@ -667,3 +667,23 @@ tr.mine td:first-child { padding-left: 6px; }
 .week .rest { border-style: dashed; }
 .week .today { outline: 2px solid var(--text-2); outline-offset: 2px; }
 [data-dash="brutal"] .week li { border-radius: 0; }
+
+/* ---- Mon programme (accueil) ---- */
+.plan-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; }
+.plan-count { font-size: 14px; font-weight: 600; }
+.plan { display: flex; flex-direction: column; }
+.plan li { display: flex; align-items: center; gap: 6px; border-bottom: 1px solid color-mix(in srgb, var(--border) 60%, transparent); animation: rise-sm 360ms var(--glide) backwards; }
+.plan li:last-child { border-bottom: 0; }
+.plan-item { flex: 1; min-width: 0; display: flex; align-items: center; gap: 12px; min-height: 52px; cursor: pointer; position: relative; }
+.plan-item input { position: absolute; opacity: 0; width: 28px; height: 28px; margin: 0; cursor: pointer; }
+.plan-check { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; flex: none; border-radius: 9px; border: 2px solid var(--text-2); color: transparent; transition: transform 240ms var(--spring); }
+.plan-item input:checked + .plan-check { background: var(--accent); border-color: var(--accent); color: var(--on-accent); transform: scale(1.08); }
+.plan-item input:focus-visible + .plan-check { outline: 2px solid var(--focus); outline-offset: 2px; }
+[data-dash="brutal"] .plan-check { border-radius: 0; border-color: #000; }
+.plan-hour { flex: none; padding: 2px 8px; border-radius: 999px; background: var(--surface-2); font-size: 13px; }
+.plan-text { min-width: 0; overflow-wrap: anywhere; font-size: 15px; }
+.plan .done .plan-text { color: var(--text-2); text-decoration: line-through; }
+.plan-form { display: flex; gap: 8px; flex-wrap: wrap; }
+.plan-form .field { flex: 1 1 180px; }
+.plan-form .plan-time { flex: 0 0 118px; }
+.plan-late { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; }

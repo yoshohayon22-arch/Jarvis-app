@@ -4,6 +4,8 @@
  */
 import { callConnector, DataError } from "./data";
 import { h, icon } from "./dom";
+import { agentSection, type Proposition } from "./etudes-agent";
+import { sections } from "./layout";
 import { sampleMessage, samplePromise } from "./mail";
 import { liveList, newId, num, str } from "./store";
 import { dayLabel, daysFromToday, field, gate, runner, select, textArea, textInput } from "./ui";
@@ -280,8 +282,13 @@ export function etudesView(root: HTMLElement): void {
     if (!gate(ecoles, body, "Études")) return void (built = false);
     if (!built) {
       built = true;
+      const notes = (p: Proposition) => [p.pourquoi, p.admission && `Admission : ${p.admission}`, p.frais && `Frais : ${p.frais}`, p.delai && `Date limite : ${p.delai}`, p.langue && `Langue : ${p.langue}`].filter(Boolean).join("\n");
       body.replaceChildren(
-        h("div", { class: "grid two" }, card("Recherche d'écoles", [searchForm]), card("Mes écoles et candidatures", [listSlot, addBtn, h("p", { class: "note" }, "Source : tes saisies, enregistrées dans l'espace privé de cette page. Triées par date limite.")])),
+        sections("etudes", [
+          { id: "agent", label: "Agent", nodes: [agentSection(ecoles, (p, opener) => openEcole(null, opener, { nom: p.nom, programme: p.programme, lieu: p.lieu, url: p.url, notes: notes(p) }))] },
+          { id: "liste", label: "Mes écoles", nodes: [card("Mes écoles et candidatures", [listSlot, addBtn, h("p", { class: "note" }, "Source : tes saisies, enregistrées dans l'espace privé de cette page. Triées par date limite.")])] },
+          { id: "rapide", label: "Recherche rapide", nodes: [card("Recherche rapide", [h("p", { class: "muted small-2" }, "Une seule recherche web résumée par Claude : plus rapide et moins coûteuse que l'agent, mais moins approfondie."), searchForm])] },
+        ]),
       );
     }
     renderList();

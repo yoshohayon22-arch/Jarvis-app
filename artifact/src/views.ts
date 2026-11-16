@@ -4,7 +4,9 @@ import { aqiLabel, describeWeather, uvLabel, windDirectionLabel } from "@/lib/me
 import { GROUP_LABELS, REAL_MADRID_PATTERN, type NewsGroup, type NewsTab } from "@/lib/rss/sources";
 import type { Article, NewsPayload } from "@/lib/rss/types";
 import { DataError, loadAir, loadAlerts, loadForecast, loadNews, newsMaxAgeDays, newsSourceCount, type Cached } from "./data";
+import { digest } from "./assistant";
 import { h, icon, svg } from "./dom";
+import { sampleMessage } from "./mail";
 import { sections } from "./layout";
 import type { ArtifactTab } from "./tabs";
 
@@ -457,10 +459,55 @@ export function newsView(root: HTMLElement, tab: NewsTab): void {
     );
   };
 
+  // « L'essentiel en 5 points » : rédigé par Claude à la demande, à partir des titres affichés.
+  const digestSlot = h("div", { class: "slot" });
+  let digestFor = 0;
+  const digestButton = () => {
+    const info = h("p", { class: "note keep", role: "status" });
+    const btn: HTMLButtonElement = h(
+      "button",
+      {
+        class: "btn primary",
+        type: "button",
+        onclick: async () => {
+          if (!payload) return;
+          const current = payload;
+          btn.disabled = true;
+          info.textContent = "Claude lit les titres…";
+          try {
+            const result = await digest(current.data.articles);
+            digestFor = current.at;
+            digestSlot.replaceChildren(
+              h(
+                "section",
+                { class: "hero" },
+                h("p", { class: "eyebrow" }, icon("sparkles", "ic ic-sm"), "L'essentiel en 5 points"),
+                h(
+                  "ol",
+                  { class: "digest" },
+                  ...result.points.map((point) => h("li", null, h("p", null, point.text), h("p", { class: "meta" }, ...point.articles.map((a) => h("a", { href: a.link, target: "_blank", rel: "noopener noreferrer", title: a.title }, a.sourceName))))),
+                ),
+                h("p", { class: "note" }, "Résumé rédigé par Claude à partir des seuls titres et résumés ci-dessous ; chaque point renvoie aux articles d'origine. Une erreur reste possible."),
+              ),
+            );
+          } catch (e) {
+            info.textContent = sampleMessage(e);
+            btn.disabled = false;
+          }
+        },
+      },
+      icon("sparkles"),
+      "L'essentiel en 5 points",
+    );
+    return h("div", { class: "stack" }, h("div", { class: "actions" }, btn), info);
+  };
+
   const run = async (force: boolean) => {
     if (!payload) content.replaceChildren(h("div", { class: "grid" }, ...Array.from({ length: 6 }, () => skeleton())));
     try {
       payload = await loadNews(tab, force);
+      // Le résumé précédent ne vaut que pour les articles qu'il a lus : on le propose de nouveau après une actualisation.
+      if (tab !== "cours" && payload.data.articles.length >= 5 && digestFor !== payload.at) digestSlot.replaceChildren(digestButton());
       render();
     } catch (e) {
       if (!payload) content.replaceChildren(errorCard("Articles", e, "flux RSS des journaux", () => void run(true)));
@@ -474,6 +521,7 @@ export function newsView(root: HTMLElement, tab: NewsTab): void {
       h("p", { class: "note" }, `Chaque actualisation lit ${count} flux, soit ${count} crédits Firecrawl ; les articles sont gardés 30 minutes.`),
       h("button", { class: "btn", type: "button", onclick: () => void run(true) }, icon("refresh-cw"), h("span", { class: "btn-label" }, "Actualiser")),
     ),
+    digestSlot,
     content,
   );
   void run(false);

@@ -424,7 +424,7 @@ tr.mine td:first-child { padding-left: 6px; }
 /* Sources et précisions repliées. */
 .folded { display: none !important; }
 .info { font-size: 12px; color: var(--text-2); }
-.info summary { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; cursor: pointer; list-style: none; border-radius: var(--radius-sm); }
+.info summary { display: inline-flex; align-items: center; gap: 6px; min-height: 45px; cursor: pointer; list-style: none; border-radius: var(--radius-sm); }
 .info summary::-webkit-details-marker { display: none; }
 .info summary:hover { color: var(--text); }
 .card-info { margin: -10px 0 -12px; }
@@ -604,3 +604,28 @@ tr.mine td:first-child { padding-left: 6px; }
 .lineup li { display: grid; grid-template-columns: 28px minmax(0, 1fr) auto; gap: 8px; align-items: baseline; }
 .jersey { text-align: right; color: var(--text-2); }
 .dialog .info summary { font-size: 13px; width: auto; gap: 6px; margin: 0; }
+
+/* ---- Claude : conversation, résumé, agent ---- */
+.chat { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.chat-log { display: flex; flex-direction: column; gap: 10px; max-height: 52vh; overflow-y: auto; }
+.bubble { max-width: 92%; padding: 10px 14px; border-radius: 16px; font-size: 14.5px; line-height: 1.55; white-space: pre-wrap; overflow-wrap: anywhere; animation: rise-sm 320ms var(--glide) backwards; }
+.bubble.me { align-self: flex-end; background: var(--accent); color: var(--on-accent); border-bottom-right-radius: 4px; }
+.bubble.claude { align-self: flex-start; background: var(--surface-2); border-bottom-left-radius: 4px; }
+.bubble.failed { border: var(--border-width) dashed var(--border); }
+.bubble a { text-underline-offset: 3px; }
+[data-dash="brutal"] .bubble { border-radius: 0; border: 3px solid #000; }
+.activity { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-2); min-height: 20px; }
+.activity:not(:empty)::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); animation: live-pulse 1.2s ease-in-out infinite; }
+.activity:empty { display: none; }
+.ask-btn { color: var(--accent); }
+[data-dash="brutal"] .ask-btn, [data-dash="dessine"] .ask-btn { color: var(--text); }
+.digest { display: flex; flex-direction: column; gap: 14px; counter-reset: pt; }
+.digest li { display: grid; grid-template-columns: 30px minmax(0, 1fr); column-gap: 12px; row-gap: 4px; font-size: 15px; line-height: 1.5; counter-increment: pt; animation: rise-sm 420ms var(--glide) backwards; }
+.digest li::before { content: counter(pt); grid-row: span 2; display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 50%; background: var(--accent); color: var(--on-accent); font: 700 13px/1 var(--ff-body); }
+.digest li:nth-child(2) { animation-delay: 70ms; } .digest li:nth-child(3) { animation-delay: 140ms; } .digest li:nth-child(4) { animation-delay: 210ms; } .digest li:nth-child(5) { animation-delay: 280ms; }
+.digest .meta a { min-height: 24px; display: inline-flex; align-items: center; }
+.fiche { display: flex; flex-direction: column; }
+.fiche .kv { align-items: flex-start; font-size: 13.5px; padding: 4px 0; }
+.fiche .kv > span:first-child { flex: none; width: 92px; }
+.fiche .kv > span:last-child { text-align: right; overflow-wrap: anywhere; }
+.form-grid.wide-fields { grid-template-columns: repeat(auto-fill, minmax(min(100%, 220px), 1fr)); }

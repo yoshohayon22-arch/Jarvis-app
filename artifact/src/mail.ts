@@ -53,8 +53,13 @@ interface SampleError {
   code?: string;
   text?: string;
 }
-type Sample = ((input: string, options?: Record<string, unknown>) => Promise<{ text: string; truncated: boolean }>) & {
+export interface SampleTurn {
+  role: "user" | "assistant";
+  content: string;
+}
+export type Sample = ((input: string | SampleTurn[], options?: Record<string, unknown>) => Promise<{ text: string; truncated: boolean }>) & {
   json<T>(input: string, options?: Record<string, unknown>): Promise<T>;
+  limits?: () => Promise<{ tools?: { maxCount: number } }>;
 };
 export const samplePromise: Promise<Sample | null> = window.claude ? (window.claude.use("sample") as Promise<Sample | null>).catch(() => null) : Promise.resolve(null);
 
@@ -78,6 +83,8 @@ export function sampleMessage(e: unknown): string {
       return "Claude n'a pas répondu dans le format attendu. Réessaie.";
     case "cancelled":
       return "Demande annulée.";
+    case "tools_unavailable":
+      return "Cette vue ne permet pas à Claude d'utiliser des outils (recherche, lecture de pages).";
     default:
       return "La demande à Claude a échoué. Réessaie dans un instant.";
   }

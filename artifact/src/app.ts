@@ -5,6 +5,7 @@
 import { clear, h, icon, store } from "./dom";
 import { DEFAULT_FAVORITES, getTab, TABS, type ArtifactTab } from "./tabs";
 import { meteoView, newsView, plannedView } from "./views";
+import { openAsk } from "./assistant";
 import { budgetView } from "./budget";
 import { cerveauView } from "./cerveau";
 import { filmsView } from "./films";
@@ -110,9 +111,12 @@ function renderChrome(): void {
   const fullBtn = document.fullscreenEnabled
     ? h("button", { class: "icon-btn boxed wide-only-flex", type: "button", "aria-label": full ? "Quitter le plein écran (touche F)" : "Plein écran (touche F)", title: full ? "Quitter le plein écran (F)" : "Plein écran (F)", "aria-pressed": String(full), onclick: toggleFullscreen }, icon(full ? "minimize" : "maximize"))
     : null;
+  // « Demander à Claude » : une question sur ce que l'onglet affiche.
+  const askBtn: HTMLButtonElement | null = tab ? h("button", { class: "icon-btn boxed ask-btn", type: "button", "aria-label": `Demander à Claude à propos de ${tab.label}`, title: "Demander à Claude", onclick: () => openAsk(tab.id, tab.label, main, askBtn as HTMLButtonElement) }, icon("sparkles")) : null;
   header.replaceChildren(
     h("h1", null, active === "reglages" ? "Réglages" : (tab?.label ?? "Dashboard")),
     h("button", { class: "search-btn boxed", type: "button", "aria-label": "Rechercher (Ctrl + K)", onclick: openPalette }, icon("search"), h("span", { class: "wide-only" }, "Rechercher…"), h("kbd", { class: "wide-only" }, "Ctrl K")),
+    ...(askBtn ? [askBtn] : []),
     themeBtn,
     ...(fullBtn ? [fullBtn] : []),
     h("a", { class: "icon-btn boxed narrow-only", href: "#reglages", "aria-label": "Réglages" }, icon("settings")),

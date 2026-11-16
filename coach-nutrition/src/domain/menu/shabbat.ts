@@ -75,3 +75,15 @@ export function shabbatLabel(s: ShabbatSettings, dayIndex: number, slot: MealSlo
   if (on(s) && s.shabbat.noCookingSaturday && dayIndex === SATURDAY) return 'Préparé la veille'
   return null
 }
+
+/**
+ * Les plats traditionnels (cholent, dafina, kugel, poulet rôti de Shabbat…) sont réservés aux repas
+ * de Shabbat quand les repas de fête sont activés : on ne les « use » pas en semaine.
+ */
+export function reservedForShabbatOk(recipe: Recipe, s: ShabbatSettings, dayIndex: number, slot: MealSlot): boolean {
+  if (!on(s) || !s.shabbat.festiveMeals) return true
+  const tag = recipe.tags.find((t) => t === 'shabbat-soir' || t === 'shabbat-midi')
+  if (!tag) return true
+  // Autorisé au repas de fête correspondant, et le samedi (restes du vendredi, gardés au chaud ou froids).
+  return festiveTag(s, dayIndex, slot) === tag || dayIndex === SATURDAY
+}

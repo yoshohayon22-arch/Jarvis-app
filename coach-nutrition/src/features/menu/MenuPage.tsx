@@ -3,8 +3,8 @@
  * actions discrètes, bilan en une ligne), les recettes et le calculateur de repas.
  */
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
-import { BookOpen, Calculator, CalendarDays, ChefHat, Check, Flame, Lock, LockOpen, RefreshCw, Shuffle, Sparkles } from 'lucide-react'
+import { Link, useLocation } from 'react-router-dom'
+import { BookOpen, Calculator, CalendarDays, UtensilsCrossed, ChefHat, Check, Flame, Lock, LockOpen, RefreshCw, Shuffle, Sparkles } from 'lucide-react'
 import type { Recipe } from '../../domain/catalog'
 import { isBatchCooked } from '../../domain/menu/batch'
 import { daySummary, mealValues } from '../../domain/menu/generator'
@@ -20,11 +20,14 @@ import { RecipeDetail } from '../recipes/RecipeDetail'
 import { useMenu } from './useMenu'
 import { CountUp } from '../../components/CountUp'
 import { MealCalculator, type CalculatorState } from './MealCalculator'
+import { MealIdeas } from './MealIdeas'
 
-type Tab = 'semaine' | 'recettes' | 'calcul'
+type Tab = 'semaine' | 'idee' | 'recettes' | 'calcul'
 
 export function MenuPage() {
-  const [tab, setTab] = useState<Tab>('semaine')
+  // L'accueil peut ouvrir directement l'onglet « Un repas ».
+  const location = useLocation()
+  const [tab, setTab] = useState<Tab>((location.state as { tab?: Tab } | null)?.tab ?? 'semaine')
   // L'assiette du calculateur est gardée quand on change d'onglet.
   const [calc, setCalc] = useState<CalculatorState>({ slot: null, items: [] })
   return (
@@ -35,6 +38,7 @@ export function MenuPage() {
           {(
             [
               ['semaine', 'Semaine', CalendarDays],
+              ['idee', 'Un repas', UtensilsCrossed],
               ['recettes', 'Recettes', BookOpen],
               ['calcul', 'Calculer', Calculator],
             ] as const
@@ -55,6 +59,7 @@ export function MenuPage() {
         </div>
       </div>
       {tab === 'semaine' && <WeekView />}
+      {tab === 'idee' && <MealIdeas />}
       {tab === 'recettes' && <RecipeLibrary />}
       {tab === 'calcul' && <MealCalculator state={calc} setState={setCalc} />}
     </div>

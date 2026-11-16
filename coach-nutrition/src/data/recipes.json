@@ -6146,6 +6146,642 @@
     ]
   },
   {
+    "id": "mujaddara",
+    "name": "Mujaddara (riz et lentilles aux oignons dorés)",
+    "mealTypes": [
+      "dejeuner",
+      "diner"
+    ],
+    "servings": 4,
+    "prepMin": 15,
+    "cookMin": 40,
+    "ingredients": [
+      {
+        "id": "riz-long",
+        "grams": 200
+      },
+      {
+        "id": "lentilles-vertes",
+        "grams": 200
+      },
+      {
+        "id": "oignons",
+        "grams": 500
+      },
+      {
+        "id": "huile-olive",
+        "grams": 40
+      },
+      {
+        "id": "cumin",
+        "grams": 4
+      },
+      {
+        "id": "yaourt-soja",
+        "grams": 200
+      },
+      {
+        "id": "concombre",
+        "grams": 300
+      }
+    ],
+    "steps": [
+      "Cuire les lentilles 15 min dans l’eau salée, égoutter.",
+      "Faire dorer longuement les oignons émincés dans l’huile (20 min), jusqu’à ce qu’ils soient bien bruns.",
+      "Cuire le riz avec les lentilles, le cumin et la moitié des oignons, 15 min à couvert.",
+      "Servir avec le reste des oignons, le yaourt de soja et le concombre en dés."
+    ],
+    "kashrut": "parve",
+    "tags": [
+      "batch-friendly",
+      "prepare-veille",
+      "petit-budget"
+    ],
+    "season": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "fridgeDays": 4,
+    "freezerMonths": 3,
+    "perServing": {
+      "kcal": 515,
+      "protein": 19.6,
+      "fat": 12.7,
+      "carbs": 74.9,
+      "priceChf": 1.41,
+      "priceBudgetChf": 1.24
+    },
+    "compatibleWith": [
+      "casher",
+      "halal",
+      "vegetarien",
+      "sans-gluten",
+      "sans-lactose",
+      "sans-arachides"
+    ]
+  },
+  {
+    "id": "pates-pois-chiches-tomate",
+    "name": "Pâtes aux pois chiches et sauce tomate",
+    "mealTypes": [
+      "dejeuner",
+      "diner"
+    ],
+    "servings": 4,
+    "prepMin": 10,
+    "cookMin": 20,
+    "ingredients": [
+      {
+        "id": "pates",
+        "grams": 360
+      },
+      {
+        "id": "pois-chiches-conserve",
+        "grams": 480
+      },
+      {
+        "id": "tomates-pelees-conserve",
+        "grams": 800
+      },
+      {
+        "id": "oignons",
+        "grams": 120
+      },
+      {
+        "id": "ail",
+        "grams": 10
+      },
+      {
+        "id": "huile-olive",
+        "grams": 20
+      },
+      {
+        "id": "herbes-provence",
+        "grams": 3
+      },
+      {
+        "id": "epinards-surgeles",
+        "grams": 300
+      }
+    ],
+    "steps": [
+      "Faire revenir oignon et ail dans l’huile.",
+      "Ajouter tomates, herbes, pois chiches et épinards ; mijoter 15 min.",
+      "Cuire les pâtes et les mélanger à la sauce."
+    ],
+    "kashrut": "parve",
+    "tags": [
+      "batch-friendly",
+      "petit-budget"
+    ],
+    "season": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "fridgeDays": 4,
+    "freezerMonths": 3,
+    "perServing": {
+      "kcal": 587,
+      "protein": 24.1,
+      "fat": 10.2,
+      "carbs": 93.5,
+      "priceChf": 2.2,
+      "priceBudgetChf": 1.34
+    },
+    "compatibleWith": [
+      "casher",
+      "halal",
+      "vegetarien",
+      "sans-lactose",
+      "sans-arachides"
+    ]
+  },
+  {
+    "id": "couscous-poulet-legumes",
+    "name": "Couscous au poulet et légumes",
+    "mealTypes": [
+      "dejeuner",
+      "diner"
+    ],
+    "servings": 4,
+    "prepMin": 20,
+    "cookMin": 35,
+    "ingredients": [
+      {
+        "id": "cuisses-poulet",
+        "grams": 500
+      },
+      {
+        "id": "semoule-couscous",
+        "grams": 320
+      },
+      {
+        "id": "carottes",
+        "grams": 300
+      },
+      {
+        "id": "courgette",
+        "grams": 300
+      },
+      {
+        "id": "pois-chiches-conserve",
+        "grams": 240
+      },
+      {
+        "id": "oignons",
+        "grams": 120
+      },
+      {
+        "id": "tomates-pelees-conserve",
+        "grams": 400
+      },
+      {
+        "id": "cumin",
+        "grams": 4
+      },
+      {
+        "id": "huile-olive",
+        "grams": 15
+      }
+    ],
+    "steps": [
+      "Dorer le poulet en morceaux dans l’huile avec l’oignon et le cumin.",
+      "Ajouter tomates, carottes et 700 ml d’eau, mijoter 20 min.",
+      "Ajouter courgettes et pois chiches, cuire 10 min.",
+      "Préparer la semoule avec le même volume de bouillon bouillant."
+    ],
+    "kashrut": "bassari",
+    "tags": [
+      "batch-friendly",
+      "prepare-veille"
+    ],
+    "season": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "fridgeDays": 3,
+    "freezerMonths": 3,
+    "perServing": {
+      "kcal": 671,
+      "protein": 41.3,
+      "fat": 18.6,
+      "carbs": 80.2,
+      "priceChf": 2.75,
+      "priceBudgetChf": 2.34
+    },
+    "compatibleWith": [
+      "casher",
+      "halal",
+      "sans-lactose",
+      "sans-arachides"
+    ]
+  },
+  {
+    "id": "pates-saumon-brocoli",
+    "name": "Pâtes au saumon et brocoli",
+    "mealTypes": [
+      "dejeuner",
+      "diner"
+    ],
+    "servings": 1,
+    "prepMin": 5,
+    "cookMin": 15,
+    "ingredients": [
+      {
+        "id": "pates",
+        "grams": 110
+      },
+      {
+        "id": "saumon-filet",
+        "grams": 110
+      },
+      {
+        "id": "brocoli",
+        "grams": 150
+      },
+      {
+        "id": "citron",
+        "grams": 10
+      },
+      {
+        "id": "huile-olive",
+        "grams": 8
+      }
+    ],
+    "steps": [
+      "Cuire les pâtes avec le brocoli en fleurettes les 4 dernières minutes.",
+      "Poêler le saumon en dés dans l’huile 4 min.",
+      "Mélanger le tout avec un filet de citron."
+    ],
+    "kashrut": "parve",
+    "tags": [
+      "rapide"
+    ],
+    "season": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "fridgeDays": 1,
+    "freezerMonths": 0,
+    "perServing": {
+      "kcal": 737,
+      "protein": 40.5,
+      "fat": 24.6,
+      "carbs": 82.9,
+      "priceChf": 4.41,
+      "priceBudgetChf": 3.33
+    },
+    "compatibleWith": [
+      "casher",
+      "halal",
+      "sans-lactose",
+      "sans-arachides"
+    ]
+  },
+  {
+    "id": "cabillaud-four-haricots",
+    "name": "Cabillaud au four, haricots verts et pommes de terre",
+    "mealTypes": [
+      "dejeuner",
+      "diner"
+    ],
+    "servings": 1,
+    "prepMin": 10,
+    "cookMin": 20,
+    "ingredients": [
+      {
+        "id": "cabillaud-filet",
+        "grams": 180
+      },
+      {
+        "id": "haricots-verts-surgeles",
+        "grams": 200
+      },
+      {
+        "id": "pommes-de-terre",
+        "grams": 200
+      },
+      {
+        "id": "citron",
+        "grams": 10
+      },
+      {
+        "id": "huile-olive",
+        "grams": 6
+      },
+      {
+        "id": "herbes-provence",
+        "grams": 1
+      }
+    ],
+    "steps": [
+      "Préchauffer le four à 200 °C, cuire les pommes de terre en quartiers 10 min.",
+      "Ajouter le cabillaud arrosé d’huile, de citron et d’herbes, cuire 12 min.",
+      "Cuire les haricots verts à la vapeur 10 min et servir."
+    ],
+    "kashrut": "parve",
+    "tags": [],
+    "season": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "fridgeDays": 2,
+    "freezerMonths": 0,
+    "perServing": {
+      "kcal": 418,
+      "protein": 40.6,
+      "fat": 8,
+      "carbs": 44.6,
+      "priceChf": 5.04,
+      "priceBudgetChf": 3.46
+    },
+    "compatibleWith": [
+      "casher",
+      "halal",
+      "sans-gluten",
+      "sans-lactose",
+      "sans-arachides"
+    ]
+  },
+  {
+    "id": "salade-thon-haricots",
+    "name": "Salade de thon aux haricots blancs et tomates",
+    "mealTypes": [
+      "dejeuner",
+      "diner"
+    ],
+    "servings": 1,
+    "prepMin": 10,
+    "cookMin": 0,
+    "ingredients": [
+      {
+        "id": "thon-conserve",
+        "grams": 120
+      },
+      {
+        "id": "haricots-blancs-conserve",
+        "grams": 150
+      },
+      {
+        "id": "tomates",
+        "grams": 150
+      },
+      {
+        "id": "concombre",
+        "grams": 100
+      },
+      {
+        "id": "oignons",
+        "grams": 20
+      },
+      {
+        "id": "huile-olive",
+        "grams": 8
+      },
+      {
+        "id": "vinaigre-cidre",
+        "grams": 5
+      }
+    ],
+    "steps": [
+      "Égoutter thon et haricots.",
+      "Couper tomates, concombre et oignon.",
+      "Mélanger avec l’huile et le vinaigre, saler et poivrer."
+    ],
+    "kashrut": "parve",
+    "tags": [
+      "rapide",
+      "prepare-veille"
+    ],
+    "season": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "fridgeDays": 2,
+    "freezerMonths": 0,
+    "perServing": {
+      "kcal": 411,
+      "protein": 43.9,
+      "fat": 10.4,
+      "carbs": 29.8,
+      "priceChf": 3.79,
+      "priceBudgetChf": 3.14
+    },
+    "compatibleWith": [
+      "casher",
+      "halal",
+      "sans-gluten",
+      "sans-lactose",
+      "sans-arachides"
+    ]
+  },
+  {
+    "id": "brochettes-dinde-legumes",
+    "name": "Brochettes de dinde, légumes grillés et riz",
+    "mealTypes": [
+      "dejeuner",
+      "diner"
+    ],
+    "servings": 1,
+    "prepMin": 15,
+    "cookMin": 15,
+    "ingredients": [
+      {
+        "id": "dinde-escalope",
+        "grams": 160
+      },
+      {
+        "id": "poivron",
+        "grams": 150
+      },
+      {
+        "id": "courgette",
+        "grams": 150
+      },
+      {
+        "id": "riz-long",
+        "grams": 50
+      },
+      {
+        "id": "huile-olive",
+        "grams": 8
+      },
+      {
+        "id": "paprika",
+        "grams": 2
+      }
+    ],
+    "steps": [
+      "Cuire le riz.",
+      "Couper dinde et légumes en cubes, les enfiler sur des piques avec l’huile et le paprika.",
+      "Griller 10 à 12 min à la poêle ou au four en retournant."
+    ],
+    "kashrut": "bassari",
+    "tags": [],
+    "season": [
+      5,
+      6,
+      7,
+      8,
+      9,
+      10
+    ],
+    "fridgeDays": 2,
+    "freezerMonths": 0,
+    "perServing": {
+      "kcal": 495,
+      "protein": 45.9,
+      "fat": 11.1,
+      "carbs": 51.4,
+      "priceChf": 5.87,
+      "priceBudgetChf": 5.51
+    },
+    "compatibleWith": [
+      "casher",
+      "halal",
+      "sans-gluten",
+      "sans-lactose",
+      "sans-arachides"
+    ]
+  },
+  {
+    "id": "sere-sale-crudites",
+    "name": "Séré salé aux herbes, crudités et pain complet",
+    "mealTypes": [
+      "dejeuner",
+      "diner"
+    ],
+    "servings": 1,
+    "prepMin": 10,
+    "cookMin": 0,
+    "ingredients": [
+      {
+        "id": "sere-maigre",
+        "grams": 250
+      },
+      {
+        "id": "concombre",
+        "grams": 150
+      },
+      {
+        "id": "carottes",
+        "grams": 100
+      },
+      {
+        "id": "pain-complet",
+        "grams": 60
+      },
+      {
+        "id": "herbes-provence",
+        "grams": 2
+      },
+      {
+        "id": "citron",
+        "grams": 5
+      }
+    ],
+    "steps": [
+      "Mélanger le séré avec les herbes, le citron, sel et poivre.",
+      "Couper concombre et carottes en bâtonnets.",
+      "Servir avec le pain complet."
+    ],
+    "kashrut": "halavi",
+    "tags": [
+      "rapide",
+      "petit-budget"
+    ],
+    "season": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "fridgeDays": 1,
+    "freezerMonths": 0,
+    "perServing": {
+      "kcal": 381,
+      "protein": 37.3,
+      "fat": 3.1,
+      "carbs": 46,
+      "priceChf": 2.33,
+      "priceBudgetChf": 1.67
+    },
+    "compatibleWith": [
+      "casher",
+      "halal",
+      "vegetarien",
+      "sans-arachides"
+    ]
+  },
+  {
     "id": "pomme-amandes",
     "name": "Pomme et amandes",
     "mealTypes": [

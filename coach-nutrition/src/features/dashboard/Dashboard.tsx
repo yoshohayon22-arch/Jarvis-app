@@ -144,6 +144,9 @@ export function Dashboard() {
           <Link to="/menu" className="mt-3 inline-block font-semibold text-brand-700 underline-offset-4 hover:underline">
             {todayPlan ? 'Voir le menu de la semaine' : 'Aller au menu'}
           </Link>
+          <Link to="/menu" state={{ tab: 'idee' }} className="ml-4 mt-3 inline-block font-semibold text-brand-700 underline-offset-4 hover:underline">
+            Envie d’autre chose ? Juste un repas
+          </Link>
         </Card>
 
         {/* Mini-courbe des 4 dernières semaines */}

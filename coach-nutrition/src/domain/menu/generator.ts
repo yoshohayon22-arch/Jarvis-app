@@ -15,7 +15,7 @@ import type { DayPlan, MealSlot, PlannedMeal, ProfileSettings, WeekPlan } from '
 import { objective, optimizePortions, relativeError, roundPortions, totals, type MacroVector, type PortionProblem } from './portions'
 import { KCAL_SHARE, PORTION_BOUNDS, SLOT_HOUR, SLOT_MEAL_TYPE, SLOTS_BY_COUNT } from './slots'
 import { canServe, isBatchCooked, planBatch, sessionForDay } from './batch'
-import { allowedOnShabbat, dayShares, effectiveSessionDays, festiveTag } from './shabbat'
+import { allowedOnShabbat, dayShares, effectiveSessionDays, festiveTag, reservedForShabbatOk } from './shabbat'
 
 /** Marge tolérée sur les calories de chaque jour. */
 export const KCAL_TOLERANCE = 0.05
@@ -23,6 +23,8 @@ export const KCAL_TOLERANCE = 0.05
 export const MAX_USES_PER_WEEK = 3
 /** Plats de batch : cuisinés en grande quantité, ils peuvent revenir plus souvent. */
 export const MAX_USES_BATCH = 5
+/** Une même famille d'aliments principale (poulet, riz, quinoa…) apparaît au plus 4 fois sur les 14 déjeuners et dîners. */
+export const MAX_KEY_PER_WEEK = 4
 /** Combinaisons essayées par jour. */
 const ATTEMPTS_PER_DAY = 140
 
@@ -152,18 +154,88 @@ function portionProblem(slots: MealSlot[], recipes: Recipe[], ctx: GeneratorCont
     const ideal = ((share[slots[i]] ?? 0.2) * ctx.targets.kcal) / Math.max(r.perServing.kcal, 1)
     return Math.min(hi, Math.max(lo, ideal))
   })
+  // Le repas de Shabbat reste le plus copieux : au moins 85 % de sa part prévue.
+  const mins = slots.map((s, i) =>
+    festiveTag(ctx.settings, dayIndex, s) ? Math.min(anchors[i], Math.max(PORTION_BOUNDS[s][0], anchors[i] * 0.85)) : PORTION_BOUNDS[s][0],
+  )
   return {
     items: recipes.map(toVector),
     anchors,
-    min: slots.map((s) => PORTION_BOUNDS[s][0]),
+    min: mins,
     max: slots.map((s) => PORTION_BOUNDS[s][1] * scale),
     target: targetVector(ctx.targets),
   }
 }
 
+/**
+ * Ingrédients « principaux » d'une recette : ceux qui apportent au moins 20 % de ses calories
+ * (hors huiles, épices et condiments). Ex. : quinoa et saumon pour un bowl saumon-quinoa.
+ * Ils servent à varier la semaine au-delà des recettes : pas le même quinoa trois jours de suite
+ * sous des noms différents.
+ */
+const keyCache = new Map<string, string[]>()
+
+/**
+ * Familles d'aliments : on compte « poulet » une seule fois, qu'il s'agisse d'émincé ou de cuisses ;
+ * idem pour pâtes, riz, bœuf, lentilles, haricots, flocons d'avoine.
+ */
+const FAMILIES: [RegExp, string][] = [
+  [/^(poulet-emince|cuisses-poulet)$/, 'poulet'],
+  [/^pates/, 'pates'],
+  [/^riz-/, 'riz'],
+  [/^boeuf-/, 'boeuf'],
+  [/^lentilles-/, 'lentilles'],
+  [/^haricots-(rouges|blancs)/, 'haricots'],
+  [/^flocons-avoine/, 'avoine'],
+]
+export const familyOf = (id: string) => FAMILIES.find(([re]) => re.test(id))?.[1] ?? id
+
+export function keyIngredients(recipe: Recipe, ingredients: ReadonlyMap<string, Ingredient>): string[] {
+  const cached = keyCache.get(recipe.id)
+  if (cached) return cached
+  const kcal = recipe.ingredients.map(({ id, grams }) => ({ id, k: ((ingredients.get(id)?.per100g.kcal ?? 0) * grams) / 100 }))
+  const total = kcal.reduce((s, x) => s + x.k, 0) || 1
+  const keys = [
+    ...new Set(kcal.filter((x) => x.k / total >= 0.2 && ingredients.get(x.id)?.aisle !== 'condiments').map((x) => familyOf(x.id))),
+  ]
+  keyCache.set(recipe.id, keys)
+  return keys
+}
+
+/**
+ * Intensité de la recherche de variété : pleine en général, réduite de moitié pour les profils
+ * très contraints (protéines ≥ 33 % des calories, ou besoins ≥ 2 800 kcal) : là,
+ * la précision nutritionnelle passe avant.
+ */
+export function varietyStrength(t: { kcal: number; proteinG: number }): number {
+  const veryHighProtein = (t.proteinG * 4) / Math.max(1, t.kcal) >= 0.33
+  const veryHighEnergy = t.kcal >= 2800 // prise de masse : beaucoup de féculents à placer
+  return veryHighProtein || veryHighEnergy ? 0.5 : 1
+}
+
+/** Pénalité de répétition : ingrédients principaux déjà servis cette semaine, ou deux fois le même jour. */
+export function repetitionPenalty(recipes: Recipe[], keyUses: ReadonlyMap<string, number>, ingredients: ReadonlyMap<string, Ingredient>): number {
+  let penalty = 0
+  const today = new Map<string, number>()
+  for (const r of recipes) {
+    for (const k of keyIngredients(r, ingredients)) {
+      const used = keyUses.get(k) ?? 0
+      penalty += 0.008 * Math.max(0, used - 1) // à partir de la 3e fois dans la semaine
+      if (used >= 4) penalty += 0.1 // au-delà de 4 fois : à éviter (même si c’est moins cher)
+      today.set(k, (today.get(k) ?? 0) + 1)
+    }
+  }
+  for (const n of today.values()) if (n > 1) penalty += 0.03 * (n - 1) // même ingrédient principal deux fois dans la journée
+  return penalty
+}
+
 interface ScoreOptions {
   costWeight: number
   month: number
+  /** Ingrédients principaux déjà servis cette semaine (pour varier). */
+  keyUses?: ReadonlyMap<string, number>
+  /** Nombre de fois où chaque recette a déjà été servie cette semaine. */
+  recipeUses?: ReadonlyMap<string, number>
   /** Mode batch cooking actif : bonus pour les plats préparés en session. */
   batch?: boolean
   /** Jour de la semaine (0 = lundi), pour les règles du Shabbat. */
@@ -185,6 +257,18 @@ function evaluate(slots: MealSlot[], recipes: Recipe[], ctx: GeneratorContext, o
   // plus consistant plutôt que de multiplier une petite recette.
   const big = 1.8 * portionScale(ctx.targets.kcal, ctx.settings.mealsPerDay)
   score += portions.reduce((sum, p) => sum + Math.max(0, p - big), 0) * 0.04
+  if (opt.keyUses) {
+    const main = recipes.filter((_, i) => slots[i] === 'dejeuner' || slots[i] === 'diner')
+    score += varietyStrength(ctx.targets) * repetitionPenalty(main, opt.keyUses, ctx.ingredients)
+  }
+  if (opt.recipeUses) {
+    // Plat principal déjà servi cette semaine : légère pénalité (hors bowls et plats de batch).
+    recipes.forEach((r, i) => {
+      if ((slots[i] === 'dejeuner' || slots[i] === 'diner') && !r.components && !(opt.batch && isBatchCooked(r, slots[i]))) {
+        score += 0.02 * (opt.recipeUses!.get(r.id) ?? 0)
+      }
+    })
+  }
   // Batch cooking : on veut utiliser ce qu'on a cuisiné en session (bowls, plats mijotés).
   if (opt.batch) {
     recipes.forEach((r, i) => {
@@ -279,6 +363,13 @@ function generateOnce(ctx: GeneratorContext, opts: GenerateOptions): WeekPlan {
   const targetSplit = energySplit(ctx.targets.proteinG, ctx.targets.fatG, ctx.targets.carbsG)
   const days: DayPlan[] = []
   let previousDay: Recipe[] = []
+  // Nombre de repas de la semaine où chaque ingrédient principal apparaît déjà.
+  const keyUses = new Map<string, number>()
+  // Familles servies la veille au déjeuner/dîner (pas deux jours de suite).
+  let previousDayKeys = new Set<string>()
+  // Profils très protéinés : un peu plus de marge, la précision nutritionnelle passe avant.
+  const strictVariety = varietyStrength(ctx.targets) === 1
+  const keyCap = strictVariety ? MAX_KEY_PER_WEEK : MAX_KEY_PER_WEEK + 2
   let lastMeal: { recipe: Recipe; hour: number } | null = null
 
   for (let d = 0; d < 7; d++) {
@@ -304,6 +395,14 @@ function generateOnce(ctx: GeneratorContext, opts: GenerateOptions): WeekPlan {
             !chosen.some((c) => c.id === r.id) && // jamais deux fois le même plat dans la journée
             batchAllowed(batch, ctx.weekStart, byId, r, d, slot) &&
             allowedOnShabbat(r, ctx.settings, d) &&
+            reservedForShabbatOk(r, ctx.settings, d, slot) &&
+            // Variété des déjeuners/dîners : une famille d'aliments principale au plus `keyCap` fois
+            // dans la semaine, et jamais deux jours de suite.
+            // (Le repas de Shabbat, traditionnel, passe avant la variété.)
+            (relax ||
+              (slot !== 'dejeuner' && slot !== 'diner') ||
+              festiveTag(ctx.settings, d, slot) !== null ||
+              keyIngredients(r, ctx.ingredients).every((k) => (keyUses.get(k) ?? 0) < keyCap && (!strictVariety || !previousDayKeys.has(k)))) &&
             (relax || (uses.get(r.id) ?? 0) < maxUses(r, ctx.settings)) &&
             kosherOk(ctx, prev, r, hour) &&
             // un plat verrouillé plus tard dans la journée doit rester compatible
@@ -320,12 +419,14 @@ function generateOnce(ctx: GeneratorContext, opts: GenerateOptions): WeekPlan {
         }
         // Batch cooking : le menu est construit autour des bases. Au déjeuner, on sert le bowl
         // de la session dès qu'il est disponible (conservation OK, limite hebdomadaire non atteinte).
-        if (batch && slot === 'dejeuner' && !festive) {
+        // Un jour sur deux seulement, pour ne pas manger le même bowl toute la semaine.
+        if (batch && slot === 'dejeuner' && !festive && !previousDay.some((r) => r.components)) {
           const bowl = candidates.find((r) => r.components)
           if (bowl) candidates.splice(0, candidates.length, bowl)
         }
         const weights = candidates.map((r) => {
           let w = 1 / (1 + (uses.get(r.id) ?? 0)) // varier les plats
+          if ((slot === 'dejeuner' || slot === 'diner') && (uses.get(r.id) ?? 0) > 0) w *= 0.4 // un plat principal déjà servi revient rarement
           if (previousDay[i]?.id === r.id) w *= 0.25 // éviter le même plat deux jours de suite
           if (!r.season.includes(month)) w *= 0.3 // préférer la saison
           if (ctx.settings.lowBudget && r.tags.includes('petit-budget')) w *= 2
@@ -333,6 +434,13 @@ function generateOnce(ctx: GeneratorContext, opts: GenerateOptions): WeekPlan {
           if (r.components) w *= slot === 'dejeuner' ? 8 : 1.5
           else if (batch && isBatchCooked(r, slot)) w *= 1.8
           w *= profileMatch(r, targetSplit)
+          // Varier les ingrédients principaux (quinoa, riz, poulet…) des déjeuners et dîners.
+          // (Au petit-déjeuner et en collation, retrouver son séré ou ses flocons est normal.)
+          if (slot === 'dejeuner' || slot === 'diner') for (const k of keyIngredients(r, ctx.ingredients)) {
+            w /= 1 + 0.5 * varietyStrength(ctx.targets) * (keyUses.get(k) ?? 0)
+            if (chosen.some((c, ci) => (slots[ci] === 'dejeuner' || slots[ci] === 'diner') && keyIngredients(c, ctx.ingredients).includes(k))) w *= 0.2
+            if (previousDayKeys.has(k)) w *= strictVariety ? 0.3 : 0.6 // déjà servi la veille
+          }
           return w
         })
         const pick = weightedPick(candidates, weights, rng)
@@ -345,12 +453,20 @@ function generateOnce(ctx: GeneratorContext, opts: GenerateOptions): WeekPlan {
       }
       if (!ok) continue
       // Le dernier repas doit aussi permettre le premier du lendemain (casher : dîner → petit-déj).
-      const result = evaluate(slots, chosen, ctx, { ...scoreOpt, dayIndex: d })
+      const result = evaluate(slots, chosen, ctx, { ...scoreOpt, dayIndex: d, keyUses, recipeUses: uses })
       if (!best || result.score < best.score) best = result
     }
     if (!best) throw new Error(`Impossible de composer le jour ${d + 1} avec ces restrictions.`)
 
     best.recipes.forEach((r) => uses.set(r.id, (uses.get(r.id) ?? 0) + (lockedAt(d, slots[best!.recipes.indexOf(r)]) ? 0 : 1)))
+    previousDayKeys = new Set<string>()
+    best.recipes.forEach((r, i) => {
+      if (slots[i] !== 'dejeuner' && slots[i] !== 'diner') return
+      keyIngredients(r, ctx.ingredients).forEach((k) => {
+        keyUses.set(k, (keyUses.get(k) ?? 0) + 1)
+        previousDayKeys.add(k)
+      })
+    })
     previousDay = best.recipes
     lastMeal = { recipe: best.recipes[best.recipes.length - 1], hour: SLOT_HOUR[slots[slots.length - 1]] }
     days.push({
@@ -430,7 +546,15 @@ export function replaceMeal(plan: WeekPlan, ctx: GeneratorContext, dayIndex: num
 
   const pool = [...buildPools(ctx)[slot], ...(slot === 'dejeuner' || slot === 'diner' ? bowlForDay(plan.batch, plan.weekStart, byId, dayIndex) : [])]
   const month = Number(plan.weekStart.slice(5, 7))
-  const scoreOpt = { costWeight: defaultCostWeight(ctx.settings), month, batch: Boolean(plan.batch), dayIndex }
+  // Ingrédients principaux du reste de la semaine (sans le plat qu'on remplace), pour varier.
+  const keyUses = new Map<string, number>()
+  plan.days.forEach((dd, di) =>
+    dd.meals.forEach((m) => {
+      if ((di === dayIndex && m.slot === slot) || (m.slot !== 'dejeuner' && m.slot !== 'diner')) return
+      keyIngredients(byId.get(m.recipeId)!, ctx.ingredients).forEach((k) => keyUses.set(k, (keyUses.get(k) ?? 0) + 1))
+    }),
+  )
+  const scoreOpt = { costWeight: defaultCostWeight(ctx.settings), month, batch: Boolean(plan.batch), dayIndex, keyUses }
   // Repas de Shabbat : on remplace par un autre plat traditionnel quand il en existe.
   const tag = festiveTag(ctx.settings, dayIndex, slot)
   const hasTraditional = Boolean(tag) && pool.some((r) => r.id !== current && r.tags.includes(tag!))
@@ -440,6 +564,7 @@ export function replaceMeal(plan: WeekPlan, ctx: GeneratorContext, dayIndex: num
         r.id !== current &&
         batchAllowed(plan.batch, plan.weekStart, byId, r, dayIndex, slot) &&
         allowedOnShabbat(r, ctx.settings, dayIndex) &&
+        reservedForShabbatOk(r, ctx.settings, dayIndex, slot) &&
         (!festiveTag(ctx.settings, dayIndex, slot) || r.tags.includes(festiveTag(ctx.settings, dayIndex, slot)!) || !hasTraditional) &&
         !dayRecipes.some((c, i) => i !== idx && c.id === r.id) &&
         (uses.get(r.id) ?? 0) < maxUses(r, ctx.settings) &&

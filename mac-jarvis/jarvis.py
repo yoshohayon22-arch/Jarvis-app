@@ -102,6 +102,16 @@ def detect_wake(text: str, wake_words: list[str]) -> tuple[bool, str]:
     return False, ""
 
 
+def strip_leading_wake(text: str, wake_words: list[str]) -> str:
+    """Retire le mot de réveil s'il commence la phrase (« Jarvis, ouvre Firefox » -> « ouvre Firefox »)."""
+    head = " ".join(re.findall(r"\w+", text)[:2])
+    found, _ = detect_wake(head, wake_words)
+    if found:
+        _, rest = detect_wake(text, wake_words)
+        return rest
+    return text
+
+
 def is_yes(text: str) -> bool:
     t = normalize(text)
     return any(t == w or t.startswith(w + " ") for w in YES_WORDS)
@@ -906,7 +916,9 @@ def main() -> int:
         if source == "voix":
             print(f"👂 {heard}")
             if time.time() < follow_up_until:
-                command = heard
+                command = strip_leading_wake(heard, config["wake_words"])
+                if not command:
+                    continue
             else:
                 found, rest = detect_wake(heard, config["wake_words"])
                 if not found:
@@ -921,8 +933,10 @@ def main() -> int:
                     continue
                 command = rest
         else:
-            command = heard
-            print(f"⌨️  {command}")
+            print(f"⌨️  {heard}")
+            command = strip_leading_wake(heard, config["wake_words"])
+            if not command:
+                continue
 
         follow_up_until = 0.0
         normalized = normalize(command)

@@ -315,6 +315,12 @@ class MacTools:
             "lecture": "play", "pause": "pause", "suivant": "next track",
             "precedent": "previous track", "lecture_pause": "playpause",
         }
+        if action == "en_cours":
+            try:
+                track = osa('tell application "Music" to get (name of current track) & " par " & (artist of current track)')
+                return f"C'est {track}."
+            except ToolError:
+                return "Aucune musique n'est en cours de lecture."
         if action not in commands:
             raise ToolError(f"action inconnue : {action}")
         osa(f'tell application "Music" to {commands[action]}')
@@ -529,6 +535,296 @@ class Brain:
             return explain_api_error(exc)
 
 
+# --------------------------------------------------------------------------
+# Cerveau gratuit (sans IA, sans clé API, hors ligne)
+# --------------------------------------------------------------------------
+
+NUMBER_WORDS = {
+    "zero": 0, "un": 1, "une": 1, "deux": 2, "trois": 3, "quatre": 4, "cinq": 5,
+    "six": 6, "sept": 7, "huit": 8, "neuf": 9, "dix": 10, "onze": 11, "douze": 12,
+    "treize": 13, "quatorze": 14, "quinze": 15, "seize": 16, "vingt": 20,
+    "vingts": 20, "trente": 30, "quarante": 40, "cinquante": 50, "soixante": 60,
+    "cent": 100,
+}
+
+JOURS = ["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"]
+MOIS = ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août",
+        "septembre", "octobre", "novembre", "décembre"]
+
+# Surnoms en français -> nom de l'application sur le Mac.
+APP_ALIASES = {
+    "navigateur": "Safari", "internet": "Safari", "safari": "Safari",
+    "musique": "Music", "itunes": "Music", "mail": "Mail", "mails": "Mail",
+    "courriel": "Mail", "e mail": "Mail", "messages": "Messages", "sms": "Messages",
+    "imessage": "Messages", "photos": "Photos", "photo": "Photos",
+    "calendrier": "Calendar", "agenda": "Calendar", "notes": "Notes", "note": "Notes",
+    "rappels": "Reminders", "rappel": "Reminders", "plans": "Maps", "cartes": "Maps",
+    "carte": "Maps", "reglages": "System Preferences", "preferences systeme": "System Preferences",
+    "preferences": "System Preferences", "calculatrice": "Calculator", "calculette": "Calculator",
+    "app store": "App Store", "terminal": "Terminal", "finder": "Finder",
+    "facetime": "FaceTime", "contacts": "Contacts", "podcasts": "Podcasts",
+    "podcast": "Podcasts", "tv": "TV", "apple tv": "TV", "television": "TV",
+    "livres": "Books", "livre": "Books", "apercu": "Preview", "textedit": "TextEdit",
+    "editeur de texte": "TextEdit", "dictaphone": "Voice Memos", "memos vocaux": "Voice Memos",
+    "horloge": "Clock", "plan": "Maps", "bourse": "Stocks", "photo booth": "Photo Booth",
+}
+
+# Nom à prononcer pour les apps Apple dont le nom système est en anglais.
+FRENCH_NAMES = {
+    "Calendar": "le calendrier", "System Preferences": "les préférences système",
+    "Music": "Musique", "Reminders": "Rappels", "Maps": "Plans",
+    "Calculator": "la calculatrice", "Books": "Livres", "Preview": "Aperçu",
+    "Voice Memos": "Dictaphone", "Clock": "l'horloge", "Stocks": "Bourse",
+    "TextEdit": "TextEdit", "Photo Booth": "Photo Booth",
+}
+
+# Sites connus -> adresse.
+SITES = {
+    "youtube": "https://www.youtube.com", "google": "https://www.google.com",
+    "gmail": "https://mail.google.com", "facebook": "https://www.facebook.com",
+    "instagram": "https://www.instagram.com", "netflix": "https://www.netflix.com",
+    "wikipedia": "https://fr.wikipedia.org", "amazon": "https://www.amazon.fr",
+    "twitter": "https://x.com", "linkedin": "https://www.linkedin.com",
+    "meteo": "https://www.meteosuisse.admin.ch", "tiktok": "https://www.tiktok.com",
+    "whatsapp": "https://web.whatsapp.com", "chat gpt": "https://chatgpt.com",
+    "claude": "https://claude.ai",
+}
+
+FILLER_WORDS = {
+    "moi", "l", "le", "la", "les", "mon", "ma", "mes", "un", "une", "d", "de", "du",
+    "des", "application", "applications", "app", "appli", "logiciel", "programme",
+    "site", "sur", "stp", "svp", "please", "jarvis", "ordinateur",
+}
+
+OPEN_VERBS = ("ouvre", "ouvrir", "ouvres", "lance", "lancer", "lances", "demarre",
+              "demarrer", "affiche", "montre", "va sur", "allez sur", "aller sur")
+CLOSE_VERBS = ("ferme", "fermer", "fermes", "quitte", "quitter", "quittes")
+
+HELP_TEXT = (
+    "Je sais ouvrir et fermer tes applications, ouvrir un site, faire une recherche Google, "
+    "régler le volume, lancer ou mettre en pause la musique, te donner l'heure et la date, "
+    "faire une capture d'écran et verrouiller l'écran. Par exemple : Jarvis, ouvre Safari."
+)
+
+
+def parse_number(words: list[str]) -> int | None:
+    """« soixante dix » -> 70, « vingt et un » -> 21, « 30 » -> 30."""
+    for w in words:
+        if w.isdigit():
+            return int(w)
+    total, found = 0, False
+    for w in words:
+        if w == "et" and found:
+            continue
+        if w in NUMBER_WORDS:
+            found = True
+            value = NUMBER_WORDS[w]
+            if value == 20 and total == 4:
+                total = 80          # quatre-vingt
+            elif value == 100:
+                total = max(total, 1) * 100
+            else:
+                total += value
+        elif found:
+            break
+    return total if found else None
+
+
+def strip_filler(text: str) -> str:
+    words = text.split()
+    while words and words[0] in FILLER_WORDS:
+        words.pop(0)
+    while words and words[-1] in FILLER_WORDS | {"plait", "il", "te", "s"}:
+        words.pop()
+    text = " ".join(words)
+    return re.sub(r"\s*s il te plait$", "", text).strip()
+
+
+class LocalBrain:
+    """Comprend une liste de commandes fixes, sans internet ni clé API."""
+
+    def __init__(self, tools: MacTools, aliases: dict | None = None):
+        self.tools = tools
+        self.aliases = {normalize(k): v for k, v in APP_ALIASES.items()}
+        self.aliases.update({normalize(k): v for k, v in (aliases or {}).items()})
+        self.apps = installed_apps()
+
+    def reset(self) -> None:
+        pass
+
+    # ---- applications ----
+
+    def find_app(self, spoken: str) -> str | None:
+        spoken = normalize(spoken)
+        if not spoken:
+            return None
+        if spoken in self.aliases:
+            return self.aliases[spoken]
+        if not self.apps:
+            self.apps = installed_apps()
+        by_norm = {normalize(a): a for a in self.apps}
+        joined = spoken.replace(" ", "")
+        for norm, app in by_norm.items():
+            if norm == spoken or norm.replace(" ", "") == joined:
+                return app
+        for norm, app in by_norm.items():
+            if len(joined) >= 4 and norm.replace(" ", "").startswith(joined):
+                return app
+        # « word » -> « Microsoft Word », « chrome » -> « Google Chrome »
+        spoken_words = set(spoken.split())
+        for norm, app in by_norm.items():
+            if len(joined) >= 3 and spoken_words <= set(norm.split()):
+                return app
+        squashed = {n.replace(" ", ""): a for n, a in by_norm.items()}
+        close = difflib.get_close_matches(joined, list(squashed), n=1, cutoff=0.6)
+        if close:
+            return squashed[close[0]]
+        close = difflib.get_close_matches(spoken, list(self.aliases), n=1, cutoff=0.75)
+        return self.aliases[close[0]] if close else None
+
+    def find_site(self, spoken: str) -> str | None:
+        spoken = normalize(spoken)
+        if spoken in SITES:
+            return SITES[spoken]
+        joined = spoken.replace(" ", "")
+        for name, url in SITES.items():
+            if name.replace(" ", "") == joined:
+                return url
+        if re.fullmatch(r"[a-z0-9-]+ (point|\.) ?[a-z]{2,4}", spoken):
+            return "https://" + re.sub(r" ?point ?", ".", spoken).replace(" ", "")
+        close = difflib.get_close_matches(spoken, list(SITES), n=1, cutoff=0.75)
+        return SITES[close[0]] if close else None
+
+    # ---- compréhension ----
+
+    def ask(self, command: str) -> str:
+        t = normalize(command)
+        words = t.split()
+        if not words:
+            return "Je n'ai rien entendu, tu peux répéter ?"
+        try:
+            return self._understand(t, words)
+        except ToolError as exc:
+            return f"Ça n'a pas marché : {exc}"
+
+    def _understand(self, t: str, words: list[str]) -> str:
+        has = lambda *keys: any(re.search(rf"\b{k}\b", t) for k in keys)
+        starts = lambda verbs: next((v for v in verbs if t == v or t.startswith(v + " ")), None)
+
+        # Politesse et aide
+        if has("aide", "que sais tu faire", "qu est ce que tu sais faire", "tu sais faire quoi", "tu peux faire quoi"):
+            return HELP_TEXT
+        if has("merci"):
+            return "Avec plaisir !"
+        if t in {"bonjour", "salut", "coucou", "hello", "bonsoir"}:
+            return "Bonjour ! Que puis-je faire pour toi ?"
+        if has("ca va", "comment vas tu", "comment tu vas"):
+            return "Je vais très bien, merci ! Et toi ?"
+        if has("qui es tu", "tu es qui", "comment tu t appelles"):
+            return "Je suis Jarvis, ton assistant vocal."
+
+        # Heure et date
+        now = datetime.datetime.now()
+        if has("heure", "l heure"):
+            return f"Il est {now.hour} heures {now.minute:02d}." if now.minute else f"Il est {now.hour} heures."
+        if has("date", "quel jour", "on est quel jour", "quel jour sommes nous", "on est le combien"):
+            return f"Nous sommes le {JOURS[now.weekday()]} {now.day} {MOIS[now.month - 1]} {now.year}."
+
+        # Volume
+        if has("coupe le son", "couper le son", "silence", "muet", "mute", "chut"):
+            return self.tools.regler_volume(0)
+        if has("volume", "son") and has("a fond", "maximum", "max"):
+            return self.tools.regler_volume(100)
+        if has("volume", "son") and (n := parse_number(words)) is not None:
+            return self.tools.regler_volume(n)
+        if has("monte", "augmente", "plus fort", "hausse", "remonte"):
+            return self.tools.regler_volume(self._current_volume() + 15)
+        if has("baisse", "diminue", "moins fort", "descend"):
+            return self.tools.regler_volume(max(self._current_volume() - 15, 5))
+        if has("remets le son", "remet le son", "reactive le son", "rallume le son"):
+            return self.tools.regler_volume(max(self._current_volume(), 40))
+
+        # Musique
+        music = has("musique", "chanson", "morceau", "titre", "son suivant")
+        if has("suivant", "suivante", "next", "passe", "zappe") and (music or len(words) <= 3):
+            return self.tools.controle_musique("suivant")
+        if has("precedent", "precedente", "reviens") and (music or len(words) <= 3):
+            return self.tools.controle_musique("precedent")
+        if has("pause", "stop", "arrete", "arreter") and (music or len(words) <= 2):
+            self.tools.controle_musique("pause")
+            return "Musique en pause."
+        if has("quelle chanson", "quel morceau", "quel titre", "c est quoi cette chanson", "qui chante"):
+            track = self.tools.controle_musique("en_cours")
+            return track
+        if music and (has("mets", "met", "joue", "lance", "reprends", "reprend", "play", "lecture")
+                      or t in {"musique", "la musique"}):
+            return self.tools.controle_musique("lecture")
+
+        # Capture, verrouillage, veille
+        if has("capture", "screenshot", "copie d ecran"):
+            return self.tools.capture_ecran()
+        if has("verrouille", "verrouiller", "bloque l ecran", "verrouillage"):
+            return self.tools.verrouiller_ecran()
+        if has("veille", "dors", "endors"):
+            return self.tools.mettre_en_veille()
+
+        # Recherche Google
+        m = re.match(r"^(?:fais une |fait une |lance une )?(?:recherche|cherche|chercher|google|recherche sur google)\s+(?:sur google\s+)?(.+)$", t)
+        if m:
+            query = strip_filler(m.group(1))
+            self.tools.ouvrir_site("https://www.google.com/search?q=" + query.replace(" ", "+"))
+            return f"Je cherche {query} sur Google."
+
+        # Ouvrir
+        verb = starts(OPEN_VERBS)
+        if verb:
+            target = strip_filler(t[len(verb):])
+            if not target:
+                return "Qu'est-ce que je dois ouvrir ?"
+            if target in {"musique", "de musique"} and verb in ("lance", "lancer"):
+                return self.tools.controle_musique("lecture")
+            wants_site = verb.startswith(("va", "allez", "aller")) or " site " in f" {t[len(verb):]} "
+            if not wants_site:
+                app = self.find_app(target)
+                if app:
+                    try:
+                        self.tools.ouvrir_application(app)
+                    except ToolError:
+                        return f"Je n'arrive pas à ouvrir {self._spoken_name(app)}."
+                    return f"J'ouvre {self._spoken_name(app)}."
+            site = self.find_site(target)
+            if site:
+                self.tools.ouvrir_site(site)
+                return f"J'ouvre {target}."
+            return f"Je ne trouve pas d'application qui s'appelle {target}. Essaie de dire le nom autrement."
+
+        # Fermer
+        verb = starts(CLOSE_VERBS)
+        if verb:
+            target = strip_filler(t[len(verb):])
+            app = self.find_app(target) if target else None
+            if not app:
+                return f"Je ne trouve pas l'application {target}." if target else "Qu'est-ce que je dois fermer ?"
+            try:
+                self.tools.quitter_application(app)
+            except ToolError:
+                return f"Je n'arrive pas à fermer {self._spoken_name(app)}."
+            return f"J'ai fermé {self._spoken_name(app)}."
+
+        return "Je n'ai pas compris. Dis « Jarvis, aide » pour savoir ce que je sais faire."
+
+    @staticmethod
+    def _spoken_name(app: str) -> str:
+        """Nom français à prononcer (« le calendrier » plutôt que « Calendar »)."""
+        return FRENCH_NAMES.get(app, app)
+
+    def _current_volume(self) -> int:
+        try:
+            return int(osa("output volume of (get volume settings)"))
+        except (ToolError, ValueError):
+            return 50
+
+
 def explain_api_error(exc: Exception) -> str:
     import anthropic
 
@@ -554,13 +850,6 @@ def explain_api_error(exc: Exception) -> str:
 def main() -> int:
     config = load_config()
     api_key = load_api_key()
-    if not api_key:
-        print("Aucune clé API Anthropic trouvée. Relance l'installation pour la saisir.")
-        return 1
-
-    import anthropic
-
-    client = anthropic.Anthropic(api_key=api_key)
     mouth = Mouth(config["voice"])
     events: queue.Queue = queue.Queue()
 
@@ -584,7 +873,15 @@ def main() -> int:
             if listener:
                 listener.pause()
 
-    brain = Brain(client, config, MacTools(confirm))
+    tools = MacTools(confirm)
+    if api_key:
+        import anthropic
+
+        brain = Brain(anthropic.Anthropic(api_key=api_key), config, tools)
+        mode = "intelligent (Claude)"
+    else:
+        brain = LocalBrain(tools, config.get("app_aliases"))
+        mode = "gratuit (commandes fixes, hors ligne)"
 
     threading.Thread(target=keyboard_loop, args=(events,), daemon=True).start()
     if listener:
@@ -593,7 +890,7 @@ def main() -> int:
 
     wake = " ou ".join(f"« {w.capitalize()} »" for w in config["wake_words"])
     print("=" * 60)
-    print(" JARVIS — assistant vocal")
+    print(f" JARVIS — assistant vocal — mode {mode}")
     print(f" Dis {wake} puis ta demande. Tu peux aussi l'écrire ici + Entrée.")
     print(" Pour arrêter : dis « Jarvis, au revoir » ou appuie sur Ctrl + C.")
     print("=" * 60)

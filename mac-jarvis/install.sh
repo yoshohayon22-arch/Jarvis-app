@@ -69,10 +69,14 @@ else
     echo "OK"
 fi
 
-# ---- 5. Clé API Anthropic ----
-say_step "5/6 Clé API Anthropic"
+# ---- 5. Clé API Anthropic (facultative) ----
+# Sans clé : mode gratuit, commandes fixes, hors ligne.
+# Avec clé (JARVIS_CLAUDE=1 devant la commande) : mode intelligent avec Claude.
+say_step "5/6 Mode de Jarvis"
 if [[ -s "$JARVIS_HOME/api_key" && "${JARVIS_NEW_KEY:-0}" != "1" ]]; then
-    echo "Clé déjà enregistrée. (Pour la changer : relance avec JARVIS_NEW_KEY=1 devant la commande.)"
+    echo "Mode intelligent (Claude) : clé déjà enregistrée."
+elif [[ "${JARVIS_CLAUDE:-0}" != "1" && "${JARVIS_NEW_KEY:-0}" != "1" ]]; then
+    echo "Mode gratuit : aucune clé API nécessaire."
 else
     if ! { exec 3<> /dev/tty; } 2>/dev/null; then
         fail "Pas de terminal interactif pour saisir la clé. Lance la commande depuis l'app Terminal."
@@ -128,5 +132,6 @@ Pour le lancer : double-clique sur « Jarvis.command » sur ton Bureau.
 Dis « Jarvis » puis ta demande, par exemple :
   « Jarvis, ouvre Safari »
   « Jarvis, mets le volume à 30 »
-  « Jarvis, quel temps fait-il à Genève ? »
+  « Jarvis, quelle heure est-il ? »
+  « Jarvis, aide »  (pour la liste de ce qu'il sait faire)
 EOF

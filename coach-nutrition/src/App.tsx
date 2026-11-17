@@ -28,7 +28,10 @@ function Loading() {
 }
 
 function AppRoutes() {
-  const { activeProfile, data, update } = useAppData()
+  const { activeProfile, data, update, seeding } = useAppData()
+
+  // Aperçu personnel : le profil de base est en cours de création.
+  if (seeding) return <Loading />
 
   // Premier lancement : Mia se présente avant la création du profil.
   if (!activeProfile && !data.introSeen) {

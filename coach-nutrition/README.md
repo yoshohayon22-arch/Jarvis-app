@@ -55,6 +55,22 @@ et régénère la semaine : les recettes qui la respectent sont privilégiées (
 semaine au plus ; jeûne : 2 repas par jour, nombre de repas d'avant rétabli au retrait). Calories et protéines restent
 calculées comme d'habitude.
 
+## Profil de base (aperçu personnel)
+
+Pour ne pas ressaisir son profil à chaque ouverture, on peut définir un **profil de base** : il est créé
+automatiquement, avec son menu de la semaine, quand l'application ne contient encore aucun profil
+(et recréé après « Tout effacer »). Les données personnelles ne vont **jamais** dans le dépôt (public) :
+elles sont dans `.env.preview.local` (ignoré par git), lu seulement par le build de l'aperçu :
+
+```bash
+# .env.preview.local
+VITE_DEFAULT_PROFILE={"name":"Prénom","settings":{"sex":"femme","age":40,"heightCm":165,"startWeightKg":70,"targetWeightKg":65,"activityLevel":2}}
+npx vite build --mode preview
+```
+
+Les réglages absents prennent les valeurs par défaut ; les garde-fous de l'onboarding s'appliquent
+(âge ≥ 18 ans, IMC cible ≥ 18,5). Le site public (build normal, Netlify) n'a pas de profil de base.
+
 ## Sauvegarde des données
 
 Tout reste dans le navigateur (localStorage). Dans **Profil → Mes données** :

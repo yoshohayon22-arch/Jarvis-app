@@ -51,7 +51,7 @@ function ProfileEditorWithMessage() {
 }
 
 function ProfileEditor({ importMsg, setImportMsg }: { importMsg: ImportMessage; setImportMsg: (m: ImportMessage) => void }) {
-  const { data, activeProfile, update, replaceAll, clearAll, storage } = useAppData()
+  const { data, activeProfile, update, replaceAll, clearAll, storage, hasDefaultProfile } = useAppData()
   const navigate = useNavigate()
   const profile = activeProfile!
   const current = latestWeight(profile)
@@ -210,7 +210,9 @@ function ProfileEditor({ importMsg, setImportMsg }: { importMsg: ImportMessage; 
       >
         <p className="text-sm">
           {confirm === 'tout'
-            ? 'Tous les profils, pesées et menus enregistrés dans ce navigateur seront supprimés. Pense à exporter tes données avant, si tu veux les garder.'
+            ? `Tous les profils, pesées et menus enregistrés dans ce navigateur seront supprimés. Pense à exporter tes données avant, si tu veux les garder.${
+                hasDefaultProfile ? ' Ton profil de base sera ensuite recréé automatiquement, avec un nouveau menu.' : ''
+              }`
             : 'Les informations et pesées de ce profil seront supprimées de ce navigateur.'}
         </p>
         <div className="flex justify-end gap-2">

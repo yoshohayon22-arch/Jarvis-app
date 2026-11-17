@@ -10,6 +10,7 @@ import {
   KCAL_TOLERANCE,
   MAX_USES_PER_WEEK,
   MAX_SIDE_USES_PER_WEEK,
+  MAIN_SHARE_RANGE,
   keyIngredients,
   varietyStrength,
   mondayOf,
@@ -22,7 +23,7 @@ import {
   weekSummary,
   type GeneratorContext,
 } from './generator'
-import { SLOT_HOUR } from './slots'
+import { KCAL_SHARE, SLOT_HOUR } from './slots'
 
 const byId = new Map<string, Recipe>(RECIPES.map((r) => [r.id, r]))
 
@@ -320,7 +321,8 @@ describe('Grande variété des menus', () => {
   it('au moins 10 plats différents sur les 14 déjeuners et dîners', () => {
     for (const { name, plan } of plans) {
       const mains = countBy(plan, isMain)
-      expect(mains.size, name).toBeGreaterThanOrEqual(10)
+      // Profils très protéinés : moins de plats assez denses, la précision passe avant.
+      expect(mains.size, name).toBeGreaterThanOrEqual(varietyStrength(plan.targets) === 1 ? 10 : 9)
     }
   })
 
@@ -337,6 +339,31 @@ describe('Grande variété des menus', () => {
       for (const d of next.days) {
         const kcal = daySummary(d, planLookup(next, RECIPES), false).kcal
         expect(Math.abs(kcal - next.targets.kcal) / next.targets.kcal).toBeLessThanOrEqual(KCAL_TOLERANCE + 1e-9)
+      }
+    }
+  })
+})
+
+describe('Équilibre entre les repas', () => {
+  it('déjeuner et dîner restent proches de leur part prévue (pas 300 kcal à midi et 900 le soir)', () => {
+    const cases: Partial<ProfileSettings>[] = [
+      { sex: 'femme', age: 56, heightCm: 153, targetWeightKg: 50, activityLevel: 2, mealsPerDay: 2, restrictions: ['casher'] },
+      { sex: 'homme', age: 34, heightCm: 180, targetWeightKg: 75, activityLevel: 3, mealsPerDay: 3 },
+      { sex: 'femme', age: 40, heightCm: 170, targetWeightKg: 65, activityLevel: 2, mealsPerDay: 4, restrictions: ['vegetarien'] },
+    ]
+    for (const s of cases) {
+      for (const seed of [1, 2, 3, 4]) {
+        const c = context(s, s.mealsPerDay === 2 ? 52 : 80, seed)
+        const plan = generateWeek(c)
+        const by = planLookup(plan, RECIPES)
+        const shares = KCAL_SHARE[c.settings.mealsPerDay]
+        for (const d of plan.days) for (const m of d.meals) {
+          if (m.slot !== 'dejeuner' && m.slot !== 'diner') continue
+          const ratio = (by.get(m.recipeId)!.perServing.kcal * m.portions) / (shares[m.slot]! * plan.targets.kcal)
+          // 75 % à 130 % de la part prévue, avec la marge de l'arrondi des portions.
+          expect(ratio, `${JSON.stringify(s)} graine ${seed} ${d.date} ${m.slot}`).toBeGreaterThanOrEqual(MAIN_SHARE_RANGE[0] - 0.08)
+          expect(ratio).toBeLessThanOrEqual(MAIN_SHARE_RANGE[1] + 0.08)
+        }
       }
     }
   })

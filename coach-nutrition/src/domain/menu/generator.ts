@@ -24,6 +24,8 @@ export const KCAL_TOLERANCE = 0.05
 export const MAX_USES_PER_WEEK = 3
 /** Plats de batch : cuisinés en grande quantité, ils peuvent revenir plus souvent. */
 export const MAX_USES_BATCH = 5
+/** Déjeuner et dîner : entre 75 % et 130 % de leur part prévue des calories du jour. */
+export const MAIN_SHARE_RANGE: [number, number] = [0.75, 1.3]
 /** Petit-déjeuner et collations : la même recette au plus 2 fois par semaine (si le choix le permet). */
 export const MAX_SIDE_USES_PER_WEEK = 2
 /** Une même famille d'aliments principale (poulet, riz, quinoa…) apparaît au plus 4 fois sur les 14 déjeuners et dîners. */
@@ -158,18 +160,27 @@ function portionProblem(slots: MealSlot[], recipes: Recipe[], ctx: GeneratorCont
     return Math.min(hi, Math.max(lo, ideal))
   })
   const festive = slots.some((s) => festiveTag(ctx.settings, dayIndex, s))
-  // Le repas de Shabbat reste le plus copieux : au moins 85 % de sa part prévue.
-  const mins = slots.map((s, i) =>
-    festiveTag(ctx.settings, dayIndex, s) ? Math.min(anchors[i], Math.max(PORTION_BOUNDS[s][0], anchors[i] * 0.85)) : PORTION_BOUNDS[s][0],
-  )
+  const isMain = (s: MealSlot) => s === 'dejeuner' || s === 'diner'
+  const mins = slots.map((s, i) => {
+    const lo = PORTION_BOUNDS[s][0]
+    // Le repas de Shabbat reste le plus copieux : au moins 85 % de sa part prévue.
+    if (festiveTag(ctx.settings, dayIndex, s)) return Math.min(anchors[i], Math.max(lo, anchors[i] * 0.85))
+    // Déjeuner et dîner : au moins 75 % de leur part (pas un déjeuner minuscule et un dîner énorme).
+    if (isMain(s)) return Math.min(anchors[i], Math.max(lo, anchors[i] * MAIN_SHARE_RANGE[0]))
+    return lo
+  })
   return {
     items: recipes.map(toVector),
     anchors,
     min: mins,
-    // Jour de fête : les autres repas restent proches de leur part (≤ 115 %), le repas de Shabbat reste le plus copieux.
-    max: slots.map((s, i) =>
-      festive && !festiveTag(ctx.settings, dayIndex, s) ? Math.max(PORTION_BOUNDS[s][0], Math.min(PORTION_BOUNDS[s][1] * scale, anchors[i] * 1.15)) : PORTION_BOUNDS[s][1] * scale,
-    ),
+    max: slots.map((s, i) => {
+      const hi = PORTION_BOUNDS[s][1] * scale
+      // Jour de fête : les autres repas restent proches de leur part (≤ 115 %), le repas de Shabbat reste le plus copieux.
+      if (festive && !festiveTag(ctx.settings, dayIndex, s)) return Math.max(PORTION_BOUNDS[s][0], Math.min(hi, anchors[i] * 1.15))
+      // Déjeuner et dîner : au plus 130 % de leur part.
+      if (isMain(s) && !festive) return Math.max(mins[i], Math.min(hi, anchors[i] * MAIN_SHARE_RANGE[1]))
+      return hi
+    }),
     target: targetVector(ctx.targets),
   }
 }

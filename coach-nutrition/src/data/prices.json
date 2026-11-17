@@ -1779,6 +1779,229 @@
         "budgetLine": false,
         "source": "estimation"
       }
+    ],
+    "fenouil": [
+      {
+        "store": "Migros",
+        "label": "Fenouil (au kg)",
+        "priceChf": 4.6,
+        "packageSize": 1000,
+        "budgetLine": false,
+        "source": "estimation",
+        "byWeight": true
+      },
+      {
+        "store": "Lidl",
+        "label": "Fenouil (500 g)",
+        "priceChf": 1.99,
+        "packageSize": 500,
+        "budgetLine": true,
+        "source": "estimation"
+      }
+    ],
+    "chou-rouge": [
+      {
+        "store": "Migros",
+        "label": "Chou rouge (au kg)",
+        "priceChf": 3.2,
+        "packageSize": 1000,
+        "budgetLine": false,
+        "source": "estimation",
+        "byWeight": true
+      },
+      {
+        "store": "Aldi",
+        "label": "Chou rouge",
+        "priceChf": 1.99,
+        "packageSize": 1000,
+        "budgetLine": true,
+        "source": "estimation"
+      }
+    ],
+    "kiwis": [
+      {
+        "store": "Migros",
+        "label": "Kiwis (500 g)",
+        "priceChf": 2.95,
+        "packageSize": 500,
+        "budgetLine": false,
+        "source": "estimation"
+      },
+      {
+        "store": "Lidl",
+        "label": "Kiwis (1 kg)",
+        "priceChf": 3.99,
+        "packageSize": 1000,
+        "budgetLine": true,
+        "source": "estimation"
+      }
+    ],
+    "veau-emince": [
+      {
+        "store": "Coop",
+        "label": "Émincé de veau suisse",
+        "priceChf": 17.8,
+        "packageSize": 300,
+        "budgetLine": false,
+        "source": "estimation"
+      },
+      {
+        "store": "Migros",
+        "label": "Émincé de veau (au kg)",
+        "priceChf": 56.0,
+        "packageSize": 1000,
+        "budgetLine": false,
+        "source": "estimation",
+        "byWeight": true
+      }
+    ],
+    "colin-filet": [
+      {
+        "store": "Migros",
+        "label": "Filets de colin d’Alaska surgelés",
+        "priceChf": 6.5,
+        "packageSize": 400,
+        "budgetLine": false,
+        "source": "estimation"
+      },
+      {
+        "store": "Aldi",
+        "label": "Colin d’Alaska surgelé",
+        "priceChf": 4.99,
+        "packageSize": 400,
+        "budgetLine": true,
+        "source": "estimation"
+      }
+    ],
+    "maquereau-conserve": [
+      {
+        "store": "Coop",
+        "label": "Filets de maquereau à l’huile d’olive",
+        "priceChf": 2.6,
+        "packageSize": 125,
+        "budgetLine": false,
+        "source": "estimation"
+      },
+      {
+        "store": "Lidl",
+        "label": "Filets de maquereau",
+        "priceChf": 1.49,
+        "packageSize": 125,
+        "budgetLine": true,
+        "source": "estimation"
+      }
+    ],
+    "ricotta": [
+      {
+        "store": "Migros",
+        "label": "Ricotta",
+        "priceChf": 2.8,
+        "packageSize": 250,
+        "budgetLine": false,
+        "source": "estimation"
+      },
+      {
+        "store": "Aldi",
+        "label": "Ricotta",
+        "priceChf": 1.89,
+        "packageSize": 250,
+        "budgetLine": true,
+        "source": "estimation"
+      }
+    ],
+    "fromage-raclette": [
+      {
+        "store": "Migros",
+        "label": "Fromage à raclette en tranches",
+        "priceChf": 8.9,
+        "packageSize": 400,
+        "budgetLine": false,
+        "source": "estimation"
+      },
+      {
+        "store": "Aldi",
+        "label": "Raclette en tranches",
+        "priceChf": 6.49,
+        "packageSize": 400,
+        "budgetLine": true,
+        "source": "estimation"
+      }
+    ],
+    "edamame-surgeles": [
+      {
+        "store": "Coop",
+        "label": "Edamame écossés surgelés",
+        "priceChf": 4.5,
+        "packageSize": 400,
+        "budgetLine": false,
+        "source": "estimation"
+      }
+    ],
+    "sarrasin": [
+      {
+        "store": "Migros",
+        "label": "Sarrasin décortiqué",
+        "priceChf": 3.6,
+        "packageSize": 500,
+        "budgetLine": false,
+        "source": "estimation"
+      }
+    ],
+    "millet": [
+      {
+        "store": "Migros",
+        "label": "Millet doré",
+        "priceChf": 2.9,
+        "packageSize": 500,
+        "budgetLine": false,
+        "source": "estimation"
+      }
+    ],
+    "pois-casses": [
+      {
+        "store": "Coop",
+        "label": "Pois cassés verts",
+        "priceChf": 2.4,
+        "packageSize": 500,
+        "budgetLine": false,
+        "source": "estimation"
+      }
+    ],
+    "olives": [
+      {
+        "store": "Migros",
+        "label": "Olives noires dénoyautées",
+        "priceChf": 2.5,
+        "packageSize": 150,
+        "budgetLine": false,
+        "source": "estimation"
+      },
+      {
+        "store": "Lidl",
+        "label": "Olives noires",
+        "priceChf": 1.29,
+        "packageSize": 150,
+        "budgetLine": true,
+        "source": "estimation"
+      }
+    ],
+    "pain-seigle": [
+      {
+        "store": "Migros",
+        "label": "Pain de seigle",
+        "priceChf": 3.5,
+        "packageSize": 500,
+        "budgetLine": false,
+        "source": "estimation"
+      },
+      {
+        "store": "Aldi",
+        "label": "Pain de seigle",
+        "priceChf": 2.29,
+        "packageSize": 500,
+        "budgetLine": true,
+        "source": "estimation"
+      }
     ]
   }
 }

@@ -55,6 +55,15 @@ et régénère la semaine : les recettes qui la respectent sont privilégiées (
 semaine au plus ; jeûne : 2 repas par jour, nombre de repas d'avant rétabli au retrait). Calories et protéines restent
 calculées comme d'habitude.
 
+## Cuisiner avec ce que j'ai
+
+**Menu → Un repas → Avec ce que j'ai** (`src/domain/fridge-meal.ts`, testé dans `fridge-meal.test.ts`) :
+on tape ce qu'on a (« poulet, riz, 2 courgettes… ») ou on coche dans l'ajout rapide. L'app compose une
+assiette avec ces produits seulement (plus l'huile du placard) : protéine, féculent, légumes, quantités calées
+sur les calories et les protéines du repas, étapes de préparation. Les règles du profil s'appliquent comme
+pour les recettes (casher : jamais viande et laitage ensemble). Elle liste aussi les recettes du catalogue
+faisables avec au plus 2 produits à acheter. Rien n'est mémorisé.
+
 ## Profil de base (aperçu personnel)
 
 Pour ne pas ressaisir son profil à chaque ouverture, on peut définir un **profil de base** : il est créé

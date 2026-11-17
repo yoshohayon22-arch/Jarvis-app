@@ -270,6 +270,16 @@ function evaluate(slots: MealSlot[], recipes: Recipe[], ctx: GeneratorContext, o
   let score = objective(problem, portions)
   // Hors de la marge de ±5 % : fortement pénalisé (la combinaison ne sera retenue qu'en dernier recours).
   if (kcalErr > KCAL_TOLERANCE) score += 10 + kcalErr * 10
+  // Équilibre : un déjeuner ou un dîner hors de 75-130 % de sa part (plat trop léger ou trop copieux) est pénalisé.
+  if (!slots.some((s) => festiveTag(ctx.settings, opt.dayIndex ?? -1, s))) {
+    const share = KCAL_SHARE[ctx.settings.mealsPerDay]
+    recipes.forEach((r, i) => {
+      const s = slots[i]
+      if (s !== 'dejeuner' && s !== 'diner') return
+      const ratio = (r.perServing.kcal * portions[i]) / ((share[s] ?? 0.3) * ctx.targets.kcal)
+      score += Math.max(0, MAIN_SHARE_RANGE[0] - ratio, ratio - MAIN_SHARE_RANGE[1])
+    })
+  }
   const cost = recipes.reduce((s, r, i) => s + recipePrice(r, ctx.settings.lowBudget) * portions[i], 0)
   score += opt.costWeight * cost
   score += recipes.filter((r) => !r.season.includes(opt.month)).length * 0.01

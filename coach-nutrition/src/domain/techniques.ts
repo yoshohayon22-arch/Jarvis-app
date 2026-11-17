@@ -185,8 +185,20 @@ const has = (r: Recipe, set: Set<string>) => r.ingredients.some((i) => set.has(i
 /** Le plat contient-il de la viande rouge ou de la charcuterie ? */
 export const hasRedMeat = (r: Recipe) => has(r, RED_MEAT)
 
+/** Résultats déjà calculés (le générateur pose la même question des milliers de fois). */
+const fitCache = new WeakMap<Recipe, Map<string, boolean>>()
+
 /** La recette respecte-t-elle la technique pour ce moment de la journée ? */
 export function fitsTechnique(recipe: Recipe, id: TechniqueId, moment: TechniqueMoment, ingredients: ReadonlyMap<string, Ingredient>): boolean {
+  let cache = fitCache.get(recipe)
+  if (!cache) fitCache.set(recipe, (cache = new Map()))
+  const key = `${id}|${moment}`
+  let v = cache.get(key)
+  if (v === undefined) cache.set(key, (v = computeFit(recipe, id, moment, ingredients)))
+  return v
+}
+
+function computeFit(recipe: Recipe, id: TechniqueId, moment: TechniqueMoment, ingredients: ReadonlyMap<string, Ingredient>): boolean {
   switch (id) {
     case 'assiette': {
       if (moment === 'collation') return false

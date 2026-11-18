@@ -137,6 +137,93 @@ const ART = {};
         ${old ? `<path d="M80 118 q-2 6 1 11 M120 118 q2 6 -1 11" stroke="#c39566" stroke-width="1.5" fill="none"/>` : ""}
       </g><circle cx="100" cy="115" r="92" fill="none" stroke="#7b8794" stroke-width="1.5"/></svg>`;
   };
+  ART.scenes.bureau = function(){ return wrap(
+    `<rect width="1200" height="330" fill="#e9e2cf"/>
+     <g fill="#d9cfb4">${Array.from({ length: 7 }, (_, i) => `<rect x="${30 + i * 170}" y="0" width="150" height="330" opacity="${i % 2 ? .5 : .25}"/>`).join("")}</g>
+     <g>${[330, 600, 870].map(x => `<rect x="${x - 70}" y="30" width="140" height="190" fill="#a9c4dc"/><path d="M${x - 70} 30 h140 v190 h-140z M${x} 30 v190 M${x - 70} 125 h140" fill="none" stroke="#f6f2e6" stroke-width="6"/><path d="M${x - 92} 20 q22 110 0 215 h22 q14 -105 0 -215z M${x + 92} 20 q-22 110 0 215 h-22 q-14 -105 0 -215z" fill="#b8963e"/>`).join("")}</g>
+     <rect x="160" y="60" width="8" height="170" fill="#6b4a22"/><path d="M168 64 h70 v46 h-70z" fill="#b22234"/><path d="M168 64 h30 v24 h-30z" fill="#3c3b6e"/>
+     <rect x="1032" y="60" width="8" height="170" fill="#6b4a22"/><path d="M1032 64 h-70 v46 h70z" fill="#1f3b6e"/>
+     <rect x="380" y="226" width="440" height="60" rx="4" fill="#5a3a1c"/><rect x="396" y="286" width="408" height="44" fill="#4a2f16"/>
+     <rect y="296" width="1200" height="34" fill="#31456b" opacity=".55"/>`); };
+  ART.scenes.tribune = function(){ const g = id("sk");
+    return wrap(sky(g, "#17233b", "#3a5a8c") +
+    `<g>${Array.from({ length: 9 }, (_, i) => `<rect x="${60 + i * 130}" y="40" width="5" height="150" fill="#c9ced6"/><path d="M${65 + i * 130} 44 h64 v40 h-64z" fill="${i % 2 ? "#b22234" : "#f4f4f4"}"/><path d="M${65 + i * 130} 44 h26 v20 h-26z" fill="#3c3b6e"/>`).join("")}</g>
+     <rect x="0" y="190" width="1200" height="60" fill="#22345a"/>
+     <rect x="530" y="150" width="140" height="100" fill="#1b2a4a"/><rect x="560" y="120" width="80" height="34" rx="3" fill="#0f1a30"/><rect x="596" y="96" width="4" height="26" fill="#0b1220"/><rect x="606" y="100" width="4" height="22" fill="#0b1220"/>
+     <g fill="#0d1526">${Array.from({ length: 60 }, (_, i) => `<circle cx="${10 + i * 20}" cy="${270 + (i % 3) * 14}" r="13"/>`).join("")}</g><rect y="290" width="1200" height="40" fill="#0d1526"/>`); };
+  /* Homme d’État stylisé : costume sombre, cravate rouge, sans insigne */
+  ART.statesman = function(o = {}){
+    const g = id("sg"), c = id("sc"); const age = o.age || 70;
+    return `<svg viewBox="0 0 200 240" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Portrait stylisé d’un homme d’État en costume">
+      <defs><radialGradient id="${g}" cx=".5" cy=".36" r=".72"><stop offset="0" stop-color="#3d5c94"/><stop offset="1" stop-color="#101b33"/></radialGradient><clipPath id="${c}"><circle cx="100" cy="115" r="92"/></clipPath></defs>
+      <circle cx="100" cy="115" r="98" fill="#c9b27a"/><circle cx="100" cy="115" r="92" fill="url(#${g})"/>
+      <g clip-path="url(#${c})">
+        <path d="M14 240 C22 176 60 158 100 158 C140 158 178 176 186 240Z" fill="#1a2238"/>
+        <path d="M80 160 L100 210 L120 160 L112 154 L100 176 L88 154Z" fill="#f4f1ea"/>
+        <path d="M96 172 L104 172 L109 228 L100 240 L91 228Z" fill="#c1272d"/>
+        <path d="M80 160 L62 176 L92 214Z M120 160 L138 176 L108 214Z" fill="#232d48"/>
+        <rect x="88" y="132" width="24" height="30" fill="#e2b48c"/>
+        <ellipse cx="100" cy="108" rx="29" ry="33" fill="#ecc19a"/>
+        <path d="M70 100 Q66 66 100 64 Q136 64 132 98 Q126 80 108 78 Q92 76 82 84 Q74 90 70 100Z" fill="${age >= 76 ? "#ead9a8" : "#e6c56f"}"/>
+        <path d="M74 88 Q96 62 130 82 Q110 70 74 88Z" fill="${age >= 76 ? "#f2e6c2" : "#f0d488"}"/>
+        <path d="M82 104 q8 -4 14 0 M104 104 q8 -4 14 0" stroke="#b9925a" stroke-width="2.6" fill="none"/>
+        <ellipse cx="90" cy="111" rx="3" ry="2" fill="#3a4c66"/><ellipse cx="110" cy="111" rx="3" ry="2" fill="#3a4c66"/>
+        <path d="M100 111 Q96 124 101 127" stroke="#c4946a" stroke-width="2" fill="none"/>
+        <path d="M91 136 Q100 133 109 136" stroke="#9a5a48" stroke-width="2.4" fill="none"/>
+      </g><circle cx="100" cy="115" r="92" fill="none" stroke="#8a744a" stroke-width="1.5"/></svg>`;
+  };
+  ART.scenes.studio = function(){ return wrap(
+    `<rect width="1200" height="330" fill="#160d2b"/>
+     <g opacity=".5">${Array.from({ length: 8 }, (_, i) => `<path d="M${80 + i * 150} 0 L${20 + i * 150} 330 L${140 + i * 150} 330Z" fill="${i % 2 ? "#ff4fa3" : "#3ad0ff"}" opacity=".12"/>`).join("")}</g>
+     <g fill="#0b0616">${[90, 300, 900, 1110].map(x => `<rect x="${x - 4}" y="0" width="8" height="70"/><rect x="${x - 26}" y="66" width="52" height="26" rx="5"/>`).join("")}</g>
+     <g fill="#fff6d6" opacity=".9">${[90, 300, 900, 1110].map(x => `<rect x="${x - 20}" y="84" width="40" height="6"/>`).join("")}</g>
+     <rect x="380" y="120" width="440" height="150" rx="10" fill="#241542" stroke="#ff4fa3" stroke-width="4"/>
+     <path d="M560 160 L660 195 L560 230Z" fill="#ff4fa3"/>
+     <g fill="#0b0616"><rect x="180" y="210" width="10" height="90"/><rect x="150" y="186" width="70" height="34" rx="6"/><circle cx="232" cy="203" r="12"/><rect x="1010" y="210" width="10" height="90"/><rect x="980" y="186" width="70" height="34" rx="6"/><circle cx="968" cy="203" r="12"/></g>
+     <rect y="296" width="1200" height="34" fill="#0b0616"/>`); };
+  /* Créateur stylisé : sweat à capuche, sans marque ni logo */
+  ART.creator = function(o = {}){
+    const g = id("cg"), c = id("cc"); const age = o.age || 20;
+    return `<svg viewBox="0 0 200 240" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Portrait stylisé d’un créateur de vidéos">
+      <defs><radialGradient id="${g}" cx=".5" cy=".36" r=".72"><stop offset="0" stop-color="#6a3fb0"/><stop offset="1" stop-color="#1a0f33"/></radialGradient><clipPath id="${c}"><circle cx="100" cy="115" r="92"/></clipPath></defs>
+      <circle cx="100" cy="115" r="98" fill="#ff4fa3"/><circle cx="100" cy="115" r="92" fill="url(#${g})"/>
+      <g clip-path="url(#${c})">
+        <path d="M16 240 C22 176 60 156 100 156 C140 156 178 176 184 240Z" fill="#2a2f3a"/>
+        <path d="M64 170 Q100 196 136 170 Q128 152 100 152 Q72 152 64 170Z" fill="#1c2029"/>
+        <path d="M92 176 v40 M108 176 v40" stroke="#e6e9ef" stroke-width="3"/>
+        <rect x="88" y="130" width="24" height="30" fill="#e3b792"/>
+        <ellipse cx="100" cy="106" rx="27" ry="32" fill="#eec7a2"/>
+        <path d="M73 100 Q70 68 100 66 Q130 68 127 100 Q122 84 108 82 Q92 80 80 86 Q75 92 73 100Z" fill="#6b4a2c"/>
+        ${age >= 22 ? `<path d="M78 120 Q100 150 122 120 Q118 140 100 142 Q82 140 78 120Z" fill="#6b4a2c" opacity=".55"/>` : ""}
+        <path d="M84 102 q7 -4 13 0 M103 102 q7 -4 13 0" stroke="#4a3320" stroke-width="2.4" fill="none"/>
+        <ellipse cx="91" cy="109" rx="3" ry="2.2" fill="#2f3a2c"/><ellipse cx="109" cy="109" rx="3" ry="2.2" fill="#2f3a2c"/>
+        <path d="M100 109 Q97 121 101 124" stroke="#c4946a" stroke-width="2" fill="none"/>
+        <path d="M88 129 Q100 139 112 129" stroke="#8f4f3c" stroke-width="2.4" fill="#fff" fill-opacity=".85"/>
+      </g><circle cx="100" cy="115" r="92" fill="none" stroke="#b83a78" stroke-width="1.5"/></svg>`;
+  };
+  /* Décors génériques du monde magique : aucun signe distinctif, aucun personnage */
+  const mstars = (n, h) => Array.from({ length: n }, (_, i) => `<circle cx="${(i * 197 + 61) % 1200}" cy="${(i * 83 + 17) % h}" r="${1 + (i % 3) * .5}" fill="#e9e4ff" opacity="${.35 + (i % 4) * .15}"/>`).join("");
+  ART.scenes.chateau = function(){ return wrap(
+    `<rect width="1200" height="330" fill="#12142e"/>${mstars(46, 200)}
+     <circle cx="960" cy="78" r="34" fill="#f1ecd2" opacity=".9"/><circle cx="972" cy="70" r="30" fill="#12142e"/>
+     <path d="M0 330 L0 250 Q200 200 420 240 L420 330Z" fill="#0b0c1c"/>
+     <g fill="#070814"><rect x="470" y="170" width="260" height="160"/><rect x="430" y="120" width="46" height="210"/><path d="M424 120 L453 66 L482 120Z"/><rect x="724" y="100" width="52" height="230"/><path d="M716 100 L750 34 L784 100Z"/><rect x="560" y="130" width="70" height="60"/><path d="M552 130 L595 82 L638 130Z"/><rect x="800" y="210" width="120" height="120"/><rect x="900" y="170" width="34" height="160"/><path d="M894 170 L917 128 L940 170Z"/><path d="M300 330 Q360 250 470 250 L470 330Z"/><path d="M920 330 L920 260 Q1040 240 1200 280 L1200 330Z"/></g>
+     <g fill="#f3c969" opacity=".9">${[[444, 150], [444, 200], [742, 130], [742, 180], [742, 240], [510, 200], [560, 230], [640, 210], [690, 250], [585, 150], [830, 240], [870, 270], [910, 200]].map(([x, y]) => `<rect x="${x}" y="${y}" width="7" height="12" rx="3"/>`).join("")}</g>`); };
+  ART.scenes.bougies = function(){ return wrap(
+    `<rect width="1200" height="330" fill="#15102a"/>${mstars(30, 150)}
+     <g>${Array.from({ length: 13 }, (_, i) => { const x = 70 + i * 88, y = 60 + (i * 53) % 120; return `<circle cx="${x}" cy="${y - 14}" r="34" fill="#f3c969" opacity=".08"/><rect x="${x - 5}" y="${y}" width="10" height="${34 + (i % 3) * 10}" rx="2" fill="#efe6cf"/><path d="M${x} ${y - 20} q7 10 0 20 q-7 -10 0 -20Z" fill="#ffcf6b"/>`; }).join("")}</g>
+     <rect y="262" width="1200" height="68" fill="#0b0816"/><g fill="#2a2036">${[120, 420, 720, 1020].map(x => `<rect x="${x - 110}" y="250" width="220" height="16" rx="3"/>`).join("")}</g>`); };
+  ART.scenes.foret = function(){ return wrap(
+    `<rect width="1200" height="330" fill="#0c1420"/>${mstars(26, 120)}
+     <g fill="#0a1a16">${Array.from({ length: 16 }, (_, i) => { const x = 20 + i * 78, h = 150 + (i * 37) % 110; return `<path d="M${x} 330 L${x + 8} ${330 - h} L${x + 16} 330Z"/><path d="M${x - 34} ${330 - h * .25} L${x + 8} ${330 - h * 1.05} L${x + 50} ${330 - h * .25}Z"/><path d="M${x - 26} ${330 - h * .55} L${x + 8} ${330 - h * 1.25} L${x + 42} ${330 - h * .55}Z"/>`; }).join("")}</g>
+     <rect y="300" width="1200" height="30" fill="#060d0c"/><g fill="#9fe3c8" opacity=".5">${[180, 470, 610, 930].map((x, i) => `<circle cx="${x}" cy="${250 - i * 14}" r="3"/>`).join("")}</g>`); };
+  ART.scenes.parchemin = function(){ return wrap(
+    `<rect width="1200" height="330" fill="#1a1426"/>
+     <rect x="250" y="50" width="700" height="250" rx="6" fill="#e6d7ae" transform="rotate(-2 600 175)"/>
+     <g stroke="#7a6844" stroke-width="3" opacity=".55" transform="rotate(-2 600 175)">${Array.from({ length: 7 }, (_, i) => `<path d="M310 ${95 + i * 28} h${520 - (i * 61) % 170}"/>`).join("")}</g>
+     <path d="M930 40 Q1010 120 880 250 L872 244 Q990 124 922 46Z" fill="#cfc7e6"/><path d="M872 244 l-10 22 l18 -16Z" fill="#2a2036"/>
+     <rect x="150" y="210" width="60" height="70" rx="8" fill="#2a2036"/><rect x="162" y="196" width="36" height="18" rx="4" fill="#3a2d4e"/>
+     <rect x="1010" y="170" width="12" height="90" rx="2" fill="#efe6cf"/><path d="M1016 146 q8 12 0 24 q-8 -12 0 -24Z" fill="#ffcf6b"/><circle cx="1016" cy="156" r="40" fill="#f3c969" opacity=".08"/>`); };
   ART.scene = key => (ART.scenes[key] || ART.scenes.paris)();
 
   /* Portrait de Napoléon : médaillon, bicorne porté « en bataille », habit des chasseurs de la Garde.
@@ -178,11 +265,11 @@ const ART = {};
 
 
   /* Carte interactive générique : régions, statuts et pions viennent des données du personnage */
-  ART.map = function(ch, s, sel, selMarker){
-    const m = ch.map; const byReg = {};
+  ART.map = function(ch, s, sel, selMarker, map){
+    const m = map || ch.map; const byReg = {};
     for (const mk of m.markers(s)) (byReg[mk.region] = byReg[mk.region] || []).push(mk);
     const regs = m.regions.map(r => { const st = m.status(s, r.id); return `<polygon class="rg st-${st} ${sel === r.id ? "sel" : ""}" data-region="${r.id}" points="${r.pts}" tabindex="0" role="button" aria-label="${r.name} : ${m.statusLabel[st]}"></polygon>`; }).join("");
-    const labels = m.regions.map(r => `<text class="rg-l" x="${r.c[0]}" y="${r.c[1] + (byReg[r.id] ? 24 : 4)}" text-anchor="middle">${r.name}</text>`).join("");
+    const labels = m.regions.map(r => `<text class="rg-l" x="${r.c[0]}" y="${r.c[1] + (byReg[r.id] ? 24 : 4)}" text-anchor="middle">${r.short || r.name}</text>`).join("");
     const pins = Object.entries(byReg).map(([rid, arr]) => { const r = m.regions.find(x => x.id === rid); if (!r) return ""; return arr.map((mk, i) => { const x = r.c[0] + (i - (arr.length - 1) / 2) * 24, y = r.c[1] - 8; return `<g class="pin ${mk.moving ? "moving" : ""} ${selMarker === mk.id ? "sel" : ""}" data-marker="${mk.id}" tabindex="0" role="button" aria-label="${mk.title}"><title>${mk.title}</title><circle cx="${x}" cy="${y}" r="11"></circle><text x="${x}" y="${y + 4.5}" text-anchor="middle">${mk.label}</text></g>`; }).join(""); }).join("");
     return `<svg class="map-svg" viewBox="${m.viewBox}" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" role="group" aria-label="Carte : ${m.title}">
       <rect class="sea" x="-200" y="-200" width="1600" height="1300"></rect>

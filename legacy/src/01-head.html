@@ -34,6 +34,39 @@
 .theme-stade .st-home{fill:#c8102e} .theme-stade .st-vassal{fill:#4d6a8a} .theme-stade .st-allie{fill:#2f9a63} .theme-stade .st-paix{fill:#33465c}
 .theme-stade .map-legend .st-home{background:#c8102e} .theme-stade .map-legend .st-vassal{background:#4d6a8a} .theme-stade .map-legend .st-allie{background:#2f9a63} .theme-stade .map-legend .st-paix{background:#33465c}
 .theme-stade .bub.me{background:#1d5a8a}
+/* Thème Maison-Blanche : bleu nuit, ivoire, rouge du drapeau */
+.theme-maison{
+  --bg:#0b1020; --bg2:#10172b; --panel:#141d35; --panel2:#1b2644;
+  --ink:#f1ece0; --muted:#a8afc2; --faint:#727a92; --line:rgba(168,175,194,.2);
+  --accent:#e8c874; --accent-ink:#1a1405; --accent2:#b22234; --sea:#0d1730;
+}
+.theme-maison .st-home{fill:#e8c874} .theme-maison .map-legend .st-home{background:#e8c874}
+.st-s5{fill:#b3282d} .st-s4{fill:#d77b72} .st-s3{fill:#8d8872} .st-s2{fill:#6f98c9} .st-s1{fill:#2f5fa8} .st-tendu{fill:#c08a3e}
+.map-legend .st-s5{background:#b3282d} .map-legend .st-s4{background:#d77b72} .map-legend .st-s3{background:#8d8872} .map-legend .st-s2{background:#6f98c9} .map-legend .st-s1{background:#2f5fa8} .map-legend .st-tendu{background:#c08a3e}
+.map-switch{position:absolute;top:8px;right:8px;display:flex;gap:4px}
+.map-switch button{min-height:44px;padding:0 .9em;border:1px solid var(--line);border-radius:99px;background:rgba(0,0,0,.55);color:var(--ink);font-family:var(--f-ui);font-size:.8rem;font-weight:600}
+.map-switch button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.map-legend{max-width:calc(100% - 210px)}
+/* Thème Studio : nuit violette, néons rose et cyan */
+.theme-studio{
+  --bg:#100a1f; --bg2:#160e2a; --panel:#1b1233; --panel2:#251a45;
+  --ink:#f3effa; --muted:#b1a6cc; --faint:#7d7399; --line:rgba(177,166,204,.2);
+  --accent:#ff5fae; --accent-ink:#22061a; --accent2:#3ad0ff; --sea:#150d2b;
+  --f-display:"Barlow Semi Condensed","Arial Narrow",system-ui,sans-serif;
+}
+.theme-studio h1,.theme-studio h2,.theme-studio h3,.theme-studio .blk-h,.theme-studio .legend-title{font-weight:600;letter-spacing:.05em}
+.theme-studio .st-home{fill:#ff5fae} .theme-studio .st-allie{fill:#3ad0ff} .theme-studio .st-vassal{fill:#7fd69a} .theme-studio .st-paix{fill:#3a2d5e}
+.theme-studio .map-legend .st-home{background:#ff5fae} .theme-studio .map-legend .st-allie{background:#3ad0ff} .theme-studio .map-legend .st-vassal{background:#7fd69a} .theme-studio .map-legend .st-paix{background:#3a2d5e}
+.theme-studio .pin circle{fill:#fff} .theme-studio .bub.me{background:#7a2f8f}
+/* Thème Magie : nuit indigo, lueur de bougie */
+.theme-magie{
+  --bg:#0c0d1f; --bg2:#12142b; --panel:#171a36; --panel2:#20244a;
+  --ink:#f1ecdd; --muted:#aeb0cf; --faint:#777a9e; --line:rgba(174,176,207,.2);
+  --accent:#f0c35a; --accent-ink:#231a04; --accent2:#9fb4ff; --sea:#0e1026;
+}
+.theme-magie .st-home{fill:#f0c35a} .theme-magie .st-allie{fill:#6f86d6} .theme-magie .st-vassal{fill:#3b4480} .theme-magie .st-paix{fill:#23274a} .theme-magie .st-guerre{fill:#7a3050}
+.theme-magie .map-legend .st-home{background:#f0c35a} .theme-magie .map-legend .st-allie{background:#6f86d6} .theme-magie .map-legend .st-vassal{background:#3b4480} .theme-magie .map-legend .st-paix{background:#23274a} .theme-magie .map-legend .st-guerre{background:#7a3050}
+.theme-magie .pin circle{fill:#f0c35a} .theme-magie .pin text{fill:#231a04} .theme-magie .bub.me{background:#3b4480}
 html,body{height:100%}
 body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.5;
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));}

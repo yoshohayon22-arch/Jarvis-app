@@ -50,7 +50,7 @@ const UI = {
           <p class="muted ui">Né le ${frDate(ch.born)} à ${esc(ch.birthplace)}</p><p class="muted" style="font-size:.95rem">${esc(ch.realTimeline)}</p></div>
         <div style="display:grid;gap:14px;min-width:0">
           <div><div class="label">Mode carrière</div><h2 style="font-size:1.5rem">Choisissez l’année de départ</h2>
-          <p class="muted">Vous jouez jusqu’à la mort du personnage. Le temps avance d’une semaine toutes les six secondes environ ; rien ne peut être annulé.${ch.realStatus ? " Personne réelle et vivante : le jeu s’appuie sur des faits publics, et tout ce qui s’en écarte est de la fiction." : ""}</p></div>
+          <p class="muted">Vous jouez jusqu’à la mort du personnage. Le temps avance d’une semaine toutes les six secondes environ ; rien ne peut être annulé.${ch.fiction ? " Personnage de fiction : le récit des livres est résumé avec nos propres mots, sans citation ni image tirée des films." : ch.realStatus ? " Personne réelle et vivante : le jeu s’appuie sur des faits publics, et tout ce qui s’en écarte est de la fiction." : ""}</p></div>
           <div class="starts" role="radiogroup" aria-label="Année de départ">${ch.starts.map(st => `<button class="start" role="radio" data-start="${st.id}" aria-pressed="${st.id === pick}" aria-checked="${st.id === pick}"><span class="yr">${st.year}</span><h3>${esc(st.title)}</h3><span class="muted">${esc(st.summary)}</span></button>`).join("")}</div>
           <div class="slot-pick"><label class="label" for="slot-sel">Emplacement de sauvegarde</label>
             <select id="slot-sel" class="sel" style="width:auto">${[1, 2, 3].map(n => { const s = STORE.read(n); return `<option value="${n}" ${n === free ? "selected" : ""}>Emplacement ${n}${STORE.valid(s) ? ` (remplacera ${esc(CHARACTERS[s.char].short)}, ${esc(frMonth(s.date))})` : " (libre)"}</option>`; }).join("")}</select></div>
@@ -123,7 +123,7 @@ const UI = {
     v.addEventListener("click", e => {
       const b = e.target.closest("button[data-cid]");
       if (b) { if (b.disabled) return; const c = UI.ctlById[b.dataset.cid]; if (!c) return; if (c.confirm && UI.armed !== c.act + "|" + c.arg) { UI.armed = c.act + "|" + c.arg; UI.renderPanel(true); return; } UI.armed = null; UI.busyUntil = 0; UI.act(c.act, c.arg); return; }
-      const t = e.target.closest("[data-do]"); if (t) { const [a, x] = t.dataset.do.split("|"); UI.doView(a, x); return; }
+      const t = e.target.closest("[data-do]"); if (t) { const [a, x, y] = t.dataset.do.split("|"); UI.doView(a, x, y); return; }
       const pick = e.target.closest("[data-pick]"); if (pick) { UI.pickCorps(pick.dataset.pick); return; }
       const rel = e.target.closest(".rel"); if (rel) { const d = rel.querySelector(".rel-detail"); if (d) d.hidden = !d.hidden; }
     });
@@ -141,7 +141,7 @@ const UI = {
   kind(view){ const v = GAME.ch().views.find(x => x.id === (view || UI.view)); return v ? v.kind : "general"; },
   setView(view){
     const s = GAME.s, ch = GAME.ch(s); if (!ch.views.some(v => v.id === view)) view = "general"; UI.view = view; UI.keys = {}; UI.armed = null; UI.mapSel = null; UI.ord = { corps: null, dest: null };
-    const legend = `<div class="map-legend">${Object.entries(ch.map.statusLabel).map(([k, l]) => `<span><i class="st-${k}"></i>${esc(l)}</span>`).join("")}</div>`;
+    const legend = `<div class="map-legend" id="map-legend"></div>${ch.maps ? `<div class="map-switch">${ch.maps.map((m, i) => `<button data-do="mapsw|${i}">${esc(m.label)}</button>`).join("")}</div>` : ""}`; if (ch.maps && !(UI.mapIdx < ch.maps.length)) UI.mapIdx = 0;
     const html = {
       general: `<div class="vw"><div class="vcol grow"><div class="mapbox"><div id="map" class="mapfit"></div>${legend}<div id="map-info"></div></div>
           <div class="panel upcoming"><h2>À venir</h2><div id="upcoming"></div></div></div>
@@ -151,7 +151,7 @@ const UI = {
         <div class="vcol side"><div id="alerts"></div><div class="pbody panel" id="pbody"></div></div></div>`,
       presse: `<div class="vw"><div class="vcol grow"><div class="panel"><h2>Opinion publique</h2><div class="gauges two" id="opinion"></div></div><div class="chips" id="pcats"></div><div class="panel scroll" id="press"></div></div>
         <div class="vcol side"><div class="pbody panel" id="pbody"></div></div></div>`,
-      finances: `<div class="vw"><div class="vcol grow scrolly"><div id="alerts"></div><div class="panel"><div class="kpi four" id="fkpi"></div><h2 style="margin-top:12px">${esc(ch.fin.chartTitle)}</h2><div id="chart"></div></div><div class="two-col" id="ftables"></div></div>
+      finances: `<div class="vw"><div class="vcol grow scrolly"><div id="alerts"></div><div class="panel"><div class="kpi four" id="fkpi"></div><h2 style="margin-top:12px">${esc(ch.fin ? ch.fin.chartTitle : "")}</h2><div id="chart"></div></div><div class="two-col" id="ftables"></div></div>
         <div class="vcol side"><div class="pbody panel" id="pbody"></div></div></div>`,
       board: `<div class="vw"><div class="vcol grow scrolly" id="board"></div><div class="vcol side"><div id="alerts"></div><div class="pbody panel" id="pbody"></div></div></div>`,
       corr: `<div class="vw corr"><div class="vcol contacts panel" id="contacts"></div><div class="vcol grow panel convo"><div class="conv-h" id="conv-h"></div><div class="conv" id="conv"></div>
@@ -207,14 +207,15 @@ const UI = {
   },
 
   updateMap(force){
-    const s = GAME.s, ch = GAME.ch(s), m = ch.map; if (!$("#map")) return;
-    const key = JSON.stringify([m.regions.map(r => m.status(s, r.id)), m.markers(s).map(k => [k.id, k.region, k.moving]), UI.mapSel, UI.ord.corps, UI.ord.dest]);
-    if (key !== UI.keys.map) { UI.keys.map = key; $("#map").innerHTML = ART.map(ch, s, UI.kind() === "ops" ? UI.ord.dest : UI.mapSel, UI.ord.corps); }
+    const s = GAME.s, ch = GAME.ch(s), m = UI.curMap(ch); if (!$("#map")) return;
+    UI.put("map-legend", Object.entries(m.statusLabel).map(([k, l]) => `<span><i class="st-${k}"></i>${esc(l)}</span>`).join("")); $$(".map-switch button").forEach((b, i) => b.setAttribute("aria-pressed", i === (UI.mapIdx || 0)));
+    const key = JSON.stringify([m.regions.map(r => m.status(s, r.id)), m.markers(s).map(k => [k.id, k.region, k.moving]), UI.mapSel, UI.ord.corps, UI.ord.dest, UI.mapIdx]);
+    if (key !== UI.keys.map) { UI.keys.map = key; $("#map").innerHTML = ART.map(ch, s, UI.kind() === "ops" ? UI.ord.dest : UI.mapSel, UI.ord.corps, m); }
     if (UI.view === "general") UI.mapInfo();
   },
   mapClick(e){
     const s = GAME.s, ch = GAME.ch(s); const pin = e.target.closest("[data-marker]"), rg = e.target.closest("[data-region]");
-    if (pin) { AUDIO.sfx("click"); if (UI.kind() !== "ops") { const ops = ch.views.find(v => v.kind === "ops"); if (ops) { UI.ord = { corps: pin.dataset.marker, dest: null }; UI.setViewKeep(ops.id); return; } const mk = ch.map.markers(s).find(k => k.id === pin.dataset.marker); UI.mapSel = mk ? mk.region : null; UI.update(); return; }
+    if (pin) { AUDIO.sfx("click"); if (UI.kind() !== "ops") { const ops = ch.views.find(v => v.kind === "ops"); if (ops) { UI.ord = { corps: pin.dataset.marker, dest: null }; UI.setViewKeep(ops.id); return; } const mk = UI.curMap(ch).markers(s).find(k => k.id === pin.dataset.marker); UI.mapSel = mk ? mk.region : null; UI.update(); return; }
       // Un corps est déjà choisi : toucher un autre pion désigne sa région comme destination
       if (UI.ord.corps && UI.ord.corps !== pin.dataset.marker) { const o = s.corps.find(x => x.id === pin.dataset.marker); if (o) { UI.ord.dest = o.dest || o.loc; UI.update(); return; } }
       UI.pickCorps(pin.dataset.marker); return; }
@@ -222,6 +223,7 @@ const UI = {
     if (UI.kind() === "ops") { if (!UI.ord.corps) { UI.toast("Touchez d’abord un corps d’armée."); return; } UI.ord.dest = rg.dataset.region; UI.update(); return; }
     UI.mapSel = UI.mapSel === rg.dataset.region ? null : rg.dataset.region; UI.update();
   },
+  curMap(ch){ return ch.maps ? ch.maps[UI.mapIdx || 0] : ch.map; },
   setViewKeep(view){ const o = UI.ord; UI.setView(view); UI.ord = o; UI.update(true); },
   pickCorps(id){ AUDIO.sfx("click"); UI.ord = UI.ord.corps === id ? { corps: null, dest: null } : { corps: id, dest: null }; UI.update(true); if (UI.ord.corps && window.innerWidth <= 960) window.scrollTo({ top: 0, behavior: "smooth" }); },
   orderSheet(){
@@ -234,8 +236,11 @@ const UI = {
       <div class="ord4">${ch.orders.map(o => `<button class="btn ${o.id === "attaquer" ? "primary" : ""}" data-do="order|${o.id}" title="${esc(o.hint)}">${esc(o.label)}</button>`).join("")}</div>
       <div class="ops"><button class="btn small ghost" data-do="ordcancel">Annuler</button></div></div>`);
   },
-  doView(a, x){
+  doView(a, x, y){
     const s = GAME.s;
+    if (a === "mapsw") { UI.mapIdx = +x; UI.mapSel = null; AUDIO.sfx("click"); UI.update(true); return; }
+    if (a === "act") { UI.act(x, y); return; }
+    if (a === "char") { const ch = GAME.ch(s); if (ch.doView) ch.doView(s, x, y); return; }
     if (a === "ordcancel") { UI.ord = { corps: null, dest: null }; UI.update(true); }
     else if (a === "order") { const o = UI.ord; UI.ord = { corps: null, dest: null }; UI.act("order", o.corps, x + "|" + o.dest); }
     else if (a === "subtab") { UI.subtab = x; UI.armed = null; AUDIO.sfx("click"); UI.keys.subtabs = null; UI.renderPanel(true); }
@@ -505,7 +510,7 @@ const UI = {
       <div class="ev-kind"><span class="k ${kind === "hist" ? "hist" : ""}">${kindLabel}</span><span class="label">${esc(frDate(kind === "hist" && ev.date && ev.date.slice(0, 7) === s.date.slice(0, 7) ? ev.date : s.date))} · ${esc(ev.place || s.place)}</span></div>
       <h2>${esc(ev.title)}</h2><p class="ev-text">${esc(ev.text)}</p>
       ${people.length ? `<div class="people">${people.map(p => `<span>${esc(p)}</span>`).join("")}</div>` : ""}
-      <div class="choices">${ev.choices.map((c, i) => `<button class="choice" data-choice="${i}">${esc(c.t)}${c.battle ? `<small>Bataille : ${esc(c.battle.name)}</small>` : ""}${c.match ? `<small>Match à jouer</small>` : ""}</button>`).join("")}</div>`, { scene: ev.scene || s.scene });
+      <div class="choices">${ev.choices.map((c, i) => `<button class="choice" data-choice="${i}">${esc(c.t)}${c.battle ? `<small>${GAME.ch(s).fiction ? "Duel" : "Bataille"} : ${esc(c.battle.name)}</small>` : ""}${c.match ? `<small>Match à jouer</small>` : ""}</button>`).join("")}</div>`, { scene: ev.scene || s.scene });
     $$("[data-choice]", ov).forEach(b => b.onclick = () => UI.choose(+b.dataset.choice));
   },
 
@@ -525,7 +530,7 @@ const UI = {
       GAME.news(s, { src: "Carnet", title: ev.title, text: `${c.t}.${out.battle ? ` ${out.battle.win ? "Victoire" : "Défaite"} : ${out.battle.name}.` : ""}`, tone: kind === "hist" ? "key" : out.battle ? (out.battle.win ? "good" : "bad") : "" });
       const chx = GAME.ch(s); if (chx.press) { if (out.battle) chx.press(s, "bataille", out.battle); else chx.press(s, "evenement", { title: ev.title, res: c.res, hist: kind === "hist" }); }
       s.pending = null; if (out.death) s.deathPending = out.death; UI.save();
-      const real = kind === "hist" && ev.real ? `<div class="realbox"><b>Dans la réalité :</b> ${esc(ev.real)}${ev.anecdote ? `<br><i>${esc(ev.anecdote)}</i>` : ""}</div>` : "";
+      const real = kind === "hist" && ev.real ? `<div class="realbox"><b>${chx.fiction ? "Dans les livres" : "Dans la réalité"} :</b> ${esc(ev.real)}${ev.anecdote ? `<br><i>${esc(ev.anecdote)}</i>` : ""}</div>` : "";
       const verdict = out.battle ? `<div class="verdict ${out.battle.win ? "win" : "loss"}">${out.battle.win ? "Victoire" : out.battle.draw ? "Match nul" : "Défaite"} · ${esc(out.battle.name)}</div>` : "";
       const ov = UI.openModal(`<div class="outcome">
         <div class="ev-kind"><span class="k ${kind === "hist" ? "hist" : ""}">${kind === "hist" ? (c.hist ? "Comme dans la réalité" : "Ton histoire bifurque") : "Conséquences"}</span></div>
@@ -594,7 +599,7 @@ const UI = {
     const ov = UI.openModal(`<div class="outcome"><div class="label">${esc(frDate(s.date))} · ${esc(s.place)}</div>
       <h2 style="font-size:2rem">${esc(ch.name)} est mort</h2><p class="ev-text">${esc(death.cause)}</p>
       <p class="muted">${s.dead.age} ans. ${esc(GAME.rankLabel(s))}. La partie est terminée.</p>
-      <div class="row"><button class="btn primary" id="to-end">Toi contre l’Histoire</button></div></div>`, { scene: s.scene });
+      <div class="row"><button class="btn primary" id="to-end">${ch.fiction ? "Toi contre les livres" : "Toi contre l’Histoire"}</button></div></div>`, { scene: s.scene });
     $("#to-end", ov).onclick = () => { UI.closeModal(); UI.endScreen(); };
   },
 
@@ -615,16 +620,16 @@ const UI = {
       const isReal = e.choices.some(x => x.hist);
       if (!h && (!isReal || e.date > deathDate)) continue;
       const histChoice = e.choices.find(x => x.hist);
-      const you = h ? `<span class="tag ${h.hist ? "same" : "diff"}">${h.hist ? "Comme dans l’Histoire" : "Tu as changé l’Histoire"}</span><div><b>${esc(h.choice)}</b></div><div class="muted">${esc(h.outcome)} · ${esc(frMonth(h.date))}</div>`
+      const you = h ? `<span class="tag ${h.hist ? "same" : "diff"}">${h.hist ? (ch.fiction ? "Comme dans les livres" : "Comme dans l’Histoire") : (ch.fiction ? "Tu as changé le récit" : "Tu as changé l’Histoire")}</span><div><b>${esc(h.choice)}</b></div><div class="muted">${esc(h.outcome)} · ${esc(frMonth(h.date))}</div>`
         : `<span class="tag none">N’a pas eu lieu ainsi</span><div class="muted">Dans ta partie, le cours des choses avait déjà bifurqué${s.done[e.id] === "panel" ? " : tu l’as décidé toi-même depuis tes panneaux" : ""}.</div>`;
       rows.push(`<div class="frise-row"><div class="when">${esc(frMonth(e.date))}</div><div class="you"><h3>${esc(e.title)}</h3>${you}</div>
-        <div class="real">${isReal ? `<div class="label" style="margin-bottom:4px">Ce qui s’est vraiment passé</div>${histChoice ? `<div><b>${esc(histChoice.t)}</b></div>` : ""}<div>${esc(e.real)}</div>${e.anecdote ? `<div class="anec">${esc(e.anecdote)}</div>` : ""}` : `<div class="muted">${esc(e.real || "Cet épisode n’existe que dans ta version de l’Histoire.")}</div>`}</div></div>`);
+        <div class="real">${isReal ? `<div class="label" style="margin-bottom:4px">${ch.fiction ? "Ce qui se passe dans les livres" : "Ce qui s’est vraiment passé"}</div>${histChoice ? `<div><b>${esc(histChoice.t)}</b></div>` : ""}<div>${esc(e.real)}</div>${e.anecdote ? `<div class="anec">${esc(e.anecdote)}</div>` : ""}` : `<div class="muted">${esc(e.real || "Cet épisode n’existe que dans ta version.")}</div>`}</div></div>`);
     }
     const rd = ch.realDeath;
     rows.push(`<div class="frise-row"><div class="when">Fin</div><div class="you"><h3>Ta mort</h3><div><b>${s.dead ? esc(frDate(s.dead.date)) : "—"}</b>, à ${s.dead ? s.dead.age : GAME.age(s)} ans</div><div class="muted">${esc(s.dead ? s.dead.cause : "")} ${esc(s.place)}.</div></div>
       <div class="real">${rd ? `<div class="label" style="margin-bottom:4px">Sa mort réelle</div><div><b>${esc(frDate(rd.date))}</b>, à ${rd.age} ans, ${esc(rd.place)}.</div><div class="anec">${esc(rd.cause)}</div>` : `<div class="label" style="margin-bottom:4px">${esc(ch.realStatus.title)}</div><div>${esc(ch.realStatus.text)}</div>`}</div></div>`);
     const top = [...s.journal].sort((a, b) => (b.importance || 1) - (a.importance || 1) || b.d.localeCompare(a.d)).slice(0, 8).sort((a, b) => a.d.localeCompare(b.d));
-    app().innerHTML = `<div class="wrap"><div class="label" style="margin-top:10px">Toi contre l’Histoire</div>
+    app().innerHTML = `<div class="wrap"><div class="label" style="margin-top:10px">${ch.fiction ? "Toi contre les livres" : "Toi contre l’Histoire"}</div>
       <section class="end-hero"><div class="portrait">${ch.portrait(s)}</div>
         <div style="display:grid;gap:10px;min-width:0"><div class="muted ui">${esc(ch.name)} · ${esc(frDate(ch.born))} – ${esc(frDate(deathDate))}</div>
           <div class="legend-title">${esc(legend.title)}</div><p class="epitaph">${esc(legend.text)}</p>
@@ -632,7 +637,7 @@ const UI = {
       <div class="vs">${[...ch.endTiles(s, { fidelity, same, total: histChoices.length }), ["Actions libres", s.journal.length, "Écrites de ta main"]].map(([l, v, sub]) => `<div><small>${esc(l)}</small><b>${esc(v)}</b><small>${esc(sub)}</small></div>`).join("")}</div>
       ${top.length ? `<h2 style="font-size:1.3rem;margin-top:8px">Tes actions les plus marquantes</h2><div style="display:grid;gap:12px;margin:10px 0 22px">${top.map(j => `<div class="news key"><span class="m">${esc(frDate(j.d))} · ${esc(j.typeLabel)}${j.target ? " à " + esc(j.target) : ""}</span><b>${esc(j.resume)}</b><span class="muted">« ${esc(j.text.length > 260 ? j.text.slice(0, 260) + "…" : j.text)} »</span>${j.suites && j.suites.length ? `<span class="note">Suites : ${j.suites.map(q => esc(q.t)).join(" ; ")}</span>` : ""}</div>`).join("")}</div>` : ""}
       <h2 style="font-size:1.3rem;margin-top:8px">La frise comparée</h2>
-      <div class="frise"><div class="frise-h label"><span>Date</span><span>Toi</span><span>${ch.realStatus ? "La réalité" : "L’Histoire"}</span></div>${rows.join("")}</div></div>`;
+      <div class="frise"><div class="frise-h label"><span>Date</span><span>Toi</span><span>${ch.fiction ? "Les livres" : ch.realStatus ? "La réalité" : "L’Histoire"}</span></div>${rows.join("")}</div></div>`;
     $("#again").onclick = () => UI.setup(s.char); $("#home").onclick = () => UI.title(); $("#exp").onclick = () => UI.exportGame(s);
     window.scrollTo(0, 0);
   },
@@ -731,7 +736,7 @@ const LOOP = {
     if (death) { UI.die(death); return; }
     const due = GAME.dueHistorical(s);
     if (due) { UI.showEvent(due, "hist"); return; }
-    if (ch.week) { const w = ch.week(s); UI.update(); if (w && w.event) { UI.showEvent(w.event, "saison"); return; } if (w && w.match) { UI.playMatch(w.match); return; } }
+    if (ch.week) { const w = ch.week(s); UI.update(); if (w && w.hold) return; if (w && w.event) { UI.showEvent(w.event, "saison"); return; } if (w && w.match) { UI.playMatch(w.match); return; } }
     const mt = ch.meet ? ch.meet(s) : null;
     if (mt) { UI.fieldBattle(mt); return; }
     if (--s.nextMailIn <= 0) { s.nextMailIn = 5 + Math.floor(Math.random() * 5); UI.mailTurn(); }

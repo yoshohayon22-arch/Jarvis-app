@@ -98,7 +98,8 @@ const GAME = {
 
   /* Résolution rapide d’une bataille (quand le joueur délègue) */
   quickBattle(s, b){
-    const st = s.stats;
+    const st = s.stats; const chq = GAME.ch(s);
+    if (chq.quickP) { const win = Math.random() < clamp(chq.quickP(s, b), .04, .95); return { win, lossPct: win ? .1 : .25, quick: true }; }
     let p = b.base + (st.moral - 60) * .003 + (st.loyaute - 55) * .0015 - Math.max(0, st.fatigue - 60) * .002;
     if (b.need) p += clamp((st.armee - b.need) / b.need * .15, -.25, .12);
     const win = Math.random() < clamp(p, .04, .95);
@@ -113,7 +114,7 @@ const GAME = {
     if (r) { const copy = JSON.parse(JSON.stringify(r)); if (!res.quick && copy.s && copy.s.armee < 0) delete copy.s.armee; GAME.applyFx(s, copy, out); if (r.txt) out.notes.unshift(r.txt); }
     if (res.quick && s.corps) { for (const c of s.corps) if (c.loc !== "espagne" || b.region === "espagne") c.men *= 1 - res.lossPct * .5; GAME.ch(s).sync(s); }
     const risk = b.risk ?? .006;
-    if (!out.death && Math.random() < risk * (res.win ? 1 : 2.2)) out.death = { type: "bataille", cause: `Tué à la bataille de ${b.name}.` };
+    if (!out.death && Math.random() < risk * (res.win ? 1 : 2.2)) out.death = { type: "bataille", cause: GAME.ch(s).battleDeath ? GAME.ch(s).battleDeath(s, b) : `Tué à la bataille de ${b.name}.` };
     return out;
   },
 
@@ -193,7 +194,9 @@ const GAME = {
   },
   pickFallback(s){
     const ch = GAME.ch(s);
-    const pool = ch.randomEvents.filter(e => { if (e.once && s.done[e.id]) return false; if (s.recentRandom.includes(e.id)) return false; try { return !e.cond || e.cond(s); } catch (err) { return false; } });
+    const ok = ch.randomEvents.filter(e => { if (e.once && s.done[e.id]) return false; try { return !e.cond || e.cond(s); } catch (err) { return false; } });
+    const recent = s.recentRandom.slice(-Math.max(1, Math.min(6, ok.length - 2)));
+    const pool = ok.length > 1 ? ok.filter(e => !recent.includes(e.id)) : ok;
     return pool.length ? pickW(pool) : null;
   },
 

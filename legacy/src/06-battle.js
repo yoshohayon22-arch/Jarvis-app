@@ -17,7 +17,7 @@ const BATTLE = {
     const terr = Array.from({ length: 5 }, () => ({ mine: terrKeys[Math.floor(Math.random() * terrKeys.length)], foe: terrKeys[Math.floor(Math.random() * terrKeys.length)] }));
     const cols = n => n >= 5 ? [2, 1, 3, 0, 4] : n === 4 ? [1, 2, 3, 0] : n === 3 ? [2, 1, 3] : n === 2 ? [1, 3] : [2];
     const place = (arr, side) => arr.map((u, i) => ({ ...u, side, id: side + i, col: cols(Math.min(arr.length, 5))[i % 5], row: i >= 5 ? "back" : "front", order: "tenir", men0: u.men, routed: false, fresh: false, flankNext: false, flanking: false }));
-    BATTLE.B = { s, b, title, cb, phase: 0, terr, mine: place(set.mine, "m"), foes: place(set.foes, "f"), sel: null, texts: [], changeLeft: 99, over: null, unitLabel: set.unitLabel || "hommes" };
+    BATTLE.B = { s, b, title, cb, phase: 0, terr, mine: place(set.mine, "m"), foes: place(set.foes, "f"), sel: null, texts: [], changeLeft: 99, over: null, unitLabel: set.unitLabel || "hommes", L: set.labels || {} };
     BATTLE.render();
   },
   quick(){ const B = BATTLE.B; BATTLE.close(); B.cb(GAME.quickBattle(B.s, B.b)); },
@@ -53,7 +53,7 @@ const BATTLE = {
       const hit = (units, dmg, t) => { const tot = units.reduce((x, u) => x + u.men, 0); for (const u of units) { const loss = Math.min(u.men * .6, dmg * (u.men / tot) * taken(u, t)); u.men -= loss; u.moral -= loss / Math.max(1, u.men + loss) * 110; u._loss = (u._loss || 0) + loss; } };
       if (M.length && F.length) { hit(F, aM * K, B.terr[c].foe); hit(M, aF * K, B.terr[c].mine); for (const u of M) if (aM > aF) u.moral += 4; for (const u of F) if (aF > aM) u.moral += 4; }
       else if (M.length && !F.length && aM > 0 && M.some(u => u.order === "attaquer" || u.flanking)) { spill.f += aM * .5; facts.push(`Secteur ${c + 1} : percée de ${M[0].name}, personne en face.`); for (const u of BATTLE.alive(B.foes)) u.moral -= 5; }
-      else if (F.length && !M.length && aF > 0 && F.some(u => u.order === "attaquer" || u.flanking)) { spill.m += aF * .5; facts.push(`Secteur ${c + 1} : l’ennemi perce, aucun de vos corps ne tient ce secteur.`); for (const u of BATTLE.alive(B.mine)) u.moral -= 5; }
+      else if (F.length && !M.length && aF > 0 && F.some(u => u.order === "attaquer" || u.flanking)) { spill.m += aF * .5; facts.push(`Secteur ${c + 1} : l’ennemi perce, personne ne tient ce secteur de votre côté.`); for (const u of BATTLE.alive(B.mine)) u.moral -= 5; }
     }
     for (const side of ["m", "f"]) if (spill[side] > 0) { const units = BATTLE.alive(side === "m" ? B.mine : B.foes); const tot = units.reduce((x, u) => x + u.men, 0); for (const u of units) { const loss = Math.min(u.men * .3, spill[side] * K * (u.men / tot)); u.men -= loss; u.moral -= loss / Math.max(1, u.men + loss) * 110; } }
     for (const u of BATTLE.alive(all)) {
@@ -75,9 +75,9 @@ const BATTLE = {
       const win = !fAlive ? true : !mAlive ? false : lf > lm * 1.05;
       B.over = { win, lossPct: lm, mineLost: m0 - BATTLE.total(B.mine), foeLost: f0 - BATTLE.total(B.foes) };
     }
-    AUDIO.sfx("cannon");
+    AUDIO.sfx(B.L.sfx || "cannon");
     const entry = B.texts[B.texts.length - 1];
-    if (AI.usable()) AI.narrate(B.s, `Bataille : ${B.b.name}. ${txt}\nVos unités : ${B.mine.map(u => `${u.name} (${u.chief || ""}) ordre ${u.order}${u.routed ? ", en déroute" : ""}`).join(" ; ")}.${B.over ? ` Issue : ${B.over.win ? "victoire" : "défaite"} du joueur.` : ""}`).then(t => { if (t && BATTLE.B === B) { entry.ai = t; BATTLE.render(); } }).catch(() => {});
+    if (AI.usable()) AI.narrate(B.s, `${B.L.kind || "Bataille"} : ${B.b.name}. ${txt}\nVos unités : ${B.mine.map(u => `${u.name} (${u.chief || ""}) ordre ${u.order}${u.routed ? ", en déroute" : ""}`).join(" ; ")}.${B.over ? ` Issue : ${B.over.win ? "victoire" : "défaite"} du joueur.` : ""}`).then(t => { if (t && BATTLE.B === B) { entry.ai = t; BATTLE.render(); } }).catch(() => {});
     BATTLE.render();
   },
   fmt: (k, B) => B.unitLabel === "hommes" ? `${Math.max(0, Math.round(k * 1000)).toLocaleString("fr-FR")} hommes` : `${Math.max(0, Math.round(k))} ${B.unitLabel}`,
@@ -90,26 +90,26 @@ const BATTLE = {
       const unit = u ? `<button class="bt-unit ${side} ${B.sel === u.id ? "sel" : ""}" data-unit="${u.id}" ${side === "f" ? "disabled" : ""}>
           <b>${esc(u.name)}</b><span>${esc(u.chief || "")}</span><span class="num">${Math.round(u.men * (B.unitLabel === "hommes" ? 1000 : 1)).toLocaleString("fr-FR")}</span>
           <span class="bar"><i class="lvl-${u.moral < 30 ? "bad" : u.moral < 50 ? "warn" : "good"}" style="width:${u.moral}%"></i></span>
-          ${side === "m" ? `<em>${BATTLE.ORDERS[u.order].label}${u.flankNext ? " →" : ""}</em>` : ""}</button>` : "";
-      return `<div class="bt-cell ${side} ${row} ${t ? "t-" + B.terr[c][side === "m" ? "mine" : "foe"] : ""}" data-cell="${side}|${row}|${c}">${t ? `<small>${t.label}</small>` : ""}${unit}</div>`;
+          ${side === "m" ? `<em>${(B.L.orders || {})[u.order] || BATTLE.ORDERS[u.order].label}${u.flankNext ? " →" : ""}</em>` : ""}</button>` : "";
+      return `<div class="bt-cell ${side} ${row} ${t ? "t-" + B.terr[c][side === "m" ? "mine" : "foe"] : ""}" data-cell="${side}|${row}|${c}">${t ? `<small>${(B.L.terr || {})[B.terr[c][side === "m" ? "mine" : "foe"]] || t.label}</small>` : ""}${unit}</div>`;
     };
     const rows = [["f", "back"], ["f", "front"], ["m", "front"], ["m", "back"]].map(([sd, rw]) => Array.from({ length: 5 }, (_, c) => cell(sd, rw, c)).join("")).join("");
     const sel = B.mine.find(u => u.id === B.sel);
     const canOrder = !B.over && sel && !sel.routed && !sel.flankNext && (B.phase === 0 || B.changeLeft > 0);
     const last = B.texts[B.texts.length - 1];
     const routedM = B.mine.filter(u => u.routed), routedF = B.foes.filter(u => u.routed);
-    overlay().innerHTML = `<div class="overlay" role="dialog" aria-modal="true" aria-label="Bataille"><div class="modal wide"><div class="modal-body bt">
-      <div class="ev-kind"><span class="k hist">Bataille</span><span class="label">${B.over ? "Terminée" : B.phase === 0 ? "Déploiement" : `Phase ${B.phase} sur 3 jouée`}</span></div>
+    overlay().innerHTML = `<div class="overlay" role="dialog" aria-modal="true" aria-label="${B.L.kind || "Bataille"}"><div class="modal wide"><div class="modal-body bt">
+      <div class="ev-kind"><span class="k hist">${B.L.kind || "Bataille"}</span><span class="label">${B.over ? "Terminée" : B.phase === 0 ? "Déploiement" : `Phase ${B.phase} sur 3 jouée`}</span></div>
       <h2>${esc(B.title || B.b.name)}</h2>
       <div class="bt-forces"><span>Vous : <b class="num">${BATTLE.fmt(BATTLE.alive(B.mine).reduce((t, u) => t + u.men, 0), B)}</b></span><span>Ennemi : <b class="num">${BATTLE.fmt(BATTLE.alive(B.foes).reduce((t, u) => t + u.men, 0), B)}</b></span></div>
       <div class="bt-grid">${rows}</div>
       ${routedM.length || routedF.length ? `<p class="muted ui" style="margin:0;font-size:.85rem">En déroute : ${[...routedM.map(u => u.name + " (à vous)"), ...routedF.map(u => u.name + " (ennemi)")].map(esc).join(", ")}</p>` : ""}
       ${last ? `<div class="realbox"><b>${esc(last.ai || last.txt)}</b>${last.ai ? `<br><span class="ui" style="font-size:.82rem">${esc(last.txt)}</span>` : ""}</div>` : `<p class="muted" style="margin:0">Touchez une de vos unités, puis une case de vos deux lignes pour la placer. Donnez un ordre à chacune. Une unité seule dans un secteur face au vide peut percer ; un secteur laissé vide peut être percé.</p>`}
       ${!B.over ? `<div class="bt-orders">${sel ? `<span class="label">${esc(sel.name)}${B.phase > 0 ? ` · ${B.changeLeft > 0 ? "vous pouvez changer un ordre" : "ordre déjà changé pour cette phase"}` : ""}</span>` : `<span class="label">${B.phase > 0 && B.changeLeft > 0 ? "Vous pouvez changer un ordre : touchez une unité" : "Touchez une unité pour lui donner un ordre"}</span>`}
-        <div class="bt-ord">${Object.entries(BATTLE.ORDERS).map(([k, o]) => `<button class="btn ${sel && sel.order === k ? "primary" : ""}" data-order="${k}" ${canOrder ? "" : "disabled"} title="${esc(o.hint)}">${o.label}</button>`).join("")}</div>
+        <div class="bt-ord">${Object.entries(BATTLE.ORDERS).map(([k, o]) => `<button class="btn ${sel && sel.order === k ? "primary" : ""}" data-order="${k}" ${canOrder ? "" : "disabled"} title="${esc(o.hint)}">${(B.L.orders || {})[k] || o.label}</button>`).join("")}</div>
         ${sel ? `<span class="muted ui" style="font-size:.85rem">${esc(BATTLE.ORDERS[sel.order].hint)}</span>` : ""}</div>` : ""}
       <div class="row">${B.over ? `<span class="verdict ${B.over.win ? "win" : "loss"}" style="margin-right:auto">${B.over.win ? "Victoire" : "Défaite"}</span><button class="btn primary" id="bt-end">Continuer</button>`
-        : `${B.phase === 0 ? `<button class="btn ghost" id="bt-quick">Déléguer à l’état-major</button>` : ""}<button class="btn primary" id="bt-go">${B.phase === 0 ? "Engager la bataille" : `Lancer la phase ${B.phase + 1}`}</button>`}</div>
+        : `${B.phase === 0 ? `<button class="btn ghost" id="bt-quick">${B.L.quick || "Déléguer à l’état-major"}</button>` : ""}<button class="btn primary" id="bt-go">${B.phase === 0 ? (B.L.go || "Engager la bataille") : `Lancer la phase ${B.phase + 1}`}</button>`}</div>
     </div></div></div>`;
     const ov = $(".overlay");
     $$("[data-unit]", ov).forEach(b => b.onclick = e => { e.stopPropagation(); B.sel = b.dataset.unit; AUDIO.sfx("click"); BATTLE.render(); });

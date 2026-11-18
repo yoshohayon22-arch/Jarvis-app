@@ -15,7 +15,7 @@ CHARACTERS.napoleon = {
   art: "linear-gradient(160deg,#1e3a2b,#0b140f)",
   born: "1769-08-15",
   birthplace: "Ajaccio, Corse",
-  unit: { label: "mois", months: 1 },
+  unit: { label: "semaine", days: 7 },
   portrait: s => ART.napoleon({ age: s ? GAME.age(s) : 27 }),
   realDeath: { date: "1821-05-05", age: 51, place: "Longwood, île de Sainte-Hélène",
     cause: "Cancer de l’estomac, selon l’autopsie de 1821 (l’hypothèse d’un empoisonnement à l’arsenic, avancée au XXe siècle, est aujourd’hui largement écartée)." },
@@ -259,6 +259,15 @@ CHARACTERS.napoleon = {
       choices: [
         { t: "Accepter le plébiscite et devenir consul à vie", hist: true, res: "Le peuple approuve massivement. Votre pouvoir n’a plus de terme.", fx: { s: { popularite: 6, complot: 6 }, r: { fouche: -6 }, rank: "consulvie", c: { reforms: 1 } } },
         { t: "Refuser et garder un mandat de dix ans", res: "Les républicains vous saluent. Les ambitieux attendent la fin du mandat.", fx: { s: { popularite: 4, complot: -6, loyaute: -4 }, r: { fouche: 8 }, f: { republican: true } } }
+      ] },
+    { id: "rupture", date: "1803-05-16", until: "1803-12-01", cond: s => s.flags.peace && s.pays && s.pays.angleterre.statut === "paix", title: "La rupture de la paix d’Amiens", place: "Palais de Saint-Cloud", scene: "palais", people: ["talleyrand", "pitt"],
+      text: "Londres refuse d’évacuer Malte, comme le traité l’y obligeait, et s’inquiète de vos annexions en Italie et de votre médiation en Suisse. L’ambassadeur Whitworth a quitté Paris. Pour financer la guerre qui vient, Barbé-Marbois propose de vendre aux États-Unis l’immense Louisiane, indéfendable sans flotte.",
+      real: "Le Royaume-Uni rompt la paix en mai 1803. Bonaparte vend la Louisiane aux États-Unis pour 80 millions de francs et rassemble l’armée au camp de Boulogne pour envahir l’Angleterre.",
+      anecdote: "La vente double la superficie des États-Unis, pour environ trois cents le demi-hectare.",
+      choices: [
+        { t: "Vendre la Louisiane et préparer le débarquement à Boulogne", hist: true, res: "Jefferson signe ; 2 000 péniches sont mises en chantier sur la Manche.", fx: { s: { tresor: 60, coalition: 10, popularite: -2 }, r: { pitt: -15 }, f: { peace: false, louisiane: true } } },
+        { t: "Évacuer la Hollande et la Suisse pour sauver la paix", res: "Londres, surpris, accepte de reprendre les discussions.", fx: { s: { coalition: -8, loyaute: -6, departements: -2 }, r: { pitt: 10, talleyrand: 8 }, f: { peaceKept: true } } },
+        { t: "Garder la Louisiane et y envoyer une armée", res: "Une expédition part pour La Nouvelle-Orléans ; la fièvre jaune et la Royal Navy l’attendent.", fx: { s: { tresor: -40, coalition: 8 }, f: { peace: false }, depot: -15 } }
       ] },
     { id: "enghien", date: "1804-03-15", until: "1804-07-01", cond: s => s.flags.consul && !s.flags.empire, title: "Le duc d’Enghien", place: "Château de Vincennes", scene: "paris", people: ["talleyrand", "fouche", "alexandre"],
       text: "La police vient de démanteler le complot de Cadoudal, qui voulait vous enlever ou vous tuer. Les conjurés évoquent l’arrivée imminente d’un « prince » Bourbon. Le duc d’Enghien, petit-fils du prince de Condé, vit à Ettenheim, en territoire badois, à quelques lieues du Rhin. Une colonne de dragons pourrait l’enlever cette nuit.",
@@ -648,68 +657,6 @@ CHARACTERS.napoleon = {
       ] }
   ],
 
-  /* ---------------- Actions de gestion, disponibles à tout moment ---------------- */
-  actions: [
-    { id: "conscription", label: "Lever une conscription", desc: "+ armée, − popularité", cd: 6, cond: s => GAME.power(s) >= 2, fx: { s: { armee: 60, popularite: -6, tresor: -15 } } },
-    { id: "volontaires", label: "Recruter des volontaires", desc: "+ armée, − trésor", cd: 4, cond: s => GAME.power(s) === 1, fx: { s: { armee: 6, tresor: -3, popularite: -1 } } },
-    { id: "requisitions", label: "Lever des contributions", desc: "+ trésor, − popularité", cd: 4, cond: s => GAME.power(s) === 1, fx: { s: { tresor: 12, popularite: -3, coalition: 2 } } },
-    { id: "impot", label: "Lever les droits réunis", desc: "Taxe sur l’alcool, le tabac, le sel", cd: 6, cond: s => GAME.power(s) >= 2, fx: { s: { tresor: 70, popularite: -6 } } },
-    { id: "harangue", label: "Passer les troupes en revue", desc: "+ moral, + fatigue", cd: 3, cond: s => GAME.power(s) >= 1 && s.stats.armee > 5, fx: { s: { moral: 8, fatigue: 5 } } },
-    { id: "dotations", label: "Doter les maréchaux", desc: "Titres, terres, rentes", cd: 6, cond: s => GAME.power(s) >= 2, fx: { s: { tresor: -45, loyaute: 10 }, r: { ney: 4, davout: 4, berthier: 4, murat: 4 } } },
-    { id: "police", label: "Renforcer la police", desc: "− complot, − popularité", cd: 4, cond: s => GAME.power(s) >= 2, fx: { s: { tresor: -15, complot: -12, popularite: -2 }, r: { fouche: 4 } } },
-    { id: "propagande", label: "Fêtes et bulletins", desc: "Te Deum, bulletins de l’armée", cd: 4, cond: s => GAME.power(s) >= 2, fx: { s: { tresor: -20, popularite: 6 } } },
-    { id: "diplomatie", label: "Mission diplomatique", desc: "− menace des coalitions", cd: 6, cond: s => GAME.power(s) >= 2, fx: { s: { coalition: -8, tresor: -10 }, r: { talleyrand: 3, metternich: 3 } } },
-    { id: "repos", label: "Prendre du repos", desc: "− fatigue, − stress", cd: 3, cond: s => !s.flags.inRussia && GAME.power(s) >= 1, fx: { s: { fatigue: -18, stress: -10, sante: 2 } } },
-    { id: "medecin", label: "Consulter son médecin", desc: "+ santé", cd: 6, cond: s => true, fx: { s: { sante: 6, tresor: -1 } } },
-    { id: "famille", label: "Passer du temps en famille", desc: "− stress, + relation conjoint", cd: 3, cond: s => !!(s.family.spouse || s.family.spouseName) || s.family.children.length > 0, fx: { s: { stress: -8 }, spouseRel: 6 } },
-    { id: "memoires", label: "Dicter ses mémoires", desc: "Forger sa légende", cd: 4, cond: s => GAME.power(s) === 0, fx: { s: { popularite: 3, stress: -4, fatigue: 3 } } },
-    { id: "jardin", label: "Jardiner et marcher", desc: "+ santé, − stress", cd: 3, cond: s => GAME.power(s) === 0, fx: { s: { sante: 3, stress: -6 } } }
-  ],
-
-  /* ---------------- Simulation mensuelle propre au personnage ---------------- */
-  tick(s, h){
-    const st = s.stats, f = s.flags, r = this.ranks[s.rank] || { income: 0 };
-    const age = h.age;
-    const out = [];
-    // Finances
-    const income = st.departements * .55 * (.7 + st.popularite / 200) * r.income + (GAME.power(s) === 1 ? 2 : 0);
-    let upkeep = st.armee * (GAME.power(s) >= 2 ? .085 : .02) + (f.atWar ? st.armee * .035 : 0);
-    if (GAME.power(s) === 0) upkeep = 0;
-    h.add("tresor", income - upkeep);
-    if (st.tresor < 0) { h.add("popularite", -1.2); h.add("loyaute", -1); h.add("moral", -1.5); }
-    // Armée
-    h.add("armee", -st.armee * .004);
-    if (f.spainWar) { h.add("armee", -4); h.add("moral", -.4); h.add("popularite", -.15); }
-    if (f.inRussia) { const winter = [10, 11, 0, 1, 2].includes(h.month); h.add("armee", -st.armee * (winter ? .12 : .05)); h.add("moral", winter ? -4 : -1.5); h.add("fatigue", 3); if (Math.random() < .03) h.condition("typhus", "Typhus", 2.5); }
-    h.drift("moral", 58, .05);
-    // Politique
-    h.drift("popularite", 50, .018);
-    h.drift("loyaute", 55, .02);
-    if (f.atWar && GAME.power(s) >= 2) { h.add("popularite", -.25); h.add("coalition", st.departements > 115 ? .5 : .15); } else h.drift("coalition", 30, .03);
-    if (GAME.power(s) >= 2) {
-      let c = (50 - st.popularite) * .02 + (50 - st.loyaute) * .02 - .25;
-      if (s.rank === "empereur" && !GAME.hasHeir(s)) c += .35;
-      for (const rel of this.relations) if (rel.plotter && GAME.relAlive(s, rel.id)) c += Math.max(0, -s.rel[rel.id]) / 220;
-      h.add("complot", c);
-    } else h.drift("complot", 5, .05);
-    // Corps
-    h.add("fatigue", f.atWar && GAME.power(s) >= 1 ? 1.2 : -2.5);
-    h.add("stress", (st.coalition + st.complot) / 110 - 1.6 + (st.tresor < 0 ? .8 : 0));
-    let dS = 0;
-    if (st.fatigue > 70) dS -= .8; if (st.stress > 70) dS -= .8;
-    if (age > 40) dS -= (age - 40) * .035;
-    if (st.fatigue < 45 && st.stress < 55) dS += .7;
-    h.add("sante", dS);
-    if (f.stHelena) { h.add("sante", -.5); h.add("stress", .6); }
-    // Maladies : son père Charles est mort d’un cancer de l’estomac en 1785
-    if (age >= 44 && !h.hasCondition("cancer") && Math.random() < .0016 * (1 + st.stress / 40) * (f.stHelena ? 4 : 1)) { h.condition("cancer", "Ulcère, puis cancer de l’estomac", .9); out.push({ t: "Douleurs violentes au côté droit. Le médecin parle d’une affection de l’estomac, comme celle qui emporta votre père.", tone: "bad" }); }
-    if (st.stress > 80 && !h.hasCondition("ulcere") && Math.random() < .02) h.condition("ulcere", "Troubles digestifs chroniques", .4);
-    if (age > 38 && !h.hasCondition("vessie") && Math.random() < .004) h.condition("vessie", "Dysurie (troubles urinaires)", .06);
-    return out;
-  },
-  plotHazard: s => GAME.power(s) >= 2 ? Math.pow(s.stats.complot / 100, 3) * .028 : Math.pow(s.stats.complot / 100, 3) * .006,
-  plotCause: s => s.rank === "empereur" ? "Assassiné lors d’une conjuration de palais." : "Assassiné par des conjurés royalistes.",
-
   /* ---------------- Titres de légende ---------------- */
   legends: [
     { title: "Le Vainqueur de Waterloo", cond: (s, c) => s.flags.waterlooWon, text: "Tu as gagné la bataille que l’Histoire t’avait refusée." },
@@ -736,6 +683,6 @@ const ROSTER = [
   { id: "trump", name: "Donald Trump", role: "Homme d’affaires, président des États-Unis", art: "linear-gradient(160deg,#20304f,#0c1220)", c1: "#3b5b94", c2: "#121b30", letter: "DT" },
   { id: "ronaldo", name: "Cristiano Ronaldo", role: "Footballeur", art: "linear-gradient(160deg,#1f4b2c,#0b1a10)", c1: "#3f8a4f", c2: "#10261a", letter: "CR" },
   { id: "mrbeast", name: "MrBeast", role: "Créateur YouTube, entrepreneur", art: "linear-gradient(160deg,#3c2160,#120a20)", c1: "#7b44c4", c2: "#1d1033", letter: "MB" },
-  { id: "moise", name: "Moïse", role: "Prophète, selon le récit biblique", art: "linear-gradient(160deg,#6b4a22,#20150a)", c1: "#b98a4a", c2: "#3a2610", letter: "M" }
+  { id: "harry", name: "Harry Potter", role: "Apprenti sorcier", art: "linear-gradient(160deg,#1c1f3f,#0a0b18)", c1: "#39407e", c2: "#0e1026", letter: "✦", noFigure: true }
 ];
 </script>

@@ -134,6 +134,28 @@ const ART = {};
     </svg>`;
   };
 
+
+  /* Carte interactive générique : régions, statuts et pions viennent des données du personnage */
+  ART.map = function(ch, s, sel, selMarker){
+    const m = ch.map; const byReg = {};
+    for (const mk of m.markers(s)) (byReg[mk.region] = byReg[mk.region] || []).push(mk);
+    const regs = m.regions.map(r => { const st = m.status(s, r.id); return `<polygon class="rg st-${st} ${sel === r.id ? "sel" : ""}" data-region="${r.id}" points="${r.pts}" tabindex="0" role="button" aria-label="${r.name} : ${m.statusLabel[st]}"></polygon>`; }).join("");
+    const labels = m.regions.map(r => `<text class="rg-l" x="${r.c[0]}" y="${r.c[1] + (byReg[r.id] ? 24 : 4)}" text-anchor="middle">${r.name}</text>`).join("");
+    const pins = Object.entries(byReg).map(([rid, arr]) => { const r = m.regions.find(x => x.id === rid); if (!r) return ""; return arr.map((mk, i) => { const x = r.c[0] + (i - (arr.length - 1) / 2) * 24, y = r.c[1] - 8; return `<g class="pin ${mk.moving ? "moving" : ""} ${selMarker === mk.id ? "sel" : ""}" data-marker="${mk.id}" tabindex="0" role="button" aria-label="${mk.title}"><title>${mk.title}</title><circle cx="${x}" cy="${y}" r="11"></circle><text x="${x}" y="${y + 4.5}" text-anchor="middle">${mk.label}</text></g>`; }).join(""); }).join("");
+    return `<svg class="map-svg" viewBox="${m.viewBox}" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" role="group" aria-label="Carte : ${m.title}">
+      <rect class="sea" x="-200" y="-200" width="1600" height="1300"></rect>
+      <g class="sea-lines">${Array.from({length:9},(_,i)=>`<path d="M${170+i*30} ${60+i*72} q26 -9 52 0 t52 0"/>`).join("")}</g>
+      ${regs}${labels}${pins}</svg>`;
+  };
+  /* Illustration générique sans personnage : ciel étoilé et bougie */
+  ART.plain = function(c1, c2){
+    const g = id("pl");
+    return `<svg viewBox="0 0 200 240" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs><radialGradient id="${g}" cx=".5" cy=".4" r=".7"><stop offset="0" stop-color="${c1}"/><stop offset="1" stop-color="${c2}"/></radialGradient></defs>
+      <circle cx="100" cy="115" r="94" fill="url(#${g})" stroke="rgba(255,255,255,.25)" stroke-width="2"/>
+      ${Array.from({length:16},(_,i)=>`<circle cx="${30+(i*53)%140}" cy="${40+(i*37)%110}" r="${i%4?1.2:2}" fill="#fff" opacity="${i%3?.5:.9}"/>`).join("")}
+      <rect x="94" y="130" width="12" height="46" rx="2" fill="#e9dfc6"/><ellipse cx="100" cy="122" rx="5" ry="9" fill="#f6c453"/><rect x="82" y="176" width="36" height="6" rx="3" fill="#8a7a55"/></svg>`;
+  };
+
   /* Silhouettes d’attente pour les personnages des étapes suivantes */
   ART.placeholder = function(letter, c1, c2){
     const g = id("ph");

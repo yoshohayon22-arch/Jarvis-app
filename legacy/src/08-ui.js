@@ -10,10 +10,10 @@ const app = () => $("#app");
 const overlay = () => $("#overlay-root");
 
 const UI = {
-  modalOpen: false, resumeSpeed: 1, currentEvent: null, currentKind: null, tab: "carte", panel: null, mapSel: null, pinSel: null, armed: null,
+  modalOpen: false, resumeSpeed: 1, currentEvent: null, currentKind: null, view: "general", subtab: null, pressCat: "tous", contact: null, ord: { corps: null, dest: null }, mapSel: null, armed: null, ctlById: {},
   feedOpen: STORE.getSetting("feedOpen", false), keys: {}, busyUntil: 0,
 
-  toast(msg){ const t = document.createElement("div"); t.className = "toast"; t.setAttribute("role", "status"); t.textContent = msg; document.body.appendChild(t); setTimeout(() => t.remove(), 2600); },
+  toast(msg){ for (const old of $$(".toast")) old.hidden = true; const t = document.createElement("div"); t.className = "toast"; t.setAttribute("role", "status"); t.textContent = msg; document.body.appendChild(t); setTimeout(() => t.remove(), 2600); },
   setTheme(theme, inGame){ document.body.className = (theme || "") + (inGame ? " in-game" : ""); },
   save(){ const s = GAME.s; if (s) STORE.write(s.slot, s); },
 
@@ -67,7 +67,7 @@ const UI = {
     const ch = GAME.ch(s);
     if (s.dead) { UI.endScreen(); return; }
     UI.setTheme(ch.theme, true);
-    UI.panel = (ch.panels.find(p => p.cond(s)) || ch.panels[0]).id;
+    UI.view = "general"; UI.subtab = null; UI.contact = null;
     UI.buildGame(); AUDIO.theme(ch.audio);
     if (fresh) { UI.save(); AI.prefetch(s); }
     if (s.pending) { UI.restorePending(); return; }
@@ -80,11 +80,18 @@ const UI = {
     s.pending = null; if (ev) UI.showEvent(ev, p.kind);
   },
 
+  ICONS: {
+    general: `<svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="11" fill="none" stroke="currentColor" stroke-width="2"/><path d="M5 16h22M16 5c-5 4-5 18 0 22M16 5c5 4 5 18 0 22" fill="none" stroke="currentColor" stroke-width="2"/></svg>`,
+    armee: `<svg viewBox="0 0 32 32" aria-hidden="true"><path d="M9 4v24M9 5h15l-4 5 4 5H9" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/></svg>`,
+    presse: `<svg viewBox="0 0 32 32" aria-hidden="true"><rect x="5" y="6" width="22" height="20" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9 11h14M9 16h6M9 21h6M19 16h4v5h-4z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`,
+    finances: `<svg viewBox="0 0 32 32" aria-hidden="true"><ellipse cx="16" cy="9" rx="9" ry="4" fill="none" stroke="currentColor" stroke-width="2"/><path d="M7 9v7c0 2.2 4 4 9 4s9-1.8 9-4V9M7 16v7c0 2.2 4 4 9 4s9-1.8 9-4v-7" fill="none" stroke="currentColor" stroke-width="2"/></svg>`,
+    corr: `<svg viewBox="0 0 32 32" aria-hidden="true"><rect x="4" y="8" width="24" height="17" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M5 10l11 8 11-8" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>`
+  },
+  VIEWS: [["general", "Vue générale"], ["armee", "Armée"], ["presse", "Presse"], ["finances", "Finances"], ["corr", "Correspondance"]],
+
   buildGame(){
     const s = GAME.s, ch = GAME.ch(s);
-    const gauge = d => `<div class="gauge" data-stat="${d.id}" title="${esc(d.hint || "")}"><div class="top"><span class="name">${esc(d.label)}</span><span class="val"><span class="v"></span><span class="trend"></span></span></div><span class="bar"><i></i></span></div>`;
-    const groups = Object.entries(ch.groups).map(([g, label]) => `<div class="panel"><h2>${esc(label)}</h2><div class="gauges">${ch.stats.filter(d => d.group === g).map(gauge).join("")}</div>${g === "vie" ? `<div id="conds" style="margin-top:6px"></div>` : ""}</div>`).join("");
-    const m = ch.map;
+    s.seen = s.seen || { feedN: s.feedN || 0, armee: "" };
     app().innerHTML = `
       <header class="topbar"><div class="topbar-in">
         <div class="who"><h1>${esc(ch.short)}</h1><span class="rank" id="rank"></span></div>
@@ -95,122 +102,255 @@ const UI = {
         <button class="icon-btn" id="b-sfx" aria-pressed="${AUDIO.sfxOn}" title="Bruitages">Sons</button>
         <button class="icon-btn" id="b-menu" title="Parties, réglages, quitter">Menu</button>
       </div><div class="tick-bar"><i id="tickbar"></i></div></header>
-      <main class="game" data-tab="${UI.tab}">
-        <section class="col col-left" aria-label="Jauges">
-          <div class="panel idcard"><div id="portrait"></div><div><div class="place" id="place"></div><span class="status" id="status"></span></div></div>
-          ${groups}
-          <div class="panel"><h2>Finances</h2><div class="mini" id="mini"></div></div>
-        </section>
-        <section class="col col-mid" aria-label="Carte et fil d’actualité">
-          <div class="mapbox"><div id="map" style="width:100%;height:100%"></div>
-            <div class="map-legend">${Object.entries(m.statusLabel).map(([k, l]) => `<span><i class="st-${k}" style="background:currentColor"></i>${esc(l)}</span>`).join("")}</div>
-            <div id="map-info"></div></div>
-          <div class="feed ${UI.feedOpen ? "" : "closed"}" id="feed"><button class="feed-h" id="feed-h" aria-expanded="${UI.feedOpen}"><span class="label">Fil d’actualité</span><span class="last" id="feed-last"></span><span class="chev" id="feed-chev"></span></button><div class="feed-list" id="feed-list"></div></div>
-        </section>
-        <section class="col col-right" aria-label="Panneaux de gestion"><div class="ptabs" role="tablist" id="ptabs"></div><div class="pbody" id="pbody" role="tabpanel"></div></section>
-      </main>
-      <nav class="tabs" aria-label="Sections"><button data-tab="carte">Carte</button><button data-tab="jauges">Jauges</button><button data-tab="gestion">Gestion</button></nav>`;
-    // La légende reprend les couleurs de la carte
-    $$(".map-legend i").forEach(i => { i.style.background = ""; });
+      <div class="shell">
+        <nav class="rail" id="rail" aria-label="Fenêtres">${UI.VIEWS.map(([id, label]) => `<button data-view="${id}" aria-pressed="false">${UI.ICONS[id]}<span>${label}</span><i class="badge-dot" hidden></i></button>`).join("")}</nav>
+        <main class="view" id="view"></main>
+      </div>`;
     $$("[data-speed]").forEach(b => b.onclick = () => { AUDIO.sfx("click"); LOOP.setSpeed(+b.dataset.speed); });
     $("#b-agir").onclick = () => UI.actionModal();
     $("#b-music").onclick = e => { AUDIO.setMusic(!AUDIO.musicOn); e.currentTarget.setAttribute("aria-pressed", AUDIO.musicOn); };
     $("#b-sfx").onclick = e => { AUDIO.setSfx(!AUDIO.sfxOn); e.currentTarget.setAttribute("aria-pressed", AUDIO.sfxOn); AUDIO.sfx("click"); };
     $("#b-menu").onclick = () => UI.menuModal();
-    $$(".tabs [data-tab]").forEach(b => b.onclick = () => { UI.tab = b.dataset.tab; $(".game").dataset.tab = UI.tab; UI.updateTabs(); window.scrollTo(0, 0); });
-    $("#feed-h").onclick = () => { UI.feedOpen = !UI.feedOpen; STORE.setSetting("feedOpen", UI.feedOpen); $("#feed").classList.toggle("closed", !UI.feedOpen); $("#feed-h").setAttribute("aria-expanded", UI.feedOpen); UI.updateFeed(true); };
-    const map = $("#map");
-    const mapClick = e => { const pin = e.target.closest("[data-marker]"), rg = e.target.closest("[data-region]"); if (pin) { UI.pinSel = UI.pinSel === pin.dataset.marker ? null : pin.dataset.marker; AUDIO.sfx("click"); UI.updateMap(true); return; } if (rg) { AUDIO.sfx("click"); if (UI.pinSel) { const id = UI.pinSel; UI.pinSel = null; UI.act("corps_move", id, rg.dataset.region); } UI.mapSel = rg.dataset.region; UI.updateMap(true); } };
-    map.addEventListener("click", mapClick); map.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); mapClick(e); } });
-    $("#map-info").addEventListener("click", e => { const b = e.target.closest("[data-mi]"); if (!b) return; const [act, arg] = b.dataset.mi.split("|"); if (act === "close") { UI.mapSel = null; UI.updateMap(true); } else if (act === "panel") { UI.panel = arg; UI.tab = "gestion"; $(".game").dataset.tab = UI.tab; UI.updateTabs(); UI.renderPanel(true); } else UI.act(act, arg); });
-    $("#map-info").addEventListener("change", e => { const sl = e.target.closest("[data-send]"); if (sl && sl.value) UI.act("corps_move", sl.value, sl.dataset.send); });
-    // Panneaux : délégation d’événements
-    const pb = $("#pbody");
-    pb.addEventListener("pointerdown", () => { UI.busyUntil = Date.now() + 2500; });
-    pb.addEventListener("input", e => { const r = e.target.closest("input[type=range]"); if (!r) return; UI.busyUntil = Date.now() + 2500; const lab = r.closest(".ctl").querySelector(".ctl-top b"); const c = UI.ctlById[r.dataset.cid]; if (lab && c) lab.textContent = c.fmt ? c.fmt(+r.value) : r.value; });
-    pb.addEventListener("change", e => { const el = e.target.closest("[data-cid]"); if (!el) return; const c = UI.ctlById[el.dataset.cid]; if (!c) return; UI.busyUntil = 0; if (el.tagName === "SELECT" && el.value === "" ) return; UI.act(c.act, c.arg, el.value); });
-    pb.addEventListener("click", e => { const b = e.target.closest("button[data-cid]"); if (!b || b.disabled) return; const c = UI.ctlById[b.dataset.cid]; if (!c) return; if (c.confirm && UI.armed !== c.act + "|" + c.arg) { UI.armed = c.act + "|" + c.arg; UI.renderPanel(true); return; } UI.armed = null; UI.busyUntil = 0; UI.act(c.act, c.arg); const r = e.target.closest(".rel"); });
-    pb.addEventListener("click", e => { const b = e.target.closest(".rel"); if (!b) return; const d = b.querySelector(".rel-detail"); d.hidden = !d.hidden; UI.busyUntil = Date.now() + 8000; });
-    $("#ptabs").addEventListener("click", e => { const b = e.target.closest("[data-panel]"); if (!b) return; UI.panel = b.dataset.panel; UI.armed = null; AUDIO.sfx("click"); UI.renderPanel(true); });
-    UI.keys = {}; UI.lastPortraitAge = -1;
-    UI.updateTabs(); UI.update(true); UI.updateAIStatus();
+    $("#rail").addEventListener("click", e => { const b = e.target.closest("[data-view]"); if (b) { AUDIO.sfx("click"); UI.setView(b.dataset.view); } });
+    // Délégation : tout ce qui se passe dans la fenêtre active
+    const v = $("#view");
+    v.addEventListener("pointerdown", e => { if (e.target.closest("#pbody")) UI.busyUntil = Date.now() + 2500; });
+    v.addEventListener("input", e => { const r = e.target.closest("input[type=range]"); if (!r) return; UI.busyUntil = Date.now() + 2500; const c = UI.ctlById[r.dataset.cid]; if (!c) return; const box = r.closest(".ctl"); box.querySelector(".ctl-top b").textContent = c.fmt ? c.fmt(+r.value) : r.value; if (c.live) box.querySelector(".note").textContent = c.live(+r.value); });
+    v.addEventListener("change", e => {
+      const el = e.target.closest("[data-cid]"); if (el) { const c = UI.ctlById[el.dataset.cid]; if (!c) return; UI.busyUntil = 0; if (el.tagName === "SELECT" && el.value === "") return; UI.act(c.act, c.arg, el.value); return; }
+    });
+    v.addEventListener("click", e => {
+      const b = e.target.closest("button[data-cid]");
+      if (b) { if (b.disabled) return; const c = UI.ctlById[b.dataset.cid]; if (!c) return; if (c.confirm && UI.armed !== c.act + "|" + c.arg) { UI.armed = c.act + "|" + c.arg; UI.renderPanel(true); return; } UI.armed = null; UI.busyUntil = 0; UI.act(c.act, c.arg); return; }
+      const t = e.target.closest("[data-do]"); if (t) { const [a, x] = t.dataset.do.split("|"); UI.doView(a, x); return; }
+      const pick = e.target.closest("[data-pick]"); if (pick) { UI.pickCorps(pick.dataset.pick); return; }
+      const rel = e.target.closest(".rel"); if (rel) { const d = rel.querySelector(".rel-detail"); if (d) d.hidden = !d.hidden; }
+    });
+    v.addEventListener("click", e => { if (!e.target.closest("#map")) return; UI.mapClick(e); });
+    v.addEventListener("keydown", e => { if ((e.key === "Enter" || e.key === " ") && e.target.closest("#map")) { e.preventDefault(); UI.mapClick(e); } });
+    v.addEventListener("focusin", e => { if (e.target.id === "msg") { UI.mailPaused = UI.pause() || UI.mailPaused || 0; } });
+    v.addEventListener("focusout", e => { if (e.target.id === "msg") setTimeout(() => { if (document.activeElement && document.activeElement.id === "send") return; UI.mailResume(); }, 150); });
+    v.addEventListener("pointermove", e => { const c = e.target.closest("#chart svg"); if (c) UI.chartHover(e, c); });
+    v.addEventListener("pointerout", e => { if (e.target.closest("#chart") && !(e.relatedTarget && e.relatedTarget.closest && e.relatedTarget.closest("#chart"))) UI.chartHover(null); });
+    UI.lastPortraitAge = -1; UI.ord = { corps: null, dest: null };
+    UI.setView(UI.view || "general");
+    UI.updateAIStatus();
   },
-  updateTabs(){ $$(".tabs [data-tab]").forEach(b => b.setAttribute("aria-pressed", b.dataset.tab === UI.tab)); },
+
+  setView(view){
+    const s = GAME.s, ch = GAME.ch(s); UI.view = view; UI.keys = {}; UI.armed = null; UI.mapSel = null; UI.ord = { corps: null, dest: null };
+    const legend = `<div class="map-legend">${Object.entries(ch.map.statusLabel).map(([k, l]) => `<span><i class="st-${k}"></i>${esc(l)}</span>`).join("")}</div>`;
+    const html = {
+      general: `<div class="vw"><div class="vcol grow"><div class="mapbox"><div id="map" class="mapfit"></div>${legend}<div id="map-info"></div></div>
+          <div class="panel upcoming"><h2>À venir</h2><div id="upcoming"></div></div></div>
+        <div class="vcol side"><div class="panel"><div class="idrow"><div id="portrait"></div><div><div class="place" id="place"></div><span class="status" id="status"></span></div></div><div class="gauges" id="mainG" style="margin-top:10px"></div><div class="facts4" id="facts"></div><div id="conds"></div><div id="g-alerts"></div></div>
+          <div class="subtabs" id="subtabs" role="tablist"></div><div class="pbody panel" id="pbody"></div></div></div>`,
+      armee: `<div class="vw"><div class="vcol grow"><div class="mapbox"><div id="map" class="mapfit"></div>${legend}<div id="order-sheet"></div></div></div>
+        <div class="vcol side"><div id="alerts"></div><div class="pbody panel" id="pbody"></div></div></div>`,
+      presse: `<div class="vw"><div class="vcol grow"><div class="panel"><h2>Opinion publique</h2><div class="gauges two" id="opinion"></div></div><div class="chips" id="pcats"></div><div class="panel scroll" id="press"></div></div>
+        <div class="vcol side"><div class="pbody panel" id="pbody"></div></div></div>`,
+      finances: `<div class="vw"><div class="vcol grow scrolly"><div id="alerts"></div><div class="panel"><div class="kpi four" id="fkpi"></div><h2 style="margin-top:12px">Trésor sur les douze derniers mois, en millions de francs</h2><div id="chart"></div></div><div class="two-col" id="ftables"></div></div>
+        <div class="vcol side"><div class="pbody panel" id="pbody"></div></div></div>`,
+      corr: `<div class="vw corr"><div class="vcol contacts panel" id="contacts"></div><div class="vcol grow panel convo"><div class="conv-h" id="conv-h"></div><div class="conv" id="conv"></div>
+          <div class="composer"><textarea id="msg" rows="2" maxlength="1200" placeholder="Écrivez votre lettre…" aria-label="Votre lettre"></textarea><button class="btn primary" id="send">Envoyer</button></div></div></div>`
+    }[view];
+    $("#view").innerHTML = html; $("#view").dataset.view = view;
+    $$("#rail [data-view]").forEach(b => b.setAttribute("aria-pressed", b.dataset.view === view));
+    if (view === "corr") { $("#send").onclick = () => UI.sendMail(); if (!UI.contact || !GAME.relKnown(s, UI.contact)) UI.contact = ch.contactGroups.flatMap(g => g[1]).find(id => GAME.relAlive(s, id)); }
+    if (view === "presse") s.seen.feedN = s.feedN;
+    if (view === "armee") s.seen.armee = ch.alerts(s).armee.join("|");
+    if (view === "general") UI.flagGeneral = false;
+    UI.lastPortraitAge = -1;
+    UI.update(true);
+  },
 
   level(d, v){
     if (d.warn !== undefined && d.bad === "low") return v <= d.danger ? "bad" : v < d.warn ? "warn" : "good";
     if (d.bad === "high") return v >= 70 ? "bad" : v >= 45 ? "warn" : "good";
     return v < 25 ? "bad" : v < 45 ? "warn" : "good";
   },
+  put(id, html){ const el = $("#" + id); if (!el) return false; if (UI.keys[id] === html) return false; el.innerHTML = html; UI.keys[id] = html; return true; },
+  alertBox: list => list.length ? `<div class="alert" role="alert">${list.map(a => `<div>${esc(a)}</div>`).join("")}</div>` : "",
 
   update(force){
     const s = GAME.s; if (!s || !$("#date")) return;
-    const ch = GAME.ch(s);
+    const ch = GAME.ch(s); if (force) UI.keys = {};
     $("#date").textContent = frDate(s.date); $("#age").textContent = `${GAME.age(s)} ans · semaine ${s.week + 1}`; $("#rank").textContent = GAME.rankLabel(s);
     $$("[data-speed]").forEach(b => b.setAttribute("aria-pressed", +b.dataset.speed === s.speed));
-    const can = GAME.canAct(s); $("#b-agir").classList.toggle("primary", can); $("#agir-count").innerHTML = `Action libre<b>${can ? "1 / 1 disponible" : "0 / 1 · la semaine prochaine"}</b>`;
-    const age = GAME.age(s); if (Math.abs(age - UI.lastPortraitAge) >= 2) { $("#portrait").innerHTML = ch.portrait(s); UI.lastPortraitAge = age; }
-    $("#place").textContent = s.place; $("#status").textContent = GAME.power(s) === 0 ? "Exil" : s.flags.atWar ? "En guerre" : "En paix";
-    for (const d of ch.stats) {
-      const el = $(`[data-stat="${d.id}"]`); if (!el) continue;
-      const v = s.stats[d.id], pv = s.prev[d.id] ?? v;
-      el.querySelector(".v").textContent = d.fmt ? d.fmt(v) : Math.round(v);
-      const diff = v - pv; const tr = el.querySelector(".trend"); const good = d.bad === "high" ? diff < 0 : diff > 0;
-      if (Math.abs(diff) >= (d.fmt ? .5 : .12)) { tr.textContent = diff > 0 ? "▲" : "▼"; tr.className = "trend " + (good ? "up" : "down"); } else { tr.textContent = ""; tr.className = "trend"; }
-      const lo = d.barMin ?? Math.max(0, d.min), hi = d.barMax ?? d.max;
-      const bar = el.querySelector(".bar i"); bar.style.width = (clamp((v - lo) / (hi - lo), 0, 1) * 100).toFixed(1) + "%"; bar.className = "lvl-" + UI.level(d, v);
+    const can = GAME.canAct(s); $("#b-agir").classList.toggle("primary", can); $("#agir-count").innerHTML = `Action libre<b>${can ? "1 / 1 cette semaine" : "0 / 1 · semaine prochaine"}</b>`;
+    const al = ch.alerts(s);
+    // Pastilles rouges
+    const unread = Object.values(s.corr).reduce((t, th) => t + th.filter(m => m.unread).length, 0);
+    const newsNew = s.feed.slice(0, Math.max(0, (s.feedN || 0) - (s.seen.feedN || 0))).some(n => n.ton === "hos" || n.kind === "rival" || n.kind === "differe");
+    const flags = { general: UI.view !== "general" && (UI.flagGeneral || al.general.length > 0), armee: UI.view !== "armee" && al.armee.length > 0 && al.armee.join("|") !== s.seen.armee, presse: UI.view !== "presse" && newsNew, finances: UI.view !== "finances" && al.finances.length > 0, corr: unread > 0 };
+    $$("#rail [data-view]").forEach(b => { const d = b.querySelector(".badge-dot"); const on = !!flags[b.dataset.view]; d.hidden = !on; d.textContent = b.dataset.view === "corr" && unread ? unread : ""; });
+    const view = UI.view;
+    if (view === "general" || view === "armee") UI.updateMap(force);
+    if (view === "general") {
+      const age = GAME.age(s); if (Math.abs(age - UI.lastPortraitAge) >= 2) { $("#portrait").innerHTML = ch.portrait(s); UI.lastPortraitAge = age; }
+      $("#place").textContent = s.place; $("#status").textContent = GAME.power(s) === 0 ? "Exil" : s.flags.atWar ? "En guerre" : "En paix";
+      UI.put("mainG", ch.mainGauges(s).map(g => { const d = { bad: g.bad || "low" }; return `<div class="gauge"><div class="top"><span class="name">${esc(g.label)}</span><span class="val">${Math.round(g.v)}</span></div><span class="bar"><i class="lvl-${UI.level(d, g.v)}" style="width:${clamp(g.v, 0, 100)}%"></i></span></div>`; }).join(""));
+      UI.put("facts", ch.sideFacts(s).map(([l, v]) => `<div><span>${esc(l)}</span><b>${esc(v)}</b></div>`).join(""));
+      UI.put("conds", s.conditions.map(c => `<span class="cond-chip">${esc(c.name)}</span>`).join(""));
+      UI.put("g-alerts", UI.alertBox(al.general));
+      const up = ch.upcoming(s);
+      UI.put("upcoming", up.length ? up.map(u => `<div class="up"><span class="when">${u.approx ? "vers " + esc(frMonth(u.d)) : esc(frDate(u.d))}</span><span class="what"><small>${esc(u.k)}</small>${esc(u.t)}</span></div>`).join("") : `<span class="note">Rien d’annoncé pour l’instant. Les conséquences de vos actions et les mouvements en cours apparaîtront ici.</span>`);
     }
-    const cd = $("#conds"); if (cd) cd.innerHTML = s.conditions.map(c => `<span class="cond-chip">${esc(c.name)}</span>`).join("");
-    if (ch.budget) { const b = ch.budget(s); $("#mini").innerHTML = `<div><span>Recettes par mois</span><span class="num">+${b.R.toFixed(1)}</span></div><div><span>Dépenses par mois</span><span class="num">−${b.D.toFixed(1)}</span></div><div><span>Solde</span><span class="num" style="color:var(--${b.solde >= 0 ? "good" : "bad"})">${b.solde >= 0 ? "+" : "−"}${Math.abs(b.solde).toFixed(1)} M F</span></div>${s.dette ? `<div><span>Dette</span><span class="num">${Math.round(s.dette)} M F</span></div>` : ""}`; }
-    UI.updateMap(force); UI.updateFeed(force); UI.renderPanel(force);
+    if (view === "armee") { UI.put("alerts", UI.alertBox(al.armee)); UI.orderSheet(); }
+    if (view === "presse") UI.updatePress();
+    if (view === "finances") UI.updateFinances(al);
+    if (view === "corr") UI.updateCorr(); else UI.renderPanel(force);
   },
 
   updateMap(force){
-    const s = GAME.s, ch = GAME.ch(s), m = ch.map;
-    const key = JSON.stringify([m.regions.map(r => m.status(s, r.id)), m.markers(s).map(k => [k.id, k.region, k.moving]), UI.mapSel, UI.pinSel]);
-    if (!force && key === UI.keys.map) { if (UI.mapSel) UI.mapInfo(); return; } UI.keys.map = key;
-    $("#map").innerHTML = ART.map(ch, s, UI.mapSel, UI.pinSel); UI.mapInfo();
+    const s = GAME.s, ch = GAME.ch(s), m = ch.map; if (!$("#map")) return;
+    const key = JSON.stringify([m.regions.map(r => m.status(s, r.id)), m.markers(s).map(k => [k.id, k.region, k.moving]), UI.mapSel, UI.ord.corps, UI.ord.dest]);
+    if (key !== UI.keys.map) { UI.keys.map = key; $("#map").innerHTML = ART.map(ch, s, UI.view === "armee" ? UI.ord.dest : UI.mapSel, UI.ord.corps); }
+    if (UI.view === "general") UI.mapInfo();
+  },
+  mapClick(e){
+    const s = GAME.s; const pin = e.target.closest("[data-marker]"), rg = e.target.closest("[data-region]");
+    if (pin) { AUDIO.sfx("click"); if (UI.view !== "armee") { UI.ord = { corps: pin.dataset.marker, dest: null }; UI.setViewKeep("armee"); return; }
+      // Un corps est déjà choisi : toucher un autre pion désigne sa région comme destination
+      if (UI.ord.corps && UI.ord.corps !== pin.dataset.marker) { const o = s.corps.find(x => x.id === pin.dataset.marker); if (o) { UI.ord.dest = o.dest || o.loc; UI.update(); return; } }
+      UI.pickCorps(pin.dataset.marker); return; }
+    if (!rg) return; AUDIO.sfx("click");
+    if (UI.view === "armee") { if (!UI.ord.corps) { UI.toast("Touchez d’abord un corps d’armée."); return; } UI.ord.dest = rg.dataset.region; UI.update(); return; }
+    UI.mapSel = UI.mapSel === rg.dataset.region ? null : rg.dataset.region; UI.update();
+  },
+  setViewKeep(view){ const o = UI.ord; UI.setView(view); UI.ord = o; UI.update(true); },
+  pickCorps(id){ AUDIO.sfx("click"); UI.ord = UI.ord.corps === id ? { corps: null, dest: null } : { corps: id, dest: null }; UI.update(true); if (UI.ord.corps && window.innerWidth <= 960) window.scrollTo({ top: 0, behavior: "smooth" }); },
+  orderSheet(){
+    const s = GAME.s, ch = GAME.ch(s); const c = s.corps.find(x => x.id === UI.ord.corps);
+    if (!c) { UI.ord = { corps: null, dest: null }; UI.put("order-sheet", `<div class="sheet hint">1. Touchez un corps (pion ou carte de droite) · 2. Touchez une destination · 3. Choisissez l’ordre</div>`); return; }
+    if (!UI.ord.dest) { UI.put("order-sheet", `<div class="sheet"><b class="ui">${esc(c.name)} · ${esc(ch.marshalName(c.marshal))} · ${Math.round(c.men)} 000 h.</b><span class="note">Touchez une destination sur la carte (ou la région où il se trouve pour un ordre sur place).</span><div class="ops"><button class="btn small ghost" data-do="ordcancel">Annuler</button></div></div>`); return; }
+    const to = UI.ord.dest, wk = ch.travel(c, to), st = ch.map.status(s, to);
+    UI.put("order-sheet", `<div class="sheet"><b class="ui">${esc(c.name)} → ${esc(ch.regionName(to))} <span class="chip ${st === "home" ? "allie" : st}">${esc(ch.map.statusLabel[st])}</span></b>
+      <span class="note">${wk ? `Trajet : environ ${wk} semaines.` : "Déjà sur place."}${s.pays[to] && st === "guerre" ? ` Armée ennemie estimée : ${Math.round(s.pays[to].armee)} 000 h.` : ""}</span>
+      <div class="ord4">${ch.orders.map(o => `<button class="btn ${o.id === "attaquer" ? "primary" : ""}" data-do="order|${o.id}" title="${esc(o.hint)}">${esc(o.label)}</button>`).join("")}</div>
+      <div class="ops"><button class="btn small ghost" data-do="ordcancel">Annuler</button></div></div>`);
+  },
+  doView(a, x){
+    const s = GAME.s;
+    if (a === "ordcancel") { UI.ord = { corps: null, dest: null }; UI.update(true); }
+    else if (a === "order") { const o = UI.ord; UI.ord = { corps: null, dest: null }; UI.act("order", o.corps, x + "|" + o.dest); }
+    else if (a === "subtab") { UI.subtab = x; UI.armed = null; AUDIO.sfx("click"); UI.keys.subtabs = null; UI.renderPanel(true); }
+    else if (a === "pcat") { UI.pressCat = x; AUDIO.sfx("click"); UI.update(true); }
+    else if (a === "contact") { UI.contact = x; AUDIO.sfx("click"); UI.update(true); const c = $("#conv"); if (c) c.scrollTop = c.scrollHeight; }
+    else if (a === "mapclose") { UI.mapSel = null; UI.update(); }
+    else if (a === "goto") { UI.subtab = x; UI.keys.subtabs = null; UI.renderPanel(true); }
+    else if (a === "offensive") UI.act("offensive", x);
   },
   mapInfo(){
-    const s = GAME.s, ch = GAME.ch(s), id = UI.mapSel, box = $("#map-info");
-    if (UI.pinSel && !id) { const c = s.corps.find(x => x.id === UI.pinSel); box.innerHTML = c ? `<div class="map-info"><b class="ui">${esc(c.name)} · ${esc(ch.marshalName(c.marshal))} · ${Math.round(c.men)} 000 h.</b><span class="note">Touchez une région pour y envoyer ce corps.</span></div>` : ""; return; }
-    if (!id) { if (box.innerHTML) box.innerHTML = ""; return; }
-    const r = m => ch.map.regions.find(x => x.id === m); const reg = r(id); const st = ch.map.status(s, id); const c = s.pays[id];
+    const s = GAME.s, ch = GAME.ch(s), id = UI.mapSel;
+    if (!id) { UI.put("map-info", ""); return; }
+    const reg = ch.map.regions.find(x => x.id === id); const st = ch.map.status(s, id); const c = s.pays[id];
     const here = s.corps.filter(x => x.loc === id && !x.dest), coming = s.corps.filter(x => x.dest === id);
-    const others = s.corps.filter(x => (x.dest || x.loc) !== id);
-    const blocked = ch.canEnter(s, id);
-    const html = `<div class="map-info"><button class="x" data-mi="close" aria-label="Fermer">×</button>
+    UI.put("map-info", `<div class="map-info"><button class="x" data-do="mapclose" aria-label="Fermer">×</button>
       <h3>${esc(reg.name)} <span class="chip ${st === "home" ? "allie" : st}">${esc(ch.map.statusLabel[st])}</span></h3>
       ${c ? `<span class="note">Relation ${Math.round(c.rel)} · armée estimée ${Math.round(c.armee)} 000 h.${st === "guerre" ? ` · avantage militaire ${Math.round(c.ws || 0)}` : ""}</span>` : ""}
-      <span class="note">${here.length ? "Sur place : " + here.map(x => `${esc(x.name)} (${Math.round(x.men)} 000)`).join(", ") : "Aucun de vos corps sur place."}${coming.length ? " En marche : " + coming.map(x => esc(x.name)).join(", ") + "." : ""}</span>
-      <div class="ops">
-        ${others.length && GAME.power(s) >= 1 ? (blocked ? `<span class="note">${esc(blocked)}</span>` : `<select class="sel" data-send="${id}" style="width:auto;flex:1" aria-label="Envoyer un corps"><option value="">Envoyer un corps ici…</option>${others.map(x => `<option value="${x.id}">${esc(x.name)} — ${Math.round(x.men)} 000 h.</option>`).join("")}</select>`) : ""}
-        ${c && st === "guerre" && !reg.sea && s.corps.some(x => !x.dest && (x.loc === id || reg.adj.includes(x.loc))) ? `<button class="btn small primary" data-mi="offensive|${id}">Lancer l’offensive</button>` : ""}
-        ${c && GAME.power(s) >= 2 ? `<button class="btn small" data-mi="panel|diplomatie">Diplomatie</button>` : ""}
-      </div></div>`;
-    if (UI.keys.info !== html) { box.innerHTML = html; UI.keys.info = html; }
+      <span class="note">${here.length ? "Sur place : " + here.map(x => `${esc(x.name)} (${Math.round(x.men)} 000)`).join(", ") + "." : "Aucun de vos corps sur place."}${coming.length ? " En marche : " + coming.map(x => esc(x.name)).join(", ") + "." : ""}</span>
+      <div class="ops">${c && GAME.power(s) >= 2 ? `<button class="btn small" data-do="goto|diplomatie">Diplomatie</button>` : ""}<span class="note" style="align-self:center">Pour y envoyer un corps : fenêtre Armée.</span></div></div>`);
   },
 
-  updateFeed(force){
-    const s = GAME.s; const f0 = s.feed[0]; const key = s.feed.length + "|" + (f0 ? f0.d + f0.title + f0.text : "") + UI.feedOpen;
-    if (!force && key === UI.keys.feed) return; UI.keys.feed = key;
-    $("#feed-last").textContent = f0 ? `${f0.title || f0.text}` : ""; $("#feed-chev").textContent = UI.feedOpen ? "Replier ▾" : "Déplier ▴";
-    if (UI.feedOpen) $("#feed-list").innerHTML = `<div class="ai-status" id="ai-status"></div>` + s.feed.slice(0, 60).map(n => `<div class="news ${n.tone}"><span class="m">${esc(frDate(n.d))} · ${esc(n.src)}</span>${n.title ? `<b>${esc(n.title)}</b>` : ""}${n.text ? `<span>${esc(n.text)}</span>` : ""}</div>`).join("");
+  updatePress(){
+    const s = GAME.s, ch = GAME.ch(s); const cat = UI.pressCat || "tous"; s.seen.feedN = s.feedN;
+    const ab = ch.opinionAbroad(s), fr = s.stats.popularite;
+    UI.put("opinion", [["En France", fr], ["À l’étranger", ab]].map(([l, v]) => `<div class="gauge"><div class="top"><span class="name">${l}</span><span class="val">${Math.round(v)} / 100 · ${v >= 65 ? "favorable" : v >= 40 ? "partagée" : "hostile"}</span></div><span class="bar"><i class="lvl-${v < 30 ? "bad" : v < 50 ? "warn" : "good"}" style="width:${v}%"></i></span></div>`).join(""));
+    UI.put("pcats", ch.pressCats.map(([k, l]) => `<button data-do="pcat|${k}" aria-pressed="${k === cat}">${esc(l)}</button>`).join(""));
+    const items = s.feed.filter(n => cat === "tous" ? n.cat !== "sys" : n.cat === cat).slice(0, 70);
+    UI.put("press", `<div class="ai-status" id="ai-status"></div>` + (items.length ? items.map(n => `<article class="art ${n.ton || ""}"><div class="m">${esc(frDate(n.d))} · ${esc(n.src)}</div>${n.title ? `<h3>${esc(n.title)}</h3>` : ""}${n.text ? `<p>${esc(n.text)}</p>` : ""}
+      ${n.ton ? `<div class="tags"><span class="ton ${n.ton}">${ch.tonLabel[n.ton]}</span>${n.fx ? `<span class="fxo">Opinion ${n.fx.k === "France" ? "en France" : "à l’étranger"} ${n.fx.v > 0 ? "+" : "−"}${String(Math.abs(n.fx.v)).replace(".", ",")}</span>` : `<span class="fxo">Sans effet sur l’opinion</span>`}</div>` : ""}</article>`).join("") : `<span class="note">Aucun article dans cette rubrique pour l’instant.</span>`));
     UI.updateAIStatus();
   },
-  updateAIStatus(){
-    const el = $("#ai-status"); if (!el) return;
-    const cls = !AI.enabled ? "off" : AI.status === "busy" ? "busy" : !AI.available ? "off" : "ok";
-    el.innerHTML = `<span class="dot ${cls}"></span><span>${esc(!AI.enabled ? "IA désactivée dans les réglages" : AI.note)}</span>`;
+
+  updateFinances(al){
+    const s = GAME.s, ch = GAME.ch(s); const b = ch.budget(s); const f = v => `${v < 0 ? "−" : ""}${Math.abs(Math.round(v)).toLocaleString("fr-FR")} M F`;
+    UI.put("alerts", UI.alertBox(al.finances));
+    UI.put("fkpi", [["Trésor", f(s.stats.tresor)], ["Revenus par mois", "+" + b.R.toFixed(1).replace(".", ",")], ["Dépenses par mois", "−" + b.D.toFixed(1).replace(".", ",")], ["Solde par mois", (b.solde >= 0 ? "+" : "−") + Math.abs(b.solde).toFixed(1).replace(".", ",")], ["Dette", f(s.dette || 0)], ["Activité économique", Math.round(s.eco || 100)]].map(([l, v]) => `<div><small>${l}</small><b>${v}</b></div>`).join(""));
+    const tbl = (title, rows, sign) => `<div class="panel"><h2>${title}</h2><div class="tbl">${rows.map(([l, v]) => `<div><span>${esc(l)}</span><span>${sign}${v.toFixed(1).replace(".", ",")}</span></div>`).join("")}<div class="tot"><span>Total</span><span>${sign}${rows.reduce((t, x) => t + x[1], 0).toFixed(1).replace(".", ",")}</span></div></div></div>`;
+    UI.put("ftables", tbl("Revenus par mois", b.rec, "+") + tbl("Dépenses par mois", b.dep, "−"));
+    // Graphique : une seule série (le Trésor), ligne fine, grille discrète, survol avec valeur
+    const pts = [...s.fin.slice(-12), { d: s.date, t: s.stats.tresor }];
+    if (pts.length < 3) { UI.put("chart", `<span class="note">Le relevé se construit mois après mois : revenez dans quelques semaines.</span>`); return; }
+    const W = 640, H = 190, L = 54, R = 14, T = 12, B = 26; const vals = pts.map(p => p.t); let lo = Math.min(0, ...vals), hi = Math.max(0, ...vals); if (hi - lo < 50) hi = lo + 50; const pad = (hi - lo) * .08; hi += pad; if (lo < 0) lo -= pad;
+    const X = i => L + i * (W - L - R) / (pts.length - 1), Y = v => T + (hi - v) / (hi - lo) * (H - T - B);
+    const step = (() => { const raw = (hi - lo) / 4; const m = Math.pow(10, Math.floor(Math.log10(raw))); return [1, 2, 5, 10].map(k => k * m).find(k => k >= raw); })();
+    const ticks = []; for (let v = Math.ceil(lo / step) * step; v <= hi; v += step) ticks.push(v);
+    UI.chartData = { pts, X, Y, W, H, L, R, T, B };
+    UI.put("chart", `<div class="chartbox"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Évolution du Trésor : de ${Math.round(vals[0])} à ${Math.round(vals[vals.length - 1])} millions de francs">
+      ${ticks.map(v => `<line class="grid ${v === 0 ? "zero" : ""}" x1="${L}" x2="${W - R}" y1="${Y(v)}" y2="${Y(v)}"/><text class="ax" x="${L - 8}" y="${Y(v) + 4}" text-anchor="end">${Math.round(v)}</text>`).join("")}
+      ${pts.map((p, i) => (i % 3 === 0 && pts.length - 1 - i >= 2) || i === pts.length - 1 ? `<text class="ax" x="${X(i)}" y="${H - 6}" text-anchor="${i === pts.length - 1 ? "end" : i === 0 ? "start" : "middle"}">${esc(MONTHS[parseD(p.d).m - 1].slice(0, 4))} ${String(parseD(p.d).y).slice(2)}</text>` : "").join("")}
+      <polyline class="line" points="${pts.map((p, i) => `${X(i).toFixed(1)},${Y(p.t).toFixed(1)}`).join(" ")}"/>
+      <circle class="end" cx="${X(pts.length - 1)}" cy="${Y(vals[vals.length - 1])}" r="4.5"/>
+      <g id="ch-hover" hidden><line class="cross" y1="${T}" y2="${H - B}"/><circle class="end" r="4.5"/></g></svg><div class="tip" id="ch-tip" hidden></div></div>`);
+  },
+  chartHover(e, svg){
+    const g = $("#ch-hover"), tip = $("#ch-tip"); if (!g || !tip) return; const D = UI.chartData;
+    if (!e || !D) { g.hidden = true; tip.hidden = true; return; }
+    const r = svg.getBoundingClientRect(); const x = (e.clientX - r.left) / r.width * D.W; const i = clamp(Math.round((x - D.L) / ((D.W - D.L - D.R) / (D.pts.length - 1))), 0, D.pts.length - 1); const p = D.pts[i];
+    g.hidden = false; g.querySelector("line").setAttribute("x1", D.X(i)); g.querySelector("line").setAttribute("x2", D.X(i)); g.querySelector("circle").setAttribute("cx", D.X(i)); g.querySelector("circle").setAttribute("cy", D.Y(p.t));
+    tip.hidden = false; tip.textContent = `${frMonth(p.d)} : ${Math.round(p.t)} M F`; tip.style.left = clamp(D.X(i) / D.W * 100, 12, 88) + "%";
+  },
+
+  /* ---------------- Correspondance ---------------- */
+  avatar(name, grp){ const ini = name.replace(/\(.*\)/, "").split(/[\s-]+/).filter(w => /^[A-ZÉÈÀ]/.test(w)).map(w => w[0]).slice(0, 2).join(""); return `<span class="ava g${grp}" aria-hidden="true">${esc(ini)}</span>`; },
+  updateCorr(){
+    const s = GAME.s, ch = GAME.ch(s);
+    const list = ch.contactGroups.map(([g, ids], gi) => { const rows = ids.filter(id => GAME.relKnown(s, id)).map(id => { const r = GAME.relDef(s, id), th = s.corr[id] || [], last = th[th.length - 1], un = th.filter(m => m.unread).length, dead = !!s.deadRel[id];
+        return `<button class="contact ${id === UI.contact ? "on" : ""} ${dead ? "dead" : ""}" data-do="contact|${id}">${UI.avatar(r.name, gi)}<span class="cn"><b>${esc(r.name)}${dead ? " †" : ""}</b><small>${esc(r.role)}</small><span class="lm">${last ? esc((last.me ? "Vous : " : "") + last.t) : "Aucun échange"}</span></span>${un ? `<i class="badge-dot">${un}</i>` : ""}</button>`; }).join(""); return rows ? `<div class="blk-h">${esc(g)}</div>${rows}` : ""; }).join("");
+    UI.put("contacts", list);
+    const id = UI.contact; if (!id) return; const r = GAME.relDef(s, id), th = s.corr[id] || [], dead = !!s.deadRel[id]; const days = ch.mailDays(s, id); const v = s.rel[id];
+    let touched = false; for (const m of th) if (m.unread) { m.unread = false; touched = true; }
+    const gi = ch.contactGroups.findIndex(g => g[1].includes(id));
+    UI.put("conv-h", `${UI.avatar(r.name, gi)}<div><b>${esc(r.name)}</b><small>${esc(r.role)} · ${esc(ch.regionName(ch.contactLoc(s, id)))} · ${dead ? "décédé" : days ? `courrier : ${days} jours` : "auprès de vous : réponse immédiate"}</small></div><span class="chip ${dead ? "mort" : GAME.relStatus(v)}">${dead ? "Décédé" : GAME.relStatusLabel[GAME.relStatus(v)] + " · " + Math.round(v)}</span>`);
+    const left = d => Math.max(1, Math.round((new Date(d) - new Date(s.date)) / 864e5));
+    const waiting = s.corrQueue.some(q => q.id === id) || UI.typing === id;
+    const html = (th.length ? th.map(m => `<div class="bub ${m.me ? "me" : "them"}"><p>${esc(m.t)}</p><small>${esc(frDate(m.d))}${m.me ? (m.arrive && m.arrive > s.date ? ` · en route, arrivée prévue dans ${left(m.arrive)} jour${left(m.arrive) > 1 ? "s" : ""}` : " · remise") : ""}</small></div>`).join("") : `<div class="note" style="text-align:center;padding:20px">Aucune lettre échangée avec ${esc(r.name)}. ${esc(r.bio)}</div>`)
+      + (waiting ? `<div class="bub them wait"><p>${UI.typing === id ? "écrit sa réponse…" : "Sa réponse est en route."}</p></div>` : "");
+    if (UI.put("conv", html) || touched) { const c = $("#conv"); c.scrollTop = c.scrollHeight; }
+    const ta = $("#msg"), sb = $("#send"); ta.disabled = dead; sb.disabled = dead; ta.placeholder = dead ? `${r.name} n’est plus.` : `Écrivez à ${r.name}…${days ? ` Votre lettre mettra ${days} jours.` : ""}`;
+  },
+  mailResume(){ if (UI.mailPaused) { const w = UI.mailPaused; UI.mailPaused = 0; if (!UI.modalOpen) LOOP.setSpeed(w); } },
+  sendMail(){
+    const s = GAME.s, ch = GAME.ch(s), id = UI.contact, ta = $("#msg"); const t = ta.value.trim();
+    if (!id || !GAME.relAlive(s, id)) return; if (t.length < 3) { UI.toast("Écrivez d’abord votre lettre."); return; }
+    const days = ch.mailDays(s, id); const m = { d: s.date, me: true, t: t.slice(0, 1200) }; if (days) m.arrive = addDays(s.date, days); else m.asked = true;
+    (s.corr[id] = s.corr[id] || []).push(m); if (s.corr[id].length > 300) s.corr[id].shift();
+    ta.value = ""; ta.blur(); AUDIO.sfx("paper"); UI.save(); UI.update(true); UI.mailResume();
+    if (!days) UI.fetchReply(id, 0); else UI.toast(`Lettre partie : arrivée prévue dans ${days} jours.`);
+  },
+  /* La personne a reçu la lettre : sa réponse est écrite (par Claude si possible), puis voyage */
+  async fetchReply(id, days){
+    const s = GAME.s, ch = GAME.ch(s); let rep = null;
+    if (!days) { UI.typing = id; UI.update(true); }
+    if (AI.usable()) { try { rep = await AI.reply(s, id); } catch (e) { rep = null; } }
+    if (GAME.s !== s) return; if (UI.typing === id) UI.typing = null;
+    if (!rep) rep = { t: ch.mailFallback(s, id), rel: 0 };
+    if (!GAME.relAlive(s, id)) return;
+    if (days) s.corrQueue.push({ id, t: rep.t, rel: rep.rel, at: addDays(s.date, days) });
+    else { s.corr[id].push({ d: s.date, me: false, t: rep.t, unread: !(UI.view === "corr" && UI.contact === id) }); if (rep.rel) GAME.applyFx(s, { r: { [id]: rep.rel } }); AUDIO.sfx("notify"); }
+    UI.save(); UI.update(true);
+  },
+  /* Un contact écrit de lui-même */
+  async mailTurn(){
+    const s = GAME.s, ch = GAME.ch(s); let m = null;
+    if (AI.usable()) { try { m = await AI.mail(s); } catch (e) { m = null; } }
+    if (GAME.s !== s || s.dead) return;
+    if (!m) { const pool = ch.mailScripts.filter(x => GAME.relAlive(s, x.id) && !(s.corr[x.id] || []).some(y => y.t === x.t)); if (!pool.length) return; m = pool[Math.floor(Math.random() * pool.length)]; }
+    (s.corr[m.id] = s.corr[m.id] || []).push({ d: s.date, me: false, t: m.t, unread: true });
+    AUDIO.sfx("notify"); UI.toast(`Lettre de ${GAME.relDef(s, m.id).name}`); UI.save(); UI.update();
   },
 
   /* ---------------- Panneaux de gestion ---------------- */
   renderPanel(force){
     const s = GAME.s, ch = GAME.ch(s); const pb = $("#pbody"); if (!pb) return;
-    const tabs = [...ch.panels.filter(p => { try { return p.cond(s); } catch (e) { return false; } }), { id: "_rel", label: "Relations" }];
-    if (!tabs.some(t => t.id === UI.panel)) UI.panel = tabs[0].id;
-    const tk = tabs.map(t => t.id).join() + UI.panel;
-    if (tk !== UI.keys.tabs) { UI.keys.tabs = tk; $("#ptabs").innerHTML = tabs.map(t => `<button role="tab" data-panel="${t.id}" aria-selected="${t.id === UI.panel}">${esc(t.label)}</button>`).join(""); }
+    let pid = ch.windows[UI.view];
+    if (UI.view === "general") {
+      const tabs = [...ch.windows.general.map(id => ch.panels.find(p => p.id === id)).filter(p => { try { return p && p.cond(s); } catch (e) { return false; } }), { id: "_rel", label: "Relations" }];
+      if (!tabs.some(t => t.id === UI.subtab)) UI.subtab = tabs[0].id; pid = UI.subtab;
+      UI.put("subtabs", tabs.map(t => `<button role="tab" data-do="subtab|${t.id}" aria-selected="${t.id === pid}">${esc(t.label)}</button>`).join(""));
+    }
     if (!force && (Date.now() < UI.busyUntil || (document.activeElement && pb.contains(document.activeElement) && ["SELECT", "INPUT"].includes(document.activeElement.tagName)))) return;
     UI.ctlById = {}; let n = 0; const reg = c => { const id = "k" + (n++); UI.ctlById[id] = c; return id; };
     const meter = ([l, v]) => `<div class="meter"><span>${esc(l)}</span><span class="bar"><i class="lvl-${v < 30 ? "bad" : v < 50 ? "warn" : "good"}" style="width:${clamp(v, 0, 100)}%"></i></span><span class="num">${Math.round(v)}</span></div>`;
@@ -222,27 +362,33 @@ const UI = {
         case "info": return `<div class="note">${c.html}</div>`;
         case "kpi": return `<div class="kpi">${c.items.map(([l, v]) => `<div><small>${esc(l)}</small><b>${esc(v)}</b></div>`).join("")}</div>`;
         case "table": return `<div><div class="blk-h">${esc(c.title)}</div><div class="tbl">${c.rows.map(([l, v]) => `<div><span>${esc(l)}</span><span>${esc(v)}</span></div>`).join("")}</div></div>`;
-        case "slider": { const id = reg(c); return `<div class="ctl"><div class="ctl-top"><label for="${id}">${esc(c.label)}</label><b>${esc(c.fmt ? c.fmt(c.val) : c.val)}</b></div><input type="range" id="${id}" data-cid="${id}" min="${c.min}" max="${c.max}" step="${c.step}" value="${c.val}">${c.note ? `<span class="note">${esc(c.note)}</span>` : ""}</div>`; }
+        case "slider": { const id = reg(c); return `<div class="ctl"><div class="ctl-top"><label for="${id}">${esc(c.label)}</label><b>${esc(c.fmt ? c.fmt(c.val) : c.val)}</b></div><input type="range" id="${id}" data-cid="${id}" min="${c.min}" max="${c.max}" step="${c.step}" value="${c.val}"><span class="note">${esc(c.live ? c.live(c.val) : c.note || "")}</span></div>`; }
         case "select": { const id = reg(c); return `<div class="ctl"><div class="ctl-top"><label for="${id}">${esc(c.label)}</label></div><select id="${id}" data-cid="${id}" ${c.dis ? "disabled" : ""}>${c.options.map(([v, l]) => `<option value="${esc(v)}" ${String(v) === String(c.val) ? "selected" : ""}>${esc(l)}</option>`).join("")}</select>${c.dis && typeof c.dis === "string" ? `<span class="note">${esc(c.dis)}</span>` : c.note ? `<span class="note">${esc(c.note)}</span>` : ""}</div>`; }
         case "btn": { const id = reg(c); const armed = UI.armed === c.act + "|" + c.arg; return `<button class="pbtn ${armed ? "arm" : ""}" data-cid="${id}" ${c.dis ? "disabled" : ""}><b>${armed ? "Confirmer ?" : esc(c.label)}</b><span>${esc(typeof c.dis === "string" ? c.dis : c.cost || "")}</span></button>`; }
-        case "row": return `<div class="rowc ${c.done ? "done" : ""}"><div class="rt"><b>${esc(c.title)}</b>${c.badge ? `<span class="chip ${c.badge[1]}">${esc(c.badge[0])}</span>` : ""}</div>${c.sub ? `<div class="rs">${esc(c.sub)}</div>` : ""}${c.rel !== undefined ? relbar(c.rel) : ""}${(c.meters || []).map(meter).join("")}${c.ctrls && c.ctrls.length ? `<div class="rc">${c.ctrls.map(ctl).join("")}</div>` : ""}</div>`;
+        case "row": return `<div class="rowc ${c.done ? "done" : ""} ${c.pick ? "pick" : ""} ${c.pick && c.pick === UI.ord.corps ? "on" : ""}" ${c.pick ? `data-pick="${c.pick}" tabindex="0" role="button"` : ""}><div class="rt"><b>${esc(c.title)}</b>${c.badge ? `<span class="chip ${c.badge[1]}">${esc(c.badge[0])}</span>` : ""}</div>${c.sub ? `<div class="rs">${esc(c.sub)}</div>` : ""}${(c.alerts || []).map(a => `<span class="warn-chip">${esc(a)}</span>`).join("")}${c.rel !== undefined ? relbar(c.rel) : ""}${(c.meters || []).map(meter).join("")}${c.ctrls && c.ctrls.length ? `<div class="rc">${c.ctrls.map(ctl).join("")}</div>` : ""}</div>`;
       }
       return "";
     };
     let html;
-    if (UI.panel === "_rel") {
+    if (pid === "_rel") {
       const known = ch.relations.filter(r => GAME.relKnown(s, r.id)); const alive = known.filter(r => !s.deadRel[r.id]), dead = known.filter(r => s.deadRel[r.id]);
       html = [...alive, ...dead].map(r => { const v = s.rel[r.id]; const st = s.deadRel[r.id] ? "mort" : GAME.relStatus(v); return `<button class="rel ${s.deadRel[r.id] ? "dead" : ""}"><span class="n">${esc(r.name)}${s.deadRel[r.id] ? " †" : ""}</span><span class="chip ${st}">${GAME.relStatusLabel[st]}</span><span class="ro">${esc(r.role)}</span>${relbar(v)}<span class="rel-detail" hidden>${esc(r.bio)}</span></button>`; }).join("");
-    } else { let blocks = []; try { blocks = ch.panels.find(p => p.id === UI.panel).blocks(s); } catch (e) { blocks = [{ k: "info", html: "Ce panneau n’est pas disponible pour le moment." }]; } html = blocks.map(ctl).join(""); }
+    } else { let blocks = []; try { blocks = ch.panels.find(p => p.id === pid).blocks(s); } catch (e) { blocks = [{ k: "info", html: "Ce panneau n’est pas disponible pour le moment." }]; } html = blocks.map(ctl).join(""); }
     if (html !== UI.keys.panel) { const top = pb.scrollTop; pb.innerHTML = html; pb.scrollTop = top; UI.keys.panel = html; }
+  },
+  updateAIStatus(){
+    const el = $("#ai-status"); if (!el) return;
+    const cls = !AI.enabled ? "off" : AI.status === "busy" ? "busy" : !AI.available ? "off" : "ok";
+    el.innerHTML = `<span class="dot ${cls}"></span><span>${esc(!AI.enabled ? "IA désactivée dans les réglages" : AI.note)}</span>`;
   },
 
   /* Exécute un réglage ou un bouton de panneau */
   act(act, arg, val){
-    const s = GAME.s, ch = GAME.ch(s); if (!s || s.dead || (UI.modalOpen && act !== "corps_move")) return;
+    const s = GAME.s, ch = GAME.ch(s); if (!s || s.dead || UI.modalOpen) return;
+    if (act === "write_article") { UI.actionModal("article"); return; }
     let res = {}; try { res = ch.act(s, act, arg, val) || {}; } catch (e) { res = { msg: "Impossible pour le moment.", tone: "bad" }; }
     ch.sync && ch.sync(s);
-    if (res.msg) { GAME.news(s, { src: res.src || "Carnet", text: res.msg, tone: res.tone || "" }); UI.toast(res.msg); }
+    if (res.msg) { GAME.news(s, { src: res.src || "Carnet", text: res.msg, tone: res.tone || "" }); UI.toast(res.msg); } else if (res.toast) UI.toast(res.toast);
     AUDIO.sfx(res.sfx || (res.tone === "bad" ? "error" : act === "pol" ? "" : "click"));
     UI.save(); UI.update(true);
     if (res.battle) UI.fieldBattle(res.battle);
@@ -253,7 +399,7 @@ const UI = {
     const s = GAME.s; if (s.speed > 0) UI.resumeSpeed = s.speed; LOOP.setSpeed(0);
     BATTLE.start(s, o.battle, o.title, res => {
       const out = { deltas: {}, rels: {}, notes: [], death: null }; GAME.battleOutcome(s, o.battle, res, out);
-      GAME.news(s, { src: GAME.ch(s).newsSources(s)[0], title: `${res.win ? "Victoire" : "Revers"} : ${o.battle.name}`, text: out.notes.join(" "), tone: res.win ? "good" : "bad" });
+      GAME.news(s, { src: "Carnet", title: `${res.win ? "Victoire" : "Revers"} : ${o.battle.name}`, text: out.notes.join(" "), tone: res.win ? "good" : "bad" }); if (GAME.ch(s).press) GAME.ch(s).press(s, "bataille", out.battle);
       s.history.push({ date: s.date, id: "bat-" + s.week, kind: "bataille", title: o.title, choice: "Offensive ordonnée", hist: null, histExists: false, outcome: `${res.win ? "Victoire" : "Défaite"} — ${o.battle.name}` });
       if (out.death) s.deathPending = out.death; UI.save();
       const ov = UI.openModal(`<div class="outcome"><div class="ev-kind"><span class="k">Bataille</span></div><h2>${esc(o.title)}</h2><div class="verdict ${res.win ? "win" : "loss"}">${res.win ? "Victoire" : "Défaite"}</div><p class="ev-text">${out.notes.map(esc).join(" ")}</p><div class="deltas">${UI.deltaChips(out)}</div><div class="row"><button class="btn primary" id="cont">Reprendre le cours du temps</button></div></div>`, { scene: "bataille" });
@@ -280,11 +426,12 @@ const UI = {
   pause(){ const s = GAME.s; if (!s) return 0; const was = s.speed; if (was > 0) { UI.resumeSpeed = was; LOOP.setSpeed(0); } return was; },
 
   /* ---------------- Action libre écrite ---------------- */
-  actionModal(){
+  actionModal(preType){
     const s = GAME.s, ch = GAME.ch(s); if (!s || s.dead || UI.modalOpen) return;
     const was = UI.pause(); AUDIO.sfx("paper");
     const types = ch.speech.filter(t => !t.cond || t.cond(s));
     const A = UI.draft && UI.draft.char === s.char ? UI.draft : (UI.draft = { char: s.char, type: types[0].id, target: "", text: "" });
+    if (preType && types.some(t => t.id === preType)) A.type = preType;
     if (!types.some(t => t.id === A.type)) A.type = types[0].id;
     A.advice = null; A.msg = null; A.busy = null;
     const resume = () => { UI.closeModal(); UI.update(true); if (was || UI.resumeSpeed) LOOP.setSpeed(was || UI.resumeSpeed); };
@@ -328,7 +475,7 @@ const UI = {
     const out = GAME.applyFx(s, res.fx);
     const jid = "j" + s.journal.length + "-" + s.week;
     for (const d of res.differes) s.deferred.push({ date: addDays(s.date, d.weeks * 7), title: d.title, text: d.text, fx: d.fx, from: jid });
-    for (const n of [...res.news].reverse()) GAME.news(s, { src: n.src, title: n.title, text: n.text, kind: "action" });
+    for (const n of [...res.news].reverse()) GAME.news(s, { src: n.src, title: n.title, text: n.text, kind: "action", ton: n.ton });
     s.journal.push({ id: jid, d: s.date, type: act.type, typeLabel: tp.label, target: act.target || "", text: act.text, resume: res.resume, importance: res.importance, deltas: out.deltas, news: res.news.map(n => n.title), suites: [] });
     s.actionWeek = s.week; UI.draft = null; UI.save();
     AUDIO.sfx(act.type === "discours" ? "crowd" : "notify");
@@ -376,6 +523,7 @@ const UI = {
       s.history.push({ date: s.date, id: ev.id, kind, title: ev.title, choice: c.t, hist: kind === "hist" ? !!c.hist : null, histExists: kind === "hist" ? ev.choices.some(x => x.hist) : false, outcome });
       if (s.history.length > 500) s.history.splice(0, s.history.length - 500);
       GAME.news(s, { src: "Carnet", title: ev.title, text: `${c.t}.${out.battle ? ` ${out.battle.win ? "Victoire" : "Défaite"} : ${out.battle.name}.` : ""}`, tone: kind === "hist" ? "key" : out.battle ? (out.battle.win ? "good" : "bad") : "" });
+      const chx = GAME.ch(s); if (chx.press) { if (out.battle) chx.press(s, "bataille", out.battle); else chx.press(s, "evenement", { title: ev.title, res: c.res, hist: kind === "hist" }); }
       s.pending = null; if (out.death) s.deathPending = out.death; UI.save();
       const real = kind === "hist" && ev.real ? `<div class="realbox"><b>Dans l’Histoire :</b> ${esc(ev.real)}${ev.anecdote ? `<br><i>${esc(ev.anecdote)}</i>` : ""}</div>` : "";
       const verdict = out.battle ? `<div class="verdict ${out.battle.win ? "win" : "loss"}">${out.battle.win ? "Victoire" : "Défaite"} · ${esc(out.battle.name)}</div>` : "";
@@ -428,7 +576,7 @@ const UI = {
     if (AI.usable()) { try { news = await AI.rivals(s); } catch (e) { news = null; } }
     if (GAME.s !== s || s.dead) return;
     if (!news) news = GAME.rivalsScripted(s);
-    if (news && news.length) { AUDIO.sfx("notify"); UI.toast(news[0].title); UI.save(); UI.update(true); }
+    if (news && news.length) { AUDIO.sfx("notify"); UI.toast(news[0].title); UI.flagGeneral = true; UI.save(); UI.update(); }
   },
 
   die(death){
@@ -575,12 +723,17 @@ const LOOP = {
   step(){
     const s = GAME.s; if (!s || s.dead || UI.modalOpen || s.speed <= 0) return;
     const ch = GAME.ch(s);
-    const { death, fired } = GAME.tick(s);
-    if (fired.length) { AUDIO.sfx("notify"); UI.toast(fired[0].d.title); }
+    const { death, fired, arrived, mail } = GAME.tick(s);
+    if (fired.length) { AUDIO.sfx("notify"); UI.toast(fired[0].d.title); UI.flagGeneral = true; }
+    for (const a of arrived) UI.fetchReply(a.id, ch.mailDays(s, a.id) || 3);
+    if (mail.length) { AUDIO.sfx("notify"); UI.toast(`Lettre de ${GAME.relDef(s, mail[0].id).name}`); }
     UI.update(); UI.save();
     if (death) { UI.die(death); return; }
     const due = GAME.dueHistorical(s);
     if (due) { UI.showEvent(due, "hist"); return; }
+    const mt = ch.meet ? ch.meet(s) : null;
+    if (mt) { UI.fieldBattle(mt); return; }
+    if (--s.nextMailIn <= 0) { s.nextMailIn = 5 + Math.floor(Math.random() * 5); UI.mailTurn(); }
     const off = ch.enemyMove ? ch.enemyMove(s) : null;
     if (off) { UI.showEvent(off, "guerre"); return; }
     if (--s.nextRivalIn <= 0) { s.nextRivalIn = 10 + Math.floor(Math.random() * 5); UI.rivalsTurn(); }

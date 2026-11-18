@@ -3,7 +3,7 @@
 /* =====================================================================
    MOTEUR — temps (semaine), effets, santé, mort, événements, mémoire
    ===================================================================== */
-const SAVE_VERSION = 2;
+const SAVE_VERSION = 3;
 const MONTHS = ["janvier","février","mars","avril","mai","juin","juillet","août","septembre","octobre","novembre","décembre"];
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 const esc = t => String(t ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
@@ -43,7 +43,7 @@ const GAME = {
       family: { spouse: st.family?.spouse || null, spouseName: null, exSpouses: [...(st.family?.exSpouses || [])], children: [...(st.family?.children || [])], heir: null },
       conditions: [], done, history: [], feed: [], journal: [], deferred: [], deadRel: {},
       counters: { battlesWon: 0, battlesLost: 0, reforms: 0, treaties: 0, weeks: 0, maxDep: stats.departements || 0, popSum: 0, powerWeeks: 0, ...(st.counters || {}) },
-      nextRandomIn: 6, nextRivalIn: 8, recentRandom: [], actionWeek: -1, dead: null, pending: null, speed: 0, savedAt: null
+      nextRandomIn: 6, nextRivalIn: 8, nextMailIn: 3, recentRandom: [], actionWeek: -1, corr: {}, corrQueue: [], fin: [], where: null, feedN: 0, dead: null, pending: null, speed: 0, savedAt: null
     };
     for (const r of ch.relations) if (r.dies && r.dies.date <= s.date) s.deadRel[r.id] = r.dies.date;
     if (ch.setup) ch.setup(s, st.id, false);
@@ -52,7 +52,20 @@ const GAME = {
   },
 
   /* Fil d’actualité : articles, dépêches et notes */
-  news(s, it){ s.feed.unshift({ d: s.date, src: it.src || "Carnet", title: it.title || "", text: it.text || "", tone: it.tone || "", kind: it.kind || "" }); if (s.feed.length > 160) s.feed.length = 160; },
+  news(s, it){
+    const ch = GAME.ch(s); const src = it.src || "Carnet";
+    const cat = it.cat || (ch.newsCat ? ch.newsCat(src) : "sys");
+    let ton = { favorable: "fav", hostile: "hos", neutre: "neu", fav: "fav", hos: "hos", neu: "neu" }[String(it.ton || "").toLowerCase()] || (cat === "sys" ? "" : "neu");
+    // Effet visible de l’article sur l’opinion, en France ou à l’étranger
+    let fx = null;
+    if (cat !== "sys" && ton && ton !== "neu" && s.stats.popularite !== undefined) {
+      const sign = ton === "fav" ? 1 : -1;
+      if (cat === "etr") { const v = -sign * .4; s.stats.coalition = clamp(s.stats.coalition + v, 0, 100); fx = { k: "étranger", v: sign * .4 }; }
+      else { const v = sign * (cat === "rum" ? .6 : 1); s.stats.popularite = clamp(s.stats.popularite + v, 0, 100); fx = { k: "France", v }; }
+    }
+    s.feed.unshift({ d: s.date, src, title: it.title || "", text: it.text || "", tone: it.tone || "", kind: it.kind || "", cat, ton, fx });
+    s.feedN = (s.feedN || 0) + 1; if (s.feed.length > 220) s.feed.length = 220;
+  },
   log(s, t, tone = "", src){ GAME.news(s, { src: src || "Carnet", text: t, tone }); },
 
   /* Applique un bloc d’effets. Renvoie les variations pour l’affichage. */
@@ -69,6 +82,7 @@ const GAME = {
     if (fx.pays && s.pays) for (const [k, o] of Object.entries(fx.pays)) { const c = s.pays[k]; if (!c || !o) continue; if (o.statut && o.statut !== c.statut) { c.statut = o.statut; if (o.statut !== "guerre") c.ws = 0; out.notes.push(`${ch.regionName(k)} : ${ch.map.statusLabel[o.statut].toLowerCase()}.`); } if (typeof o.rel === "number") c.rel = clamp(c.rel + o.rel, -100, 100); if (typeof o.armee === "number") c.armee = Math.max(0, c.armee + o.armee); if (typeof o.ws === "number") c.ws = clamp((c.ws || 0) + o.ws, -100, 100); if (typeof o.pression === "number") c.pression = clamp((c.pression || 0) + o.pression, 0, 100); }
     if (fx.paysAll && s.pays) for (const c of Object.values(s.pays)) if (c.statut === "guerre") { c.statut = fx.paysAll; c.ws = 0; }
     if (fx.moveCorps && s.corps) for (const c of s.corps) if (c.loc !== "espagne" || fx.moveCorps === "espagne" || s.corps.length <= 3) { c.loc = fx.moveCorps; c.dest = null; c.eta = null; }
+    if (fx.moveCorps) s.where = fx.moveCorps; else if (fx.place && (fx.scene === "palais" || fx.scene === "paris")) s.where = "france";
     if (fx.thr && s.thrones) Object.assign(s.thrones, fx.thr);
     if (typeof fx.depot === "number" && "depot" in s) s.depot = Math.max(0, s.depot + fx.depot);
     if (fx.f) Object.assign(s.flags, fx.f);
@@ -138,12 +152,18 @@ const GAME = {
     // Conséquences différées arrivées à échéance
     const fired = [];
     for (const d of [...s.deferred]) if (d.date <= s.date) { s.deferred = s.deferred.filter(x => x !== d); const o = GAME.applyFx(s, d.fx); GAME.news(s, { src: d.src || "Conséquence", title: d.title, text: d.text, tone: "key", kind: "differe" }); const j = s.journal.find(x => x.id === d.from); if (j) (j.suites = j.suites || []).push({ d: s.date, t: d.title }); fired.push({ d, o }); }
+    // Finances : un relevé par mois pour le graphique
+    if (ch.budget && s.week % 4 === 0) { const bu = ch.budget(s); s.fin.push({ d: s.date, t: s.stats.tresor, R: bu.R, D: bu.D }); if (s.fin.length > 14) s.fin.shift(); }
+    // Courrier : lettres arrivées chez leur destinataire, réponses arrivées chez vous
+    const arrived = [], mail = [];
+    for (const [id, th] of Object.entries(s.corr)) for (const m of th) if (m.me && m.arrive && !m.asked && m.arrive <= s.date) { m.asked = true; arrived.push({ id, m }); }
+    for (const q of [...s.corrQueue]) if (q.at <= s.date) { s.corrQueue = s.corrQueue.filter(x => x !== q); if (!GAME.relAlive(s, q.id)) continue; (s.corr[q.id] = s.corr[q.id] || []).push({ d: s.date, me: false, t: q.t, unread: true }); if (q.rel) GAME.applyFx(s, { r: { [q.id]: q.rel } }); mail.push(q); }
     const b = parseD(ch.born); if (p.m === b.m && p.d >= b.d && p.d < b.d + 7) GAME.log(s, `Vous avez ${GAME.age(s)} ans.`);
     ch.sync && ch.sync(s);
     s.counters.maxDep = Math.max(s.counters.maxDep || 0, s.stats.departements || 0);
     s.counters.popSum = (s.counters.popSum || 0) + (s.stats.popularite || 0);
     if (GAME.power(s) >= 2) s.counters.powerWeeks = (s.counters.powerWeeks || 0) + 1;
-    return { death: GAME.mortality(s, dt), fired };
+    return { death: GAME.mortality(s, dt), fired, arrived, mail };
   },
 
   mortality(s, dt){
@@ -226,6 +246,17 @@ const STORE = {
         if (ch.setup) ch.setup(s, null, true);
         s.v = 2;
         GAME.news(s, { src: "Carnet", title: "Partie reprise", text: "Cette partie vient d’une version précédente du jeu. Elle a été convertie : le temps avance désormais à la semaine.", tone: "key" });
+      }
+      if (s.v < 3) {
+        // v2 : interface à panneaux ; v3 ajoute la correspondance, le relevé des finances et les ordres aux corps
+        const ch = CHARACTERS[s.char];
+        for (const r of ch.relations) if (typeof s.rel[r.id] !== "number") s.rel[r.id] = r.start || 0;
+        for (const r of ch.relations) if (r.dies && r.dies.date <= s.date && !s.deadRel[r.id] && (!r.dies.cond || r.dies.cond(s))) s.deadRel[r.id] = r.dies.date;
+        s.corr = s.corr || {}; s.corrQueue = s.corrQueue || []; s.fin = s.fin || []; s.where = s.where || null; s.nextMailIn = s.nextMailIn || 3; s.feedN = s.feed.length;
+        if (ch.defaultPol) s.pol = { ...ch.defaultPol, ...(s.pol || {}) };
+        for (const c of (s.corps || [])) c.stance = c.stance || "marche";
+        for (const n of s.feed) { n.cat = n.cat || (ch.newsCat ? ch.newsCat(n.src) : "sys"); n.ton = n.ton || (n.cat === "sys" ? "" : "neu"); }
+        s.v = 3;
       }
       return s;
     } catch (e) { return null; }

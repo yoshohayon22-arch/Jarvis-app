@@ -231,6 +231,107 @@ body.in-game #app{height:100%;display:flex;flex-direction:column}
   .agir{order:5;flex:1} .agir .btn{flex:1}
 }
 
+/* ---------- Cinq fenêtres : barre d’icônes et vues ---------- */
+.shell{flex:1;min-height:0;display:grid;grid-template-columns:92px minmax(0,1fr);gap:12px;padding-block:10px}
+.rail{display:flex;flex-direction:column;gap:8px;min-height:0}
+.rail button{position:relative;display:grid;justify-items:center;align-content:center;gap:4px;min-height:78px;border:1px solid var(--line);border-radius:10px;background:var(--panel);color:var(--muted);font-family:var(--f-ui);font-size:.72rem;font-weight:600;padding:6px 2px;line-height:1.1}
+.rail svg{width:32px;height:32px}
+.rail button[aria-pressed="true"]{color:var(--accent);border-color:var(--accent);background:var(--panel2)}
+.badge-dot{position:absolute;top:6px;right:8px;min-width:16px;height:16px;border-radius:99px;background:#e0412f;color:#fff;font-size:.68rem;font-style:normal;line-height:16px;text-align:center;padding:0 4px;font-family:var(--f-ui);font-weight:700}
+.view{min-height:0;min-width:0}
+.vw{height:100%;display:grid;grid-template-columns:minmax(0,1fr) 400px;gap:12px;min-height:0}
+.vw.corr{grid-template-columns:320px minmax(0,1fr)}
+.vcol{min-height:0;min-width:0;display:flex;flex-direction:column;gap:10px}
+.vcol.side .pbody{flex:1;min-height:0;overflow:auto}
+.vcol.grow .mapbox{flex:1}
+.scrolly{overflow:auto}
+.panel.scroll{flex:1;min-height:0;overflow:auto;display:grid;gap:14px;align-content:start}
+.mapfit{width:100%;height:100%}
+.upcoming{flex:none;max-height:168px;overflow:auto}
+.up{display:grid;grid-template-columns:128px minmax(0,1fr);gap:10px;padding:5px 0;border-top:1px solid var(--line);font-size:.92rem}
+.up:first-child{border-top:0}
+.up .when{font-family:var(--f-ui);color:var(--accent);font-weight:600;font-size:.82rem}
+.up small{display:block;font-family:var(--f-ui);font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;color:var(--faint)}
+.idrow{display:grid;grid-template-columns:54px minmax(0,1fr);gap:10px;align-items:center}
+.idrow svg{width:54px;height:auto;display:block}
+.idrow .place{font-family:var(--f-ui);font-size:.84rem;color:var(--muted)}
+.idrow .status{display:inline-block;font-family:var(--f-ui);font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;border:1px solid var(--line);border-radius:99px;padding:.1em .6em;margin-top:3px}
+.facts4{display:grid;grid-template-columns:1fr 1fr;gap:4px 14px;margin-top:10px;font-family:var(--f-ui);font-size:.82rem}
+.facts4 div{display:flex;justify-content:space-between;gap:6px} .facts4 span{color:var(--muted)} .facts4 b{font-variant-numeric:tabular-nums;font-weight:600}
+.subtabs,.chips{display:flex;gap:6px;overflow-x:auto;flex:none;padding-bottom:2px}
+.subtabs button,.chips button{min-height:44px;white-space:nowrap;border:1px solid var(--line);border-radius:99px;background:transparent;padding:0 .95em;font-family:var(--f-ui);font-size:.84rem;color:var(--muted)}
+.subtabs button[aria-selected="true"],.chips button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.pbody.panel{display:grid;gap:10px;align-content:start}
+.alert{border:1px solid var(--bad);background:rgba(208,88,63,.14);border-radius:8px;padding:8px 10px;font-family:var(--f-ui);font-size:.86rem;display:grid;gap:3px;color:#f3b3a4;margin-top:8px}
+#alerts .alert{margin-top:0}
+.warn-chip{display:inline-block;font-family:var(--f-ui);font-size:.72rem;background:rgba(208,88,63,.2);color:#f0a390;border-radius:99px;padding:.1em .6em;margin-right:4px;justify-self:start}
+.rowc.pick{cursor:pointer} .rowc.pick.on{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.sheet{position:absolute;left:8px;right:8px;bottom:8px;background:rgba(10,16,13,.94);border:1px solid var(--line);border-radius:10px;padding:10px 12px;display:grid;gap:8px}
+.sheet.hint{font-family:var(--f-ui);font-size:.84rem;color:var(--muted);text-align:center}
+.sheet .ops{display:flex;gap:6px;justify-content:flex-end}
+.ord4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.ord4 .btn{min-height:58px;font-size:.95rem;padding:.3em}
+.gauges.two{grid-template-columns:1fr 1fr;gap:14px}
+.art{border-left:3px solid var(--line);padding-left:12px;display:grid;gap:3px}
+.art.fav{border-left-color:var(--good)} .art.hos{border-left-color:var(--bad)}
+.art .m{font-family:var(--f-ui);font-size:.72rem;color:var(--faint);letter-spacing:.05em;text-transform:uppercase}
+.art h3{font-family:var(--f-body);font-weight:600;font-size:1.06rem;letter-spacing:0}
+.art p{margin:0;font-size:.95rem;color:var(--muted);max-width:70ch}
+.tags{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:2px}
+.ton{font-family:var(--f-ui);font-size:.68rem;letter-spacing:.06em;text-transform:uppercase;padding:.15em .6em;border-radius:99px;background:rgba(238,230,212,.1);color:var(--muted)}
+.ton.fav{background:rgba(134,176,111,.2);color:#b6d9a3} .ton.hos{background:rgba(208,88,63,.22);color:#f0a390}
+.fxo{font-family:var(--f-ui);font-size:.76rem;color:var(--muted)}
+.kpi.four{grid-template-columns:repeat(3,minmax(0,1fr))}
+.two-col{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.tbl .tot{font-weight:600;border-bottom:0;padding-top:3px}
+.chartbox{position:relative;margin-top:4px}
+.chartbox svg{width:100%;height:auto;display:block}
+.grid{stroke:rgba(255,255,255,.08);stroke-width:1} .grid.zero{stroke:rgba(255,255,255,.32)}
+.ax{font-family:var(--f-ui);font-size:11px;fill:var(--muted)}
+.line{fill:none;stroke:var(--accent);stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
+.end{fill:var(--accent);stroke:var(--panel);stroke-width:2}
+.cross{stroke:rgba(255,255,255,.35);stroke-width:1}
+.tip{position:absolute;top:-4px;transform:translateX(-50%);background:var(--ink);color:var(--bg);font-family:var(--f-ui);font-size:.78rem;font-weight:600;padding:.2em .6em;border-radius:6px;white-space:nowrap;pointer-events:none}
+.contacts{overflow:auto;gap:2px;padding:8px}
+.contacts .blk-h{margin:8px 6px 2px}
+.contact{position:relative;display:grid;grid-template-columns:44px minmax(0,1fr);gap:10px;align-items:center;min-height:62px;text-align:left;background:none;border:0;border-radius:8px;padding:6px;width:100%}
+.contact.on{background:var(--panel2)} .contact.dead{opacity:.5}
+.cn{display:grid;min-width:0}
+.cn b{font-family:var(--f-ui);font-size:.92rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cn small{font-family:var(--f-ui);font-size:.72rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lm{font-family:var(--f-ui);font-size:.78rem;color:var(--faint);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.contact .badge-dot{top:8px;right:8px}
+.ava{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font-family:var(--f-display);font-size:.9rem;color:#f4eedd;border:2px solid rgba(255,255,255,.22);flex:none}
+.g0{background:#7a3d55} .g1{background:#3d5f7a} .g2{background:#4d6b3c} .g3{background:#6b5a2e}
+.convo{padding:0;overflow:hidden;gap:0}
+.conv-h{display:grid;grid-template-columns:44px minmax(0,1fr) auto;gap:10px;align-items:center;padding:10px 12px;border-bottom:1px solid var(--line)}
+.conv-h b{font-family:var(--f-ui);font-weight:600} .conv-h small{display:block;font-family:var(--f-ui);font-size:.78rem;color:var(--muted)}
+.conv{flex:1;min-height:0;overflow:auto;padding:14px;display:flex;flex-direction:column;gap:8px}
+.bub{max-width:min(78%,560px);border-radius:14px;padding:8px 12px;display:grid;gap:2px}
+.bub p{margin:0;font-size:1rem;overflow-wrap:anywhere} .bub small{font-family:var(--f-ui);font-size:.7rem;opacity:.78}
+.bub.me{align-self:flex-end;background:#2c5a3f;border-bottom-right-radius:4px}
+.bub.them{align-self:flex-start;background:var(--panel2);border-bottom-left-radius:4px}
+.bub.wait{opacity:.6;font-style:italic}
+.composer{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;padding:10px 12px;border-top:1px solid var(--line);align-items:end}
+.composer textarea{width:100%;min-height:48px;background:var(--bg2);color:var(--ink);border:1px solid var(--line);border-radius:var(--r);font-family:var(--f-body);font-size:1rem;padding:8px 10px;resize:vertical}
+@media (max-width:1180px){.vw{grid-template-columns:minmax(0,1fr) 372px}.vw.corr{grid-template-columns:280px minmax(0,1fr)}}
+@media (max-width:960px){
+  .shell{display:block;padding-bottom:96px}
+  .rail{position:fixed;left:0;right:0;bottom:0;z-index:6;flex-direction:row;background:var(--bg2);border-top:1px solid var(--line);gap:4px;
+    padding:6px max(8px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(8px,env(safe-area-inset-left,0px))}
+  .rail button{flex:1;min-height:56px;border-color:transparent;background:transparent;font-size:.62rem;padding:4px 0}
+  .rail svg{width:24px;height:24px}
+  .vw,.vw.corr{display:grid;grid-template-columns:minmax(0,1fr);height:auto}
+  .vcol.grow .mapbox{flex:none;height:min(58vh,480px)}
+  .vcol.side .pbody,.panel.scroll,.scrolly{overflow:visible}
+  .contacts{max-height:38vh}
+  .convo{height:70vh}
+  .ord4{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .two-col,.gauges.two{grid-template-columns:minmax(0,1fr)}
+  .kpi.four{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .up{grid-template-columns:minmax(0,1fr);gap:0}
+}
+
 /* ---------- Fenêtres ---------- */
 .scene{position:relative;overflow:hidden;aspect-ratio:1200/330;max-width:100%;background:#000}
 .scene svg{display:block;width:100%;height:100%}
@@ -575,7 +676,21 @@ CHARACTERS.napoleon = {
     { id: "alexandre", name: "Alexandre Ier", role: "Tsar de Russie", bio: "Monté sur le trône en 1801 après l’assassinat de son père. Séducteur, mystique, imprévisible.", from: "1801-03-24", dies: { date: "1825-12-01", cause: "mort à Taganrog" }, start: 0 },
     { id: "metternich", name: "Klemens von Metternich", role: "Diplomate autrichien", bio: "Ambassadeur à Paris en 1806, ministre des Affaires étrangères en 1809. Le grand architecte de l’équilibre européen.", from: "1806-08-01", dies: { date: "1859-06-11", cause: "mort à Vienne" }, start: -5 },
     { id: "pitt", name: "William Pitt le Jeune", role: "Premier ministre britannique", bio: "Financier des coalitions successives contre la France.", from: "1796-01-01", dies: { date: "1806-01-23", cause: "mort à Londres" }, start: -45 },
-    { id: "wellington", name: "Arthur Wellesley (Wellington)", role: "Général britannique", bio: "Vainqueur aux Indes, puis maître de la guerre défensive dans la péninsule Ibérique.", from: "1808-08-01", dies: { date: "1852-09-14", cause: "mort au château de Walmer" }, start: -30 }
+    { id: "wellington", name: "Arthur Wellesley (Wellington)", role: "Général britannique", bio: "Vainqueur aux Indes, puis maître de la guerre défensive dans la péninsule Ibérique.", from: "1808-08-01", dies: { date: "1852-09-14", cause: "mort au château de Walmer" }, start: -30 },
+    { id: "francois", name: "François Ier d’Autriche", role: "Empereur d’Autriche", bio: "Souverain prudent et tenace, quatre fois vaincu, jamais résigné. Père de Marie-Louise.", from: "1796-01-01", dies: { date: "1835-03-02", cause: "mort à Vienne" }, start: -30 },
+    { id: "cambaceres", name: "Jean-Jacques-Régis de Cambacérès", role: "Deuxième consul puis archichancelier", bio: "Juriste prudent, gourmet célèbre, il gouverne à Paris quand vous êtes aux armées.", from: "1799-11-01", dies: { date: "1824-03-08", cause: "mort à Paris" }, start: 45 },
+    { id: "joseph", name: "Joseph Bonaparte", role: "Frère aîné", bio: "Aimable, cultivé, peu fait pour la guerre. Roi de Naples puis d’Espagne si l’Histoire suit son cours.", from: "1769-01-01", dies: { date: "1844-07-28", cause: "mort à Florence" }, start: 55 },
+    { id: "lucien", name: "Lucien Bonaparte", role: "Frère", bio: "Le plus indépendant de la fratrie, républicain sincère, brouillé avec vous pour son mariage.", from: "1775-01-01", dies: { date: "1840-06-29", cause: "mort à Viterbe" }, start: 30 },
+    { id: "louis", name: "Louis Bonaparte", role: "Frère", bio: "Mélancolique et susceptible. Époux malheureux d’Hortense, roi de Hollande s’il vous obéit.", from: "1778-01-01", dies: { date: "1846-07-25", cause: "mort à Livourne" }, start: 40 },
+    { id: "jerome", name: "Jérôme Bonaparte", role: "Frère cadet", bio: "Léger, dépensier, courageux à ses heures.", from: "1784-01-01", dies: { date: "1860-06-24", cause: "mort près de Paris" }, start: 45 },
+    { id: "pauline", name: "Pauline Bonaparte", role: "Sœur", bio: "La plus belle et la plus fidèle de vos sœurs ; elle vous suivra jusque dans l’exil.", from: "1780-01-01", dies: { date: "1825-06-09", cause: "morte à Florence" }, start: 60 },
+    { id: "caroline", name: "Caroline Bonaparte", role: "Sœur, épouse de Murat", bio: "Ambitieuse et politique, plus habile que son mari.", from: "1782-01-01", dies: { date: "1839-05-18", cause: "morte à Florence" }, start: 40 },
+    { id: "elisa", name: "Élisa Bonaparte", role: "Sœur", bio: "Autoritaire et capable ; elle administre ses principautés italiennes avec sérieux.", from: "1777-01-01", dies: { date: "1820-08-07", cause: "morte près de Trieste" }, start: 35 },
+    { id: "eugene", name: "Eugène de Beauharnais", role: "Beau-fils", bio: "Fils de Joséphine. Loyal, appliqué, bon soldat.", from: "1796-03-01", dies: { date: "1824-02-21", cause: "mort à Munich" }, start: 60 },
+    { id: "hortense", name: "Hortense de Beauharnais", role: "Belle-fille", bio: "Fille de Joséphine, mariée à Louis. Musicienne, mère du futur Napoléon III.", from: "1796-03-01", dies: { date: "1837-10-05", cause: "morte à Arenenberg" }, start: 55 },
+    { id: "massena", name: "André Masséna", role: "Général puis maréchal", bio: "« L’enfant chéri de la victoire ». Grand tacticien, grand pillard.", from: "1796-03-01", dies: { date: "1817-04-04", cause: "mort à Paris" }, start: 40 },
+    { id: "lannes", name: "Jean Lannes", role: "Général puis maréchal", bio: "Le seul qui vous tutoie. Bravoure légendaire et franc-parler.", from: "1796-04-01", dies: { date: "1809-05-31", cause: "mort de ses blessures après Essling" }, start: 60 },
+    { id: "soult", name: "Jean-de-Dieu Soult", role: "Général puis maréchal", bio: "Organisateur remarquable, manœuvrier, ambitieux.", from: "1799-01-01", dies: { date: "1851-11-26", cause: "mort dans le Tarn" }, start: 35 }
   ],
 
   starts: [
@@ -1693,9 +1808,260 @@ N.audio = { tempo: 76, root: 146.83, scale: [0, 2, 3, 5, 7, 8, 10], style: "marc
 <script>
 "use strict";
 /* =====================================================================
+   NAPOLÉON — organisation en cinq fenêtres : Vue générale, Armée, Presse,
+   Finances, Correspondance. Ordres aux corps, curseurs à effet direct,
+   presse d’époque, contacts et courriers. Toujours en données.
+   ===================================================================== */
+(function(){
+const N = CHARACTERS.napoleon;
+const P = s => GAME.power(s);
+const M = v => `${Math.round(v)} M F`;
+const sg = (v, d = 1) => `${v >= 0 ? "+" : "−"}${Math.abs(v).toFixed(d).replace(".", ",")}`;
+const REG = id => N.map.regions.find(r => r.id === id);
+const once = (s, id) => s.wk[id] === s.week ? "Déjà fait cette semaine" : false;
+const pay = (s, n) => s.stats.tresor < n ? `Il faut ${M(n)}` : false;
+
+Object.assign(N.defaultPol, { recrut: 0, marine: 1, cour: 1 });
+
+/* ---------------- Jauges composées et alertes ---------------- */
+N.stability = s => clamp(Math.round(100 - s.stats.complot * .6 - Math.max(0, 50 - s.stats.popularite) * .5 - Math.max(0, 50 - s.stats.loyaute) * .35 - (s.stats.tresor < 0 ? 10 : 0)), 0, 100);
+N.opinionAbroad = s => { const ks = ["angleterre", "autriche", "russie", "prusse", "espagne", "allemagne", "italie"]; const avg = ks.reduce((t, k) => t + s.pays[k].rel, 0) / ks.length; return clamp(Math.round(50 + avg * .45 - (s.stats.coalition - 50) * .25), 0, 100); };
+N.mainGauges = s => [
+  { label: "Popularité en France", v: s.stats.popularite }, { label: "Stabilité de l’Empire", v: N.stability(s) },
+  { label: `Santé · ${GAME.age(s)} ans`, v: s.stats.sante }, { label: "Loyauté des maréchaux", v: s.stats.loyaute },
+  { label: "Menace de coalition", v: s.stats.coalition, bad: "high" }
+];
+N.sideFacts = s => [["Territoire", `${Math.round(s.stats.departements)} dép.`], ["Risque de complot", Math.round(s.stats.complot)], ["Fatigue", Math.round(s.stats.fatigue)], ["Stress", Math.round(s.stats.stress)]];
+N.corpsAlerts = (s, c) => { const a = []; if (c.supply < 35) a.push("Manque de vivres"); if (c.moral < 40) a.push("Moral bas"); const r = REG(c.loc); const near = [c.loc, ...(r ? r.adj : [])].find(k => s.pays[k] && s.pays[k].statut === "guerre" && s.pays[k].armee >= 30 && k !== "angleterre"); if (near && !c.dest) a.push(`Ennemi proche : ${N.regionName(near)}`); return a; };
+N.alerts = s => {
+  const b = N.budget(s); const out = { armee: [], finances: [], general: [] };
+  for (const c of s.corps) for (const a of N.corpsAlerts(s, c)) out.armee.push(`${c.name} : ${a}`);
+  if (P(s) >= 1) { if (s.stats.tresor < 0) out.finances.push("Le Trésor est vide : la faillite menace."); else if (b.solde < 0 && s.stats.tresor / -b.solde < 6) out.finances.push(`À ce rythme, le Trésor sera vide dans ${Math.max(1, Math.round(s.stats.tresor / -b.solde))} mois.`); if (s.dette > 400) out.finances.push("La dette dépasse 400 millions : les banquiers s’inquiètent."); }
+  if (s.stats.complot >= 65) out.general.push("La police signale des conjurations sérieuses."); if (s.stats.sante < 35) out.general.push("Votre santé décline dangereusement.");
+  return out;
+};
+/* « À venir » : ce que l’on sait déjà de l’avenir */
+N.upcoming = s => {
+  const out = [];
+  for (const d of s.deferred) out.push({ d: d.date, t: d.title, k: "Conséquence attendue" });
+  for (const c of s.corps) if (c.dest) out.push({ d: c.eta, t: `${c.name} arrive : ${N.regionName(c.dest)}${c.stance === "attaque" ? " (attaque à l’arrivée)" : ""}`, k: "Mouvement" });
+  for (const w of N.works) { const pr = s.projects[w.id]; if (pr && pr.left > 0) out.push({ d: addDays(s.date, Math.round(pr.left / [.5, 1, 1.6][s.pol.travaux] * 7)), t: `Fin du chantier : ${w.label}`, k: "Grands travaux" }); }
+  for (const q of (s.corrQueue || [])) out.push({ d: q.at, t: `Réponse attendue : ${GAME.relDef(s, q.id).name}`, k: "Courrier" });
+  for (const [id, th] of Object.entries(s.corr || {})) for (const m of th) if (m.me && m.arrive && m.arrive > s.date) out.push({ d: m.arrive, t: `Votre lettre parvient à ${GAME.relDef(s, id).name}`, k: "Courrier" });
+  if (s.flags.remarried && !s.flags.sonBorn && (s.family.spouse || s.family.spouseName)) out.push({ d: addDays(s.date, 120), t: "Une naissance est espérée à la cour", k: "Famille", approx: true });
+  if (s.pol.espions) for (const r of N.rivals) { const v = s.rivals[r.id]; if (v.prog >= 60) out.push({ d: addDays(s.date, Math.round((100 - v.prog) * 1.2) + 7), t: `${r.name} : ${v.plan.charAt(0).toLowerCase() + v.plan.slice(1)}`, k: "Renseignement", approx: true }); }
+  if (s.dette > 0) out.push({ d: addDays(s.date, 30), t: `Intérêts de la dette : ${(s.dette * .005).toFixed(1).replace(".", ",")} M F par mois`, k: "Finances", approx: true });
+  return out.sort((a, b) => a.d.localeCompare(b.d)).slice(0, 12);
+};
+
+/* ---------------- Budget mensuel détaillé ---------------- */
+N.budget = s => {
+  const st = s.stats, p = s.pol, r = N.ranks[s.rank] || { income: 0 }, pw = P(s), L = s.laws;
+  const rec = [], dep = [];
+  if (pw === 0) { rec.push(["Pension et revenus de l’exil", s.rank === "prisonnier" ? .2 : .6]); dep.push(["Maison et domestiques", s.rank === "prisonnier" ? .2 : .5]); }
+  else {
+    const mult = (1 + (L.prefets ? .03 : 0) + (L.cadastre ? .04 : 0) + (L.banque ? .02 : 0)) * (s.eco / 100) * (pw >= 2 ? N.minister(s, "tresor") : 1);
+    const vassaux = Object.values(s.pays).filter(x => x.statut === "vassal" || x.statut === "occupe").length;
+    rec.push([pw >= 2 ? "Impôts directs" : "Caisse de l’armée", st.departements * .55 * (.7 + st.popularite / 200) * r.income * (p.impots / 100) * mult]);
+    if (pw >= 2) { rec.push(["Droits indirects (droits réunis)", [0, 6, 11][p.droits]]); rec.push(["Douanes" + (p.blocus === 1 ? " et licences" : ""), [2, 5, 8][p.douanes] * (p.blocus === 2 ? .35 : p.blocus === 1 ? 1.4 : 1)]); }
+    rec.push(["Tributs des pays vaincus", p.contrib * (pw >= 2 ? vassaux * 1.4 : vassaux * 3)]);
+    dep.push(["Armée : solde et entretien", st.armee * (pw >= 2 ? .085 : .02) * (p.solde / 100)]);
+    if (s.flags.atWar) dep.push(["Armée : dépenses de campagne", st.armee * (pw >= 2 ? .035 : .01)]);
+    dep.push(["Armée : ravitaillement", st.armee * .012 * [.6, 1, 1.5][p.rav] * (pw >= 2 ? 1 : .3)]);
+    if (p.recrut && pw >= 2) dep.push(["Contingents étrangers", [0, 3, 7][p.recrut]]);
+    if (pw >= 2) {
+      dep.push(["Marine", [0, 4, 9, 16][p.marine]]);
+      const tr = N.works.filter(w => s.projects[w.id] && s.projects[w.id].left > 0).reduce((t, w) => t + w.cost / w.weeks * 4.35 * [.5, 1, 1.6][p.travaux], 0); if (tr) dep.push(["Grands travaux", tr]);
+      dep.push([s.rank === "empereur" ? "Cour impériale" : "Maison du Premier consul", [1, 3, 6][p.cour] * (s.rank === "empereur" ? 1 : .5)]);
+      dep.push(["Administration", st.departements * .045]);
+      dep.push(["Police" + (p.espions ? " et espions" : ""), [0, 3, 7, 12][p.police] + (p.espions ? 4 : 0)]); dep.push(["Presse et propagande", [0, 2, 5, 9][p.propag]]);
+      if (p.pain) dep.push(["Prix du pain", 3]); if (p.industrie) dep.push(["Aides à l’industrie", [0, 4, 8][p.industrie]]);
+      if (s.dette > 0) dep.push(["Intérêts de la dette", s.dette * .005]);
+    }
+  }
+  const R = rec.reduce((t, x) => t + x[1], 0), D = dep.reduce((t, x) => t + x[1], 0);
+  return { rec, dep, R, D, solde: R - D };
+};
+
+/* ---------------- Compléments de simulation ---------------- */
+const baseTick = N.tick;
+N.tick = function(s, h){
+  const out = baseTick.call(this, s, h) || []; const p = s.pol, pw = P(s);
+  if (pw >= 2) {
+    if (p.recrut) { const vas = Object.entries(s.pays).filter(([k, c]) => c.statut === "vassal" || c.statut === "allie"); if (vas.length) { s.depot += [0, 3, 6][p.recrut] * h.dt; for (const [k, c] of vas) c.rel = clamp(c.rel - [0, .25, .6][p.recrut] * h.dt, -100, 100); } }
+    const a = s.pays.angleterre; if (a.statut === "guerre") a.pression = clamp((a.pression || 0) + [-.3, 0, .15, .35][p.marine] * h.dt, 0, 100);
+    h.add("loyaute", [-.5, 0, .35][p.cour]); h.add("popularite", [.1, 0, -.15][p.cour]);
+  }
+  for (const c of s.corps) { if (c.stance === "repos" && !c.dest) { const st = N.map.status(s, c.loc); if (st !== "guerre") { c.moral = clamp(c.moral + 3 * h.dt, 0, 100); c.supply = clamp(c.supply + 4 * h.dt, 0, 100); } } }
+  return out;
+};
+/* Rencontre : un corps qui a l’ordre d’attaquer et se trouve en pays ennemi engage le combat */
+N.meet = s => { const c = s.corps.find(x => x.stance === "attaque" && !x.dest && s.pays[x.loc] && s.pays[x.loc].statut === "guerre" && s.pays[x.loc].armee >= 5); if (!c) return null; for (const x of s.corps) if (x.loc === c.loc && x.stance === "attaque") x.stance = "defense"; return N.offensive(s, c.loc); };
+const baseEnemy = N.enemyMove;
+N.enemyMove = s => { const e = baseEnemy(s); if (!e) return null; const there = s.corps.filter(c => c.loc === e.region && !c.dest); const b = e.choices[0].battle; if (there.some(c => c.stance === "defense")) { b.base = .66; e.text += " Vos corps en défense sur place ont eu le temps de se retrancher."; } else if (there.length && there.every(c => c.stance === "repos")) { b.base = .46; e.text += " Vos troupes au repos sont surprises dans leurs cantonnements."; } return e; };
+
+/* ---------------- Ordres et réglages ---------------- */
+N.orders = [
+  { id: "marcher", label: "Marcher", hint: "Se rendre sur place et y stationner." }, { id: "attaquer", label: "Attaquer", hint: "Marcher à l’ennemi et livrer bataille à l’arrivée." },
+  { id: "defendre", label: "Défendre", hint: "Se retrancher : avantage si l’ennemi attaque." }, { id: "reposer", label: "Se reposer", hint: "Refaire le moral et les vivres, en pays ami." }
+];
+N.stanceLabel = { marche: "En position", attaque: "Ordre d’attaque", defense: "En défense", repos: "Au repos" };
+N.travel = (c, to) => c.loc === to ? 0 : (REG(to).sea || REG(c.loc).sea ? 6 : N.path(c.loc, to) * 2);
+const baseAct = N.act;
+N.act = (s, act, arg, val) => {
+  const st = s.stats; const fx = o => GAME.applyFx(s, o); const corps = () => s.corps.find(c => c.id === arg);
+  switch (act) {
+    case "order": { const c = corps(); const [kind, to] = String(val).split("|"); if (!c) return {};
+      const stance = { marcher: "marche", attaquer: "attaque", defendre: "defense", reposer: "repos" }[kind];
+      if (kind === "attaquer" && !(s.pays[to] && s.pays[to].statut === "guerre")) return { msg: `${N.regionName(to)} n’est pas en guerre avec vous : il n’y a personne à attaquer.`, tone: "bad" };
+      if (kind === "reposer" && s.pays[to] && s.pays[to].statut === "guerre") return { msg: "On ne se repose pas en pays ennemi.", tone: "bad" };
+      if (to !== c.loc) { const why = N.canEnter(s, to); if (why) return { msg: why, tone: "bad" }; c.dest = to; c.eta = addDays(s.date, N.travel(c, to) * 7); } else { c.dest = null; c.eta = null; }
+      c.stance = stance;
+      if (kind === "attaquer" && to === c.loc) return { battle: N.offensive(s, to), sfx: "drum" };
+      return { msg: `${c.name} : ${N.orders.find(o => o.id === kind).label.toLowerCase()}, ${N.regionName(to)}${c.dest ? ` (arrivée vers le ${frDate(c.eta)})` : ""}.`, sfx: "drum" }; }
+    case "corps_merge": { const c = corps(); const o = s.corps.filter(x => x !== c && x.loc === c.loc && !x.dest && !c.dest).sort((a, b) => a.men - b.men)[0]; if (!o) return { msg: "Aucun autre corps au même endroit.", tone: "bad" }; if (s.corps.length <= 3) return { msg: "Il faut garder au moins trois corps.", tone: "bad" }; const tot = c.men + o.men; c.moral = (c.moral * c.men + o.moral * o.men) / tot; c.supply = (c.supply * c.men + o.supply * o.men) / tot; c.men = tot; s.corps = s.corps.filter(x => x !== o); return { msg: `${o.name} est fondu dans ${c.name}.` }; }
+    case "corps_split": { const c = corps(); if (s.corps.length >= 6) return { msg: "Six corps au maximum.", tone: "bad" }; if (c.men < 20) return { msg: "Ce corps est trop faible pour être divisé.", tone: "bad" }; const free = N.marshalsFree(s).sort((a, b) => b.skill - a.skill)[0]; const half = c.men / 2; c.men = half; s.corps.push({ id: "c" + Date.now().toString(36), name: `Corps de ${free ? free.name : "réserve"}`, marshal: free ? free.id : "?", men: half, moral: c.moral, supply: c.supply, loc: c.loc, dest: c.dest, eta: c.eta, stance: c.stance }); return { msg: `${c.name} est divisé en deux.` }; }
+    case "corps_cycle": { const c = corps(); const list = N.marshalsFree(s).sort((a, b) => b.skill - a.skill); if (!list.length) return { msg: "Aucun autre chef disponible.", tone: "bad" }; const cur = N.marshal(c.marshal).skill; const next = list.find(m => m.skill < cur) || list[0]; c.marshal = next.id; return { msg: `${c.name} : commandement confié à ${next.name}.` }; }
+    case "impot_exc": s.wk["exc" + parseD(s.date).y] = s.week; fx({ s: { tresor: 60, popularite: -6, complot: 2 } }); N.press(s, "impot"); return { msg: "Impôt exceptionnel : 60 millions levés d’urgence.", src: "Le Moniteur universel", sfx: "paper" };
+    case "article_cmd": st.tresor -= 6; s.wk.article = s.week; N.press(s, "commande"); return { sfx: "paper" };
+    case "bulletin": { const r = baseAct(s, act, arg, val); N.press(s, "bulletin"); return { sfx: r.sfx }; }
+    case "law": { const r = baseAct(s, act, arg, val); N.press(s, "loi", N.laws.find(l => l.id === arg)); return { sfx: r.sfx, toast: r.msg }; }
+  }
+  return baseAct(s, act, arg, val);
+};
+
+/* ---------------- Presse : sources, tons, articles qui réagissent ---------------- */
+N.newsSources = s => P(s) === 0 ? ["The Times (Londres)", "Journal des débats", "Rumeur de Longwood"] : ["Le Moniteur universel", "Journal des débats", "Gazette de France", "Journal de Paris", "Le Publiciste", "The Times (Londres)", "The Morning Chronicle (Londres)", "Gazette de Vienne", "Gazette de Saint-Pétersbourg", "Gazette de Berlin", "Rumeur des faubourgs", "Rumeur des provinces", "Rapport de police"];
+N.newsCat = src => { const x = String(src || "").toLowerCase(); if (/carnet|conséquence/.test(x)) return "sys"; if (/rumeur|bruit|police|on dit|salon/.test(x)) return "rum"; if (/times|chronicle|london|londres|vienne|wiener|pétersbourg|petersbourg|berlin|madrid|gazeta|courier|anglais|morning|allgemeine|rome/.test(x)) return "etr"; return "fr"; };
+N.pressCats = [["tous", "Tout"], ["fr", "Presse française"], ["etr", "Presse étrangère"], ["rum", "Rumeurs"], ["sys", "Carnet"]];
+N.tonLabel = { fav: "Favorable", neu: "Neutre", hos: "Hostile" };
+const A = (src, ton, title, text) => ({ src, ton, title, text });
+N.press = (s, kind, d) => {
+  const cens = s.pol.censure || 0, pw = P(s); let arts = [];
+  const fr = (ton, title, text) => cens >= 2 && ton === "hos" ? A("Rumeur des faubourgs", "hos", title, text + " Les journaux, eux, n’en disent rien.") : A(cens >= 3 ? "Le Moniteur universel" : ["Journal des débats", "Gazette de France", "Journal de Paris", "Le Publiciste"][Math.floor(Math.random() * 4)], ton, title, text);
+  if (kind === "bataille") {
+    if (d.win) arts = [A("Le Moniteur universel", "fav", `Victoire : ${d.name}`, "L’ennemi est en retraite. L’armée a montré sa valeur accoutumée."), A("The Times (Londres)", "hos", `Nouveau carnage sur le continent`, `On annonce une affaire sanglante : ${d.name}. Le prix payé par la France est tu par ses gazettes.`)];
+    else arts = [fr("hos", `Mauvaises nouvelles de l’armée`, `On parle à mots couverts d’un revers : ${d.name}. Les familles attendent les listes.`), A("Gazette de Vienne", "hos", `Les Français battus : ${d.name}`, "L’invincibilité de leurs armes n’est plus qu’une légende."), ...(cens >= 1 ? [A("Le Moniteur universel", "neu", "Mouvements de l’armée", "L’armée a pris de nouvelles positions, conformément aux ordres.")] : [])];
+  } else if (kind === "loi") arts = [A("Le Moniteur universel", "fav", d.label, d.note), fr(Math.random() < .5 ? "neu" : "fav", "Une mesure commentée dans les salons", "Les notables approuvent l’ordre ; quelques voix regrettent les libertés d’hier.")];
+  else if (kind === "impot") arts = [fr("hos", "L’impôt exceptionnel fait gronder", "Dans les campagnes, les percepteurs sont reçus fraîchement."), A("The Morning Chronicle (Londres)", "hos", "Le Trésor français aux abois", "Un gouvernement qui lève des taxes d’urgence n’est pas un gouvernement prospère.")];
+  else if (kind === "bulletin") arts = [A("Bulletin de la Grande Armée", "fav", `Le Bulletin célèbre ${s.lastBattle ? s.lastBattle.name : "l’armée"}`, "Lu dans les mairies, affiché aux portes des églises, commenté dans les cafés.")];
+  else if (kind === "commande") arts = [A(["Journal de Paris", "Journal des débats", "Le Publiciste"][Math.floor(Math.random() * 3)], "fav", ["Le gouvernement veille au bonheur public", "Tableau de la prospérité nationale", "Ce que la France doit à son chef"][Math.floor(Math.random() * 3)], "Un article inspiré en haut lieu, que les lecteurs avertis reconnaissent à son style.")];
+  else if (kind === "evenement") arts = [d.hist ? A(pw >= 2 ? "Le Moniteur universel" : "Journal de Paris", "neu", d.title, d.res || "") : fr("neu", d.title, d.res || ""), ...(Math.random() < .6 ? [A(["The Times (Londres)", "Gazette de Vienne", "Gazette de Saint-Pétersbourg"][Math.floor(Math.random() * 3)], "hos", `Vu de l’étranger : ${d.title.toLowerCase()}`, "Les cours d’Europe observent et prennent note.")] : [])];
+  for (const a of arts.reverse()) GAME.news(s, a);
+  return arts;
+};
+
+/* ---------------- Panneaux : effets des curseurs en direct ---------------- */
+const levels = (...names) => v => names[v];
+const live = (id, label, min, max, step, fmt, extra) => s => ({ k: "slider", act: "pol", arg: id, label, min, max, step, val: s.pol[id], fmt,
+  live: v => { const old = s.pol[id]; const b0 = N.budget(s); s.pol[id] = +v; const b1 = N.budget(s); const ex = extra ? extra(s, +v) : ""; s.pol[id] = old; const d = b1.solde - b0.solde; return `Solde mensuel ${sg(b1.solde)} M F${Math.abs(d) >= .05 ? ` (${sg(d)})` : ""}${ex ? " · " + ex : ""}`; } });
+const recMonth = s => [0, 4, 8, 14, 24][s.pol.conscription] * (P(s) >= 2 ? 1 : .12) * Math.min(1, s.stats.departements / 100) + (P(s) >= 2 ? [0, 3, 6][s.pol.recrut] : 0);
+const in3 = s => `effectif dans 3 mois ≈ ${Math.round((s.stats.armee + recMonth(s) * 3) * .985)} 000`;
+const oldPanel = id => N.panels.find(p => p.id === id);
+const O = { lois: oldPanel("lois"), dip: oldPanel("diplomatie"), police: oldPanel("police"), travaux: oldPanel("travaux"), famille: oldPanel("famille"), presse: oldPanel("presse"), eco: oldPanel("economie") };
+const cut = (arr, from, to) => { const i = arr.findIndex(c => c && c.k === "h" && c.text === from); const j = to ? arr.findIndex(c => c && c.k === "h" && c.text === to) : arr.length; return i < 0 ? [] : arr.slice(i, j < 0 ? arr.length : j); };
+
+N.panels = [
+  { id: "armee", label: "Armée", cond: s => true, blocks: s => {
+    if (!s.corps.length) return [{ k: "info", html: "Vous ne commandez plus aucune troupe." }];
+    const rows = s.corps.map((c, i) => { const al = N.corpsAlerts(s, c); const same = s.corps.some(x => x !== c && x.loc === c.loc && !x.dest && !c.dest);
+      return { k: "row", pick: c.id, title: `${i + 1}. ${c.name}`, badge: [N.marshalName(c.marshal), "neutre"], sub: `${Math.round(c.men)} 000 h. · ${N.regionName(c.loc)}${c.dest ? ` → ${N.regionName(c.dest)}, vers le ${frDate(c.eta)}` : ""} · ${N.stanceLabel[c.stance || "marche"]}`,
+        meters: [["Moral", c.moral], ["Ravitaillement", c.supply]], alerts: al,
+        ctrls: [{ k: "btn", act: "corps_cycle", arg: c.id, label: "Changer de maréchal" }, { k: "btn", act: "corps_merge", arg: c.id, label: "Fusionner", dis: (!same && "Aucun corps voisin") || (s.corps.length <= 3 && "3 corps au minimum") }, { k: "btn", act: "corps_split", arg: c.id, label: "Diviser", dis: (s.corps.length >= 6 && "6 corps au maximum") || (c.men < 20 && "Trop faible") }, { k: "btn", act: "corps_plus", arg: c.id, label: "+10 000", dis: s.depot < 1 && "Dépôts vides" }] }; });
+    return [{ k: "kpi", items: [["Sous les armes", `${Math.round(s.stats.armee)} 000`], ["Aux dépôts", `${Math.round(s.depot)} 000`], ["Moral moyen", Math.round(s.stats.moral)], ["Corps", `${s.corps.length}/6`]] },
+      { k: "info", html: "Touchez un corps, puis une destination sur la carte, puis choisissez l’ordre." }, ...rows,
+      { k: "btn", act: "corps_new", label: "Former un nouveau corps", cost: "15 000 hommes des dépôts", dis: (s.corps.length >= 6 && "6 corps au maximum") || (s.depot < 15 && "Dépôts insuffisants") },
+      { k: "h", text: "Recrutement et intendance" },
+      live("conscription", "Niveau de conscription", 0, 4, 1, levels("Suspendue", "Légère", "Normale", "Forte", "Levée en masse"), (s, v) => `popularité ${["+0,3", "0", "−0,4", "−1", "−2,2"][v]}/mois · ${in3(s)}`)(s),
+      ...(P(s) >= 2 ? [live("recrut", "Recrutement de contingents étrangers", 0, 2, 1, levels("Aucun", "Alliés sollicités", "Alliés pressurés"), (s, v) => `fidélité des alliés ${["stable", "en baisse", "en forte baisse"][v]} · ${in3(s)}`)(s)] : []),
+      live("solde", "Budget militaire (solde)", 80, 125, 5, v => v + " %", (s, v) => `moral visé ${Math.round(58 + (v - 100) * .5)}`)(s),
+      live("rav", "Priorité au ravitaillement", 0, 2, 1, levels("Vivre sur le pays", "Convois réguliers", "Magasins abondants"), (s, v) => `vivres visés ${[40, 65, 88][v]} %`)(s)]; } },
+  { id: "lois", label: "Lois et décrets", cond: s => P(s) >= 2, blocks: s => { const b = O.lois.blocks(s); const on = b.filter(x => x.done), off = b.filter(x => x.k === "row" && !x.done); return [{ k: "h", text: `En vigueur (${on.length})` }, ...(on.length ? on : [{ k: "info", html: "Aucune loi promulguée pour l’instant." }]), { k: "h", text: "À promulguer" }, ...off]; } },
+  { id: "diplomatie", label: "Diplomatie et traités", cond: s => P(s) >= 2, blocks: s => { const b = O.dip.blocks(s); return [...cut(b, "Puissances", "Ministres"), ...cut(b, "Ce que préparent vos rivaux")]; } },
+  { id: "nominations", label: "Nominations", cond: s => P(s) >= 2, blocks: s => [...cut(O.dip.blocks(s), "Ministres", "Ce que préparent vos rivaux"), ...(P(s) >= 3 ? [{ k: "h", text: "Trônes de famille" }, ...O.famille.blocks(s).filter(c => c.act === "throne")] : [])] },
+  { id: "police", label: "Police et espionnage", cond: s => P(s) >= 2, blocks: s => O.police.blocks(s) },
+  { id: "travaux", label: "Grands travaux", cond: s => P(s) >= 2, blocks: s => O.travaux.blocks(s) },
+  { id: "famille", label: "Famille et succession", cond: s => true, blocks: s => O.famille.blocks(s).filter(c => c.act !== "throne").map(c => c.k === "h" ? { k: "h", text: "Succession" } : c) },
+  { id: "presse", label: "Presse", cond: s => true, blocks: s => P(s) < 2 ? [{ k: "btn", act: "write_article", label: "Écrire un article", cost: "Compte comme l’action de la semaine" }, { k: "info", html: "Vous n’avez pas encore la main sur les journaux." }] : [
+    live("censure", "Niveau de censure", 0, 3, 1, levels("Presse libre (73 titres)", "Presse surveillée", "13 journaux à Paris", "4 journaux à Paris"), (s, v) => ["les critiques s’impriment librement", "les critiques s’adoucissent", "les critiques deviennent des rumeurs · complots +", "seul le Moniteur parle · complots ++, l’étranger se moque"][v])(s),
+    live("propag", "Budget de propagande", 0, 3, 1, levels("Aucun", "Modeste", "Soutenu", "Massif"), (s, v) => `popularité visée +${[0, 2, 4, 6][v]}`)(s),
+    { k: "btn", act: "write_article", label: "Écrire un article vous-même", cost: "Compte comme l’action de la semaine" },
+    { k: "btn", act: "bulletin", label: "Commander un Bulletin de la Grande Armée", cost: "Après une bataille", dis: (!s.lastBattle || s.lastBattle.used || s.week - s.lastBattle.week > 8) && "Aucune bataille récente" },
+    { k: "btn", act: "article_cmd", label: "Commander un article de propagande", cost: "6 M F", dis: once(s, "article") || pay(s, 6) },
+    { k: "btn", act: "fete", label: "Te Deum et fête publique", cost: "15 M F", dis: pay(s, 15) },
+    { k: "btn", act: "tableau", label: "Commander un tableau pour le Salon", cost: "8 M F, une fois par an", dis: once(s, "tab" + parseD(s.date).y) || pay(s, 8) }] },
+  { id: "finances", label: "Finances", cond: s => true, blocks: s => {
+    const pw = P(s), y = parseD(s.date).y; const pop = (s2, v, k) => `popularité visée ${sg(k(v))}`;
+    if (pw === 0) return [{ k: "info", html: "En exil, vous vivez de votre pension." }];
+    const out = [{ k: "h", text: "Recettes" }];
+    if (pw >= 2) out.push(live("impots", "Impôts directs", 80, 130, 5, v => v + " %", (s, v) => `popularité visée ${sg(-(v - 100) * .35)}`)(s), live("droits", "Droits indirects (alcool, tabac, sel)", 0, 2, 1, levels("Supprimés", "Modérés", "Élevés"), (s, v) => `popularité visée ${sg(-[0, 1.5, 3][v])}`)(s), live("douanes", "Tarif douanier", 0, 2, 1, levels("Bas", "Moyen", "Prohibitif"), (s, v) => v === 2 ? "protège les manufactures, freine le commerce" : "")(s));
+    out.push(live("contrib", "Tributs des pays vaincus", 0, 3, 1, levels("Aucun", "Modérés", "Lourds", "Écrasants"), (s, v) => `fidélité des vassaux ${["en hausse", "stable", "en baisse", "en chute"][v]} · menace de coalition ${sg(v * .12 - .12, 2)}/mois`)(s));
+    if (pw >= 2) out.push({ k: "h", text: "Grandes dépenses" },
+      live("marine", "Marine", 0, 3, 1, levels("Désarmée", "Entretien", "Constructions", "Grand programme naval"), (s, v) => ["l’Angleterre respire", "", "pression sur Londres", "forte pression sur Londres"][v])(s),
+      live("cour", s.rank === "empereur" ? "Train de la cour" : "Train de maison", 0, 2, 1, levels("Austère", "Convenable", "Fastueux"), (s, v) => ["les grands dignitaires murmurent", "", "dignitaires comblés, peuple agacé"][v])(s),
+      live("travaux", "Rythme des grands travaux", 0, 2, 1, levels("Ralenti", "Normal", "Accéléré"))(s),
+      { k: "h", text: "Mesures" },
+      { k: "btn", act: "emprunt", label: "Emprunter 100 millions", cost: "110 à rembourser, intérêts mensuels" },
+      { k: "btn", act: "rembourser", label: "Rembourser la dette", cost: M(Math.min(100, s.dette)), dis: (s.dette <= 0 && "Aucune dette") || pay(s, Math.min(100, s.dette)) },
+      { k: "btn", act: "impot_exc", label: "Lever un impôt exceptionnel", cost: "+60 M F, popularité −6, une fois par an", dis: s.wk["exc" + y] !== undefined && "Déjà levé cette année", confirm: true },
+      { k: "select", act: "tribut", label: "Exiger un tribut de 30 millions", val: "", options: [["", "Choisir un pays soumis…"], ...Object.entries(s.pays).filter(([k, c]) => (c.statut === "vassal" || c.statut === "occupe") && s.wk["trib" + k + y] === undefined).map(([k]) => [k, N.regionName(k)])], note: "La relation avec ce pays baisse de 15." },
+      { k: "btn", act: "biens", label: "Vendre des domaines nationaux", cost: "+40 M F, une fois par an", dis: s.wk["biens" + y] !== undefined && "Déjà fait cette année" },
+      { k: "h", text: "Économie et Blocus" }, ...O.eco.blocks(s).filter(c => c.k !== "kpi" && c.arg !== "douanes"));
+    return out; } }
+];
+/* Répartition des panneaux dans les fenêtres */
+N.windows = { general: ["lois", "diplomatie", "nominations", "police", "travaux", "famille"], armee: "armee", presse: "presse", finances: "finances" };
+const tr = N.act; N.act = (s, act, arg, val) => act === "tribut" ? tr(s, act, arg || val, val) : tr(s, act, arg, val);
+
+/* ---------------- Parole : l’article remplace la lettre (les lettres passent par la Correspondance) ---------------- */
+N.speech = N.speech.filter(t => t.id !== "lettre");
+N.speech.push({ id: "article", label: "Article de presse", hint: "Un article que vous écrivez ou dictez, publié sans signature dans un journal.", ph: "Ex. : Un article pour le Journal des débats, qui explique pourquoi la paix avec l’Autriche sert le commerce français…" });
+
+/* ---------------- Correspondance : où se trouve chacun, qui il est ---------------- */
+N.persona = {
+  josephine: "tendre, mondaine, dépensière, inquiète de son rang et du sort de ses enfants Eugène et Hortense ; redoute le divorce", marielouise: "jeune, réservée, élevée à la cour de Vienne, attachée à son père, peu politique",
+  letizia: "austère, économe, corse jusqu’au bout des ongles ; se soucie de la famille, se méfie de la fortune ; écrit simplement", talleyrand: "feutré, ironique, cynique ; défend l’équilibre européen, la modération et ses propres intérêts ; ne dit jamais tout",
+  fouche: "froid, précis, renseigné sur tout ; ancien jacobin ; rend service et se rend indispensable", berthier: "méthodique, dévoué, anxieux ; parle logistique, effectifs, ordres de marche",
+  murat: "panache, vanité, bravoure ; réclame des honneurs et un trône", ney: "bouillant, direct, susceptible sur l’honneur", davout: "sévère, exact, incorruptible ; rapports brefs et précis",
+  massena: "rusé, intéressé par l’argent, grand soldat un peu las", lannes: "franc, familier, courageux ; ose contredire", soult: "organisé, ambitieux, prudent dans ses formules",
+  cambaceres: "juriste prudent, légaliste, attentif à l’opinion des notables ; gouverne Paris en votre absence", joseph: "aimable, cultivé, conciliant ; aîné qui supporte mal d’obéir à son cadet",
+  lucien: "indépendant, républicain, fier ; refuse de se soumettre pour sa vie privée", louis: "mélancolique, susceptible, scrupuleux ; défend ses sujets contre vos exigences", jerome: "léger, dépensier, affectueux ; demande de l’argent",
+  pauline: "frivole, drôle, très attachée à vous", caroline: "ambitieuse, calculatrice, défend les intérêts de Murat et les siens", elisa: "autoritaire, sérieuse, fière de bien administrer",
+  eugene: "loyal, modeste, appliqué ; fils respectueux", hortense: "douce, artiste, malheureuse en ménage", pie7: "doux dans la forme, inflexible sur les droits de l’Église ; parle en pasteur",
+  alexandre: "charmeur, mystique, changeant ; se voit en arbitre de l’Europe ; flatte puis se dérobe", francois: "prudent, bureaucrate, patient ; défend sa maison avant tout", metternich: "brillant, vaniteux, calculateur ; cherche l’équilibre des puissances",
+  pitt: "austère, déterminé, parle au nom des intérêts britanniques ; ne correspond que par voie officielle", wellington: "laconique, froid, professionnel ; répond en soldat, par voie officielle"
+};
+N.contactGroups = [["Famille", ["josephine", "marielouise", "letizia", "joseph", "lucien", "louis", "jerome", "pauline", "caroline", "elisa", "eugene", "hortense"]], ["Gouvernement", ["talleyrand", "fouche", "cambaceres"]], ["Armée", ["berthier", "murat", "ney", "davout", "massena", "lannes", "soult"]], ["Souverains et étrangers", ["alexandre", "francois", "metternich", "pie7", "pitt", "wellington"]]];
+N.where = s => s.rank === "prisonnier" ? "sainte-helene" : s.rank === "exilam" ? "amerique" : s.rank === "elbe" ? "elbe" : (s.where || "france");
+N.whereName = s => ({ "sainte-helene": "Sainte-Hélène", amerique: "États-Unis", elbe: "île d’Elbe" }[N.where(s)] || N.regionName(N.where(s)));
+N.contactLoc = (s, id) => {
+  const fix = { alexandre: "russie", francois: "autriche", metternich: "autriche", pie7: "naples", pitt: "angleterre", wellington: s.date >= "1808-08-01" ? "espagne" : "angleterre", lucien: s.date >= "1804-04-01" ? "naples" : "france", elisa: s.date >= "1805-03-01" ? "italie" : "france" };
+  if (fix[id]) return fix[id];
+  const c = s.corps.find(x => x.marshal === id); if (c) return c.loc;
+  if (id === "berthier" && P(s) >= 1) return N.where(s);
+  const th = Object.entries(s.thrones || {}).find(([k, who]) => who === id || (id === "caroline" && who === "murat")); if (th) return th[0];
+  if (id === "eugene" && s.date >= "1805-06-01") return "italie";
+  if (id === "josephine" && s.rank === "general" && s.date < "1796-07-01") return "france";
+  return "france";
+};
+/* Délai d’un courrier, en jours, selon la distance */
+N.mailDays = (s, id) => { const a = N.where(s), b = N.contactLoc(s, id); if (a === b) return 0; if (a === "sainte-helene" || a === "amerique") return 70; if (a === "elbe") return 8; const seaB = REG(b) && REG(b).sea, seaA = REG(a) && REG(a).sea; if (seaA || seaB) return a === "egypte" || b === "egypte" ? 40 : 9; return Math.max(3, N.path(a, b) * 4); };
+N.mailScripts = [
+  { id: "josephine", t: "Mon ami, la Malmaison est bien vide sans toi. Les fournisseurs me pressent encore ; ne te fâche pas, je t’en prie, et écris-moi." }, { id: "letizia", t: "Mon fils, tes frères dépensent sans compter. Mets de l’argent de côté : rien ne dure, et il faudra peut-être un jour donner du pain à tous ces rois." },
+  { id: "talleyrand", t: "Il me revient de plusieurs cours que l’on s’inquiète de nos accroissements. Un geste de modération, placé à propos, vaudrait une armée." }, { id: "fouche", t: "Rien de grave à Paris. Quelques bavards dans les salons du faubourg Saint-Germain ; je les fais suivre. Souhaitez-vous que j’aille plus loin ?" },
+  { id: "berthier", t: "Les états de situation sont à jour. Plusieurs corps manquent de souliers et de fourgons ; je sollicite vos ordres pour les magasins." }, { id: "murat", t: "La cavalerie brûle de se signaler. J’ose rappeler à Votre Majesté les promesses faites à sa sœur et à moi." },
+  { id: "joseph", t: "Mon cher frère, on m’obéit mal ici et l’on me compare à toi. Laisse-moi gouverner à ma manière, avec douceur." }, { id: "cambaceres", t: "Le Conseil a expédié les affaires courantes. Les notables approuvent l’ordre, mais trouvent l’impôt lourd ; je crois devoir vous le dire." },
+  { id: "davout", t: "Mon corps est en ordre. Discipline rétablie, maraudeurs punis. J’attends vos instructions." }, { id: "pauline", t: "Tu ne m’écris plus ! Dis-moi que tu te portes bien et que tu penses un peu à ta sœur." }
+];
+N.mailFallback = (s, id) => { const v = s.rel[id] || 0; return v >= 40 ? "J’ai bien reçu votre lettre et j’y donnerai suite avec tout le zèle que vous me connaissez." : v >= -15 ? "Votre lettre m’est parvenue. Je prends note de ce que vous m’écrivez et vous répondrai plus au long." : "J’ai lu votre lettre. Vous comprendrez que je réserve ma réponse."; };
+})();
+</script>
+<script>
+"use strict";
+/* =====================================================================
    MOTEUR — temps (semaine), effets, santé, mort, événements, mémoire
    ===================================================================== */
-const SAVE_VERSION = 2;
+const SAVE_VERSION = 3;
 const MONTHS = ["janvier","février","mars","avril","mai","juin","juillet","août","septembre","octobre","novembre","décembre"];
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 const esc = t => String(t ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
@@ -1735,7 +2101,7 @@ const GAME = {
       family: { spouse: st.family?.spouse || null, spouseName: null, exSpouses: [...(st.family?.exSpouses || [])], children: [...(st.family?.children || [])], heir: null },
       conditions: [], done, history: [], feed: [], journal: [], deferred: [], deadRel: {},
       counters: { battlesWon: 0, battlesLost: 0, reforms: 0, treaties: 0, weeks: 0, maxDep: stats.departements || 0, popSum: 0, powerWeeks: 0, ...(st.counters || {}) },
-      nextRandomIn: 6, nextRivalIn: 8, recentRandom: [], actionWeek: -1, dead: null, pending: null, speed: 0, savedAt: null
+      nextRandomIn: 6, nextRivalIn: 8, nextMailIn: 3, recentRandom: [], actionWeek: -1, corr: {}, corrQueue: [], fin: [], where: null, feedN: 0, dead: null, pending: null, speed: 0, savedAt: null
     };
     for (const r of ch.relations) if (r.dies && r.dies.date <= s.date) s.deadRel[r.id] = r.dies.date;
     if (ch.setup) ch.setup(s, st.id, false);
@@ -1744,7 +2110,20 @@ const GAME = {
   },
 
   /* Fil d’actualité : articles, dépêches et notes */
-  news(s, it){ s.feed.unshift({ d: s.date, src: it.src || "Carnet", title: it.title || "", text: it.text || "", tone: it.tone || "", kind: it.kind || "" }); if (s.feed.length > 160) s.feed.length = 160; },
+  news(s, it){
+    const ch = GAME.ch(s); const src = it.src || "Carnet";
+    const cat = it.cat || (ch.newsCat ? ch.newsCat(src) : "sys");
+    let ton = { favorable: "fav", hostile: "hos", neutre: "neu", fav: "fav", hos: "hos", neu: "neu" }[String(it.ton || "").toLowerCase()] || (cat === "sys" ? "" : "neu");
+    // Effet visible de l’article sur l’opinion, en France ou à l’étranger
+    let fx = null;
+    if (cat !== "sys" && ton && ton !== "neu" && s.stats.popularite !== undefined) {
+      const sign = ton === "fav" ? 1 : -1;
+      if (cat === "etr") { const v = -sign * .4; s.stats.coalition = clamp(s.stats.coalition + v, 0, 100); fx = { k: "étranger", v: sign * .4 }; }
+      else { const v = sign * (cat === "rum" ? .6 : 1); s.stats.popularite = clamp(s.stats.popularite + v, 0, 100); fx = { k: "France", v }; }
+    }
+    s.feed.unshift({ d: s.date, src, title: it.title || "", text: it.text || "", tone: it.tone || "", kind: it.kind || "", cat, ton, fx });
+    s.feedN = (s.feedN || 0) + 1; if (s.feed.length > 220) s.feed.length = 220;
+  },
   log(s, t, tone = "", src){ GAME.news(s, { src: src || "Carnet", text: t, tone }); },
 
   /* Applique un bloc d’effets. Renvoie les variations pour l’affichage. */
@@ -1761,6 +2140,7 @@ const GAME = {
     if (fx.pays && s.pays) for (const [k, o] of Object.entries(fx.pays)) { const c = s.pays[k]; if (!c || !o) continue; if (o.statut && o.statut !== c.statut) { c.statut = o.statut; if (o.statut !== "guerre") c.ws = 0; out.notes.push(`${ch.regionName(k)} : ${ch.map.statusLabel[o.statut].toLowerCase()}.`); } if (typeof o.rel === "number") c.rel = clamp(c.rel + o.rel, -100, 100); if (typeof o.armee === "number") c.armee = Math.max(0, c.armee + o.armee); if (typeof o.ws === "number") c.ws = clamp((c.ws || 0) + o.ws, -100, 100); if (typeof o.pression === "number") c.pression = clamp((c.pression || 0) + o.pression, 0, 100); }
     if (fx.paysAll && s.pays) for (const c of Object.values(s.pays)) if (c.statut === "guerre") { c.statut = fx.paysAll; c.ws = 0; }
     if (fx.moveCorps && s.corps) for (const c of s.corps) if (c.loc !== "espagne" || fx.moveCorps === "espagne" || s.corps.length <= 3) { c.loc = fx.moveCorps; c.dest = null; c.eta = null; }
+    if (fx.moveCorps) s.where = fx.moveCorps; else if (fx.place && (fx.scene === "palais" || fx.scene === "paris")) s.where = "france";
     if (fx.thr && s.thrones) Object.assign(s.thrones, fx.thr);
     if (typeof fx.depot === "number" && "depot" in s) s.depot = Math.max(0, s.depot + fx.depot);
     if (fx.f) Object.assign(s.flags, fx.f);
@@ -1830,12 +2210,18 @@ const GAME = {
     // Conséquences différées arrivées à échéance
     const fired = [];
     for (const d of [...s.deferred]) if (d.date <= s.date) { s.deferred = s.deferred.filter(x => x !== d); const o = GAME.applyFx(s, d.fx); GAME.news(s, { src: d.src || "Conséquence", title: d.title, text: d.text, tone: "key", kind: "differe" }); const j = s.journal.find(x => x.id === d.from); if (j) (j.suites = j.suites || []).push({ d: s.date, t: d.title }); fired.push({ d, o }); }
+    // Finances : un relevé par mois pour le graphique
+    if (ch.budget && s.week % 4 === 0) { const bu = ch.budget(s); s.fin.push({ d: s.date, t: s.stats.tresor, R: bu.R, D: bu.D }); if (s.fin.length > 14) s.fin.shift(); }
+    // Courrier : lettres arrivées chez leur destinataire, réponses arrivées chez vous
+    const arrived = [], mail = [];
+    for (const [id, th] of Object.entries(s.corr)) for (const m of th) if (m.me && m.arrive && !m.asked && m.arrive <= s.date) { m.asked = true; arrived.push({ id, m }); }
+    for (const q of [...s.corrQueue]) if (q.at <= s.date) { s.corrQueue = s.corrQueue.filter(x => x !== q); if (!GAME.relAlive(s, q.id)) continue; (s.corr[q.id] = s.corr[q.id] || []).push({ d: s.date, me: false, t: q.t, unread: true }); if (q.rel) GAME.applyFx(s, { r: { [q.id]: q.rel } }); mail.push(q); }
     const b = parseD(ch.born); if (p.m === b.m && p.d >= b.d && p.d < b.d + 7) GAME.log(s, `Vous avez ${GAME.age(s)} ans.`);
     ch.sync && ch.sync(s);
     s.counters.maxDep = Math.max(s.counters.maxDep || 0, s.stats.departements || 0);
     s.counters.popSum = (s.counters.popSum || 0) + (s.stats.popularite || 0);
     if (GAME.power(s) >= 2) s.counters.powerWeeks = (s.counters.powerWeeks || 0) + 1;
-    return { death: GAME.mortality(s, dt), fired };
+    return { death: GAME.mortality(s, dt), fired, arrived, mail };
   },
 
   mortality(s, dt){
@@ -1918,6 +2304,17 @@ const STORE = {
         if (ch.setup) ch.setup(s, null, true);
         s.v = 2;
         GAME.news(s, { src: "Carnet", title: "Partie reprise", text: "Cette partie vient d’une version précédente du jeu. Elle a été convertie : le temps avance désormais à la semaine.", tone: "key" });
+      }
+      if (s.v < 3) {
+        // v2 : interface à panneaux ; v3 ajoute la correspondance, le relevé des finances et les ordres aux corps
+        const ch = CHARACTERS[s.char];
+        for (const r of ch.relations) if (typeof s.rel[r.id] !== "number") s.rel[r.id] = r.start || 0;
+        for (const r of ch.relations) if (r.dies && r.dies.date <= s.date && !s.deadRel[r.id] && (!r.dies.cond || r.dies.cond(s))) s.deadRel[r.id] = r.dies.date;
+        s.corr = s.corr || {}; s.corrQueue = s.corrQueue || []; s.fin = s.fin || []; s.where = s.where || null; s.nextMailIn = s.nextMailIn || 3; s.feedN = s.feed.length;
+        if (ch.defaultPol) s.pol = { ...ch.defaultPol, ...(s.pol || {}) };
+        for (const c of (s.corps || [])) c.stance = c.stance || "marche";
+        for (const n of s.feed) { n.cat = n.cat || (ch.newsCat ? ch.newsCat(n.src) : "sys"); n.ton = n.ton || (n.cat === "sys" ? "" : "neu"); }
+        s.v = 3;
       }
       return s;
     } catch (e) { return null; }
@@ -2038,14 +2435,14 @@ RÈGLES :
 - Difficulté équilibrée : réaliste, mais une erreur doit rester rattrapable. La plupart des effets valent entre 1 et 8 points ; réserve les grands effets aux actes majeurs. Une action médiocre a des effets faibles, pas nuls.
 - Tiens compte de la mémoire : une action ancienne peut ressurgir (un journal ressort une promesse, une loi passée produit encore des effets, un personnage se souvient).
 - "effets_differes" : de 0 à 3 conséquences futures plausibles, avec un délai en semaines (de 2 à 520).
-- "fil_actualite" : 2 à 4 articles de sources d’époque crédibles pour ce personnage (${ch.newsSources(s).join(", ")}…), y compris des sources étrangères ou hostiles quand c’est logique. Titre et une ou deux phrases.
+- "fil_actualite" : 2 à 4 articles de sources d’époque crédibles pour ce personnage (${ch.newsSources(s).join(", ")}…), y compris des sources étrangères ou hostiles quand c’est logique. Titre, une ou deux phrases, et le ton de l’article envers le personnage (favorable, neutre ou hostile).
 - "reactions_personnages" : 1 à 4 personnes réelles concernées, parmi les relations listées (utilise leur identifiant), avec une réaction paraphrasée et le changement de relation (-20 à +20).
 - "commentaires_public" : 3 à 6 réactions courtes et variées (${ch.publicLabel}), chacune attribuée à un type de personne (« un grenadier », « une marchande des Halles »…).
 ${AI.rules(s)}
 - "resume" : une phrase neutre qui résume l’action et son effet, pour la mémoire. "importance" : 1 (anecdotique) à 5 (tournant de la partie).
 
 RÉPONDS UNIQUEMENT par un objet JSON de cette forme exacte :
-{"valide":true,"raison":"","resume":"…","importance":2,"effets_immediats":{"jauges":{"popularite":3},"relations":{"talleyrand":-4},"pays":{"autriche":-5}},"effets_differes":[{"dans_semaines":12,"titre":"…","texte":"…","jauges":{"tresor":-20},"relations":{},"pays":{}}],"fil_actualite":[{"source":"…","titre":"…","texte":"…"}],"reactions_personnages":[{"id":"talleyrand","nom":"Talleyrand","reaction":"…","relation":-4}],"commentaires_public":[{"qui":"un grenadier de la Garde","texte":"…"}]}`;
+{"valide":true,"raison":"","resume":"…","importance":2,"effets_immediats":{"jauges":{"popularite":3},"relations":{"talleyrand":-4},"pays":{"autriche":-5}},"effets_differes":[{"dans_semaines":12,"titre":"…","texte":"…","jauges":{"tresor":-20},"relations":{},"pays":{}}],"fil_actualite":[{"source":"…","titre":"…","texte":"…","ton":"favorable|neutre|hostile"}],"reactions_personnages":[{"id":"talleyrand","nom":"Talleyrand","reaction":"…","relation":-4}],"commentaires_public":[{"qui":"un grenadier de la Garde","texte":"…"}]}`;
   },
   normAction(o, s){
     if (!o || typeof o !== "object" || typeof o.valide !== "boolean") throw new Error("forme");
@@ -2055,7 +2452,7 @@ RÉPONDS UNIQUEMENT par un objet JSON de cette forme exacte :
     const reactions = (Array.isArray(o.reactions_personnages) ? o.reactions_personnages : []).slice(0, 5).map(r => { const id = AI.findRel(s, r.id) || AI.findRel(s, r.nom); const n = clamp(Math.round(Number(r.relation) || 0), -20, 20); return { id: id && GAME.relAlive(s, id) ? id : null, nom: String(r.nom || (id ? GAME.relDef(s, id).name : "")).slice(0, 60), reaction: String(r.reaction || "").slice(0, 300), relation: n }; }).filter(r => r.nom && r.reaction);
     for (const r of reactions) if (r.id && r.relation) fx.r[r.id] = r.relation;
     const differes = (Array.isArray(o.effets_differes) ? o.effets_differes : []).slice(0, 4).map(d => ({ weeks: clamp(Math.round(Number(d.dans_semaines) || 8), 1, 520), title: String(d.titre || "Conséquence").slice(0, 100), text: String(d.texte || "").slice(0, 400), fx: AI.normFx(d, s, 1.5) })).filter(d => d.title);
-    const news = (Array.isArray(o.fil_actualite) ? o.fil_actualite : []).slice(0, 4).map(n => ({ src: String(n.source || ch.newsSources(s)[0]).slice(0, 60), title: String(n.titre || "").slice(0, 140), text: String(n.texte || "").slice(0, 400) })).filter(n => n.title);
+    const news = (Array.isArray(o.fil_actualite) ? o.fil_actualite : []).slice(0, 4).map(n => ({ src: String(n.source || ch.newsSources(s)[0]).slice(0, 60), title: String(n.titre || "").slice(0, 140), text: String(n.texte || "").slice(0, 400), ton: String(n.ton || "neutre") })).filter(n => n.title);
     const comments = (Array.isArray(o.commentaires_public) ? o.commentaires_public : []).slice(0, 6).map(c => typeof c === "string" ? { qui: "", texte: c.slice(0, 220) } : { qui: String(c.qui || "").slice(0, 60), texte: String(c.texte || "").slice(0, 220) }).filter(c => c.texte);
     if (news.length < 1) throw new Error("fil manquant");
     return { valide: true, resume: String(o.resume || "").slice(0, 240) || "Action libre.", importance: clamp(Math.round(Number(o.importance) || 2), 1, 5), fx, differes, news, reactions, comments };
@@ -2154,7 +2551,7 @@ ${list}
 
 Fais avancer UN ou DEUX de ces plans de façon crédible pour l’époque (les autres ne bougent pas). Pour chacun : le plan (tu peux le faire évoluer ou le remplacer s’il est achevé ou devenu absurde), le nouvel avancement (0 à 100, en général +10 à +35), une annonce pour le fil d’actualité (source d’époque, titre, une ou deux phrases) et de petits effets (jauges entre -6 et +6, relations des pays entre -10 et +10). Si un plan atteint 100, décris son aboutissement dans l’annonce et donne des effets un peu plus forts.
 ${AI.rules(s)}
-RÉPONDS UNIQUEMENT par un objet JSON : {"rivaux":[{"id":"…","plan":"…","progression":45,"annonce":{"source":"…","titre":"…","texte":"…"},"effets":{"jauges":{"coalition":3},"pays":{"autriche":-4}}}]}`, { timeout: 90000 });
+Ajoute aussi une courte revue de presse : 2 articles (un français, un étranger) qui commentent la situation actuelle ou une action récente du joueur, avec leur ton envers le personnage.\nRÉPONDS UNIQUEMENT par un objet JSON : {"rivaux":[{"id":"…","plan":"…","progression":45,"annonce":{"source":"…","titre":"…","texte":"…"},"effets":{"jauges":{"coalition":3},"pays":{"autriche":-4}}}],"presse":[{"source":"…","titre":"…","texte":"…","ton":"favorable|neutre|hostile"}]}`, { timeout: 90000 });
     if (!o || !Array.isArray(o.rivaux)) throw new Error("forme");
     const out = [];
     for (const r of o.rivaux.slice(0, 2)) {
@@ -2163,11 +2560,53 @@ RÉPONDS UNIQUEMENT par un objet JSON : {"rivaux":[{"id":"…","plan":"…","pro
       if (r.plan) v.plan = String(r.plan).slice(0, 160); v.prog = done ? 0 : prog;
       const fx = AI.normFx(r.effets, s, done ? 1 : .5); for (const k of Object.keys(fx.pays)) fx.pays[k].rel = clamp(fx.pays[k].rel, -12, 12);
       GAME.applyFx(s, fx);
-      const n = { src: String(r.annonce?.source || ch.newsSources(s)[0]).slice(0, 60), title: String(r.annonce?.titre || def.name).slice(0, 140), text: String(r.annonce?.texte || "").slice(0, 400), tone: done ? "bad" : "", kind: "rival" };
+      const n = { src: String(r.annonce?.source || ch.newsSources(s)[0]).slice(0, 60), title: String(r.annonce?.titre || def.name).slice(0, 140), text: String(r.annonce?.texte || "").slice(0, 400), tone: done ? "bad" : "", kind: "rival", ton: "hos" };
       GAME.news(s, n); out.push(n);
     }
     if (!out.length) throw new Error("vide");
+    for (const a of (Array.isArray(o.presse) ? o.presse : []).slice(0, 2)) if (a && a.titre) GAME.news(s, { src: String(a.source || ch.newsSources(s)[1]).slice(0, 60), title: String(a.titre).slice(0, 140), text: String(a.texte || "").slice(0, 400), ton: a.ton });
     return out;
+  },
+
+  /* ---------- Correspondance : un contact répond, ou écrit de lui-même ---------- */
+  thread(s, id){ const th = s.corr[id] || []; const last = th.slice(-12); return (th.length > last.length ? `(${th.length - last.length} lettres plus anciennes non reproduites)\n` : "") + (last.map(m => `- ${frDate(m.d)} — ${m.me ? "LE PERSONNAGE écrit" : "LE CONTACT écrit"} : « ${String(m.t).slice(0, 500)} »`).join("\n") || "- (aucun échange jusqu’ici)"); },
+  async reply(s, id){
+    const ch = GAME.ch(s); const r = GAME.relDef(s, id);
+    const o = await AI.call(`Tu écris la réponse de ${r.name} (${r.role}) à une lettre du personnage, dans « Legacy », simulateur historique sérieux en français. C’est une reconstitution : écris dans sa personnalité, avec ses connaissances et ses intérêts réels à cette date, sans reprendre de phrases authentiques. Caractère : ${ch.persona[id] || r.bio}. ${r.bio}
+Lieu du contact : ${ch.regionName(ch.contactLoc(s, id))}. Relation actuelle avec le personnage : ${Math.round(s.rel[id])} sur une échelle de -100 à +100 (${GAME.relStatusLabel[GAME.relStatus(s.rel[id])]}).
+
+${AI.context(s)}
+
+MÉMOIRE DE LA PARTIE :
+${AI.memory(s)}
+
+CORRESPONDANCE AVEC CE CONTACT (la dernière lettre du personnage est celle à laquelle tu réponds) :
+${AI.thread(s, id)}
+
+Écris une lettre de 2 à 5 phrases, à la première personne, dans le ton et les formules de l’époque et de ce lien (une épouse ne s’adresse pas comme un ministre ou un souverain ennemi). Le contact ne sait que ce qu’il peut savoir là où il est. Il peut accepter, refuser, marchander, flatter, se plaindre ou donner une information utile. Si la lettre reçue est anachronique ou incompréhensible pour lui, il s’en étonne.
+${AI.rules(s)}
+"relation" : l’effet de cet échange sur la relation, entre -8 et +8.
+RÉPONDS UNIQUEMENT par un objet JSON : {"reponse":"…","relation":2}`, { timeout: 80000 });
+    if (!o || typeof o.reponse !== "string" || o.reponse.trim().length < 5) throw new Error("forme");
+    return { t: o.reponse.trim().slice(0, 900), rel: clamp(Math.round(Number(o.relation) || 0), -8, 8) };
+  },
+  async mail(s){
+    const ch = GAME.ch(s); const ids = ch.contactGroups.flatMap(g => g[1]).filter(id => GAME.relAlive(s, id));
+    const o = await AI.call(`Dans « Legacy », simulateur historique sérieux en français, un proche ou un correspondant du personnage lui écrit de lui-même. Choisis UN contact qui a une vraie raison d’écrire maintenant (demande, conseil, plainte, nouvelle, mise en garde) et rédige sa lettre, dans sa personnalité et avec ce qu’il peut savoir. C’est une reconstitution : aucune phrase authentique.
+
+${AI.context(s)}
+
+MÉMOIRE DE LA PARTIE :
+${AI.memory(s)}
+
+CONTACTS POSSIBLES (identifiant : caractère) :
+${ids.map(id => `- ${id} : ${GAME.relDef(s, id).name} — ${ch.persona[id] || ""}${(s.corr[id] || []).length ? ` — dernier échange le ${frDate(s.corr[id][s.corr[id].length - 1].d)}` : ""}`).join("\n")}
+
+Lettre de 2 à 4 phrases, à la première personne, dans le ton de l’époque. Varie les correspondants : évite ceux qui ont écrit récemment.
+${AI.rules(s)}
+RÉPONDS UNIQUEMENT par un objet JSON : {"id":"…","message":"…"}`, { timeout: 80000 });
+    const id = o && AI.findRel(s, o.id); if (!id || !GAME.relAlive(s, id) || typeof o.message !== "string" || o.message.trim().length < 5) throw new Error("forme");
+    return { id, t: o.message.trim().slice(0, 800) };
   },
 
   /* ---------- 5. Récit court d’une phase de bataille ---------- */
@@ -2420,10 +2859,10 @@ const app = () => $("#app");
 const overlay = () => $("#overlay-root");
 
 const UI = {
-  modalOpen: false, resumeSpeed: 1, currentEvent: null, currentKind: null, tab: "carte", panel: null, mapSel: null, pinSel: null, armed: null,
+  modalOpen: false, resumeSpeed: 1, currentEvent: null, currentKind: null, view: "general", subtab: null, pressCat: "tous", contact: null, ord: { corps: null, dest: null }, mapSel: null, armed: null, ctlById: {},
   feedOpen: STORE.getSetting("feedOpen", false), keys: {}, busyUntil: 0,
 
-  toast(msg){ const t = document.createElement("div"); t.className = "toast"; t.setAttribute("role", "status"); t.textContent = msg; document.body.appendChild(t); setTimeout(() => t.remove(), 2600); },
+  toast(msg){ for (const old of $$(".toast")) old.hidden = true; const t = document.createElement("div"); t.className = "toast"; t.setAttribute("role", "status"); t.textContent = msg; document.body.appendChild(t); setTimeout(() => t.remove(), 2600); },
   setTheme(theme, inGame){ document.body.className = (theme || "") + (inGame ? " in-game" : ""); },
   save(){ const s = GAME.s; if (s) STORE.write(s.slot, s); },
 
@@ -2477,7 +2916,7 @@ const UI = {
     const ch = GAME.ch(s);
     if (s.dead) { UI.endScreen(); return; }
     UI.setTheme(ch.theme, true);
-    UI.panel = (ch.panels.find(p => p.cond(s)) || ch.panels[0]).id;
+    UI.view = "general"; UI.subtab = null; UI.contact = null;
     UI.buildGame(); AUDIO.theme(ch.audio);
     if (fresh) { UI.save(); AI.prefetch(s); }
     if (s.pending) { UI.restorePending(); return; }
@@ -2490,11 +2929,18 @@ const UI = {
     s.pending = null; if (ev) UI.showEvent(ev, p.kind);
   },
 
+  ICONS: {
+    general: `<svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="11" fill="none" stroke="currentColor" stroke-width="2"/><path d="M5 16h22M16 5c-5 4-5 18 0 22M16 5c5 4 5 18 0 22" fill="none" stroke="currentColor" stroke-width="2"/></svg>`,
+    armee: `<svg viewBox="0 0 32 32" aria-hidden="true"><path d="M9 4v24M9 5h15l-4 5 4 5H9" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/></svg>`,
+    presse: `<svg viewBox="0 0 32 32" aria-hidden="true"><rect x="5" y="6" width="22" height="20" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9 11h14M9 16h6M9 21h6M19 16h4v5h-4z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`,
+    finances: `<svg viewBox="0 0 32 32" aria-hidden="true"><ellipse cx="16" cy="9" rx="9" ry="4" fill="none" stroke="currentColor" stroke-width="2"/><path d="M7 9v7c0 2.2 4 4 9 4s9-1.8 9-4V9M7 16v7c0 2.2 4 4 9 4s9-1.8 9-4v-7" fill="none" stroke="currentColor" stroke-width="2"/></svg>`,
+    corr: `<svg viewBox="0 0 32 32" aria-hidden="true"><rect x="4" y="8" width="24" height="17" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M5 10l11 8 11-8" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>`
+  },
+  VIEWS: [["general", "Vue générale"], ["armee", "Armée"], ["presse", "Presse"], ["finances", "Finances"], ["corr", "Correspondance"]],
+
   buildGame(){
     const s = GAME.s, ch = GAME.ch(s);
-    const gauge = d => `<div class="gauge" data-stat="${d.id}" title="${esc(d.hint || "")}"><div class="top"><span class="name">${esc(d.label)}</span><span class="val"><span class="v"></span><span class="trend"></span></span></div><span class="bar"><i></i></span></div>`;
-    const groups = Object.entries(ch.groups).map(([g, label]) => `<div class="panel"><h2>${esc(label)}</h2><div class="gauges">${ch.stats.filter(d => d.group === g).map(gauge).join("")}</div>${g === "vie" ? `<div id="conds" style="margin-top:6px"></div>` : ""}</div>`).join("");
-    const m = ch.map;
+    s.seen = s.seen || { feedN: s.feedN || 0, armee: "" };
     app().innerHTML = `
       <header class="topbar"><div class="topbar-in">
         <div class="who"><h1>${esc(ch.short)}</h1><span class="rank" id="rank"></span></div>
@@ -2505,122 +2951,255 @@ const UI = {
         <button class="icon-btn" id="b-sfx" aria-pressed="${AUDIO.sfxOn}" title="Bruitages">Sons</button>
         <button class="icon-btn" id="b-menu" title="Parties, réglages, quitter">Menu</button>
       </div><div class="tick-bar"><i id="tickbar"></i></div></header>
-      <main class="game" data-tab="${UI.tab}">
-        <section class="col col-left" aria-label="Jauges">
-          <div class="panel idcard"><div id="portrait"></div><div><div class="place" id="place"></div><span class="status" id="status"></span></div></div>
-          ${groups}
-          <div class="panel"><h2>Finances</h2><div class="mini" id="mini"></div></div>
-        </section>
-        <section class="col col-mid" aria-label="Carte et fil d’actualité">
-          <div class="mapbox"><div id="map" style="width:100%;height:100%"></div>
-            <div class="map-legend">${Object.entries(m.statusLabel).map(([k, l]) => `<span><i class="st-${k}" style="background:currentColor"></i>${esc(l)}</span>`).join("")}</div>
-            <div id="map-info"></div></div>
-          <div class="feed ${UI.feedOpen ? "" : "closed"}" id="feed"><button class="feed-h" id="feed-h" aria-expanded="${UI.feedOpen}"><span class="label">Fil d’actualité</span><span class="last" id="feed-last"></span><span class="chev" id="feed-chev"></span></button><div class="feed-list" id="feed-list"></div></div>
-        </section>
-        <section class="col col-right" aria-label="Panneaux de gestion"><div class="ptabs" role="tablist" id="ptabs"></div><div class="pbody" id="pbody" role="tabpanel"></div></section>
-      </main>
-      <nav class="tabs" aria-label="Sections"><button data-tab="carte">Carte</button><button data-tab="jauges">Jauges</button><button data-tab="gestion">Gestion</button></nav>`;
-    // La légende reprend les couleurs de la carte
-    $$(".map-legend i").forEach(i => { i.style.background = ""; });
+      <div class="shell">
+        <nav class="rail" id="rail" aria-label="Fenêtres">${UI.VIEWS.map(([id, label]) => `<button data-view="${id}" aria-pressed="false">${UI.ICONS[id]}<span>${label}</span><i class="badge-dot" hidden></i></button>`).join("")}</nav>
+        <main class="view" id="view"></main>
+      </div>`;
     $$("[data-speed]").forEach(b => b.onclick = () => { AUDIO.sfx("click"); LOOP.setSpeed(+b.dataset.speed); });
     $("#b-agir").onclick = () => UI.actionModal();
     $("#b-music").onclick = e => { AUDIO.setMusic(!AUDIO.musicOn); e.currentTarget.setAttribute("aria-pressed", AUDIO.musicOn); };
     $("#b-sfx").onclick = e => { AUDIO.setSfx(!AUDIO.sfxOn); e.currentTarget.setAttribute("aria-pressed", AUDIO.sfxOn); AUDIO.sfx("click"); };
     $("#b-menu").onclick = () => UI.menuModal();
-    $$(".tabs [data-tab]").forEach(b => b.onclick = () => { UI.tab = b.dataset.tab; $(".game").dataset.tab = UI.tab; UI.updateTabs(); window.scrollTo(0, 0); });
-    $("#feed-h").onclick = () => { UI.feedOpen = !UI.feedOpen; STORE.setSetting("feedOpen", UI.feedOpen); $("#feed").classList.toggle("closed", !UI.feedOpen); $("#feed-h").setAttribute("aria-expanded", UI.feedOpen); UI.updateFeed(true); };
-    const map = $("#map");
-    const mapClick = e => { const pin = e.target.closest("[data-marker]"), rg = e.target.closest("[data-region]"); if (pin) { UI.pinSel = UI.pinSel === pin.dataset.marker ? null : pin.dataset.marker; AUDIO.sfx("click"); UI.updateMap(true); return; } if (rg) { AUDIO.sfx("click"); if (UI.pinSel) { const id = UI.pinSel; UI.pinSel = null; UI.act("corps_move", id, rg.dataset.region); } UI.mapSel = rg.dataset.region; UI.updateMap(true); } };
-    map.addEventListener("click", mapClick); map.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); mapClick(e); } });
-    $("#map-info").addEventListener("click", e => { const b = e.target.closest("[data-mi]"); if (!b) return; const [act, arg] = b.dataset.mi.split("|"); if (act === "close") { UI.mapSel = null; UI.updateMap(true); } else if (act === "panel") { UI.panel = arg; UI.tab = "gestion"; $(".game").dataset.tab = UI.tab; UI.updateTabs(); UI.renderPanel(true); } else UI.act(act, arg); });
-    $("#map-info").addEventListener("change", e => { const sl = e.target.closest("[data-send]"); if (sl && sl.value) UI.act("corps_move", sl.value, sl.dataset.send); });
-    // Panneaux : délégation d’événements
-    const pb = $("#pbody");
-    pb.addEventListener("pointerdown", () => { UI.busyUntil = Date.now() + 2500; });
-    pb.addEventListener("input", e => { const r = e.target.closest("input[type=range]"); if (!r) return; UI.busyUntil = Date.now() + 2500; const lab = r.closest(".ctl").querySelector(".ctl-top b"); const c = UI.ctlById[r.dataset.cid]; if (lab && c) lab.textContent = c.fmt ? c.fmt(+r.value) : r.value; });
-    pb.addEventListener("change", e => { const el = e.target.closest("[data-cid]"); if (!el) return; const c = UI.ctlById[el.dataset.cid]; if (!c) return; UI.busyUntil = 0; if (el.tagName === "SELECT" && el.value === "" ) return; UI.act(c.act, c.arg, el.value); });
-    pb.addEventListener("click", e => { const b = e.target.closest("button[data-cid]"); if (!b || b.disabled) return; const c = UI.ctlById[b.dataset.cid]; if (!c) return; if (c.confirm && UI.armed !== c.act + "|" + c.arg) { UI.armed = c.act + "|" + c.arg; UI.renderPanel(true); return; } UI.armed = null; UI.busyUntil = 0; UI.act(c.act, c.arg); const r = e.target.closest(".rel"); });
-    pb.addEventListener("click", e => { const b = e.target.closest(".rel"); if (!b) return; const d = b.querySelector(".rel-detail"); d.hidden = !d.hidden; UI.busyUntil = Date.now() + 8000; });
-    $("#ptabs").addEventListener("click", e => { const b = e.target.closest("[data-panel]"); if (!b) return; UI.panel = b.dataset.panel; UI.armed = null; AUDIO.sfx("click"); UI.renderPanel(true); });
-    UI.keys = {}; UI.lastPortraitAge = -1;
-    UI.updateTabs(); UI.update(true); UI.updateAIStatus();
+    $("#rail").addEventListener("click", e => { const b = e.target.closest("[data-view]"); if (b) { AUDIO.sfx("click"); UI.setView(b.dataset.view); } });
+    // Délégation : tout ce qui se passe dans la fenêtre active
+    const v = $("#view");
+    v.addEventListener("pointerdown", e => { if (e.target.closest("#pbody")) UI.busyUntil = Date.now() + 2500; });
+    v.addEventListener("input", e => { const r = e.target.closest("input[type=range]"); if (!r) return; UI.busyUntil = Date.now() + 2500; const c = UI.ctlById[r.dataset.cid]; if (!c) return; const box = r.closest(".ctl"); box.querySelector(".ctl-top b").textContent = c.fmt ? c.fmt(+r.value) : r.value; if (c.live) box.querySelector(".note").textContent = c.live(+r.value); });
+    v.addEventListener("change", e => {
+      const el = e.target.closest("[data-cid]"); if (el) { const c = UI.ctlById[el.dataset.cid]; if (!c) return; UI.busyUntil = 0; if (el.tagName === "SELECT" && el.value === "") return; UI.act(c.act, c.arg, el.value); return; }
+    });
+    v.addEventListener("click", e => {
+      const b = e.target.closest("button[data-cid]");
+      if (b) { if (b.disabled) return; const c = UI.ctlById[b.dataset.cid]; if (!c) return; if (c.confirm && UI.armed !== c.act + "|" + c.arg) { UI.armed = c.act + "|" + c.arg; UI.renderPanel(true); return; } UI.armed = null; UI.busyUntil = 0; UI.act(c.act, c.arg); return; }
+      const t = e.target.closest("[data-do]"); if (t) { const [a, x] = t.dataset.do.split("|"); UI.doView(a, x); return; }
+      const pick = e.target.closest("[data-pick]"); if (pick) { UI.pickCorps(pick.dataset.pick); return; }
+      const rel = e.target.closest(".rel"); if (rel) { const d = rel.querySelector(".rel-detail"); if (d) d.hidden = !d.hidden; }
+    });
+    v.addEventListener("click", e => { if (!e.target.closest("#map")) return; UI.mapClick(e); });
+    v.addEventListener("keydown", e => { if ((e.key === "Enter" || e.key === " ") && e.target.closest("#map")) { e.preventDefault(); UI.mapClick(e); } });
+    v.addEventListener("focusin", e => { if (e.target.id === "msg") { UI.mailPaused = UI.pause() || UI.mailPaused || 0; } });
+    v.addEventListener("focusout", e => { if (e.target.id === "msg") setTimeout(() => { if (document.activeElement && document.activeElement.id === "send") return; UI.mailResume(); }, 150); });
+    v.addEventListener("pointermove", e => { const c = e.target.closest("#chart svg"); if (c) UI.chartHover(e, c); });
+    v.addEventListener("pointerout", e => { if (e.target.closest("#chart") && !(e.relatedTarget && e.relatedTarget.closest && e.relatedTarget.closest("#chart"))) UI.chartHover(null); });
+    UI.lastPortraitAge = -1; UI.ord = { corps: null, dest: null };
+    UI.setView(UI.view || "general");
+    UI.updateAIStatus();
   },
-  updateTabs(){ $$(".tabs [data-tab]").forEach(b => b.setAttribute("aria-pressed", b.dataset.tab === UI.tab)); },
+
+  setView(view){
+    const s = GAME.s, ch = GAME.ch(s); UI.view = view; UI.keys = {}; UI.armed = null; UI.mapSel = null; UI.ord = { corps: null, dest: null };
+    const legend = `<div class="map-legend">${Object.entries(ch.map.statusLabel).map(([k, l]) => `<span><i class="st-${k}"></i>${esc(l)}</span>`).join("")}</div>`;
+    const html = {
+      general: `<div class="vw"><div class="vcol grow"><div class="mapbox"><div id="map" class="mapfit"></div>${legend}<div id="map-info"></div></div>
+          <div class="panel upcoming"><h2>À venir</h2><div id="upcoming"></div></div></div>
+        <div class="vcol side"><div class="panel"><div class="idrow"><div id="portrait"></div><div><div class="place" id="place"></div><span class="status" id="status"></span></div></div><div class="gauges" id="mainG" style="margin-top:10px"></div><div class="facts4" id="facts"></div><div id="conds"></div><div id="g-alerts"></div></div>
+          <div class="subtabs" id="subtabs" role="tablist"></div><div class="pbody panel" id="pbody"></div></div></div>`,
+      armee: `<div class="vw"><div class="vcol grow"><div class="mapbox"><div id="map" class="mapfit"></div>${legend}<div id="order-sheet"></div></div></div>
+        <div class="vcol side"><div id="alerts"></div><div class="pbody panel" id="pbody"></div></div></div>`,
+      presse: `<div class="vw"><div class="vcol grow"><div class="panel"><h2>Opinion publique</h2><div class="gauges two" id="opinion"></div></div><div class="chips" id="pcats"></div><div class="panel scroll" id="press"></div></div>
+        <div class="vcol side"><div class="pbody panel" id="pbody"></div></div></div>`,
+      finances: `<div class="vw"><div class="vcol grow scrolly"><div id="alerts"></div><div class="panel"><div class="kpi four" id="fkpi"></div><h2 style="margin-top:12px">Trésor sur les douze derniers mois, en millions de francs</h2><div id="chart"></div></div><div class="two-col" id="ftables"></div></div>
+        <div class="vcol side"><div class="pbody panel" id="pbody"></div></div></div>`,
+      corr: `<div class="vw corr"><div class="vcol contacts panel" id="contacts"></div><div class="vcol grow panel convo"><div class="conv-h" id="conv-h"></div><div class="conv" id="conv"></div>
+          <div class="composer"><textarea id="msg" rows="2" maxlength="1200" placeholder="Écrivez votre lettre…" aria-label="Votre lettre"></textarea><button class="btn primary" id="send">Envoyer</button></div></div></div>`
+    }[view];
+    $("#view").innerHTML = html; $("#view").dataset.view = view;
+    $$("#rail [data-view]").forEach(b => b.setAttribute("aria-pressed", b.dataset.view === view));
+    if (view === "corr") { $("#send").onclick = () => UI.sendMail(); if (!UI.contact || !GAME.relKnown(s, UI.contact)) UI.contact = ch.contactGroups.flatMap(g => g[1]).find(id => GAME.relAlive(s, id)); }
+    if (view === "presse") s.seen.feedN = s.feedN;
+    if (view === "armee") s.seen.armee = ch.alerts(s).armee.join("|");
+    if (view === "general") UI.flagGeneral = false;
+    UI.lastPortraitAge = -1;
+    UI.update(true);
+  },
 
   level(d, v){
     if (d.warn !== undefined && d.bad === "low") return v <= d.danger ? "bad" : v < d.warn ? "warn" : "good";
     if (d.bad === "high") return v >= 70 ? "bad" : v >= 45 ? "warn" : "good";
     return v < 25 ? "bad" : v < 45 ? "warn" : "good";
   },
+  put(id, html){ const el = $("#" + id); if (!el) return false; if (UI.keys[id] === html) return false; el.innerHTML = html; UI.keys[id] = html; return true; },
+  alertBox: list => list.length ? `<div class="alert" role="alert">${list.map(a => `<div>${esc(a)}</div>`).join("")}</div>` : "",
 
   update(force){
     const s = GAME.s; if (!s || !$("#date")) return;
-    const ch = GAME.ch(s);
+    const ch = GAME.ch(s); if (force) UI.keys = {};
     $("#date").textContent = frDate(s.date); $("#age").textContent = `${GAME.age(s)} ans · semaine ${s.week + 1}`; $("#rank").textContent = GAME.rankLabel(s);
     $$("[data-speed]").forEach(b => b.setAttribute("aria-pressed", +b.dataset.speed === s.speed));
-    const can = GAME.canAct(s); $("#b-agir").classList.toggle("primary", can); $("#agir-count").innerHTML = `Action libre<b>${can ? "1 / 1 disponible" : "0 / 1 · la semaine prochaine"}</b>`;
-    const age = GAME.age(s); if (Math.abs(age - UI.lastPortraitAge) >= 2) { $("#portrait").innerHTML = ch.portrait(s); UI.lastPortraitAge = age; }
-    $("#place").textContent = s.place; $("#status").textContent = GAME.power(s) === 0 ? "Exil" : s.flags.atWar ? "En guerre" : "En paix";
-    for (const d of ch.stats) {
-      const el = $(`[data-stat="${d.id}"]`); if (!el) continue;
-      const v = s.stats[d.id], pv = s.prev[d.id] ?? v;
-      el.querySelector(".v").textContent = d.fmt ? d.fmt(v) : Math.round(v);
-      const diff = v - pv; const tr = el.querySelector(".trend"); const good = d.bad === "high" ? diff < 0 : diff > 0;
-      if (Math.abs(diff) >= (d.fmt ? .5 : .12)) { tr.textContent = diff > 0 ? "▲" : "▼"; tr.className = "trend " + (good ? "up" : "down"); } else { tr.textContent = ""; tr.className = "trend"; }
-      const lo = d.barMin ?? Math.max(0, d.min), hi = d.barMax ?? d.max;
-      const bar = el.querySelector(".bar i"); bar.style.width = (clamp((v - lo) / (hi - lo), 0, 1) * 100).toFixed(1) + "%"; bar.className = "lvl-" + UI.level(d, v);
+    const can = GAME.canAct(s); $("#b-agir").classList.toggle("primary", can); $("#agir-count").innerHTML = `Action libre<b>${can ? "1 / 1 cette semaine" : "0 / 1 · semaine prochaine"}</b>`;
+    const al = ch.alerts(s);
+    // Pastilles rouges
+    const unread = Object.values(s.corr).reduce((t, th) => t + th.filter(m => m.unread).length, 0);
+    const newsNew = s.feed.slice(0, Math.max(0, (s.feedN || 0) - (s.seen.feedN || 0))).some(n => n.ton === "hos" || n.kind === "rival" || n.kind === "differe");
+    const flags = { general: UI.view !== "general" && (UI.flagGeneral || al.general.length > 0), armee: UI.view !== "armee" && al.armee.length > 0 && al.armee.join("|") !== s.seen.armee, presse: UI.view !== "presse" && newsNew, finances: UI.view !== "finances" && al.finances.length > 0, corr: unread > 0 };
+    $$("#rail [data-view]").forEach(b => { const d = b.querySelector(".badge-dot"); const on = !!flags[b.dataset.view]; d.hidden = !on; d.textContent = b.dataset.view === "corr" && unread ? unread : ""; });
+    const view = UI.view;
+    if (view === "general" || view === "armee") UI.updateMap(force);
+    if (view === "general") {
+      const age = GAME.age(s); if (Math.abs(age - UI.lastPortraitAge) >= 2) { $("#portrait").innerHTML = ch.portrait(s); UI.lastPortraitAge = age; }
+      $("#place").textContent = s.place; $("#status").textContent = GAME.power(s) === 0 ? "Exil" : s.flags.atWar ? "En guerre" : "En paix";
+      UI.put("mainG", ch.mainGauges(s).map(g => { const d = { bad: g.bad || "low" }; return `<div class="gauge"><div class="top"><span class="name">${esc(g.label)}</span><span class="val">${Math.round(g.v)}</span></div><span class="bar"><i class="lvl-${UI.level(d, g.v)}" style="width:${clamp(g.v, 0, 100)}%"></i></span></div>`; }).join(""));
+      UI.put("facts", ch.sideFacts(s).map(([l, v]) => `<div><span>${esc(l)}</span><b>${esc(v)}</b></div>`).join(""));
+      UI.put("conds", s.conditions.map(c => `<span class="cond-chip">${esc(c.name)}</span>`).join(""));
+      UI.put("g-alerts", UI.alertBox(al.general));
+      const up = ch.upcoming(s);
+      UI.put("upcoming", up.length ? up.map(u => `<div class="up"><span class="when">${u.approx ? "vers " + esc(frMonth(u.d)) : esc(frDate(u.d))}</span><span class="what"><small>${esc(u.k)}</small>${esc(u.t)}</span></div>`).join("") : `<span class="note">Rien d’annoncé pour l’instant. Les conséquences de vos actions et les mouvements en cours apparaîtront ici.</span>`);
     }
-    const cd = $("#conds"); if (cd) cd.innerHTML = s.conditions.map(c => `<span class="cond-chip">${esc(c.name)}</span>`).join("");
-    if (ch.budget) { const b = ch.budget(s); $("#mini").innerHTML = `<div><span>Recettes par mois</span><span class="num">+${b.R.toFixed(1)}</span></div><div><span>Dépenses par mois</span><span class="num">−${b.D.toFixed(1)}</span></div><div><span>Solde</span><span class="num" style="color:var(--${b.solde >= 0 ? "good" : "bad"})">${b.solde >= 0 ? "+" : "−"}${Math.abs(b.solde).toFixed(1)} M F</span></div>${s.dette ? `<div><span>Dette</span><span class="num">${Math.round(s.dette)} M F</span></div>` : ""}`; }
-    UI.updateMap(force); UI.updateFeed(force); UI.renderPanel(force);
+    if (view === "armee") { UI.put("alerts", UI.alertBox(al.armee)); UI.orderSheet(); }
+    if (view === "presse") UI.updatePress();
+    if (view === "finances") UI.updateFinances(al);
+    if (view === "corr") UI.updateCorr(); else UI.renderPanel(force);
   },
 
   updateMap(force){
-    const s = GAME.s, ch = GAME.ch(s), m = ch.map;
-    const key = JSON.stringify([m.regions.map(r => m.status(s, r.id)), m.markers(s).map(k => [k.id, k.region, k.moving]), UI.mapSel, UI.pinSel]);
-    if (!force && key === UI.keys.map) { if (UI.mapSel) UI.mapInfo(); return; } UI.keys.map = key;
-    $("#map").innerHTML = ART.map(ch, s, UI.mapSel, UI.pinSel); UI.mapInfo();
+    const s = GAME.s, ch = GAME.ch(s), m = ch.map; if (!$("#map")) return;
+    const key = JSON.stringify([m.regions.map(r => m.status(s, r.id)), m.markers(s).map(k => [k.id, k.region, k.moving]), UI.mapSel, UI.ord.corps, UI.ord.dest]);
+    if (key !== UI.keys.map) { UI.keys.map = key; $("#map").innerHTML = ART.map(ch, s, UI.view === "armee" ? UI.ord.dest : UI.mapSel, UI.ord.corps); }
+    if (UI.view === "general") UI.mapInfo();
+  },
+  mapClick(e){
+    const s = GAME.s; const pin = e.target.closest("[data-marker]"), rg = e.target.closest("[data-region]");
+    if (pin) { AUDIO.sfx("click"); if (UI.view !== "armee") { UI.ord = { corps: pin.dataset.marker, dest: null }; UI.setViewKeep("armee"); return; }
+      // Un corps est déjà choisi : toucher un autre pion désigne sa région comme destination
+      if (UI.ord.corps && UI.ord.corps !== pin.dataset.marker) { const o = s.corps.find(x => x.id === pin.dataset.marker); if (o) { UI.ord.dest = o.dest || o.loc; UI.update(); return; } }
+      UI.pickCorps(pin.dataset.marker); return; }
+    if (!rg) return; AUDIO.sfx("click");
+    if (UI.view === "armee") { if (!UI.ord.corps) { UI.toast("Touchez d’abord un corps d’armée."); return; } UI.ord.dest = rg.dataset.region; UI.update(); return; }
+    UI.mapSel = UI.mapSel === rg.dataset.region ? null : rg.dataset.region; UI.update();
+  },
+  setViewKeep(view){ const o = UI.ord; UI.setView(view); UI.ord = o; UI.update(true); },
+  pickCorps(id){ AUDIO.sfx("click"); UI.ord = UI.ord.corps === id ? { corps: null, dest: null } : { corps: id, dest: null }; UI.update(true); if (UI.ord.corps && window.innerWidth <= 960) window.scrollTo({ top: 0, behavior: "smooth" }); },
+  orderSheet(){
+    const s = GAME.s, ch = GAME.ch(s); const c = s.corps.find(x => x.id === UI.ord.corps);
+    if (!c) { UI.ord = { corps: null, dest: null }; UI.put("order-sheet", `<div class="sheet hint">1. Touchez un corps (pion ou carte de droite) · 2. Touchez une destination · 3. Choisissez l’ordre</div>`); return; }
+    if (!UI.ord.dest) { UI.put("order-sheet", `<div class="sheet"><b class="ui">${esc(c.name)} · ${esc(ch.marshalName(c.marshal))} · ${Math.round(c.men)} 000 h.</b><span class="note">Touchez une destination sur la carte (ou la région où il se trouve pour un ordre sur place).</span><div class="ops"><button class="btn small ghost" data-do="ordcancel">Annuler</button></div></div>`); return; }
+    const to = UI.ord.dest, wk = ch.travel(c, to), st = ch.map.status(s, to);
+    UI.put("order-sheet", `<div class="sheet"><b class="ui">${esc(c.name)} → ${esc(ch.regionName(to))} <span class="chip ${st === "home" ? "allie" : st}">${esc(ch.map.statusLabel[st])}</span></b>
+      <span class="note">${wk ? `Trajet : environ ${wk} semaines.` : "Déjà sur place."}${s.pays[to] && st === "guerre" ? ` Armée ennemie estimée : ${Math.round(s.pays[to].armee)} 000 h.` : ""}</span>
+      <div class="ord4">${ch.orders.map(o => `<button class="btn ${o.id === "attaquer" ? "primary" : ""}" data-do="order|${o.id}" title="${esc(o.hint)}">${esc(o.label)}</button>`).join("")}</div>
+      <div class="ops"><button class="btn small ghost" data-do="ordcancel">Annuler</button></div></div>`);
+  },
+  doView(a, x){
+    const s = GAME.s;
+    if (a === "ordcancel") { UI.ord = { corps: null, dest: null }; UI.update(true); }
+    else if (a === "order") { const o = UI.ord; UI.ord = { corps: null, dest: null }; UI.act("order", o.corps, x + "|" + o.dest); }
+    else if (a === "subtab") { UI.subtab = x; UI.armed = null; AUDIO.sfx("click"); UI.keys.subtabs = null; UI.renderPanel(true); }
+    else if (a === "pcat") { UI.pressCat = x; AUDIO.sfx("click"); UI.update(true); }
+    else if (a === "contact") { UI.contact = x; AUDIO.sfx("click"); UI.update(true); const c = $("#conv"); if (c) c.scrollTop = c.scrollHeight; }
+    else if (a === "mapclose") { UI.mapSel = null; UI.update(); }
+    else if (a === "goto") { UI.subtab = x; UI.keys.subtabs = null; UI.renderPanel(true); }
+    else if (a === "offensive") UI.act("offensive", x);
   },
   mapInfo(){
-    const s = GAME.s, ch = GAME.ch(s), id = UI.mapSel, box = $("#map-info");
-    if (UI.pinSel && !id) { const c = s.corps.find(x => x.id === UI.pinSel); box.innerHTML = c ? `<div class="map-info"><b class="ui">${esc(c.name)} · ${esc(ch.marshalName(c.marshal))} · ${Math.round(c.men)} 000 h.</b><span class="note">Touchez une région pour y envoyer ce corps.</span></div>` : ""; return; }
-    if (!id) { if (box.innerHTML) box.innerHTML = ""; return; }
-    const r = m => ch.map.regions.find(x => x.id === m); const reg = r(id); const st = ch.map.status(s, id); const c = s.pays[id];
+    const s = GAME.s, ch = GAME.ch(s), id = UI.mapSel;
+    if (!id) { UI.put("map-info", ""); return; }
+    const reg = ch.map.regions.find(x => x.id === id); const st = ch.map.status(s, id); const c = s.pays[id];
     const here = s.corps.filter(x => x.loc === id && !x.dest), coming = s.corps.filter(x => x.dest === id);
-    const others = s.corps.filter(x => (x.dest || x.loc) !== id);
-    const blocked = ch.canEnter(s, id);
-    const html = `<div class="map-info"><button class="x" data-mi="close" aria-label="Fermer">×</button>
+    UI.put("map-info", `<div class="map-info"><button class="x" data-do="mapclose" aria-label="Fermer">×</button>
       <h3>${esc(reg.name)} <span class="chip ${st === "home" ? "allie" : st}">${esc(ch.map.statusLabel[st])}</span></h3>
       ${c ? `<span class="note">Relation ${Math.round(c.rel)} · armée estimée ${Math.round(c.armee)} 000 h.${st === "guerre" ? ` · avantage militaire ${Math.round(c.ws || 0)}` : ""}</span>` : ""}
-      <span class="note">${here.length ? "Sur place : " + here.map(x => `${esc(x.name)} (${Math.round(x.men)} 000)`).join(", ") : "Aucun de vos corps sur place."}${coming.length ? " En marche : " + coming.map(x => esc(x.name)).join(", ") + "." : ""}</span>
-      <div class="ops">
-        ${others.length && GAME.power(s) >= 1 ? (blocked ? `<span class="note">${esc(blocked)}</span>` : `<select class="sel" data-send="${id}" style="width:auto;flex:1" aria-label="Envoyer un corps"><option value="">Envoyer un corps ici…</option>${others.map(x => `<option value="${x.id}">${esc(x.name)} — ${Math.round(x.men)} 000 h.</option>`).join("")}</select>`) : ""}
-        ${c && st === "guerre" && !reg.sea && s.corps.some(x => !x.dest && (x.loc === id || reg.adj.includes(x.loc))) ? `<button class="btn small primary" data-mi="offensive|${id}">Lancer l’offensive</button>` : ""}
-        ${c && GAME.power(s) >= 2 ? `<button class="btn small" data-mi="panel|diplomatie">Diplomatie</button>` : ""}
-      </div></div>`;
-    if (UI.keys.info !== html) { box.innerHTML = html; UI.keys.info = html; }
+      <span class="note">${here.length ? "Sur place : " + here.map(x => `${esc(x.name)} (${Math.round(x.men)} 000)`).join(", ") + "." : "Aucun de vos corps sur place."}${coming.length ? " En marche : " + coming.map(x => esc(x.name)).join(", ") + "." : ""}</span>
+      <div class="ops">${c && GAME.power(s) >= 2 ? `<button class="btn small" data-do="goto|diplomatie">Diplomatie</button>` : ""}<span class="note" style="align-self:center">Pour y envoyer un corps : fenêtre Armée.</span></div></div>`);
   },
 
-  updateFeed(force){
-    const s = GAME.s; const f0 = s.feed[0]; const key = s.feed.length + "|" + (f0 ? f0.d + f0.title + f0.text : "") + UI.feedOpen;
-    if (!force && key === UI.keys.feed) return; UI.keys.feed = key;
-    $("#feed-last").textContent = f0 ? `${f0.title || f0.text}` : ""; $("#feed-chev").textContent = UI.feedOpen ? "Replier ▾" : "Déplier ▴";
-    if (UI.feedOpen) $("#feed-list").innerHTML = `<div class="ai-status" id="ai-status"></div>` + s.feed.slice(0, 60).map(n => `<div class="news ${n.tone}"><span class="m">${esc(frDate(n.d))} · ${esc(n.src)}</span>${n.title ? `<b>${esc(n.title)}</b>` : ""}${n.text ? `<span>${esc(n.text)}</span>` : ""}</div>`).join("");
+  updatePress(){
+    const s = GAME.s, ch = GAME.ch(s); const cat = UI.pressCat || "tous"; s.seen.feedN = s.feedN;
+    const ab = ch.opinionAbroad(s), fr = s.stats.popularite;
+    UI.put("opinion", [["En France", fr], ["À l’étranger", ab]].map(([l, v]) => `<div class="gauge"><div class="top"><span class="name">${l}</span><span class="val">${Math.round(v)} / 100 · ${v >= 65 ? "favorable" : v >= 40 ? "partagée" : "hostile"}</span></div><span class="bar"><i class="lvl-${v < 30 ? "bad" : v < 50 ? "warn" : "good"}" style="width:${v}%"></i></span></div>`).join(""));
+    UI.put("pcats", ch.pressCats.map(([k, l]) => `<button data-do="pcat|${k}" aria-pressed="${k === cat}">${esc(l)}</button>`).join(""));
+    const items = s.feed.filter(n => cat === "tous" ? n.cat !== "sys" : n.cat === cat).slice(0, 70);
+    UI.put("press", `<div class="ai-status" id="ai-status"></div>` + (items.length ? items.map(n => `<article class="art ${n.ton || ""}"><div class="m">${esc(frDate(n.d))} · ${esc(n.src)}</div>${n.title ? `<h3>${esc(n.title)}</h3>` : ""}${n.text ? `<p>${esc(n.text)}</p>` : ""}
+      ${n.ton ? `<div class="tags"><span class="ton ${n.ton}">${ch.tonLabel[n.ton]}</span>${n.fx ? `<span class="fxo">Opinion ${n.fx.k === "France" ? "en France" : "à l’étranger"} ${n.fx.v > 0 ? "+" : "−"}${String(Math.abs(n.fx.v)).replace(".", ",")}</span>` : `<span class="fxo">Sans effet sur l’opinion</span>`}</div>` : ""}</article>`).join("") : `<span class="note">Aucun article dans cette rubrique pour l’instant.</span>`));
     UI.updateAIStatus();
   },
-  updateAIStatus(){
-    const el = $("#ai-status"); if (!el) return;
-    const cls = !AI.enabled ? "off" : AI.status === "busy" ? "busy" : !AI.available ? "off" : "ok";
-    el.innerHTML = `<span class="dot ${cls}"></span><span>${esc(!AI.enabled ? "IA désactivée dans les réglages" : AI.note)}</span>`;
+
+  updateFinances(al){
+    const s = GAME.s, ch = GAME.ch(s); const b = ch.budget(s); const f = v => `${v < 0 ? "−" : ""}${Math.abs(Math.round(v)).toLocaleString("fr-FR")} M F`;
+    UI.put("alerts", UI.alertBox(al.finances));
+    UI.put("fkpi", [["Trésor", f(s.stats.tresor)], ["Revenus par mois", "+" + b.R.toFixed(1).replace(".", ",")], ["Dépenses par mois", "−" + b.D.toFixed(1).replace(".", ",")], ["Solde par mois", (b.solde >= 0 ? "+" : "−") + Math.abs(b.solde).toFixed(1).replace(".", ",")], ["Dette", f(s.dette || 0)], ["Activité économique", Math.round(s.eco || 100)]].map(([l, v]) => `<div><small>${l}</small><b>${v}</b></div>`).join(""));
+    const tbl = (title, rows, sign) => `<div class="panel"><h2>${title}</h2><div class="tbl">${rows.map(([l, v]) => `<div><span>${esc(l)}</span><span>${sign}${v.toFixed(1).replace(".", ",")}</span></div>`).join("")}<div class="tot"><span>Total</span><span>${sign}${rows.reduce((t, x) => t + x[1], 0).toFixed(1).replace(".", ",")}</span></div></div></div>`;
+    UI.put("ftables", tbl("Revenus par mois", b.rec, "+") + tbl("Dépenses par mois", b.dep, "−"));
+    // Graphique : une seule série (le Trésor), ligne fine, grille discrète, survol avec valeur
+    const pts = [...s.fin.slice(-12), { d: s.date, t: s.stats.tresor }];
+    if (pts.length < 3) { UI.put("chart", `<span class="note">Le relevé se construit mois après mois : revenez dans quelques semaines.</span>`); return; }
+    const W = 640, H = 190, L = 54, R = 14, T = 12, B = 26; const vals = pts.map(p => p.t); let lo = Math.min(0, ...vals), hi = Math.max(0, ...vals); if (hi - lo < 50) hi = lo + 50; const pad = (hi - lo) * .08; hi += pad; if (lo < 0) lo -= pad;
+    const X = i => L + i * (W - L - R) / (pts.length - 1), Y = v => T + (hi - v) / (hi - lo) * (H - T - B);
+    const step = (() => { const raw = (hi - lo) / 4; const m = Math.pow(10, Math.floor(Math.log10(raw))); return [1, 2, 5, 10].map(k => k * m).find(k => k >= raw); })();
+    const ticks = []; for (let v = Math.ceil(lo / step) * step; v <= hi; v += step) ticks.push(v);
+    UI.chartData = { pts, X, Y, W, H, L, R, T, B };
+    UI.put("chart", `<div class="chartbox"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Évolution du Trésor : de ${Math.round(vals[0])} à ${Math.round(vals[vals.length - 1])} millions de francs">
+      ${ticks.map(v => `<line class="grid ${v === 0 ? "zero" : ""}" x1="${L}" x2="${W - R}" y1="${Y(v)}" y2="${Y(v)}"/><text class="ax" x="${L - 8}" y="${Y(v) + 4}" text-anchor="end">${Math.round(v)}</text>`).join("")}
+      ${pts.map((p, i) => (i % 3 === 0 && pts.length - 1 - i >= 2) || i === pts.length - 1 ? `<text class="ax" x="${X(i)}" y="${H - 6}" text-anchor="${i === pts.length - 1 ? "end" : i === 0 ? "start" : "middle"}">${esc(MONTHS[parseD(p.d).m - 1].slice(0, 4))} ${String(parseD(p.d).y).slice(2)}</text>` : "").join("")}
+      <polyline class="line" points="${pts.map((p, i) => `${X(i).toFixed(1)},${Y(p.t).toFixed(1)}`).join(" ")}"/>
+      <circle class="end" cx="${X(pts.length - 1)}" cy="${Y(vals[vals.length - 1])}" r="4.5"/>
+      <g id="ch-hover" hidden><line class="cross" y1="${T}" y2="${H - B}"/><circle class="end" r="4.5"/></g></svg><div class="tip" id="ch-tip" hidden></div></div>`);
+  },
+  chartHover(e, svg){
+    const g = $("#ch-hover"), tip = $("#ch-tip"); if (!g || !tip) return; const D = UI.chartData;
+    if (!e || !D) { g.hidden = true; tip.hidden = true; return; }
+    const r = svg.getBoundingClientRect(); const x = (e.clientX - r.left) / r.width * D.W; const i = clamp(Math.round((x - D.L) / ((D.W - D.L - D.R) / (D.pts.length - 1))), 0, D.pts.length - 1); const p = D.pts[i];
+    g.hidden = false; g.querySelector("line").setAttribute("x1", D.X(i)); g.querySelector("line").setAttribute("x2", D.X(i)); g.querySelector("circle").setAttribute("cx", D.X(i)); g.querySelector("circle").setAttribute("cy", D.Y(p.t));
+    tip.hidden = false; tip.textContent = `${frMonth(p.d)} : ${Math.round(p.t)} M F`; tip.style.left = clamp(D.X(i) / D.W * 100, 12, 88) + "%";
+  },
+
+  /* ---------------- Correspondance ---------------- */
+  avatar(name, grp){ const ini = name.replace(/\(.*\)/, "").split(/[\s-]+/).filter(w => /^[A-ZÉÈÀ]/.test(w)).map(w => w[0]).slice(0, 2).join(""); return `<span class="ava g${grp}" aria-hidden="true">${esc(ini)}</span>`; },
+  updateCorr(){
+    const s = GAME.s, ch = GAME.ch(s);
+    const list = ch.contactGroups.map(([g, ids], gi) => { const rows = ids.filter(id => GAME.relKnown(s, id)).map(id => { const r = GAME.relDef(s, id), th = s.corr[id] || [], last = th[th.length - 1], un = th.filter(m => m.unread).length, dead = !!s.deadRel[id];
+        return `<button class="contact ${id === UI.contact ? "on" : ""} ${dead ? "dead" : ""}" data-do="contact|${id}">${UI.avatar(r.name, gi)}<span class="cn"><b>${esc(r.name)}${dead ? " †" : ""}</b><small>${esc(r.role)}</small><span class="lm">${last ? esc((last.me ? "Vous : " : "") + last.t) : "Aucun échange"}</span></span>${un ? `<i class="badge-dot">${un}</i>` : ""}</button>`; }).join(""); return rows ? `<div class="blk-h">${esc(g)}</div>${rows}` : ""; }).join("");
+    UI.put("contacts", list);
+    const id = UI.contact; if (!id) return; const r = GAME.relDef(s, id), th = s.corr[id] || [], dead = !!s.deadRel[id]; const days = ch.mailDays(s, id); const v = s.rel[id];
+    let touched = false; for (const m of th) if (m.unread) { m.unread = false; touched = true; }
+    const gi = ch.contactGroups.findIndex(g => g[1].includes(id));
+    UI.put("conv-h", `${UI.avatar(r.name, gi)}<div><b>${esc(r.name)}</b><small>${esc(r.role)} · ${esc(ch.regionName(ch.contactLoc(s, id)))} · ${dead ? "décédé" : days ? `courrier : ${days} jours` : "auprès de vous : réponse immédiate"}</small></div><span class="chip ${dead ? "mort" : GAME.relStatus(v)}">${dead ? "Décédé" : GAME.relStatusLabel[GAME.relStatus(v)] + " · " + Math.round(v)}</span>`);
+    const left = d => Math.max(1, Math.round((new Date(d) - new Date(s.date)) / 864e5));
+    const waiting = s.corrQueue.some(q => q.id === id) || UI.typing === id;
+    const html = (th.length ? th.map(m => `<div class="bub ${m.me ? "me" : "them"}"><p>${esc(m.t)}</p><small>${esc(frDate(m.d))}${m.me ? (m.arrive && m.arrive > s.date ? ` · en route, arrivée prévue dans ${left(m.arrive)} jour${left(m.arrive) > 1 ? "s" : ""}` : " · remise") : ""}</small></div>`).join("") : `<div class="note" style="text-align:center;padding:20px">Aucune lettre échangée avec ${esc(r.name)}. ${esc(r.bio)}</div>`)
+      + (waiting ? `<div class="bub them wait"><p>${UI.typing === id ? "écrit sa réponse…" : "Sa réponse est en route."}</p></div>` : "");
+    if (UI.put("conv", html) || touched) { const c = $("#conv"); c.scrollTop = c.scrollHeight; }
+    const ta = $("#msg"), sb = $("#send"); ta.disabled = dead; sb.disabled = dead; ta.placeholder = dead ? `${r.name} n’est plus.` : `Écrivez à ${r.name}…${days ? ` Votre lettre mettra ${days} jours.` : ""}`;
+  },
+  mailResume(){ if (UI.mailPaused) { const w = UI.mailPaused; UI.mailPaused = 0; if (!UI.modalOpen) LOOP.setSpeed(w); } },
+  sendMail(){
+    const s = GAME.s, ch = GAME.ch(s), id = UI.contact, ta = $("#msg"); const t = ta.value.trim();
+    if (!id || !GAME.relAlive(s, id)) return; if (t.length < 3) { UI.toast("Écrivez d’abord votre lettre."); return; }
+    const days = ch.mailDays(s, id); const m = { d: s.date, me: true, t: t.slice(0, 1200) }; if (days) m.arrive = addDays(s.date, days); else m.asked = true;
+    (s.corr[id] = s.corr[id] || []).push(m); if (s.corr[id].length > 300) s.corr[id].shift();
+    ta.value = ""; ta.blur(); AUDIO.sfx("paper"); UI.save(); UI.update(true); UI.mailResume();
+    if (!days) UI.fetchReply(id, 0); else UI.toast(`Lettre partie : arrivée prévue dans ${days} jours.`);
+  },
+  /* La personne a reçu la lettre : sa réponse est écrite (par Claude si possible), puis voyage */
+  async fetchReply(id, days){
+    const s = GAME.s, ch = GAME.ch(s); let rep = null;
+    if (!days) { UI.typing = id; UI.update(true); }
+    if (AI.usable()) { try { rep = await AI.reply(s, id); } catch (e) { rep = null; } }
+    if (GAME.s !== s) return; if (UI.typing === id) UI.typing = null;
+    if (!rep) rep = { t: ch.mailFallback(s, id), rel: 0 };
+    if (!GAME.relAlive(s, id)) return;
+    if (days) s.corrQueue.push({ id, t: rep.t, rel: rep.rel, at: addDays(s.date, days) });
+    else { s.corr[id].push({ d: s.date, me: false, t: rep.t, unread: !(UI.view === "corr" && UI.contact === id) }); if (rep.rel) GAME.applyFx(s, { r: { [id]: rep.rel } }); AUDIO.sfx("notify"); }
+    UI.save(); UI.update(true);
+  },
+  /* Un contact écrit de lui-même */
+  async mailTurn(){
+    const s = GAME.s, ch = GAME.ch(s); let m = null;
+    if (AI.usable()) { try { m = await AI.mail(s); } catch (e) { m = null; } }
+    if (GAME.s !== s || s.dead) return;
+    if (!m) { const pool = ch.mailScripts.filter(x => GAME.relAlive(s, x.id) && !(s.corr[x.id] || []).some(y => y.t === x.t)); if (!pool.length) return; m = pool[Math.floor(Math.random() * pool.length)]; }
+    (s.corr[m.id] = s.corr[m.id] || []).push({ d: s.date, me: false, t: m.t, unread: true });
+    AUDIO.sfx("notify"); UI.toast(`Lettre de ${GAME.relDef(s, m.id).name}`); UI.save(); UI.update();
   },
 
   /* ---------------- Panneaux de gestion ---------------- */
   renderPanel(force){
     const s = GAME.s, ch = GAME.ch(s); const pb = $("#pbody"); if (!pb) return;
-    const tabs = [...ch.panels.filter(p => { try { return p.cond(s); } catch (e) { return false; } }), { id: "_rel", label: "Relations" }];
-    if (!tabs.some(t => t.id === UI.panel)) UI.panel = tabs[0].id;
-    const tk = tabs.map(t => t.id).join() + UI.panel;
-    if (tk !== UI.keys.tabs) { UI.keys.tabs = tk; $("#ptabs").innerHTML = tabs.map(t => `<button role="tab" data-panel="${t.id}" aria-selected="${t.id === UI.panel}">${esc(t.label)}</button>`).join(""); }
+    let pid = ch.windows[UI.view];
+    if (UI.view === "general") {
+      const tabs = [...ch.windows.general.map(id => ch.panels.find(p => p.id === id)).filter(p => { try { return p && p.cond(s); } catch (e) { return false; } }), { id: "_rel", label: "Relations" }];
+      if (!tabs.some(t => t.id === UI.subtab)) UI.subtab = tabs[0].id; pid = UI.subtab;
+      UI.put("subtabs", tabs.map(t => `<button role="tab" data-do="subtab|${t.id}" aria-selected="${t.id === pid}">${esc(t.label)}</button>`).join(""));
+    }
     if (!force && (Date.now() < UI.busyUntil || (document.activeElement && pb.contains(document.activeElement) && ["SELECT", "INPUT"].includes(document.activeElement.tagName)))) return;
     UI.ctlById = {}; let n = 0; const reg = c => { const id = "k" + (n++); UI.ctlById[id] = c; return id; };
     const meter = ([l, v]) => `<div class="meter"><span>${esc(l)}</span><span class="bar"><i class="lvl-${v < 30 ? "bad" : v < 50 ? "warn" : "good"}" style="width:${clamp(v, 0, 100)}%"></i></span><span class="num">${Math.round(v)}</span></div>`;
@@ -2632,27 +3211,33 @@ const UI = {
         case "info": return `<div class="note">${c.html}</div>`;
         case "kpi": return `<div class="kpi">${c.items.map(([l, v]) => `<div><small>${esc(l)}</small><b>${esc(v)}</b></div>`).join("")}</div>`;
         case "table": return `<div><div class="blk-h">${esc(c.title)}</div><div class="tbl">${c.rows.map(([l, v]) => `<div><span>${esc(l)}</span><span>${esc(v)}</span></div>`).join("")}</div></div>`;
-        case "slider": { const id = reg(c); return `<div class="ctl"><div class="ctl-top"><label for="${id}">${esc(c.label)}</label><b>${esc(c.fmt ? c.fmt(c.val) : c.val)}</b></div><input type="range" id="${id}" data-cid="${id}" min="${c.min}" max="${c.max}" step="${c.step}" value="${c.val}">${c.note ? `<span class="note">${esc(c.note)}</span>` : ""}</div>`; }
+        case "slider": { const id = reg(c); return `<div class="ctl"><div class="ctl-top"><label for="${id}">${esc(c.label)}</label><b>${esc(c.fmt ? c.fmt(c.val) : c.val)}</b></div><input type="range" id="${id}" data-cid="${id}" min="${c.min}" max="${c.max}" step="${c.step}" value="${c.val}"><span class="note">${esc(c.live ? c.live(c.val) : c.note || "")}</span></div>`; }
         case "select": { const id = reg(c); return `<div class="ctl"><div class="ctl-top"><label for="${id}">${esc(c.label)}</label></div><select id="${id}" data-cid="${id}" ${c.dis ? "disabled" : ""}>${c.options.map(([v, l]) => `<option value="${esc(v)}" ${String(v) === String(c.val) ? "selected" : ""}>${esc(l)}</option>`).join("")}</select>${c.dis && typeof c.dis === "string" ? `<span class="note">${esc(c.dis)}</span>` : c.note ? `<span class="note">${esc(c.note)}</span>` : ""}</div>`; }
         case "btn": { const id = reg(c); const armed = UI.armed === c.act + "|" + c.arg; return `<button class="pbtn ${armed ? "arm" : ""}" data-cid="${id}" ${c.dis ? "disabled" : ""}><b>${armed ? "Confirmer ?" : esc(c.label)}</b><span>${esc(typeof c.dis === "string" ? c.dis : c.cost || "")}</span></button>`; }
-        case "row": return `<div class="rowc ${c.done ? "done" : ""}"><div class="rt"><b>${esc(c.title)}</b>${c.badge ? `<span class="chip ${c.badge[1]}">${esc(c.badge[0])}</span>` : ""}</div>${c.sub ? `<div class="rs">${esc(c.sub)}</div>` : ""}${c.rel !== undefined ? relbar(c.rel) : ""}${(c.meters || []).map(meter).join("")}${c.ctrls && c.ctrls.length ? `<div class="rc">${c.ctrls.map(ctl).join("")}</div>` : ""}</div>`;
+        case "row": return `<div class="rowc ${c.done ? "done" : ""} ${c.pick ? "pick" : ""} ${c.pick && c.pick === UI.ord.corps ? "on" : ""}" ${c.pick ? `data-pick="${c.pick}" tabindex="0" role="button"` : ""}><div class="rt"><b>${esc(c.title)}</b>${c.badge ? `<span class="chip ${c.badge[1]}">${esc(c.badge[0])}</span>` : ""}</div>${c.sub ? `<div class="rs">${esc(c.sub)}</div>` : ""}${(c.alerts || []).map(a => `<span class="warn-chip">${esc(a)}</span>`).join("")}${c.rel !== undefined ? relbar(c.rel) : ""}${(c.meters || []).map(meter).join("")}${c.ctrls && c.ctrls.length ? `<div class="rc">${c.ctrls.map(ctl).join("")}</div>` : ""}</div>`;
       }
       return "";
     };
     let html;
-    if (UI.panel === "_rel") {
+    if (pid === "_rel") {
       const known = ch.relations.filter(r => GAME.relKnown(s, r.id)); const alive = known.filter(r => !s.deadRel[r.id]), dead = known.filter(r => s.deadRel[r.id]);
       html = [...alive, ...dead].map(r => { const v = s.rel[r.id]; const st = s.deadRel[r.id] ? "mort" : GAME.relStatus(v); return `<button class="rel ${s.deadRel[r.id] ? "dead" : ""}"><span class="n">${esc(r.name)}${s.deadRel[r.id] ? " †" : ""}</span><span class="chip ${st}">${GAME.relStatusLabel[st]}</span><span class="ro">${esc(r.role)}</span>${relbar(v)}<span class="rel-detail" hidden>${esc(r.bio)}</span></button>`; }).join("");
-    } else { let blocks = []; try { blocks = ch.panels.find(p => p.id === UI.panel).blocks(s); } catch (e) { blocks = [{ k: "info", html: "Ce panneau n’est pas disponible pour le moment." }]; } html = blocks.map(ctl).join(""); }
+    } else { let blocks = []; try { blocks = ch.panels.find(p => p.id === pid).blocks(s); } catch (e) { blocks = [{ k: "info", html: "Ce panneau n’est pas disponible pour le moment." }]; } html = blocks.map(ctl).join(""); }
     if (html !== UI.keys.panel) { const top = pb.scrollTop; pb.innerHTML = html; pb.scrollTop = top; UI.keys.panel = html; }
+  },
+  updateAIStatus(){
+    const el = $("#ai-status"); if (!el) return;
+    const cls = !AI.enabled ? "off" : AI.status === "busy" ? "busy" : !AI.available ? "off" : "ok";
+    el.innerHTML = `<span class="dot ${cls}"></span><span>${esc(!AI.enabled ? "IA désactivée dans les réglages" : AI.note)}</span>`;
   },
 
   /* Exécute un réglage ou un bouton de panneau */
   act(act, arg, val){
-    const s = GAME.s, ch = GAME.ch(s); if (!s || s.dead || (UI.modalOpen && act !== "corps_move")) return;
+    const s = GAME.s, ch = GAME.ch(s); if (!s || s.dead || UI.modalOpen) return;
+    if (act === "write_article") { UI.actionModal("article"); return; }
     let res = {}; try { res = ch.act(s, act, arg, val) || {}; } catch (e) { res = { msg: "Impossible pour le moment.", tone: "bad" }; }
     ch.sync && ch.sync(s);
-    if (res.msg) { GAME.news(s, { src: res.src || "Carnet", text: res.msg, tone: res.tone || "" }); UI.toast(res.msg); }
+    if (res.msg) { GAME.news(s, { src: res.src || "Carnet", text: res.msg, tone: res.tone || "" }); UI.toast(res.msg); } else if (res.toast) UI.toast(res.toast);
     AUDIO.sfx(res.sfx || (res.tone === "bad" ? "error" : act === "pol" ? "" : "click"));
     UI.save(); UI.update(true);
     if (res.battle) UI.fieldBattle(res.battle);
@@ -2663,7 +3248,7 @@ const UI = {
     const s = GAME.s; if (s.speed > 0) UI.resumeSpeed = s.speed; LOOP.setSpeed(0);
     BATTLE.start(s, o.battle, o.title, res => {
       const out = { deltas: {}, rels: {}, notes: [], death: null }; GAME.battleOutcome(s, o.battle, res, out);
-      GAME.news(s, { src: GAME.ch(s).newsSources(s)[0], title: `${res.win ? "Victoire" : "Revers"} : ${o.battle.name}`, text: out.notes.join(" "), tone: res.win ? "good" : "bad" });
+      GAME.news(s, { src: "Carnet", title: `${res.win ? "Victoire" : "Revers"} : ${o.battle.name}`, text: out.notes.join(" "), tone: res.win ? "good" : "bad" }); if (GAME.ch(s).press) GAME.ch(s).press(s, "bataille", out.battle);
       s.history.push({ date: s.date, id: "bat-" + s.week, kind: "bataille", title: o.title, choice: "Offensive ordonnée", hist: null, histExists: false, outcome: `${res.win ? "Victoire" : "Défaite"} — ${o.battle.name}` });
       if (out.death) s.deathPending = out.death; UI.save();
       const ov = UI.openModal(`<div class="outcome"><div class="ev-kind"><span class="k">Bataille</span></div><h2>${esc(o.title)}</h2><div class="verdict ${res.win ? "win" : "loss"}">${res.win ? "Victoire" : "Défaite"}</div><p class="ev-text">${out.notes.map(esc).join(" ")}</p><div class="deltas">${UI.deltaChips(out)}</div><div class="row"><button class="btn primary" id="cont">Reprendre le cours du temps</button></div></div>`, { scene: "bataille" });
@@ -2690,11 +3275,12 @@ const UI = {
   pause(){ const s = GAME.s; if (!s) return 0; const was = s.speed; if (was > 0) { UI.resumeSpeed = was; LOOP.setSpeed(0); } return was; },
 
   /* ---------------- Action libre écrite ---------------- */
-  actionModal(){
+  actionModal(preType){
     const s = GAME.s, ch = GAME.ch(s); if (!s || s.dead || UI.modalOpen) return;
     const was = UI.pause(); AUDIO.sfx("paper");
     const types = ch.speech.filter(t => !t.cond || t.cond(s));
     const A = UI.draft && UI.draft.char === s.char ? UI.draft : (UI.draft = { char: s.char, type: types[0].id, target: "", text: "" });
+    if (preType && types.some(t => t.id === preType)) A.type = preType;
     if (!types.some(t => t.id === A.type)) A.type = types[0].id;
     A.advice = null; A.msg = null; A.busy = null;
     const resume = () => { UI.closeModal(); UI.update(true); if (was || UI.resumeSpeed) LOOP.setSpeed(was || UI.resumeSpeed); };
@@ -2738,7 +3324,7 @@ const UI = {
     const out = GAME.applyFx(s, res.fx);
     const jid = "j" + s.journal.length + "-" + s.week;
     for (const d of res.differes) s.deferred.push({ date: addDays(s.date, d.weeks * 7), title: d.title, text: d.text, fx: d.fx, from: jid });
-    for (const n of [...res.news].reverse()) GAME.news(s, { src: n.src, title: n.title, text: n.text, kind: "action" });
+    for (const n of [...res.news].reverse()) GAME.news(s, { src: n.src, title: n.title, text: n.text, kind: "action", ton: n.ton });
     s.journal.push({ id: jid, d: s.date, type: act.type, typeLabel: tp.label, target: act.target || "", text: act.text, resume: res.resume, importance: res.importance, deltas: out.deltas, news: res.news.map(n => n.title), suites: [] });
     s.actionWeek = s.week; UI.draft = null; UI.save();
     AUDIO.sfx(act.type === "discours" ? "crowd" : "notify");
@@ -2786,6 +3372,7 @@ const UI = {
       s.history.push({ date: s.date, id: ev.id, kind, title: ev.title, choice: c.t, hist: kind === "hist" ? !!c.hist : null, histExists: kind === "hist" ? ev.choices.some(x => x.hist) : false, outcome });
       if (s.history.length > 500) s.history.splice(0, s.history.length - 500);
       GAME.news(s, { src: "Carnet", title: ev.title, text: `${c.t}.${out.battle ? ` ${out.battle.win ? "Victoire" : "Défaite"} : ${out.battle.name}.` : ""}`, tone: kind === "hist" ? "key" : out.battle ? (out.battle.win ? "good" : "bad") : "" });
+      const chx = GAME.ch(s); if (chx.press) { if (out.battle) chx.press(s, "bataille", out.battle); else chx.press(s, "evenement", { title: ev.title, res: c.res, hist: kind === "hist" }); }
       s.pending = null; if (out.death) s.deathPending = out.death; UI.save();
       const real = kind === "hist" && ev.real ? `<div class="realbox"><b>Dans l’Histoire :</b> ${esc(ev.real)}${ev.anecdote ? `<br><i>${esc(ev.anecdote)}</i>` : ""}</div>` : "";
       const verdict = out.battle ? `<div class="verdict ${out.battle.win ? "win" : "loss"}">${out.battle.win ? "Victoire" : "Défaite"} · ${esc(out.battle.name)}</div>` : "";
@@ -2838,7 +3425,7 @@ const UI = {
     if (AI.usable()) { try { news = await AI.rivals(s); } catch (e) { news = null; } }
     if (GAME.s !== s || s.dead) return;
     if (!news) news = GAME.rivalsScripted(s);
-    if (news && news.length) { AUDIO.sfx("notify"); UI.toast(news[0].title); UI.save(); UI.update(true); }
+    if (news && news.length) { AUDIO.sfx("notify"); UI.toast(news[0].title); UI.flagGeneral = true; UI.save(); UI.update(); }
   },
 
   die(death){
@@ -2985,12 +3572,17 @@ const LOOP = {
   step(){
     const s = GAME.s; if (!s || s.dead || UI.modalOpen || s.speed <= 0) return;
     const ch = GAME.ch(s);
-    const { death, fired } = GAME.tick(s);
-    if (fired.length) { AUDIO.sfx("notify"); UI.toast(fired[0].d.title); }
+    const { death, fired, arrived, mail } = GAME.tick(s);
+    if (fired.length) { AUDIO.sfx("notify"); UI.toast(fired[0].d.title); UI.flagGeneral = true; }
+    for (const a of arrived) UI.fetchReply(a.id, ch.mailDays(s, a.id) || 3);
+    if (mail.length) { AUDIO.sfx("notify"); UI.toast(`Lettre de ${GAME.relDef(s, mail[0].id).name}`); }
     UI.update(); UI.save();
     if (death) { UI.die(death); return; }
     const due = GAME.dueHistorical(s);
     if (due) { UI.showEvent(due, "hist"); return; }
+    const mt = ch.meet ? ch.meet(s) : null;
+    if (mt) { UI.fieldBattle(mt); return; }
+    if (--s.nextMailIn <= 0) { s.nextMailIn = 5 + Math.floor(Math.random() * 5); UI.mailTurn(); }
     const off = ch.enemyMove ? ch.enemyMove(s) : null;
     if (off) { UI.showEvent(off, "guerre"); return; }
     if (--s.nextRivalIn <= 0) { s.nextRivalIn = 10 + Math.floor(Math.random() * 5); UI.rivalsTurn(); }

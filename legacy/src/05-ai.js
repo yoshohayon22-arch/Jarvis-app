@@ -112,14 +112,14 @@ RÈGLES :
 - Difficulté équilibrée : réaliste, mais une erreur doit rester rattrapable. La plupart des effets valent entre 1 et 8 points ; réserve les grands effets aux actes majeurs. Une action médiocre a des effets faibles, pas nuls.
 - Tiens compte de la mémoire : une action ancienne peut ressurgir (un journal ressort une promesse, une loi passée produit encore des effets, un personnage se souvient).
 - "effets_differes" : de 0 à 3 conséquences futures plausibles, avec un délai en semaines (de 2 à 520).
-- "fil_actualite" : 2 à 4 articles de sources d’époque crédibles pour ce personnage (${ch.newsSources(s).join(", ")}…), y compris des sources étrangères ou hostiles quand c’est logique. Titre et une ou deux phrases.
+- "fil_actualite" : 2 à 4 articles de sources d’époque crédibles pour ce personnage (${ch.newsSources(s).join(", ")}…), y compris des sources étrangères ou hostiles quand c’est logique. Titre, une ou deux phrases, et le ton de l’article envers le personnage (favorable, neutre ou hostile).
 - "reactions_personnages" : 1 à 4 personnes réelles concernées, parmi les relations listées (utilise leur identifiant), avec une réaction paraphrasée et le changement de relation (-20 à +20).
 - "commentaires_public" : 3 à 6 réactions courtes et variées (${ch.publicLabel}), chacune attribuée à un type de personne (« un grenadier », « une marchande des Halles »…).
 ${AI.rules(s)}
 - "resume" : une phrase neutre qui résume l’action et son effet, pour la mémoire. "importance" : 1 (anecdotique) à 5 (tournant de la partie).
 
 RÉPONDS UNIQUEMENT par un objet JSON de cette forme exacte :
-{"valide":true,"raison":"","resume":"…","importance":2,"effets_immediats":{"jauges":{"popularite":3},"relations":{"talleyrand":-4},"pays":{"autriche":-5}},"effets_differes":[{"dans_semaines":12,"titre":"…","texte":"…","jauges":{"tresor":-20},"relations":{},"pays":{}}],"fil_actualite":[{"source":"…","titre":"…","texte":"…"}],"reactions_personnages":[{"id":"talleyrand","nom":"Talleyrand","reaction":"…","relation":-4}],"commentaires_public":[{"qui":"un grenadier de la Garde","texte":"…"}]}`;
+{"valide":true,"raison":"","resume":"…","importance":2,"effets_immediats":{"jauges":{"popularite":3},"relations":{"talleyrand":-4},"pays":{"autriche":-5}},"effets_differes":[{"dans_semaines":12,"titre":"…","texte":"…","jauges":{"tresor":-20},"relations":{},"pays":{}}],"fil_actualite":[{"source":"…","titre":"…","texte":"…","ton":"favorable|neutre|hostile"}],"reactions_personnages":[{"id":"talleyrand","nom":"Talleyrand","reaction":"…","relation":-4}],"commentaires_public":[{"qui":"un grenadier de la Garde","texte":"…"}]}`;
   },
   normAction(o, s){
     if (!o || typeof o !== "object" || typeof o.valide !== "boolean") throw new Error("forme");
@@ -129,7 +129,7 @@ RÉPONDS UNIQUEMENT par un objet JSON de cette forme exacte :
     const reactions = (Array.isArray(o.reactions_personnages) ? o.reactions_personnages : []).slice(0, 5).map(r => { const id = AI.findRel(s, r.id) || AI.findRel(s, r.nom); const n = clamp(Math.round(Number(r.relation) || 0), -20, 20); return { id: id && GAME.relAlive(s, id) ? id : null, nom: String(r.nom || (id ? GAME.relDef(s, id).name : "")).slice(0, 60), reaction: String(r.reaction || "").slice(0, 300), relation: n }; }).filter(r => r.nom && r.reaction);
     for (const r of reactions) if (r.id && r.relation) fx.r[r.id] = r.relation;
     const differes = (Array.isArray(o.effets_differes) ? o.effets_differes : []).slice(0, 4).map(d => ({ weeks: clamp(Math.round(Number(d.dans_semaines) || 8), 1, 520), title: String(d.titre || "Conséquence").slice(0, 100), text: String(d.texte || "").slice(0, 400), fx: AI.normFx(d, s, 1.5) })).filter(d => d.title);
-    const news = (Array.isArray(o.fil_actualite) ? o.fil_actualite : []).slice(0, 4).map(n => ({ src: String(n.source || ch.newsSources(s)[0]).slice(0, 60), title: String(n.titre || "").slice(0, 140), text: String(n.texte || "").slice(0, 400) })).filter(n => n.title);
+    const news = (Array.isArray(o.fil_actualite) ? o.fil_actualite : []).slice(0, 4).map(n => ({ src: String(n.source || ch.newsSources(s)[0]).slice(0, 60), title: String(n.titre || "").slice(0, 140), text: String(n.texte || "").slice(0, 400), ton: String(n.ton || "neutre") })).filter(n => n.title);
     const comments = (Array.isArray(o.commentaires_public) ? o.commentaires_public : []).slice(0, 6).map(c => typeof c === "string" ? { qui: "", texte: c.slice(0, 220) } : { qui: String(c.qui || "").slice(0, 60), texte: String(c.texte || "").slice(0, 220) }).filter(c => c.texte);
     if (news.length < 1) throw new Error("fil manquant");
     return { valide: true, resume: String(o.resume || "").slice(0, 240) || "Action libre.", importance: clamp(Math.round(Number(o.importance) || 2), 1, 5), fx, differes, news, reactions, comments };
@@ -228,7 +228,7 @@ ${list}
 
 Fais avancer UN ou DEUX de ces plans de façon crédible pour l’époque (les autres ne bougent pas). Pour chacun : le plan (tu peux le faire évoluer ou le remplacer s’il est achevé ou devenu absurde), le nouvel avancement (0 à 100, en général +10 à +35), une annonce pour le fil d’actualité (source d’époque, titre, une ou deux phrases) et de petits effets (jauges entre -6 et +6, relations des pays entre -10 et +10). Si un plan atteint 100, décris son aboutissement dans l’annonce et donne des effets un peu plus forts.
 ${AI.rules(s)}
-RÉPONDS UNIQUEMENT par un objet JSON : {"rivaux":[{"id":"…","plan":"…","progression":45,"annonce":{"source":"…","titre":"…","texte":"…"},"effets":{"jauges":{"coalition":3},"pays":{"autriche":-4}}}]}`, { timeout: 90000 });
+Ajoute aussi une courte revue de presse : 2 articles (un français, un étranger) qui commentent la situation actuelle ou une action récente du joueur, avec leur ton envers le personnage.\nRÉPONDS UNIQUEMENT par un objet JSON : {"rivaux":[{"id":"…","plan":"…","progression":45,"annonce":{"source":"…","titre":"…","texte":"…"},"effets":{"jauges":{"coalition":3},"pays":{"autriche":-4}}}],"presse":[{"source":"…","titre":"…","texte":"…","ton":"favorable|neutre|hostile"}]}`, { timeout: 90000 });
     if (!o || !Array.isArray(o.rivaux)) throw new Error("forme");
     const out = [];
     for (const r of o.rivaux.slice(0, 2)) {
@@ -237,11 +237,53 @@ RÉPONDS UNIQUEMENT par un objet JSON : {"rivaux":[{"id":"…","plan":"…","pro
       if (r.plan) v.plan = String(r.plan).slice(0, 160); v.prog = done ? 0 : prog;
       const fx = AI.normFx(r.effets, s, done ? 1 : .5); for (const k of Object.keys(fx.pays)) fx.pays[k].rel = clamp(fx.pays[k].rel, -12, 12);
       GAME.applyFx(s, fx);
-      const n = { src: String(r.annonce?.source || ch.newsSources(s)[0]).slice(0, 60), title: String(r.annonce?.titre || def.name).slice(0, 140), text: String(r.annonce?.texte || "").slice(0, 400), tone: done ? "bad" : "", kind: "rival" };
+      const n = { src: String(r.annonce?.source || ch.newsSources(s)[0]).slice(0, 60), title: String(r.annonce?.titre || def.name).slice(0, 140), text: String(r.annonce?.texte || "").slice(0, 400), tone: done ? "bad" : "", kind: "rival", ton: "hos" };
       GAME.news(s, n); out.push(n);
     }
     if (!out.length) throw new Error("vide");
+    for (const a of (Array.isArray(o.presse) ? o.presse : []).slice(0, 2)) if (a && a.titre) GAME.news(s, { src: String(a.source || ch.newsSources(s)[1]).slice(0, 60), title: String(a.titre).slice(0, 140), text: String(a.texte || "").slice(0, 400), ton: a.ton });
     return out;
+  },
+
+  /* ---------- Correspondance : un contact répond, ou écrit de lui-même ---------- */
+  thread(s, id){ const th = s.corr[id] || []; const last = th.slice(-12); return (th.length > last.length ? `(${th.length - last.length} lettres plus anciennes non reproduites)\n` : "") + (last.map(m => `- ${frDate(m.d)} — ${m.me ? "LE PERSONNAGE écrit" : "LE CONTACT écrit"} : « ${String(m.t).slice(0, 500)} »`).join("\n") || "- (aucun échange jusqu’ici)"); },
+  async reply(s, id){
+    const ch = GAME.ch(s); const r = GAME.relDef(s, id);
+    const o = await AI.call(`Tu écris la réponse de ${r.name} (${r.role}) à une lettre du personnage, dans « Legacy », simulateur historique sérieux en français. C’est une reconstitution : écris dans sa personnalité, avec ses connaissances et ses intérêts réels à cette date, sans reprendre de phrases authentiques. Caractère : ${ch.persona[id] || r.bio}. ${r.bio}
+Lieu du contact : ${ch.regionName(ch.contactLoc(s, id))}. Relation actuelle avec le personnage : ${Math.round(s.rel[id])} sur une échelle de -100 à +100 (${GAME.relStatusLabel[GAME.relStatus(s.rel[id])]}).
+
+${AI.context(s)}
+
+MÉMOIRE DE LA PARTIE :
+${AI.memory(s)}
+
+CORRESPONDANCE AVEC CE CONTACT (la dernière lettre du personnage est celle à laquelle tu réponds) :
+${AI.thread(s, id)}
+
+Écris une lettre de 2 à 5 phrases, à la première personne, dans le ton et les formules de l’époque et de ce lien (une épouse ne s’adresse pas comme un ministre ou un souverain ennemi). Le contact ne sait que ce qu’il peut savoir là où il est. Il peut accepter, refuser, marchander, flatter, se plaindre ou donner une information utile. Si la lettre reçue est anachronique ou incompréhensible pour lui, il s’en étonne.
+${AI.rules(s)}
+"relation" : l’effet de cet échange sur la relation, entre -8 et +8.
+RÉPONDS UNIQUEMENT par un objet JSON : {"reponse":"…","relation":2}`, { timeout: 80000 });
+    if (!o || typeof o.reponse !== "string" || o.reponse.trim().length < 5) throw new Error("forme");
+    return { t: o.reponse.trim().slice(0, 900), rel: clamp(Math.round(Number(o.relation) || 0), -8, 8) };
+  },
+  async mail(s){
+    const ch = GAME.ch(s); const ids = ch.contactGroups.flatMap(g => g[1]).filter(id => GAME.relAlive(s, id));
+    const o = await AI.call(`Dans « Legacy », simulateur historique sérieux en français, un proche ou un correspondant du personnage lui écrit de lui-même. Choisis UN contact qui a une vraie raison d’écrire maintenant (demande, conseil, plainte, nouvelle, mise en garde) et rédige sa lettre, dans sa personnalité et avec ce qu’il peut savoir. C’est une reconstitution : aucune phrase authentique.
+
+${AI.context(s)}
+
+MÉMOIRE DE LA PARTIE :
+${AI.memory(s)}
+
+CONTACTS POSSIBLES (identifiant : caractère) :
+${ids.map(id => `- ${id} : ${GAME.relDef(s, id).name} — ${ch.persona[id] || ""}${(s.corr[id] || []).length ? ` — dernier échange le ${frDate(s.corr[id][s.corr[id].length - 1].d)}` : ""}`).join("\n")}
+
+Lettre de 2 à 4 phrases, à la première personne, dans le ton de l’époque. Varie les correspondants : évite ceux qui ont écrit récemment.
+${AI.rules(s)}
+RÉPONDS UNIQUEMENT par un objet JSON : {"id":"…","message":"…"}`, { timeout: 80000 });
+    const id = o && AI.findRel(s, o.id); if (!id || !GAME.relAlive(s, id) || typeof o.message !== "string" || o.message.trim().length < 5) throw new Error("forme");
+    return { id, t: o.message.trim().slice(0, 800) };
   },
 
   /* ---------- 5. Récit court d’une phase de bataille ---------- */

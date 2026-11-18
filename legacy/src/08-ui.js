@@ -50,7 +50,7 @@ const UI = {
           <p class="muted ui">Né le ${frDate(ch.born)} à ${esc(ch.birthplace)}</p><p class="muted" style="font-size:.95rem">${esc(ch.realTimeline)}</p></div>
         <div style="display:grid;gap:14px;min-width:0">
           <div><div class="label">Mode carrière</div><h2 style="font-size:1.5rem">Choisissez l’année de départ</h2>
-          <p class="muted">Vous jouez jusqu’à la mort du personnage. Le temps avance d’une semaine toutes les six secondes environ ; rien ne peut être annulé.${ch.fiction ? " Personnage de fiction : le récit des livres est résumé avec nos propres mots, sans citation ni image tirée des films." : ch.realStatus ? " Personne réelle et vivante : le jeu s’appuie sur des faits publics, et tout ce qui s’en écarte est de la fiction." : ""}</p></div>
+          <p class="muted">Vous jouez jusqu’à la mort du personnage. Le temps avance jour par jour et s’arrête à chaque rendez-vous de votre agenda (3 ou 4 par semaine) ; rien ne peut être annulé.${ch.fiction ? " Personnage de fiction : le récit des livres est résumé avec nos propres mots, sans citation ni image tirée des films." : ch.realStatus ? " Personne réelle et vivante : le jeu s’appuie sur des faits publics, et tout ce qui s’en écarte est de la fiction." : ""}</p></div>
           <div class="starts" role="radiogroup" aria-label="Année de départ">${ch.starts.map(st => `<button class="start" role="radio" data-start="${st.id}" aria-pressed="${st.id === pick}" aria-checked="${st.id === pick}"><span class="yr">${st.year}</span><h3>${esc(st.title)}</h3><span class="muted">${esc(st.summary)}</span></button>`).join("")}</div>
           <div class="slot-pick"><label class="label" for="slot-sel">Emplacement de sauvegarde</label>
             <select id="slot-sel" class="sel" style="width:auto">${[1, 2, 3].map(n => { const s = STORE.read(n); return `<option value="${n}" ${n === free ? "selected" : ""}>Emplacement ${n}${STORE.valid(s) ? ` (remplacera ${esc(CHARACTERS[s.char].short)}, ${esc(frMonth(s.date))})` : " (libre)"}</option>`; }).join("")}</select></div>
@@ -70,9 +70,10 @@ const UI = {
     UI.view = "general"; UI.subtab = null; UI.contact = null;
     UI.buildGame(); AUDIO.theme(ch.audio);
     if (fresh) { UI.save(); AI.prefetch(s); }
+    if (!s.agenda || s.agendaWeek !== s.week) { const due = GAME.dueHistorical(s); AGENDA.plan(s, due ? [{ kind: "hist", icon: "★", title: due.title, evId: due.id, pref: s.day || 0 }] : []); UI.update(true); UI.save(); }
     if (s.pending) { UI.restorePending(); return; }
-    const due = GAME.dueHistorical(s);
-    if (due) UI.showEvent(due, "hist"); else if (fresh) LOOP.setSpeed(1);
+    if (UI.openDay()) return;
+    if (fresh) LOOP.setSpeed(1);
   },
   restorePending(){
     const s = GAME.s, p = s.pending, ch = GAME.ch(s); let ev = null;
@@ -98,17 +99,16 @@ const UI = {
         <div class="who"><h1>${esc(ch.short)}</h1><span class="rank" id="rank"></span></div>
         <div class="clock"><span class="date" id="date"></span><span class="age" id="age"></span></div>
         <div class="speed" role="group" aria-label="Vitesse du temps"><button data-speed="0" title="Pause (espace)" aria-label="Pause">❚❚</button><button data-speed="1">x1</button><button data-speed="2">x2</button><button data-speed="4">x4</button></div>
-        <div class="agir"><button class="btn primary" id="b-agir">Agir</button><span class="count" id="agir-count"></span></div>
         <button class="icon-btn" id="b-music" aria-pressed="${AUDIO.musicOn}" title="Musique">Musique</button>
         <button class="icon-btn" id="b-sfx" aria-pressed="${AUDIO.sfxOn}" title="Bruitages">Sons</button>
         <button class="icon-btn" id="b-menu" title="Parties, réglages, quitter">Menu</button>
-      </div><div class="tick-bar"><i id="tickbar"></i></div></header>
+      </div><div class="cal" id="cal" role="list" aria-label="Agenda de la semaine"></div><div class="cal-next" id="cal-next"></div><div class="tick-bar"><i id="tickbar"></i></div></header>
       <div class="shell">
         <nav class="rail" id="rail" aria-label="Fenêtres">${ch.views.map(({ id, label, icon }) => `<button data-view="${id}" aria-pressed="false">${UI.ICONS[icon]}<span>${label}</span><i class="badge-dot" hidden></i></button>`).join("")}</nav>
         <main class="view" id="view"></main>
       </div>`;
     $$("[data-speed]").forEach(b => b.onclick = () => { AUDIO.sfx("click"); LOOP.setSpeed(+b.dataset.speed); });
-    $("#b-agir").onclick = () => UI.actionModal();
+    $("#cal").addEventListener("click", e => { const b = e.target.closest("[data-rv]"); if (b) UI.calClick(b.dataset.rv); });
     $("#b-music").onclick = e => { AUDIO.setMusic(!AUDIO.musicOn); e.currentTarget.setAttribute("aria-pressed", AUDIO.musicOn); };
     $("#b-sfx").onclick = e => { AUDIO.setSfx(!AUDIO.sfxOn); e.currentTarget.setAttribute("aria-pressed", AUDIO.sfxOn); AUDIO.sfx("click"); };
     $("#b-menu").onclick = () => UI.menuModal();
@@ -178,9 +178,9 @@ const UI = {
   update(force){
     const s = GAME.s; if (!s || !$("#date")) return;
     const ch = GAME.ch(s); if (force) UI.keys = {};
-    $("#date").textContent = frDate(s.date); $("#age").textContent = `${GAME.age(s)} ans · semaine ${s.week + 1}`; $("#rank").textContent = GAME.rankLabel(s);
+    const today = AGENDA.today(s); $("#date").textContent = frDate(today); $("#age").textContent = `${GAME.age(s)} ans · ${AGENDA.WDL[AGENDA.wd(today)]}`;
+    UI.renderCal(); $("#rank").textContent = GAME.rankLabel(s);
     $$("[data-speed]").forEach(b => b.setAttribute("aria-pressed", +b.dataset.speed === s.speed));
-    const can = GAME.canAct(s); $("#b-agir").classList.toggle("primary", can); $("#agir-count").innerHTML = `Action libre<b>${can ? "1 / 1 cette semaine" : "0 / 1 · semaine prochaine"}</b>`;
     const al = ch.alerts(s);
     // Pastilles rouges
     const unread = Object.values(s.corr).reduce((t, th) => t + th.filter(m => m.unread).length, 0);
@@ -371,7 +371,7 @@ const UI = {
     if (pid === "_rel") {
       const known = ch.relations.filter(r => GAME.relKnown(s, r.id)); const alive = known.filter(r => !s.deadRel[r.id]), dead = known.filter(r => s.deadRel[r.id]);
       html = [...alive, ...dead].map(r => { const v = s.rel[r.id]; const st = s.deadRel[r.id] ? "mort" : GAME.relStatus(v); return `<button class="rel ${s.deadRel[r.id] ? "dead" : ""}"><span class="n">${esc(r.name)}${s.deadRel[r.id] ? " †" : ""}</span><span class="chip ${st}">${GAME.relStatusLabel[st]}</span><span class="ro">${esc(r.role)}</span>${relbar(v)}<span class="rel-detail" hidden>${esc(r.bio)}</span></button>`; }).join("");
-    } else { let blocks = []; try { blocks = ch.panels.find(p => p.id === pid).blocks(s); } catch (e) { blocks = [{ k: "info", html: "Ce panneau n’est pas disponible pour le moment." }]; } html = blocks.map(ctl).join(""); }
+    } else { let blocks = []; try { blocks = ch.panels.find(p => p.id === pid).blocks(s); const nb = blocks.filter(c => !(c && c.k === "btn" && (c.act === "write" || c.act === "write_article"))); if (nb.length < blocks.length) { nb.push({ k: "info", html: "Vos prises de parole (interviews, discours, messages…) se font désormais lors des rendez-vous de votre agenda." }); blocks = nb; } } catch (e) { blocks = [{ k: "info", html: "Ce panneau n’est pas disponible pour le moment." }]; } html = blocks.map(ctl).join(""); }
     if (html !== UI.keys.panel) { const top = pb.scrollTop; pb.innerHTML = html; pb.scrollTop = top; UI.keys.panel = html; }
   },
   updateAIStatus(){
@@ -425,22 +425,24 @@ const UI = {
   pause(){ const s = GAME.s; if (!s) return 0; const was = s.speed; if (was > 0) { UI.resumeSpeed = was; LOOP.setSpeed(0); } return was; },
 
   /* ---------------- Action libre écrite ---------------- */
-  actionModal(preType){
+  actionModal(preType, opts = {}){
     const s = GAME.s, ch = GAME.ch(s); if (!s || s.dead || UI.modalOpen) return;
-    const was = UI.pause(); AUDIO.sfx("paper");
-    const types = ch.speech.filter(t => !t.cond || t.cond(s));
-    const A = UI.draft && UI.draft.char === s.char ? UI.draft : (UI.draft = { char: s.char, type: types[0].id, target: "", text: "" });
+    const was = UI.pause(); AUDIO.sfx("paper"); const R = opts.rdv || null;
+    let types = ch.speech.filter(t => !t.cond || t.cond(s));
+    if (R) { const t0 = AI.tp(s, preType); types = [t0.id === "__rdv" ? { ...t0, hint: "Décrivez ce que vous dites ou faites pendant ce rendez-vous, et à qui.", ph: "Ex. : Je demande à voir les comptes moi-même avant de décider, et je convoque le responsable pour demain…" } : t0]; }
+    const A = UI.draft && UI.draft.char === s.char && UI.draft.rdvId === (R ? R.id : null) ? UI.draft : (UI.draft = { char: s.char, rdvId: R ? R.id : null, type: types[0].id, target: "", text: "" });
     if (preType && types.some(t => t.id === preType)) A.type = preType;
     if (!types.some(t => t.id === A.type)) A.type = types[0].id;
     A.advice = null; A.msg = null; A.busy = null; A.itw = null;
-    const resume = () => { UI.closeModal(); UI.update(true); if (was || UI.resumeSpeed) LOOP.setSpeed(was || UI.resumeSpeed); };
+    const resume = R ? () => { AGENDA.mark(s, R, "fait"); UI.save(); UI.afterEvent(); } : () => { UI.closeModal(); UI.update(true); if (was || UI.resumeSpeed) LOOP.setSpeed(was || UI.resumeSpeed); };
+    const back = R ? () => { UI.closeModal(); UI.showEvent(R, opts.kind || "rdv"); } : resume;
     const render = () => {
-      const tp = types.find(t => t.id === A.type); const can = GAME.canAct(s); const adv = ch.advisor(s);
+      const tp = types.find(t => t.id === A.type) || types[0]; const can = R ? true : GAME.canAct(s); const adv = ch.advisor(s);
       const targets = ch.relations.filter(r => GAME.relAlive(s, r.id));
       const ov = UI.openModal(`
-        <div class="ev-kind"><span class="k hist">Action libre</span><span class="label">${esc(frDate(s.date))} · ${can ? "1 action disponible cette semaine" : "action de la semaine déjà utilisée"}</span></div>
-        <h2>Que faites-vous ?</h2>
-        <div class="types" role="group" aria-label="Type d’action">${types.map(t => `<button data-type="${t.id}" aria-pressed="${t.id === A.type}">${esc(t.label)}</button>`).join("")}</div>
+        <div class="ev-kind"><span class="k hist">${R ? esc(tp.label) : "Action libre"}</span><span class="label">${esc(frDate(AGENDA.today(s)))}${R ? "" : ` · ${can ? "1 action disponible cette semaine" : "action de la semaine déjà utilisée"}`}</span></div>
+        <h2>${R ? esc(R.title) : "Que faites-vous ?"}</h2>
+        ${R ? `<p class="ev-text" style="margin:0">${esc(R.text)}</p>` : `<div class="types" role="group" aria-label="Type d’action">${types.map(t => `<button data-type="${t.id}" aria-pressed="${t.id === A.type}">${esc(t.label)}</button>`).join("")}</div>`}
         <span class="note">${esc(tp.hint)} Le temps est en pause. Une action envoyée est définitive.</span>
         ${tp.target ? `<div class="ctl"><div class="ctl-top"><label for="a-target">Destinataire</label></div><select id="a-target" class="sel"><option value="">Quelqu’un d’autre (nommez-le dans le texte)</option>${targets.map(r => `<option value="${esc(r.name)}" ${A.target === r.name ? "selected" : ""}>${esc(r.name)}</option>`).join("")}</select></div>` : ""}
         ${tp.flow === "interview" ? (A.itw ? `<div class="advice"><div class="label">${esc(A.itw.media)} · interview</div>${A.itw.questions.map((q, i) => `<div class="ctl"><div class="ctl-top"><label for="a-q${i}">${esc(q)}</label></div><textarea class="write" style="min-height:70px" id="a-q${i}" data-q="${i}" maxlength="600" placeholder="Votre réponse…" ${A.busy ? "disabled" : ""}>${esc(A.itw.answers[i] || "")}</textarea></div>`).join("")}</div>` : `<div class="advice"><div>Un journaliste vous posera deux ou trois questions. Vos réponses forment l’action de la semaine.</div><div class="row" style="justify-content:flex-start"><button class="btn" id="a-itw" ${A.busy || !AI.usable() ? "disabled" : ""}>Commencer l’interview</button></div></div>`) : `<textarea class="write" id="a-text" maxlength="1500" placeholder="${esc(tp.ph)}" aria-label="Votre action" ${A.busy ? "disabled" : ""}>${esc(A.text)}</textarea>`}
@@ -450,7 +452,7 @@ const UI = {
         ${A.advice ? `<div class="advice"><div class="label">Avis de ${esc(A.advice.name)}, ${esc(A.advice.role)} · reconstitution</div><div>${esc(A.advice.avis)}</div>
           ${A.advice.risques.length ? `<h4>Risques</h4><ul>${A.advice.risques.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}${A.advice.effets.length ? `<h4>Effets probables</h4><ul>${A.advice.effets.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}${A.advice.alternatives.length ? `<h4>Autres voies</h4><ul>${A.advice.alternatives.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}</div>` : ""}
         ${!AI.usable() ? `<div class="refusal"><b>Claude n’est pas disponible dans cette vue.</b><br>L’action libre et le conseiller ont besoin de Claude pour calculer les répercussions. Les panneaux de gestion, eux, fonctionnent toujours.</div>` : ""}
-        <div class="row"><button class="btn ghost" id="a-close" ${A.busy ? "disabled" : ""}>Fermer sans agir</button><button class="btn" id="a-advise" ${A.busy || !AI.usable() ? "disabled" : ""}>Demander conseil à ${esc(adv.name)}</button><button class="btn primary" id="a-go" style="font-size:1rem;padding:.6em 2em" ${A.busy || !can || !AI.usable() ? "disabled" : ""}>Agir</button></div>`, { wide: true });
+        <div class="row"><button class="btn ghost" id="a-close" ${A.busy ? "disabled" : ""}>${R ? "Revenir aux choix" : "Fermer sans agir"}</button><button class="btn" id="a-advise" ${A.busy || !AI.usable() ? "disabled" : ""}>Demander conseil à ${esc(adv.name)}</button><button class="btn primary" id="a-go" style="font-size:1rem;padding:.6em 2em" ${A.busy || !can || !AI.usable() ? "disabled" : ""}>Agir</button></div>`, { wide: true });
       const ta = $("#a-text", ov) || { value: "", focus(){}, setSelectionRange(){} }; ta.oninput = () => { A.text = ta.value; };
       const ph = $("#a-photo", ov); if (ph) ph.oninput = () => { A.photo = ph.value; };
       $$("[data-q]", ov).forEach(q => q.oninput = () => { A.itw.answers[+q.dataset.q] = q.value; });
@@ -458,13 +460,13 @@ const UI = {
       if (!A.busy) setTimeout(() => { try { ta.focus({ preventScroll: true }); ta.setSelectionRange(ta.value.length, ta.value.length); } catch (e) {} }, 30);
       const tg = $("#a-target", ov); if (tg) tg.onchange = () => { A.target = tg.value; };
       $$("[data-type]", ov).forEach(b => b.onclick = () => { A.type = b.dataset.type; A.msg = null; render(); });
-      $("#a-close", ov).onclick = resume;
+      $("#a-close", ov).onclick = back;
       const compose = () => tp.flow === "interview" ? (A.itw ? `Interview accordée à ${A.itw.media}.\n` + A.itw.questions.map((q, i) => `Question : ${q}\nRéponse : ${(A.itw.answers[i] || "(pas de réponse)").trim()}`).join("\n") : "") : A.text.trim() + (tp.photo && A.photo ? `\n[Photo ou vidéo jointe : ${A.photo.trim()}]` : "");
       const need = () => { if (tp.flow === "interview") { if (!A.itw || !A.itw.answers.some(a => a && a.trim().length > 3)) { A.msg = { title: "Répondez d’abord aux questions.", text: "Lancez l’interview, puis répondez à au moins une question." }; render(); return false; } return true; } if (A.text.trim().length < 12) { A.msg = { title: "Écrivez d’abord votre action.", text: "Quelques phrases suffisent : ce que vous ordonnez, dites ou écrivez, et à qui." }; render(); return false; } return true; };
-      $("#a-advise", ov).onclick = async () => { if (!need()) return; A.msg = null; A.busy = `${adv.name} réfléchit à votre projet…`; render(); try { A.advice = await AI.advise(s, { type: A.type, target: A.target, text: compose() }); AUDIO.sfx("notify"); } catch (e) { A.msg = { title: `${adv.name} n’a pas pu répondre.`, text: "Vous pouvez redemander, ou agir sans son avis. Votre action n’est pas consommée." }; } A.busy = null; if (GAME.s === s && UI.modalOpen) render(); };
+      $("#a-advise", ov).onclick = async () => { if (!need()) return; A.msg = null; A.busy = `${adv.name} réfléchit à votre projet…`; render(); try { A.advice = await AI.advise(s, { type: A.type, target: A.target, text: compose(), rdv: R }); AUDIO.sfx("notify"); } catch (e) { A.msg = { title: `${adv.name} n’a pas pu répondre.`, text: "Vous pouvez redemander, ou agir sans son avis. Votre action n’est pas consommée." }; } A.busy = null; if (GAME.s === s && UI.modalOpen) render(); };
       $("#a-go", ov).onclick = async () => {
         if (!need() || !GAME.canAct(s)) return; A.msg = null; A.busy = "Les courriers partent. Claude calcule les répercussions…"; render();
-        const act = { type: A.type, target: A.target, text: compose() }; let res = null;
+        const act = { type: A.type, target: A.target, text: compose(), rdv: R }; let res = null;
         try { res = await AI.evaluateAction(s, act); } catch (e) { A.busy = null; A.msg = { title: "Claude n’a pas pu répondre, après deux essais.", text: "Votre action n’est pas consommée : vous pouvez la renvoyer telle quelle dans un instant." }; AUDIO.sfx("error"); if (GAME.s === s) render(); return; }
         if (GAME.s !== s) return; A.busy = null;
         if (!res.valide) { A.msg = { title: "Action impossible : elle n’est pas consommée.", text: res.raison }; AUDIO.sfx("error"); render(); return; }
@@ -475,12 +477,12 @@ const UI = {
   },
 
   applyAction(act, res, resume){
-    const s = GAME.s, ch = GAME.ch(s); const tp = ch.speech.find(x => x.id === act.type);
+    const s = GAME.s, ch = GAME.ch(s); const tp = AI.tp(s, act.type);
     const out = GAME.applyFx(s, res.fx);
     const jid = "j" + s.journal.length + "-" + s.week;
     for (const d of res.differes) s.deferred.push({ date: addDays(s.date, d.weeks * 7), title: d.title, text: d.text, fx: d.fx, from: jid });
     for (const n of [...res.news].reverse()) GAME.news(s, { src: n.src, title: n.title, text: n.text, kind: "action", ton: n.ton });
-    s.journal.push({ id: jid, d: s.date, type: act.type, typeLabel: tp.label, target: act.target || "", text: act.text, resume: res.resume, importance: res.importance, deltas: out.deltas, news: res.news.map(n => n.title), suites: [] });
+    s.journal.push({ id: jid, d: AGENDA.today(s), type: act.type, typeLabel: act.rdv ? `${tp.label} (${act.rdv.title})` : tp.label, target: act.target || "", text: act.text, resume: res.resume, importance: res.importance, deltas: out.deltas, news: res.news.map(n => n.title), suites: [] });
     s.actionWeek = s.week; UI.draft = null; UI.save();
     AUDIO.sfx(act.type === "discours" ? "crowd" : "notify");
     const ov = UI.openModal(`
@@ -493,8 +495,47 @@ const UI = {
           ${res.comments.length ? `<h4 style="margin-top:10px">${esc(ch.publicLabel)}</h4>${res.comments.map(c => `<div class="comment">${c.qui ? `<small>${esc(c.qui)}</small>` : ""}${esc(c.texte)}</div>`).join("")}` : ""}</div>
       </div>
       ${res.differes.length ? `<p class="later">${res.differes.length === 1 ? "Une autre conséquence se fera" : `${res.differes.length} autres conséquences se feront`} sentir plus tard.</p>` : ""}
-      <div class="row"><button class="btn primary" id="cont">Reprendre le cours du temps</button></div>`, { wide: true });
+      <div class="row"><button class="btn primary" id="cont">${UI.contLabel()}</button></div>`, { wide: true });
     $("#cont", ov).onclick = resume;
+  },
+
+  /* ---------------- Agenda de la semaine ---------------- */
+  contLabel(){ const s = GAME.s; const n = AGENDA.next(s); return n ? "Rendez-vous suivant" : "Reprendre le cours du temps"; },
+  renderCal(){
+    const s = GAME.s; if (!s || !$("#cal")) return; const items = s.agenda || []; const d0 = s.day || 0;
+    const cells = Array.from({ length: 7 }, (_, d) => { const dt = addDays(s.date, d); const its = items.filter(i => i.day === d);
+      return `<div class="cd ${d === d0 ? "today" : d < d0 ? "past" : ""}" role="listitem"><span class="cw">${AGENDA.WD[AGENDA.wd(dt)]} <b>${parseD(dt).d}</b></span>${its.map(i => `<button class="rv k-${i.kind} ${i.done ? "done" : ""}" data-rv="${i.uid}" title="${esc(i.title)}"><span class="ic" aria-hidden="true">${i.done ? (i.done === "delegue" ? "↷" : "✓") : esc(i.icon || "•")}</span><span class="tt">${esc(i.title)}</span></button>`).join("")}</div>`; }).join("");
+    UI.put("cal", cells);
+    const nx = AGENDA.upcoming(s); UI.put("cal-next", nx ? `<b>${esc(AGENDA.dayLabel(s, nx.day))}</b> · ${esc(nx.title)}` : `<span>Plus de rendez-vous cette semaine</span>`);
+  },
+  calClick(uid){
+    const s = GAME.s; const it = (s.agenda || []).find(i => i.uid === uid); if (!it || UI.modalOpen) return;
+    if (!it.done && it.day <= (s.day || 0)) { UI.openItem(it); return; }
+    const txt = it.done ? `${it.done === "delegue" ? "Délégué" : "Fait"} : ${it.title}` : `${AGENDA.dayLabel(s, it.day)} : ${it.title}${it.ev && it.ev.text ? " — " + it.ev.text.slice(0, 110) + (it.ev.text.length > 110 ? "…" : "") : ""}`;
+    UI.toast(txt);
+  },
+  openDay(){ const s = GAME.s; if (!s || s.dead || UI.modalOpen) return false; const it = AGENDA.next(s); if (!it) return false; UI.openItem(it); return true; },
+  openItem(it){
+    const s = GAME.s, ch = GAME.ch(s); if (s.speed > 0) UI.resumeSpeed = s.speed; LOOP.setSpeed(0); UI.update();
+    if (it.kind === "hist") { it.done = "fait"; const ev = ch.events.find(e => e.id === it.evId); if (ev && !s.done[ev.id]) UI.showEvent(ev, "hist"); else UI.afterEvent(); return; }
+    if (it.kind === "match") { it.done = "fait"; UI.save(); UI.playMatch(it.m); return; }
+    if (it.kind === "saison") { it.done = "fait"; UI.showEvent(it.ev, "saison"); return; }
+    UI.rdvAdvice = null; UI.showEvent(it.ev, it.kind === "parole" ? "parole" : "rdv");
+  },
+  async adviseRdv(ev, kind){
+    const s = GAME.s; UI.rdvAdvice = { id: ev.id, busy: true }; UI.closeModal(); UI.showEvent(ev, kind);
+    try { const a = await AI.advise(s, { type: "__rdv", text: "Comment aborder ce rendez-vous ? Que me conseillez-vous de faire ?", rdv: ev }); UI.rdvAdvice = { id: ev.id, ...a }; AUDIO.sfx("notify"); }
+    catch (e) { UI.rdvAdvice = { id: ev.id, err: "Le conseiller n’a pas pu répondre. Vous pouvez décider sans son avis." }; }
+    if (GAME.s === s && UI.currentEvent && UI.currentEvent.id === ev.id) { UI.closeModal(); UI.showEvent(ev, kind); }
+  },
+  delegateRdv(ev, kind){
+    const s = GAME.s; UI.currentEvent = null; AUDIO.sfx("click");
+    const out = AGENDA.delegate(s, ev, kind); AGENDA.mark(s, ev, "delegue"); s.pending = null; UI.save();
+    GAME.news(s, { src: "Carnet", title: ev.title, text: "Rendez-vous délégué.", tone: "" });
+    const ov = UI.openModal(`<div class="outcome"><div class="ev-kind"><span class="k">Délégué</span></div><h2>${esc(ev.title)}</h2>
+      <p class="ev-text">${out.notes.map(esc).join(" ")}</p><div class="deltas">${UI.deltaChips(out)}</div>
+      <div class="row"><button class="btn primary" id="cont">${UI.contLabel()}</button></div></div>`, { scene: ev.scene || s.scene });
+    $("#cont", ov).onclick = () => UI.afterEvent();
   },
 
   /* ---------------- Décisions imposées ---------------- */
@@ -504,14 +545,21 @@ const UI = {
     UI.currentEvent = ev; UI.currentKind = kind;
     s.pending = { kind, id: ev.id, ev: kind === "hist" || kind === "ecrit" ? null : ev };
     const people = (ev.people || []).map(p => { const r = GAME.relDef(s, p); return r ? r.name : p; }).filter(Boolean);
-    const kindLabel = kind === "hist" ? (GAME.ch(s).histLabel || "Moment historique") : kind === "ai" ? "Dépêche · écrite par Claude" : kind === "guerre" ? "Alerte" : kind === "saison" ? "Carrière" : "Dépêche";
+    const it = (kind === "rdv" || kind === "parole") ? (s.agenda || []).find(i => !i.done && i.ev && i.ev.id === ev.id) : null;
+    const kindLabel = kind === "hist" ? (GAME.ch(s).histLabel || "Moment historique") : kind === "ai" ? "Dépêche · écrite par Claude" : kind === "guerre" ? "Alerte" : kind === "saison" ? "Carrière" : kind === "parole" ? "Prise de parole" : kind === "rdv" ? (it && it.src === "ai" ? "Rendez-vous · écrit par Claude" : it && it.src === "fixe" ? "Rendez-vous habituel" : "Rendez-vous") : "Dépêche";
+    const adv = GAME.ch(s).advisor(s); const advice = UI.rdvAdvice && UI.rdvAdvice.id === ev.id ? UI.rdvAdvice : null;
+    const extra = it ? `<div class="rdv-extra">${AI.usable() ? `<button class="btn" id="rv-free">${kind === "parole" ? "Écrire mes propres mots" : "Répondre avec mes mots"}</button><button class="btn ghost" id="rv-adv" ${advice && advice.busy ? "disabled" : ""}>Conseil de ${esc(adv.name)}</button>` : ""}${(ev.choices || []).some(c => !c.battle && !c.match) || kind === "parole" ? `<button class="btn ghost" id="rv-del">${kind === "parole" ? "Laisser un proche parler" : "Déléguer"}</button>` : ""}</div>
+      ${advice ? `<div class="advice"><div class="label">Avis de ${esc(adv.name)} · reconstitution</div>${advice.busy ? `<div>${esc(adv.name)} réfléchit…</div>` : advice.err ? `<div>${esc(advice.err)}</div>` : `<div>${esc(advice.avis)}</div>${advice.risques.length ? `<h4>Risques</h4><ul>${advice.risques.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}${advice.alternatives.length ? `<h4>Autres voies</h4><ul>${advice.alternatives.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}`}</div>` : ""}` : "";
     AUDIO.sfx(kind === "guerre" ? "drum" : "event");
     const ov = UI.openModal(`
-      <div class="ev-kind"><span class="k ${kind === "hist" ? "hist" : ""}">${kindLabel}</span><span class="label">${esc(frDate(kind === "hist" && ev.date && ev.date.slice(0, 7) === s.date.slice(0, 7) ? ev.date : s.date))} · ${esc(ev.place || s.place)}</span></div>
+      <div class="ev-kind"><span class="k ${kind === "hist" ? "hist" : ""}">${kindLabel}</span><span class="label">${esc(it ? AGENDA.dayLabel(s, it.day) : frDate(kind === "hist" && ev.date && ev.date.slice(0, 7) === s.date.slice(0, 7) ? ev.date : AGENDA.today(s)))} · ${esc(ev.place || s.place)}</span></div>
       <h2>${esc(ev.title)}</h2><p class="ev-text">${esc(ev.text)}</p>
       ${people.length ? `<div class="people">${people.map(p => `<span>${esc(p)}</span>`).join("")}</div>` : ""}
-      <div class="choices">${ev.choices.map((c, i) => `<button class="choice" data-choice="${i}">${esc(c.t)}${c.battle ? `<small>${GAME.ch(s).fiction ? "Duel" : "Bataille"} : ${esc(c.battle.name)}</small>` : ""}${c.match ? `<small>Match à jouer</small>` : ""}</button>`).join("")}</div>`, { scene: ev.scene || s.scene });
+      <div class="choices">${ev.choices.map((c, i) => `<button class="choice" data-choice="${i}">${esc(c.t)}${c.battle ? `<small>${GAME.ch(s).fiction ? "Duel" : "Bataille"} : ${esc(c.battle.name)}</small>` : ""}${c.match ? `<small>Match à jouer</small>` : ""}</button>`).join("")}</div>${extra}`, { scene: ev.scene || s.scene });
     $$("[data-choice]", ov).forEach(b => b.onclick = () => UI.choose(+b.dataset.choice));
+    const fb = $("#rv-free", ov); if (fb) fb.onclick = () => { UI.closeModal(); UI.actionModal(kind === "parole" ? it.type : "__rdv", { rdv: ev, kind }); };
+    const ab = $("#rv-adv", ov); if (ab) ab.onclick = () => UI.adviseRdv(ev, kind);
+    const db = $("#rv-del", ov); if (db) db.onclick = () => UI.delegateRdv(ev, kind);
   },
 
   choose(i){
@@ -519,9 +567,10 @@ const UI = {
     const c = ev.choices[i]; UI.currentEvent = null; AUDIO.sfx("click");
     const out = { deltas: {}, rels: {}, notes: [], death: null };
     if (ev.pre) GAME.applyFx(s, ev.pre, out);
-    GAME.applyFx(s, c.fx, out);
+    GAME.applyFx(s, kind === "rdv" || kind === "parole" ? AGENDA.tune(s, c.fx) : c.fx, out);
     const finish = () => {
       if (kind === "hist" || (kind === "ecrit" && ev.once)) s.done[ev.id] = kind;
+      if (kind === "rdv" || kind === "parole") AGENDA.mark(s, ev, "fait");
       if (kind === "saison") { s.pending = null; UI.save(); UI.closeModal(); const nx = GAME.ch(s).week ? GAME.ch(s).week(s, true) : null; if (nx && nx.event) { UI.showEvent(nx.event, "saison"); return; } if (nx && nx.match) { UI.playMatch(nx.match); return; } UI.afterEvent(); return; }
       if (kind === "ecrit") { s.recentRandom.push(ev.id); if (s.recentRandom.length > 6) s.recentRandom.shift(); }
       const outcome = out.battle ? `${out.battle.win ? "Victoire" : "Défaite"} — ${out.battle.name}` : (c.res || "");
@@ -537,7 +586,7 @@ const UI = {
         <h2>${esc(ev.title)}</h2>${verdict}
         <p class="ev-text">${esc(c.res || "")}${out.notes.length ? " " + out.notes.map(esc).join(" ") : ""}</p>
         <div class="deltas">${UI.deltaChips(out)}</div>${real}
-        <div class="row"><button class="btn primary" id="cont">${out.death ? "Continuer…" : "Reprendre le cours du temps"}</button></div></div>`, { scene: s.scene });
+        <div class="row"><button class="btn primary" id="cont">${out.death ? "Continuer…" : UI.contLabel()}</button></div></div>`, { scene: s.scene });
       $("#cont", ov).onclick = () => UI.afterEvent();
     };
     if (c.match) { UI.closeModal(); MATCH.start(s, c.match, res => { const chm = GAME.ch(s); const r = chm.applyMatch(s, c.match, res); out.battle = { name: c.match.title, win: r.win, draw: r.draw }; const o = r.win ? c.match.win : r.draw ? (c.match.draw || c.match.loss) : c.match.loss; if (o) { GAME.applyFx(s, o, out); if (o.txt) out.notes.unshift(o.txt); } out.notes.unshift(r.line); finish(); }); }
@@ -548,8 +597,7 @@ const UI = {
   afterEvent(){
     const s = GAME.s; UI.closeModal(); UI.update(true);
     if (s.deathPending) { const d = s.deathPending; delete s.deathPending; UI.die(d); return; }
-    const due = GAME.dueHistorical(s);
-    if (due) { UI.showEvent(due, "hist"); return; }
+    if (UI.openDay()) return;
     LOOP.setSpeed(UI.resumeSpeed || 1);
   },
 
@@ -707,7 +755,7 @@ const UI = {
    BOUCLE DE TEMPS — une semaine toutes les 6 secondes à x1 (≈ 5 min par an)
    ===================================================================== */
 const LOOP = {
-  timer: null, ms: { 1: 6000, 2: 3000, 4: 1500 },
+  timer: null, ms: { 1: 1100, 2: 550, 4: 260 },
   setSpeed(n){
     const s = GAME.s; if (!s) return;
     if (s.dead) n = 0;
@@ -727,25 +775,35 @@ const LOOP = {
   },
   step(){
     const s = GAME.s; if (!s || s.dead || UI.modalOpen || s.speed <= 0) return;
-    const ch = GAME.ch(s);
+    if (!s.agenda || s.agendaWeek !== s.week) AGENDA.plan(s);
+    s.day = (s.day || 0) + 1;
+    if (s.day >= 7) { LOOP.weekEnd(); return; }
+    UI.update(); UI.save();
+    if (UI.openDay()) return;
+    LOOP.schedule();
+  },
+  weekEnd(){
+    const s = GAME.s; const ch = GAME.ch(s); s.day = 0;
     const { death, fired, arrived, mail } = GAME.tick(s);
     if (fired.length) { AUDIO.sfx("notify"); UI.toast(fired[0].d.title); UI.flagGeneral = true; }
     for (const a of arrived) UI.fetchReply(a.id, ch.mailDays(s, a.id) || 3);
     if (mail.length) { AUDIO.sfx("notify"); UI.toast(`Lettre de ${GAME.relDef(s, mail[0].id).name}`); }
     UI.update(); UI.save();
     if (death) { UI.die(death); return; }
+    const forced = []; let hold = false;
     const due = GAME.dueHistorical(s);
-    if (due) { UI.showEvent(due, "hist"); return; }
-    if (ch.week) { const w = ch.week(s); UI.update(); if (w && w.hold) return; if (w && w.event) { UI.showEvent(w.event, "saison"); return; } if (w && w.match) { UI.playMatch(w.match); return; } }
+    if (due) forced.push({ kind: "hist", icon: "★", title: due.title, evId: due.id, pref: 1 + Math.floor(Math.random() * 3) });
+    if (ch.week) { const w = ch.week(s); if (w && w.hold) hold = true; else if (w && w.event) forced.push({ kind: "saison", icon: "◆", title: w.event.title, ev: w.event, pref: 0 }); else if (w && w.match) forced.push({ kind: "match", icon: "◎", title: w.match.title, m: w.match, pref: AGENDA.dayOfWd(s, 6) }); }
+    AGENDA.plan(s, forced); UI.update(true); UI.save();
+    if (AI.usable()) AI.prefetch(s);
+    if (hold) return;
     const mt = ch.meet ? ch.meet(s) : null;
     if (mt) { UI.fieldBattle(mt); return; }
     if (--s.nextMailIn <= 0) { s.nextMailIn = 5 + Math.floor(Math.random() * 5); UI.mailTurn(); }
     const off = ch.enemyMove ? ch.enemyMove(s) : null;
     if (off) { UI.showEvent(off, "guerre"); return; }
     if (--s.nextRivalIn <= 0) { s.nextRivalIn = 10 + Math.floor(Math.random() * 5); UI.rivalsTurn(); }
-    s.nextRandomIn--;
-    if (s.nextRandomIn <= 3) AI.prefetch(s);
-    if (s.nextRandomIn <= 0) { s.nextRandomIn = 13 + Math.floor(Math.random() * 5); if (s.speed > 0) UI.resumeSpeed = s.speed; UI.randomEvent(); return; }
+    if (UI.openDay()) return;
     LOOP.schedule();
   }
 };
@@ -756,7 +814,6 @@ document.addEventListener("keydown", e => {
   if (e.target.closest("input,textarea,select")) return;
   if (e.code === "Space") { e.preventDefault(); LOOP.setSpeed(s.speed > 0 ? 0 : (UI.resumeSpeed || 1)); }
   else if (e.key === "1") LOOP.setSpeed(1); else if (e.key === "2") LOOP.setSpeed(2); else if (e.key === "3") LOOP.setSpeed(4);
-  else if (e.key === "a" || e.key === "A") { e.preventDefault(); UI.actionModal(); }
 });
 
 UI.title();

@@ -67,6 +67,27 @@
 .theme-magie .st-home{fill:#f0c35a} .theme-magie .st-allie{fill:#6f86d6} .theme-magie .st-vassal{fill:#3b4480} .theme-magie .st-paix{fill:#23274a} .theme-magie .st-guerre{fill:#7a3050}
 .theme-magie .map-legend .st-home{background:#f0c35a} .theme-magie .map-legend .st-allie{background:#6f86d6} .theme-magie .map-legend .st-vassal{background:#3b4480} .theme-magie .map-legend .st-paix{background:#23274a} .theme-magie .map-legend .st-guerre{background:#7a3050}
 .theme-magie .pin circle{fill:#f0c35a} .theme-magie .pin text{fill:#231a04} .theme-magie .bub.me{background:#3b4480}
+/* Agenda de la semaine */
+.cal{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px;margin-top:8px}
+.cal .cd{border:1px solid var(--line);border-radius:10px;background:var(--panel);padding:5px 6px 6px;display:flex;flex-direction:column;gap:4px;min-height:62px;min-width:0}
+.cal .cd.past{opacity:.55}
+.cal .cd.today{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent);background:var(--panel2)}
+.cal .cw{font-family:var(--f-ui);font-size:.72rem;color:var(--muted);letter-spacing:.04em;text-transform:uppercase}
+.cal .cw b{color:var(--ink);font-size:.86rem}
+.cal .rv{display:flex;align-items:center;gap:5px;min-height:30px;width:100%;text-align:left;border:1px solid var(--line);border-radius:7px;background:var(--bg2);padding:3px 6px;font-family:var(--f-ui);font-size:.74rem;line-height:1.15;color:var(--ink)}
+.cal .rv .tt{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.cal .rv .ic{flex:none;color:var(--accent);font-size:.85rem}
+.cal .rv.k-hist,.cal .rv.k-match{border-color:var(--accent)}
+.cal .rv.done{opacity:.55}
+.cal .rv.done .ic{color:var(--good)}
+.cal-next{display:none;font-family:var(--f-ui);font-size:.8rem;color:var(--muted);margin-top:4px}
+.cal-next b{color:var(--accent)}
+.rdv-extra{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end}
+.rdv-extra .btn{min-height:44px}
+@media (max-width:760px){
+  .cal{gap:3px}.cal .cd{padding:4px 3px;min-height:52px;align-items:center}.cal .cw{font-size:.62rem;text-align:center}
+  .cal .rv{justify-content:center;padding:2px;min-height:26px}.cal .rv .tt{display:none}.cal-next{display:block}
+}
 html,body{height:100%}
 body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.5;
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));}
@@ -3901,6 +3922,7 @@ H.map = { title: "Le château et le monde magique", viewBox: "125 95 800 430", r
   statusLabel: { home: "Vous êtes ici", allie: "Lieu sûr", vassal: "Lieu connu", guerre: "Lieu dangereux", paix: "Lieu inconnu" },
   status(s, id){ if (H.where(s) === id) return "home"; if (id === "foret" || (id === "ministere" && s.stats.menace >= 60)) return "guerre"; if (id === "refuge" && s.rel.molly !== undefined && GAME.relKnown(s, "molly")) return "allie"; if (id === "chateau" && s.stats.menace < 80) return "allie"; if ((s.lieux || {})[id]) return "vassal"; return ["chateau", "ville", "maison", "terrain", "lac"].includes(id) ? "vassal" : "paix"; },
   markers: s => [{ id: "moi", region: H.where(s), moving: false, label: "★", title: "Vous" }] };
+H.atSchool = atSchool; H.yearOf = yearOf;
 H.where = s => s.flags.hunt && !s.flags.victoire ? "foret" : s.rank === "auror" ? "ministere" : s.rank === "adulte" ? "ville" : atSchool(s) ? "chateau" : s.rank === "eleve" ? (parseD(s.date).m === 8 && GAME.relKnown(s, "molly") ? "refuge" : "maison") : "ville";
 H.regionName = id => id === "hibou" ? "par hibou" : (H.map.regions.find(r => r.id === id) || { name: id }).name;
 H.mapInfo = (s, id) => { const st = H.map.status(s, id); const txt = { chateau: "Salles de classe, dortoirs, bibliothèque, passages secrets.", foret: "Interdite aux élèves. On y trouve ce qu’on ne cherchait pas.", lac: "Profond, froid, habité.", terrain: "Trois anneaux à chaque bout. Votre endroit préféré.", village: "Le seul village entièrement sorcier du pays ; sorties autorisées à partir de la troisième année.", ville: "La rue marchande des sorciers, la banque, la gare.", maison: "Une maison parfaitement ordinaire, où vous n’êtes pas le bienvenu.", refuge: "Une maison de travers, pleine de monde et de bruit.", ministere: "Sous Londres. On y entre par une cabine téléphonique." }[id];
@@ -4086,9 +4108,244 @@ H.autoTest = s => { if (!s.learning && atSchool(s)) { const sp = H.spells.find(x
 <script>
 "use strict";
 /* =====================================================================
+   AGENDA — les rendez-vous de chaque personnage.
+   recurring : rendez-vous fixes (jour de la semaine wd : 0 = dimanche),
+               tous les « every » semaines, avec des variantes de contenu.
+   rdv       : banque de rendez-vous ponctuels.
+   paroleRdv : intitulé des prises de parole quand elles tombent à l’agenda.
+   Effets volontairement modestes : il y a 3 ou 4 rendez-vous par semaine.
+   Personnes réelles : faits et contextes publics, aucune citation inventée.
+   ===================================================================== */
+(function(){
+const C = (t, res, fx) => ({ t, res, fx });
+const V = (title, text, choices, x) => ({ title, text, choices, ...(x || {}) });
+const alive = (s, id) => GAME.relAlive(s, id);
+const yr = s => parseD(s.date).y;
+
+/* =========================== NAPOLÉON =========================== */
+{
+  const N = CHARACTERS.napoleon; const pw = s => GAME.power(s);
+  const exile = s => ["elbe", "exilam", "prisonnier"].includes(s.rank);
+  N.recurring = [
+    { id: "conseil", title: "Conseil d’État", icon: "⚖", wd: 3, every: 1, cond: s => pw(s) >= 2 && !exile(s), people: ["cambaceres"], scene: "palais", variants: [
+      V("le divorce dans le Code civil", "Les conseillers débattent de l’article sur le divorce. Les juristes du Midi veulent le restreindre ; d’autres défendent le divorce par consentement mutuel, que la Révolution avait permis.", [C("Garder le consentement mutuel, encadré", "L’article passe, avec des conditions strictes.", { s: { loyaute: 1 }, r: { pie7: -2 } }), C("Le restreindre aux fautes graves", "Les catholiques applaudissent ; les anciens révolutionnaires grincent.", { s: { popularite: 1 }, r: { pie7: 3, fouche: -2 } })]),
+      V("le choix d’un préfet", "Le département de la Sarthe attend son préfet. On vous présente un ancien émigré très compétent et un jacobin rallié, fidèle mais médiocre.", [C("Nommer le plus compétent", "L’administration du département s’améliore vite.", { s: { tresor: 3, loyaute: -1 } }), C("Nommer le plus fidèle", "Le département est tenu, sans éclat.", { s: { loyaute: 2, complot: -1 } })]),
+      V("les remplaçants de la conscription", "Les familles aisées paient des remplaçants pour que leurs fils échappent au service. Les campagnes trouvent cela injuste.", [C("Maintenir le remplacement", "Les notables vous en savent gré.", { s: { loyaute: 2, popularite: -1 } }), C("Le limiter et l’encadrer", "Les campagnes approuvent ; les salons protestent.", { s: { popularite: 2, loyaute: -1, armee: 2 } })]),
+      V("la création de lycées", "Fourcroy présente un plan de lycées d’État : uniformes, tambours, latin et mathématiques. Il faudra payer les professeurs.", [C("Financer quarante lycées", "Le pays aura ses cadres dans quinze ans.", { s: { tresor: -6, popularite: 1 }, c: { reforms: 1 } }), C("Commencer par dix", "Prudent, et déjà coûteux.", { s: { tresor: -2 } })]),
+      V("le prix du pain à Paris", "La récolte est médiocre. Le préfet de police craint une hausse du pain dans les faubourgs au printemps.", [C("Acheter du grain pour les greniers publics", "Le prix tiendra ; le Trésor en souffre.", { s: { tresor: -8, popularite: 3 } }), C("Laisser faire le marché", "Les boulangers augmentent leurs prix.", { s: { popularite: -3, tresor: 1 } })]),
+      V("les routes des Alpes", "Les ingénieurs proposent d’achever la route du Simplon pour faire passer l’artillerie vers l’Italie en toute saison.", [C("Accélérer les travaux", "Des milliers d’ouvriers sont envoyés dans la montagne.", { s: { tresor: -5, armee: 1 } }), C("Remettre à l’an prochain", "Les ingénieurs rangent leurs plans.", { s: { tresor: 1 } })]),
+      V("la Légion d’honneur", "Faut-il décorer aussi des savants, des artistes et des industriels, ou réserver la croix aux soldats ?", [C("L’ouvrir aux civils", "Les savants et les manufacturiers sont flattés.", { s: { loyaute: 2 }, r: { cambaceres: 2 } }), C("La garder militaire", "L’armée apprécie ; les civils se sentent oubliés.", { s: { moral: 2, loyaute: -1 } })]) ] },
+    { id: "etatmajor", title: "Rapport de l’état-major", icon: "⚑", wd: 2, every: 1, cond: s => (pw(s) === 1 || (s.flags.atWar && s.week % 2 === 1)) && !exile(s) && alive(s, "berthier"), people: ["berthier"], scene: "camp", variants: [
+      V("les souliers manquent", "Berthier vous apprend qu’un tiers de la troupe marche pieds nus. Les fournisseurs promettent des souliers dans un mois.", [C("Réquisitionner les cordonniers des villes voisines", "Les souliers arrivent en dix jours ; les habitants protestent.", { s: { moral: 3, popularite: -1 } }), C("Payer les fournisseurs d’avance", "Ils livrent plus vite, à prix d’or.", { s: { tresor: -4, moral: 2 } })]),
+      V("la solde en retard", "La solde a deux mois de retard. Des officiers parlent de prendre eux-mêmes ce qu’on leur doit.", [C("Payer sur les contributions de guerre", "Les soldats sont payés en monnaie sonnante.", { s: { moral: 4, tresor: -3 } }), C("Promettre la solde après la prochaine victoire", "On vous croit, pour l’instant.", { s: { moral: -2 } })]),
+      V("des pillages", "Des villages ont été pillés par des traînards. Les habitants se plaignent auprès de vos généraux.", [C("Faire fusiller les meneurs pour l’exemple", "La discipline revient, dans la crainte.", { s: { moral: -2, popularite: 1, coalition: -1 } }), C("Fermer les yeux", "La troupe est contente ; le pays vous hait.", { s: { moral: 2, coalition: 2 } })]),
+      V("un espion capturé", "Un colporteur a été pris avec des croquis de vos positions. Il propose de renseigner sur l’ennemi en échange de sa vie.", [C("L’utiliser comme agent double", "Ses renseignements se révèlent exacts.", { s: { armee: 1, moral: 1 } }), C("Le juger", "Le conseil de guerre est rapide.", { s: { moral: 1 } })]),
+      V("des renforts", "Une demi-brigade de conscrits arrive, mal instruite. Berthier propose de la garder en arrière deux semaines pour l’exercer.", [C("Les instruire d’abord", "Ils seront utiles plus tard.", { s: { armee: 2, fatigue: -1 } }), C("Les amalgamer tout de suite aux vétérans", "Ils apprennent au feu.", { s: { armee: 3, moral: -1 } })]) ] },
+    { id: "audience", title: "Audience diplomatique", icon: "✉", wd: 4, every: 2, cond: s => pw(s) >= 2 && !exile(s), people: ["talleyrand"], scene: "palais", variants: [
+      V("l’ambassadeur de Russie", "L’ambassadeur du tsar se plaint des agents français à Constantinople et des mouvements de troupes en Allemagne.", [C("Le rassurer et faire un geste", "Le ton se détend à Saint-Pétersbourg.", { s: { coalition: -2 }, r: { alexandre: 3 } }), C("Lui rappeler qui gagne les batailles", "L’ambassadeur repart vexé.", { s: { coalition: 2 }, r: { alexandre: -3 } })]),
+      V("l’envoyé de Vienne", "L’envoyé autrichien sonde vos intentions sur l’Italie et propose un échange de territoires.", [C("Écouter et ne rien promettre", "Talleyrand apprécie la prudence.", { r: { talleyrand: 2, francois: 1 } }), C("Exiger la reconnaissance de vos conquêtes", "L’envoyé transmettra, sans enthousiasme.", { s: { coalition: 2 }, r: { francois: -3 } })]),
+      V("les négociants américains", "Des armateurs des États-Unis se plaignent des saisies de navires par les corsaires français.", [C("Faire libérer leurs navires", "Le commerce reprend un peu.", { s: { tresor: 3, coalition: -1 } }), C("Maintenir les saisies", "Les corsaires restent riches.", { s: { tresor: 1 } })]),
+      V("un nonce du pape", "Le représentant du pape demande la libération de prêtres détenus et le retour de biens d’Église.", [C("Libérer les prêtres, garder les biens", "Un compromis bien reçu par les campagnes.", { s: { popularite: 2 }, r: { pie7: 4 } }), C("Refuser tout", "Les curés de l’Ouest grondent.", { s: { complot: 2 }, r: { pie7: -4 } })]),
+      V("le ministre de Prusse", "Berlin propose une neutralité bienveillante en échange de garanties sur le Hanovre.", [C("Accorder des garanties", "La Prusse reste tranquille.", { s: { coalition: -3 } }), C("Rester évasif", "Berlin s’inquiète et consulte Londres.", { s: { coalition: 2 } })]) ] },
+    { id: "peuple", title: "Parler au peuple", icon: "☼", wd: 0, every: 4, cond: s => pw(s) >= 1 && !exile(s), scene: "paris", variants: [
+      V("visite aux Invalides", "Les vieux soldats vous attendent dans la cour. Certains ont servi en Égypte avec vous.", [C("Passer des heures avec eux", "Les récits de cette visite font le tour des casernes.", { s: { moral: 3, popularite: 2, fatigue: 2 } }), C("Une visite courte et une distribution d’argent", "Efficace, sans plus.", { s: { tresor: -1, popularite: 1 } })]),
+      V("au marché des Halles", "Vous traversez les Halles sans escorte apparente. Une marchande se plaint du prix du bois de chauffage.", [C("Promettre de faire baisser les octrois", "On répète votre promesse dans tout Paris.", { s: { popularite: 3, tresor: -2 } }), C("L’écouter et ne rien promettre", "Elle apprécie qu’on l’ait écoutée.", { s: { popularite: 1 } })]),
+      V("une manufacture de Lyon", "Les canuts vous montrent un nouveau métier à tisser qui économise la main-d’œuvre. Les ouvriers ont peur pour leur emploi.", [C("Encourager l’invention", "La soie lyonnaise gagne en vitesse.", { s: { tresor: 3, popularite: -1 } }), C("Rassurer les ouvriers", "On vous acclame dans les ateliers.", { s: { popularite: 2 } })]),
+      V("le faubourg Saint-Antoine", "Le faubourg qui a fait la Révolution vous observe. Un orateur vous demande du travail pour les ouvriers du bois.", [C("Commander du mobilier pour les palais", "Les ateliers tournent pour l’hiver.", { s: { tresor: -3, popularite: 3 } }), C("Répondre que la prospérité reviendra avec la paix", "Le faubourg reste sceptique.", { s: { popularite: -1 } })]),
+      V("une revue aux Tuileries", "La garde défile dans la cour du Carrousel devant une foule nombreuse.", [C("Descendre de cheval et passer dans les rangs", "Les grenadiers n’oublieront pas.", { s: { moral: 3, loyaute: 1 } }), C("Rester à cheval, majestueux", "Belle image ; la foule est impressionnée.", { s: { popularite: 2 } })]) ] },
+    { id: "memoires", title: "Promenade et dictée", icon: "✒", wd: 3, every: 1, cond: s => exile(s), scene: "mer", variants: [
+      V("la campagne d’Italie", "Vous dictez le récit de vos premières victoires à un secrétaire qui écrit à peine assez vite.", [C("Arranger un peu les faits à votre avantage", "La légende prend forme.", { s: { popularite: 2, stress: -2 } }), C("Rester exact, même sur vos erreurs", "Un texte plus froid, plus solide.", { s: { stress: -1 } })]),
+      V("un visiteur de passage", "Un voyageur anglais demande à vous rencontrer pour écrire un livre sur vous.", [C("Le recevoir longuement", "Il repart conquis.", { s: { popularite: 2, fatigue: 1 } }), C("Refuser", "Il écrira quand même, et moins bien.", { s: { popularite: -1 } })]),
+      V("la surveillance", "Les gardiens veulent vous voir deux fois par jour pour s’assurer de votre présence.", [C("Protester par écrit", "La querelle amuse l’Europe et vous épuise.", { s: { stress: 3, popularite: 1 } }), C("Accepter sans un mot", "La vie s’écoule, plus lente encore.", { s: { stress: -2, sante: -1 } })]),
+      V("le jardin", "Vous avez pris goût au jardinage. Les domestiques creusent sous votre direction.", [C("S’y consacrer chaque matin", "Votre santé s’en ressent, en bien.", { s: { sante: 2, stress: -3 } }), C("Rester à l’intérieur, à lire", "Les journées sont longues.", { s: { stress: 1 } })]) ] }
+  ];
+  N.rdv = [
+    { id: "n-josephine", cond: s => alive(s, "josephine") && !s.family.exSpouses?.includes("josephine") && s.family.spouse === "josephine", title: "Dîner avec Joséphine", icon: "♥", people: ["josephine"], scene: "palais", text: "Joséphine a commandé un dîner intime à la Malmaison. Elle voudrait vous parler de ses dettes chez les marchands de mode, et de vous.", choices: [C("Payer ses dettes sans reproche", "Elle est touchée.", { s: { tresor: -2, stress: -2 }, r: { josephine: 5 } }), C("Payer, en la sermonnant", "Le dîner se termine froidement.", { s: { tresor: -2 }, r: { josephine: -3 } })] },
+    { id: "n-letizia", cond: s => alive(s, "letizia"), title: "Visite de votre mère", icon: "✉", people: ["letizia"], scene: "palais", text: "Madame Mère vous reproche de trop dépenser et de mal établir vos frères. Elle met de côté tout ce qu’on lui donne, au cas où.", choices: [C("L’écouter avec respect", "Elle repart un peu rassurée.", { s: { stress: -1 }, r: { letizia: 4 } }), C("Lui rappeler qui gouverne", "Elle se tait. Elle n’en pense pas moins.", { r: { letizia: -4 } })] },
+    { id: "n-fouche", cond: s => alive(s, "fouche") && pw(s) >= 2 && !exile(s), title: "Rapport de police", icon: "◉", people: ["fouche"], scene: "palais", text: "Fouché vous apporte ses bulletins : un salon royaliste, un général bavard, des pamphlets imprimés à Londres.", choices: [C("Faire surveiller le général", "Fouché sourit : c’est déjà fait.", { s: { complot: -2 }, r: { fouche: 2 } }), C("Faire fermer le salon", "Paris parle de tyrannie.", { s: { complot: -3, popularite: -1 } }), C("Ne rien faire : se méfier de Fouché lui-même", "Fouché le remarque.", { s: { complot: 1 }, r: { fouche: -3 } })] },
+    { id: "n-peintre", cond: s => pw(s) >= 2 && !exile(s), title: "Séance de pose", icon: "✦", people: [], scene: "palais", text: "Le peintre David vous attend pour un grand tableau. Il réclame trois séances ; vous n’avez pas trois heures.", choices: [C("Accorder une vraie séance", "Le tableau sera magnifique.", { s: { popularite: 2, fatigue: 1 } }), C("Lui dire de peindre de mémoire", "Il s’exécute, un peu vexé.", { s: { popularite: 1 } })] },
+    { id: "n-institut", cond: s => pw(s) >= 1 && !exile(s), title: "Séance de l’Institut", icon: "∑", people: [], scene: "paris", text: "Vous êtes membre de la classe des sciences. Un chimiste présente des travaux sur le sucre de betterave, qui pourraient remplacer le sucre des colonies.", choices: [C("Financer ses essais", "Des fabriques ouvriront dans le Nord.", { s: { tresor: -2 }, c: { reforms: 1 } }), C("Le féliciter et passer", "Les académiciens apprécient votre présence.", { s: { popularite: 1 } })] },
+    { id: "n-banquier", cond: s => pw(s) >= 2 && !exile(s), title: "Un banquier demande audience", icon: "₣", people: [], scene: "palais", text: "Un munitionnaire propose d’avancer des fonds au Trésor, à des taux élevés, contre les contrats de fourniture de l’armée.", choices: [C("Accepter l’avance", "Le Trésor respire ; le banquier s’enrichit.", { s: { tresor: 12, complot: 1 } }), C("Refuser : se méfier des financiers", "Le Trésor reste tendu.", { s: { loyaute: 1 } })] },
+    { id: "n-marechaux", cond: s => s.rank === "empereur" && alive(s, "ney") && alive(s, "davout"), title: "Querelle de maréchaux", icon: "⚔", people: ["ney", "davout"], scene: "camp", text: "Ney et Davout se disputent le mérite d’une manœuvre. L’affaire fait jaser à l’état-major.", choices: [C("Donner raison à Davout", "Ney boude.", { r: { davout: 4, ney: -4 } }), C("Donner raison à Ney", "Davout se renferme.", { r: { ney: 4, davout: -4 } }), C("Les réconcilier à votre table", "Un dîner tendu, mais utile.", { s: { loyaute: 1, fatigue: 1 }, r: { ney: 1, davout: 1 } })] },
+    { id: "n-chasse", cond: s => s.rank === "empereur", title: "Chasse à Fontainebleau", icon: "♣", people: ["berthier"], scene: "palais", text: "La cour suit la chasse en forêt de Fontainebleau. Vous détestez perdre votre temps, mais les courtisans y tiennent.", choices: [C("Chasser toute la journée", "Vous rentrez détendu.", { s: { stress: -4, fatigue: 1 } }), C("Écourter et travailler dans la voiture", "La cour est déçue.", { s: { tresor: 1, stress: 1 } })] },
+    { id: "n-frere", cond: s => pw(s) >= 2 && !exile(s) && (alive(s, "lucien") || alive(s, "jerome")), title: "Un frère en difficulté", icon: "♦", people: ["jerome", "lucien"], scene: "palais", text: "Un de vos frères a fait des dettes et un mariage qui vous déplaît. Il vient plaider sa cause.", choices: [C("Payer et pardonner", "La famille est soulagée.", { s: { tresor: -3 }, r: { letizia: 3, jerome: 3 } }), C("Exiger qu’il rompe", "Il refuse ; la brouille s’installe.", { r: { lucien: -4, jerome: -3 } })] },
+    { id: "n-grenadier", cond: s => pw(s) >= 1 && !exile(s), title: "Un vieux grenadier", icon: "☼", people: [], scene: "camp", text: "Un grenadier de la première campagne d’Italie demande à vous voir : il a perdu sa pension à cause d’une erreur de bureau.", choices: [C("Régler l’affaire sur-le-champ", "L’histoire fait le tour de l’armée.", { s: { moral: 2 } }), C("Transmettre au ministère", "Il attendra encore.", { s: { moral: -1 } })] }
+  ];
+  N.paroleRdv = { proclamation: { title: "Proclamation à rédiger", text: "Le Moniteur attend une proclamation de votre main pour demain." }, discours: { title: "Discours aux troupes", text: "La troupe est rassemblée ; elle attend que vous lui parliez." }, communique: { title: "Communiqué au Moniteur", text: "Le journal officiel réserve sa première page à votre communiqué." }, rumeur: { title: "Une rumeur à lancer", text: "Fouché propose de faire circuler un bruit dans les salons. À vous de choisir lequel." }, article: { title: "Un article à écrire", text: "Un journal attend un article non signé, de votre main." }, ordre: { title: "Signature des décrets", text: "Les secrétaires apportent la liasse des décrets de la semaine." } };
+}
+
+/* =========================== RONALDO =========================== */
+{
+  const R = CHARACTERS.ronaldo; const pro = s => s.rank === "joueur";
+  R.recurring = [
+    { id: "entrainement", title: "Entraînement collectif", icon: "◎", wd: 2, every: 1, cond: pro, scene: "stade", variants: [
+      V("coups francs", "La séance est finie. Il reste une heure de lumière et un sac de ballons.", [C("Rester tirer cinquante coups francs", "Le geste devient plus sûr.", { s: { niveau: 1, fatigue: 3 } }), C("Rentrer récupérer", "Les jambes vous remercient.", { s: { fatigue: -3 } })]),
+      V("séance vidéo", "Le staff montre vos replis défensifs du dernier match. Ce n’est pas flatteur.", [C("Accepter la critique et travailler le pressing", "L’entraîneur apprécie.", { s: { coach: 3, fatigue: 1 } }), C("Rappeler que votre rôle est de marquer", "Le vestiaire a entendu.", { s: { coach: -2, vestiaire: -1 } })]),
+      V("un jeune qui vous défie", "Un jeune du centre de formation vous provoque en un-contre-un devant tout le groupe.", [C("Le battre, puis lui donner des conseils", "Il vous suivrait partout.", { s: { vestiaire: 3 } }), C("Ignorer la provocation", "Le groupe rit un peu.", { s: { vestiaire: -1 } })]),
+      V("opposition tendue", "Un défenseur vous tacle durement à l’entraînement. Vous avez mal à la cheville.", [C("Continuer comme si de rien n’était", "Vous terminez en serrant les dents.", { s: { forme: -2, vestiaire: 2 } }), C("Sortir et voir le médecin", "Rien de grave, par précaution.", { s: { forme: 1, coach: -1 } })]),
+      V("travail de la tête", "Le préparateur propose un atelier de jeu de tête et de détente verticale.", [C("S’y mettre à fond", "Le timing s’affine.", { s: { niveau: 1, fatigue: 2 } }), C("Faire le minimum", "Séance tranquille.", { s: { fatigue: -1 } })]),
+      V("récupération", "Bain froid, massage, cryothérapie : le staff médical insiste sur la récupération.", [C("Suivre tout le protocole", "Vous vous sentez neuf.", { s: { fatigue: -5, forme: 1 } }), C("Le sauter pour une séance de musculation", "Plus fort, plus fatigué.", { s: { fatigue: 2, niveau: 1 } })]) ] },
+    { id: "agent", title: "Rendez-vous avec votre agent", icon: "€", wd: 4, every: 4, cond: s => s.rank !== "retraite" && alive(s, "mendes"), people: ["mendes"], scene: "bureau", variants: [
+      V("une marque de montres", "Une marque de montres propose un contrat d’image sur trois ans.", [C("Signer", "Un joli complément.", { s: { fortune: 3, fatigue: 1 }, r: { mendes: 2 } }), C("Refuser : rester concentré", "Mendes respecte votre choix.", { s: { forme: 1 } })]),
+      V("une rumeur de transfert", "La presse annonce votre départ. Le club s’agace. Mendes demande ce qu’il doit répondre.", [C("Démentir fermement", "Le club apprécie.", { s: { coach: 1, popularite: 1 } }), C("Laisser planer le doute", "Votre valeur grimpe, l’ambiance se tend.", { s: { valeur: 3, vestiaire: -2 } })]),
+      V("vos investissements", "Mendes vous présente un projet d’hôtels à votre nom.", [C("Investir", "Le projet est lancé.", { s: { fortune: -5 }, f: { hotels: true } }), C("Attendre", "L’argent reste où il est.", {})]),
+      V("une demande caritative", "Une association demande que vous financiez un service de pédiatrie.", [C("Faire un don important", "L’hôpital donnera votre nom à une aile.", { s: { fortune: -2, popularite: 3 } }), C("Faire un don discret", "Personne ne le saura.", { s: { fortune: -1 } })]) ] },
+    { id: "famille", title: "Déjeuner en famille", icon: "♥", wd: 0, every: 4, cond: s => alive(s, "dolores"), people: ["dolores", "katia"], scene: "vestiaire", variants: [
+      V("à Madère", "Votre mère a préparé votre plat préféré. Toute la famille est là et parle fort.", [C("Rester tout l’après-midi", "Vous repartez apaisé.", { s: { stress: -5 }, r: { dolores: 4 } }), C("Repartir tôt pour l’entraînement", "Votre mère soupire.", { s: { fatigue: -1 }, r: { dolores: -2 } })]),
+      V("une inquiétude", "Votre mère s’inquiète de votre rythme de vie et de la pression des médias.", [C("La rassurer", "Elle sourit enfin.", { s: { stress: -3 }, r: { dolores: 3 } }), C("Changer de sujet", "Le repas continue.", { s: { stress: 1 } })]),
+      V("les enfants", "Les enfants veulent jouer au football dans le jardin avec vous.", [C("Jouer avec eux jusqu’au soir", "Le meilleur moment de la semaine.", { s: { stress: -4, fatigue: 1 } }), C("Les regarder jouer", "Ils réclament leur père.", { s: { stress: -1 } })]) ] },
+    { id: "affaires", title: "Réunion de vos sociétés", icon: "€", wd: 2, every: 2, cond: s => s.rank === "retraite", scene: "bureau", variants: [
+      V("les hôtels", "Les directeurs présentent les résultats de vos hôtels.", [C("Ouvrir un nouvel établissement", "Un chantier de plus.", { s: { fortune: 4, stress: 2 } }), C("Consolider", "Des comptes solides.", { s: { stress: -1 } })]),
+      V("une académie", "Un projet d’académie de football pour enfants à votre nom est sur la table.", [C("La lancer", "Des centaines d’enfants s’inscrivent.", { s: { fortune: -2, popularite: 3 } }), C("Plus tard", "Le dossier attendra.", {})]) ] }
+  ];
+  R.rdv = [
+    { id: "r-pub", cond: s => s.rank !== "retraite", title: "Tournage publicitaire", icon: "▶", people: [], scene: "plateau", text: "Un tournage pour un équipementier dure toute la journée. Le réalisateur veut une scène de plus.", choices: [C("Accepter la scène", "Le spot sera superbe.", { s: { fortune: 2, fatigue: 3 } }), C("Partir à l’heure prévue", "Le réalisateur s’en accommodera.", { s: { fatigue: 1 } })] },
+    { id: "r-hopital", cond: s => true, title: "Visite à l’hôpital des enfants", icon: "♥", people: [], scene: "vestiaire", text: "Un service de pédiatrie vous accueille. Un enfant malade porte votre maillot.", choices: [C("Rester longtemps, sans caméras", "Les soignants n’oublieront pas.", { s: { stress: -2, popularite: 1 } }), C("Faire venir les photographes", "L’image fait le tour du monde.", { s: { popularite: 3, abonnes: 1 } })] },
+    { id: "r-fan", cond: pro, title: "Un supporter à la sortie de l’entraînement", icon: "☺", people: [], scene: "stade", text: "Un adolescent a fait des heures de route pour un autographe. La sécurité veut l’écarter.", choices: [C("Arrêter la voiture", "La vidéo devient virale.", { s: { popularite: 2, abonnes: 1 } }), C("Saluer de la main et partir", "Il est déçu.", { s: { popularite: -1 } })] },
+    { id: "r-medecin", cond: pro, title: "Bilan médical", icon: "✚", people: [], scene: "vestiaire", text: "Les médecins relèvent une petite inflammation au genou. Ils conseillent de lever le pied une semaine.", choices: [C("Écouter les médecins", "Le genou dégonfle.", { s: { forme: 2, fatigue: -3, coach: -1 } }), C("Jouer quand même", "Le genou tient, pour l’instant.", { s: { forme: -2, coach: 1 } })] },
+    { id: "r-recrue", cond: pro, title: "Une nouvelle recrue", icon: "◎", people: [], scene: "vestiaire", text: "Un attaquant vient d’arriver au club. La presse parle déjà de concurrence avec vous.", choices: [C("L’inviter à dîner et l’aider à s’installer", "Il vous sera reconnaissant.", { s: { vestiaire: 3 } }), C("Lui montrer qui est le patron à l’entraînement", "Le message est passé.", { s: { niveau: 1, vestiaire: -2 } })] },
+    { id: "r-shooting", cond: s => s.rank !== "retraite", title: "Séance photo pour votre marque", icon: "✦", people: [], scene: "plateau", text: "Votre marque de vêtements prépare sa collection. Le photographe a prévu six tenues.", choices: [C("Tout faire", "La collection sera prête à temps.", { s: { fortune: 2, fatigue: 2, abonnes: 1 } }), C("Réduire à deux tenues", "On fera avec.", { s: { fortune: 1 } })] },
+    { id: "r-president", cond: pro, title: "Rendez-vous avec le président du club", icon: "♛", people: [], scene: "bureau", text: "Le président veut parler de l’avenir du club et de votre rôle dans le vestiaire.", choices: [C("Demander des renforts au mercato", "Il prend note.", { s: { coach: -1, vestiaire: 2 } }), C("Assurer qu’il peut compter sur vous", "Il repart satisfait.", { s: { coach: 1 } })] },
+    { id: "r-nutri", cond: pro, title: "Le nutritionniste", icon: "✚", people: [], scene: "vestiaire", text: "Le nutritionniste propose un régime plus strict pour prolonger votre carrière.", choices: [C("Le suivre à la lettre", "Vous perdez un kilo de masse grasse.", { s: { forme: 2, stress: 1 } }), C("Garder vos habitudes", "Rien ne change.", {})] },
+    { id: "r-gala", cond: s => true, title: "Gala de charité", icon: "★", people: [], scene: "plateau", text: "Un gala réunit des sportifs et des artistes. On vous propose de mettre aux enchères un maillot dédicacé.", choices: [C("Mettre aussi vos crampons d’une finale", "Les enchères s’envolent.", { s: { popularite: 2, fatigue: 1 } }), C("Le maillot suffit", "Belle soirée.", { s: { popularite: 1 } })] }
+  ];
+  R.paroleRdv = { post: { title: "Publication sur les réseaux", text: "Votre équipe digitale attend votre message de la semaine." }, interview: { title: "Interview prévue", text: "Un journaliste sportif a obtenu un entretien d’une demi-heure." }, conference: { title: "Conférence de presse d’avant-match", text: "La salle de presse est pleine ; on vous attend." }, communique: { title: "Communiqué à valider", text: "Votre entourage a préparé un communiqué ; à vous de dire ce qu’il contient." }, live: { title: "Live avec les fans", text: "Vous aviez promis un direct à vos abonnés cette semaine." }, rumeur: { title: "Un journaliste ami appelle", text: "Il propose de publier une information « de source proche du joueur »." } };
+}
+
+/* =========================== TRUMP =========================== */
+{
+  const T = CHARACTERS.trump; const pres = s => s.rank === "president";
+  T.recurring = [
+    { id: "cabinet", title: "Réunion du cabinet", icon: "⚖", wd: 3, every: 2, cond: pres, scene: "bureau", variants: [
+      V("les droits de douane", "Le secrétaire au Commerce présente un projet de droits de douane sur l’acier et l’aluminium. Les industriels du Midwest y sont favorables ; les constructeurs automobiles s’inquiètent.", [C("Appliquer les droits de douane", "Les aciéries applaudissent ; les marchés baissent un peu.", { s: { base: 2, bourse: -80, international: -2 } }), C("Les annoncer, puis négocier des exemptions", "Un compromis que chacun interprète à sa façon.", { s: { base: 1, international: -1 } })]),
+      V("la frontière sud", "Le département de la Sécurité intérieure signale une hausse des arrivées à la frontière et demande des moyens.", [C("Demander des crédits au Congrès", "Les débats s’annoncent longs.", { s: { base: 2, congres: -1 } }), C("Réaffecter des fonds par voie exécutive", "Des recours sont annoncés.", { s: { base: 3, justice: 2 } })]),
+      V("les infrastructures", "Le plan routes, ponts et aéroports attend toujours. Les démocrates seraient prêts à discuter.", [C("Négocier un accord bipartisan", "Les discussions avancent lentement.", { s: { approbation: 1, congres: 1, base: -1 } }), C("Garder le sujet pour la campagne", "Le dossier reste sur la table.", {})]),
+      V("la réglementation", "Les agences proposent de supprimer des centaines de règles jugées coûteuses pour les entreprises.", [C("Approuver la liste", "Les milieux d’affaires saluent la décision.", { s: { economie: 1, bourse: 60, approbation: -1 } }), C("Ne supprimer que les plus contestées", "Moins de bruit, moins d’effet.", { s: { economie: 1 } })]),
+      V("les troupes à l’étranger", "Le secrétaire à la Défense recommande de maintenir des troupes au Moyen-Orient. Vous avez promis de les ramener.", [C("Annoncer un retrait progressif", "Les alliés s’inquiètent ; votre base approuve.", { s: { base: 2, international: -2 } }), C("Suivre l’avis militaire", "Le Pentagone est rassuré.", { s: { international: 1, base: -1 } })]),
+      V("le prix des médicaments", "Le secrétaire à la Santé propose d’aligner certains prix sur ceux des pays étrangers.", [C("Signer un décret", "Les laboratoires annoncent des recours.", { s: { approbation: 2, bourse: -40, justice: 1 } }), C("Négocier avec les laboratoires", "Des baisses modestes sont annoncées.", { s: { approbation: 1 } })]) ] },
+    { id: "securite", title: "Point de sécurité nationale", icon: "◉", wd: 1, every: 2, phase: 1, cond: pres, scene: "bureau", variants: [
+      V("un essai de missile", "Le renseignement signale un nouvel essai de missile en Corée du Nord.", [C("Durcir les sanctions", "Pyongyang dénonce les mesures.", { s: { international: 1 }, r: { kim: -3 } }), C("Proposer une rencontre", "Les alliés asiatiques sont partagés.", { s: { international: -1 }, r: { kim: 3 } })]),
+      V("une cyberattaque", "Une attaque informatique a visé un réseau électrique régional.", [C("Annoncer des représailles", "Le message est envoyé.", { s: { base: 1, international: -1 } }), C("Renforcer discrètement les défenses", "Peu de bruit, du travail utile.", { s: { approbation: 1 } })]),
+      V("l’OTAN", "Le Pentagone rappelle que plusieurs alliés ne consacrent pas 2 % de leur PIB à la défense.", [C("Exiger publiquement qu’ils paient", "Les capitales européennes protestent, puis certaines augmentent leurs budgets.", { s: { base: 2, international: -2 }, r: { merkel: -3, macron: -2 } }), C("Le dire en privé", "Le sommet se passe sans éclat.", { s: { international: 1 } })]),
+      V("la Chine", "Le renseignement décrit l’avance chinoise dans les télécommunications.", [C("Restreindre les équipementiers chinois", "Pékin dénonce une mesure discriminatoire.", { s: { base: 1, international: -1, bourse: -30 }, r: { xi: -4 } }), C("Ouvrir une négociation commerciale", "Les marchés apprécient.", { s: { bourse: 40 }, r: { xi: 2 } })]) ] },
+    { id: "meeting", title: "Meeting", icon: "★", wd: 6, every: 1, cond: s => s.rank === "candidat", scene: "tribune", variants: [
+      V("dans l’Iowa", "Une salle des fêtes pleine à craquer dans une petite ville agricole.", [C("Parler des agriculteurs et du commerce", "La salle se lève.", { s: { base: 3, fatigue: 2 } }), C("Parler de vos adversaires", "Les caméras adorent.", { s: { base: 2, medias: 2, approbation: -1 } })]),
+      V("en Pennsylvanie", "Un ancien bassin sidérurgique. Les usines fermées se voient depuis le parking.", [C("Promettre le retour de l’industrie", "Les ouvriers applaudissent.", { s: { base: 3, approbation: 1, fatigue: 2 } }), C("Parler de la sécurité", "Le public réagit moins.", { s: { base: 1 } })]),
+      V("en Floride", "Un hangar d’aéroport et une foule venue de tout l’État.", [C("Un long discours improvisé", "Deux heures de show.", { s: { base: 3, fatigue: 3, medias: 1 } }), C("Un discours court et écrit", "Efficace, sans surprise.", { s: { base: 1, approbation: 1 } })]),
+      V("dans le Michigan", "Des syndicalistes sont venus écouter, bras croisés.", [C("Leur parler directement des accords commerciaux", "Certains décroisent les bras.", { s: { base: 2, approbation: 1 } }), C("Ignorer les syndicats", "Le public habituel est content.", { s: { base: 1 } })]) ] },
+    { id: "meetingp", title: "Meeting dans un État clé", icon: "★", wd: 6, every: 4, cond: s => ["president", "ancien"].includes(s.rank), scene: "tribune", variants: [
+      V("pour un candidat au Sénat", "Le parti vous demande de soutenir un candidat en difficulté.", [C("Le soutenir chaleureusement", "Il gagne quelques points.", { s: { congres: 2, fatigue: 2 } }), C("Parler surtout de votre bilan", "La foule est ravie ; le candidat un peu moins.", { s: { base: 2 } })]),
+      V("dans le Wisconsin", "Une foule nombreuse dans un aéroport régional, par un froid glacial.", [C("Rester saluer la foule", "Les images sont fortes.", { s: { base: 3, fatigue: 2 } }), C("Écourter", "Personne ne vous en veut.", { s: { base: 1 } })]),
+      V("en Arizona", "La question de l’immigration domine tout.", [C("En faire le centre du discours", "La base est galvanisée.", { s: { base: 3, approbation: -1 } }), C("Parler aussi d’économie", "Un discours plus large.", { s: { base: 1, approbation: 1 } })]) ] },
+    { id: "orga", title: "Réunion à la Trump Organization", icon: "$", wd: 2, every: 2, cond: s => ["prive", "candidat"].includes(s.rank) && yr(s) < 2017, scene: "bureau", variants: [
+      V("un projet de tour", "Un promoteur étranger propose une licence pour une tour à votre nom.", [C("Signer la licence", "Des revenus sans investissement.", { s: { fortune: .05 } }), C("Refuser pendant la campagne", "Plus prudent.", { s: { justice: -1 } })]),
+      V("les golfs", "Les directeurs des golfs présentent des travaux coûteux.", [C("Les lancer", "Les parcours seront magnifiques.", { s: { fortune: -.03 } }), C("Les reporter", "Rien ne change.", {})]),
+      V("l’émission de télévision", "La chaîne veut une nouvelle saison de votre émission.", [C("Accepter", "Une saison de plus.", { s: { fortune: .02, medias: 2, fatigue: 2 } }), C("Décliner", "La chaîne trouvera un autre animateur.", {})]) ] }
+  ];
+  T.rdv = [
+    { id: "t-pdg", cond: s => s.rank !== "prive", title: "Patrons d’industrie à la Maison-Blanche", icon: "$", people: [], scene: "bureau", text: "Des dirigeants de l’automobile et de l’acier viennent présenter leurs projets d’investissement.", choices: [C("Annoncer leurs investissements avec eux", "Belle cérémonie, chiffres impressionnants.", { s: { economie: 1, approbation: 1 } }), C("Les presser de rapatrier des usines", "Ils promettent d’étudier la question.", { s: { base: 2, bourse: -20 } })] },
+    { id: "t-gouverneur", cond: pres, title: "Appel d’un gouverneur", icon: "☎", people: [], scene: "bureau", text: "Un ouragan a frappé la côte. Le gouverneur, du parti adverse, demande l’aide fédérale.", choices: [C("Déclarer l’état de catastrophe et se rendre sur place", "L’aide arrive vite.", { s: { approbation: 3, fatigue: 2 } }), C("Accorder l’aide sans se déplacer", "L’aide arrive.", { s: { approbation: 1 } })] },
+    { id: "t-congres", cond: pres, title: "Négociation avec les chefs du Congrès", icon: "⚖", people: ["mcconnell", "pelosi", "schumer"], scene: "bureau", text: "Le budget doit être voté avant la fin du mois, sinon l’administration fermera partiellement.", choices: [C("Céder sur quelques points", "Le budget passe.", { s: { congres: 2, base: -1 } }), C("Tenir bon sur vos priorités", "Le bras de fer continue.", { s: { base: 2, congres: -2, economie: -1 } })] },
+    { id: "t-donateurs", cond: s => s.rank !== "prive", title: "Dîner avec des donateurs", icon: "$", people: [], scene: "tribune", text: "Des donateurs du parti se réunissent dans un club privé et attendent un discours.", choices: [C("Rester tard", "Les chèques sont généreux.", { s: { congres: 1, fatigue: 2 } }), C("Passer une heure et repartir", "Ils auraient aimé plus.", {})] },
+    { id: "t-golf", cond: s => alive(s, "mcconnell") && s.rank === "president", title: "Partie de golf avec un sénateur", icon: "⛳", people: [], scene: "tribune", text: "Un sénateur influent vous accompagne sur le parcours. Il veut parler d’un texte qui le concerne.", choices: [C("Lui promettre votre soutien", "Il votera vos textes.", { s: { congres: 2 } }), C("Parler golf, uniquement", "Un bon moment, sans plus.", { s: { stress: -3 } })] },
+    { id: "t-champions", cond: pres, title: "Réception d’une équipe championne", icon: "★", people: [], scene: "bureau", text: "L’équipe championne de la ligue de football américain est attendue à la Maison-Blanche. Certains joueurs ont annoncé qu’ils ne viendraient pas.", choices: [C("Maintenir la réception", "La cérémonie a lieu, avec une partie de l’équipe.", { s: { base: 1, medias: 1 } }), C("Annuler l’invitation", "La polémique dure une semaine.", { s: { base: 2, approbation: -1, medias: 2 } })] },
+    { id: "t-base", cond: pres, title: "Visite d’une base militaire", icon: "⚑", people: [], scene: "tribune", text: "Les soldats d’une base du Texas vous attendent dans un hangar.", choices: [C("Annoncer une hausse de solde", "Les applaudissements sont nourris.", { s: { base: 2, approbation: 1 } }), C("Remercier, sans annonce", "Une visite sobre.", { s: { approbation: 1 } })] },
+    { id: "t-famille", cond: s => alive(s, "melania"), title: "Dîner en famille", icon: "♥", people: ["melania", "ivanka"], scene: "bureau", text: "Un rare dîner sans conseillers. La famille voudrait parler d’autre chose que de politique.", choices: [C("Couper le téléphone", "Une soirée calme.", { s: { stress: -5 }, r: { melania: 3 } }), C("Répondre à quelques appels", "Le dîner est haché.", { s: { stress: -1 } })] },
+    { id: "t-tele", cond: s => true, title: "Passage télévisé", icon: "▶", people: [], scene: "plateau", text: "Une chaîne d’information vous propose un entretien de vingt minutes en direct.", choices: [C("Accepter", "L’entretien fait réagir.", { s: { base: 2, medias: 2 } }), C("Décliner", "Vous gardez le contrôle du calendrier.", {})] },
+    { id: "t-dirigeant", cond: pres, title: "Appel d’un chef d’État", icon: "☎", people: ["macron"], scene: "bureau", text: "Le président français appelle au sujet de l’accord sur le climat et des droits de douane.", choices: [C("Rester ferme sur vos positions", "L’appel se termine poliment, sans accord.", { s: { base: 1 }, r: { macron: -2 } }), C("Chercher un terrain d’entente sur le commerce", "Les équipes se parleront.", { s: { international: 2 }, r: { macron: 3 } })] }
+  ];
+  T.paroleRdv = { post: { title: "Message sur les réseaux", text: "Votre équipe vous rappelle qu’il faut réagir à l’actualité de la semaine." }, discours: { title: "Discours prévu", text: "Une salle vous attend ; le discours n’est pas encore écrit." }, conference: { title: "Conférence de presse", text: "Les journalistes accrédités attendent dans la salle de presse." }, interview: { title: "Interview prévue", text: "Une chaîne d’information a obtenu un entretien." }, communique: { title: "Communiqué officiel", text: "Le service de presse attend votre texte." }, ordre: { title: "Signature d’un ordre", text: "Les conseillers apportent un ordre à signer ; reste à en fixer le contenu." }, rumeur: { title: "Un journaliste demande une confidence", text: "Un journaliste réputé cherche une « source proche de la Maison-Blanche »." } };
+}
+
+/* =========================== MRBEAST =========================== */
+{
+  const B = CHARACTERS.mrbeast; const cr = s => s.rank === "createur";
+  B.recurring = [
+    { id: "brainstorm", title: "Brainstorm de l’équipe", icon: "✦", wd: 1, every: 1, cond: cr, scene: "studio", variants: [
+      V("une idée démesurée", "L’équipe propose un défi deux fois plus grand que le précédent. Le budget suivrait.", [C("Valider l’ambition", "Le projet passe en préparation.", { s: { algo: 2, tresorerie: -.05, equipe: 2 } }), C("Demander une version moins chère", "L’équipe range ses rêves.", { s: { equipe: -2, tresorerie: .01 } })]),
+      V("les miniatures", "Le graphiste a préparé douze miniatures pour la prochaine vidéo. L’équipe est divisée.", [C("En tester trois en même temps", "La meilleure se dégage vite.", { s: { algo: 2 } }), C("Choisir vous-même", "Votre instinct est bon, en général.", { s: { algo: 1 } })]),
+      V("les formats courts", "Un monteur propose de découper chaque vidéo en formats courts verticaux.", [C("Lancer une équipe dédiée", "Les vues explosent.", { s: { vues: 30, tresorerie: -.02 } }), C("Rester sur les vidéos longues", "Rien ne change.", {})]),
+      V("l’équipe est épuisée", "Les tournages s’enchaînent. Quelqu’un ose dire que le rythme n’est pas tenable.", [C("Donner une semaine de repos", "L’équipe revient motivée.", { s: { equipe: 5, algo: -1 } }), C("Promettre des primes et continuer", "Ça tiendra, pour l’instant.", { s: { equipe: 1, tresorerie: -.02 } })]),
+      V("un tournage à l’étranger", "L’équipe propose de tourner dans un pays lointain pour changer de décor.", [C("Partir", "Les images sont spectaculaires.", { s: { algo: 2, tresorerie: -.03, fatigue: 3 } }), C("Rester au studio", "Plus simple, moins original.", { s: { fatigue: -1 } })]) ] },
+    { id: "stats", title: "Revue des statistiques", icon: "▤", wd: 4, every: 2, cond: cr, scene: "studio", variants: [
+      V("la rétention", "Les spectateurs décrochent à la deuxième minute de la dernière vidéo.", [C("Remonter le montage pour couper l’intro", "La courbe se redresse.", { s: { algo: 2 } }), C("C’était un accident", "On verra la prochaine fois.", {})]),
+      V("le taux de clic", "Le titre de la dernière vidéo attire peu de clics.", [C("Changer le titre et la miniature", "Les clics remontent.", { s: { algo: 1, vues: 10 } }), C("Laisser tel quel", "La vidéo vivra sa vie.", {})]),
+      V("les pays", "Une grosse part de vos vues vient de pays non anglophones.", [C("Doubler les vidéos dans plusieurs langues", "De nouvelles chaînes naissent.", { s: { vues: 40, tresorerie: -.05 } }), C("Ajouter des sous-titres", "Une amélioration modeste.", { s: { vues: 10 } })]) ] },
+    { id: "sponsor", title: "Rendez-vous sponsor", icon: "$", wd: 3, every: 4, cond: cr, scene: "studio", variants: [
+      V("un jeu mobile", "Un éditeur de jeux mobiles propose de sponsoriser vos trois prochaines vidéos.", [C("Signer", "La production est financée.", { s: { tresorerie: .1, reputation: -1 } }), C("Refuser : le produit est médiocre", "Vos spectateurs vous en savent gré.", { s: { reputation: 1 } })]),
+      V("une banque en ligne", "Une banque en ligne veut une intégration de soixante secondes.", [C("Accepter, mais trente secondes", "Ils acceptent.", { s: { tresorerie: .06 } }), C("Refuser", "Le budget reste serré.", {})]),
+      V("une marque de boissons", "Une grande marque de boissons propose un partenariat long.", [C("Négocier dur", "Un contrat généreux.", { s: { tresorerie: .12, fatigue: 1 } }), C("Refuser : vous préférez vos propres marques", "Vous gardez votre liberté.", { s: { reputation: 1 } })]) ] }
+  ];
+  B.rdv = [
+    { id: "b-fans", cond: s => true, title: "Rencontre avec des fans", icon: "☺", people: [], scene: "studio", text: "Des centaines de fans attendent devant le studio depuis l’aube.", choices: [C("Sortir les saluer et signer", "Les vidéos des fans circulent partout.", { s: { reputation: 2, fatigue: 2 } }), C("Envoyer des goodies", "Gentil, mais distant.", { s: { reputation: 1 } })] },
+    { id: "b-ecole", cond: s => s.stats.tresorerie > .5, title: "Visite d’une école", icon: "♥", people: [], scene: "studio", text: "Une école de Caroline du Nord manque de matériel. La directrice vous a écrit.", choices: [C("Financer l’équipement et filmer", "La vidéo émeut.", { s: { tresorerie: -.1, reputation: 3, vues: 10 } }), C("Financer sans caméra", "Personne ne le saura.", { s: { tresorerie: -.1, reputation: 1 } })] },
+    { id: "b-collab", cond: s => alive(s, "logan") || alive(s, "ksi") || alive(s, "pewdiepie"), title: "Une proposition de collaboration", icon: "✦", people: ["ksi", "logan"], scene: "studio", text: "Un autre très gros créateur propose une vidéo commune.", choices: [C("Accepter", "Les deux communautés se mélangent.", { s: { abonnes: 1, vues: 15, fatigue: 2 } }), C("Décliner poliment", "Vous gardez votre ligne.", {})] },
+    { id: "b-comptable", cond: s => s.stats.tresorerie < .3, title: "Rendez-vous avec le comptable", icon: "$", people: [], scene: "studio", text: "Le comptable s’inquiète : vous réinvestissez presque tout dans les vidéos.", choices: [C("Mettre de côté un mois de budget", "Vous dormez mieux.", { s: { tresorerie: .03, stress: -2, algo: -1 } }), C("Continuer à tout réinvestir", "C’est votre méthode.", { s: { stress: 2, algo: 1 } })] },
+    { id: "b-recrue", cond: cr, title: "Entretien d’embauche", icon: "◎", people: [], scene: "studio", text: "Un monteur talentueux, venu d’une autre chaîne, demande un salaire élevé.", choices: [C("L’embaucher", "Le montage s’améliore.", { s: { equipe: 2, algo: 1, tresorerie: -.02 } }), C("Refuser", "L’équipe actuelle fera avec.", {})] },
+    { id: "b-ami", cond: s => alive(s, "chandler"), title: "Un ami de l’équipe va mal", icon: "♥", people: ["chandler", "karl"], scene: "studio", text: "Un membre historique de l’équipe semble à bout. Il n’ose pas le dire.", choices: [C("Lui parler en tête-à-tête", "Il se confie ; ça va mieux.", { s: { equipe: 3, stress: -1 }, r: { chandler: 4 } }), C("Lui donner des vacances", "Il revient reposé.", { s: { equipe: 2 } })] },
+    { id: "b-ville", cond: s => true, title: "Le maire de Greenville", icon: "⌂", people: [], scene: "studio", text: "Le maire voudrait que votre studio s’agrandisse en ville plutôt qu’ailleurs.", choices: [C("Investir localement", "La ville vous adore.", { s: { reputation: 2, tresorerie: -.05 } }), C("Comparer d’autres sites", "Le maire s’inquiète.", {})] },
+    { id: "b-presse", cond: s => s.stats.abonnes > 50, title: "Un journaliste enquête", icon: "✎", people: [], scene: "studio", text: "Un grand journal prépare un article sur les conditions de travail sur vos tournages.", choices: [C("Ouvrir les portes et répondre", "L’article est nuancé.", { s: { badbuzz: -2, stress: 2 } }), C("Ne pas répondre", "L’article est sévère.", { s: { badbuzz: 3 } })] }
+  ];
+  B.paroleRdv = { post: { title: "Publication sur les réseaux", text: "Votre communauté attend des nouvelles." }, live: { title: "Live improvisé", text: "Vous aviez promis un direct cette semaine." }, interview: { title: "Podcast enregistré", text: "Un grand podcast vous reçoit pour deux heures." }, communique: { title: "Communiqué à publier", text: "Votre équipe a besoin d’un texte officiel." }, decision: { title: "Réunion de direction", text: "Vos associés attendent une décision d’entreprise." }, rumeur: { title: "Un proche bavard", text: "Un ami du milieu propose de « laisser fuiter » une info." } };
+}
+
+/* =========================== HARRY POTTER =========================== */
+{
+  const H = CHARACTERS.harry; const sch = s => H.atSchool(s); const y = s => H.yearOf(s);
+  H.recurring = [
+    { id: "potions", title: "Cours de potions", icon: "⚗", wd: 1, every: 2, cond: s => sch(s) && alive(s, "rogue") && y(s) <= 5, people: ["rogue"], scene: "bougies", variants: [
+      V("une potion ratée", "Votre chaudron fume d’une drôle de couleur. Le professeur s’approche lentement.", [C("Recommencer en silence", "Le résultat est passable.", { s: { notes: 1, stress: 2 } }), C("Accuser un ingrédient défectueux", "Dix points en moins.", { s: { points: -10 }, r: { rogue: -2 } })]),
+      V("une question piège", "Le professeur vous pose une question à laquelle personne de votre âge ne saurait répondre.", [C("Avouer que vous ne savez pas", "Il ricane et passe à autre chose.", { s: { stress: 1 } }), C("Répliquer que Hermione connaît la réponse", "La classe rit ; il retire des points.", { s: { points: -5, courage: 1 }, r: { hermione: 2, rogue: -2 } })]),
+      V("travail en binôme", "Vous êtes placé avec Neville, dont le chaudron fond une fois sur deux.", [C("L’aider patiemment", "Votre potion est moyenne, la sienne aussi, enfin.", { r: { neville: 4 }, s: { notes: -1 } }), C("Faire tout vous-même", "Bonne note, Neville est vexé.", { s: { notes: 2 }, r: { neville: -2 } })]),
+      V("un devoir rendu", "Le professeur rend les copies. La vôtre est couverte d’encre rouge.", [C("Demander des explications après le cours", "Il est surpris, et un peu moins cassant.", { s: { notes: 2 }, r: { rogue: 2 } }), C("Ranger la copie et oublier", "Rien ne change.", {})]) ] },
+    { id: "quidditch", title: "Entraînement de Quidditch", icon: "◎", wd: 4, every: 2, phase: 1, cond: s => sch(s) && y(s) !== 4, people: ["jumeaux"], scene: "chateau", variants: [
+      V("sous la pluie", "Le capitaine maintient l’entraînement malgré l’averse.", [C("Voler deux heures sous la pluie", "Vous connaissez le terrain par cœur.", { s: { fatigue: 4, courage: 1 }, c: {} }), C("Proposer de travailler la tactique au sec", "L’équipe est soulagée.", { s: { fatigue: 1 }, r: { jumeaux: 1 } })]),
+      V("une nouvelle feinte", "Vous voulez essayer un piqué très bas, presque au ras de l’herbe.", [C("L’essayer jusqu’à la réussir", "Vous finissez couvert de boue, mais vous la maîtrisez.", { s: { courage: 2, fatigue: 3, sante: -2 } }), C("Rester prudent", "Une séance sans histoire.", {})]),
+      V("le terrain réservé", "L’équipe rivale a obtenu le terrain à votre place, avec un mot d’un professeur.", [C("Protester auprès de votre directrice de maison", "Elle vous rend le terrain la semaine suivante.", { r: { mcgonagall: 2 } }), C("S’entraîner au bord du lac", "Pas idéal, mais efficace.", { s: { fatigue: 2 } })]) ] },
+    { id: "hagrid", title: "Thé chez Hagrid", icon: "⌂", wd: 5, every: 2, cond: s => sch(s) && alive(s, "hagrid"), people: ["hagrid", "ron", "hermione"], scene: "foret", variants: [
+      V("une créature dans la cheminée", "Hagrid a quelque chose qui remue sous une couverture près du feu.", [C("Lui demander ce que c’est", "Il vous fait promettre de ne rien dire.", { s: { courage: 1 }, r: { hagrid: 3 } }), C("Lui conseiller de s’en séparer", "Il est triste, mais vous écoute.", { r: { hagrid: -1 }, s: { menace: -1 } })]),
+      V("des gâteaux", "Les gâteaux de Hagrid sont durs comme la pierre. Il vous regarde avec espoir.", [C("En manger un, courageusement", "Il est ravi.", { r: { hagrid: 3 } }), C("En glisser un dans votre poche", "Il ne voit rien.", {})]),
+      V("une confidence", "Hagrid laisse échapper une information qu’il n’aurait pas dû dire.", [C("Creuser la piste", "Un indice de plus.", { s: { courage: 1 }, c: {} }), C("Faire comme si de rien n’était", "Hagrid est soulagé.", { r: { hagrid: 2 } })]) ] },
+    { id: "village", title: "Sortie au village", icon: "♣", wd: 6, every: 4, cond: s => sch(s) && y(s) >= 3, people: ["ron", "hermione"], scene: "chateau", variants: [
+      V("la confiserie", "La confiserie du village déborde d’élèves.", [C("Offrir une tournée à vos amis", "Tout le monde est content.", { s: { gallions: -5, amitie: 2 } }), C("Ne rien acheter", "Vous économisez.", {})]),
+      V("la cabane hurlante", "Ron veut aller voir de près la maison qu’on dit hantée.", [C("Y aller", "Un frisson, rien de plus.", { s: { courage: 1 }, r: { ron: 2 } }), C("Rester à l’auberge au chaud", "Hermione approuve.", { r: { hermione: 2 } })]),
+      V("la boutique de farces", "Les jumeaux vous entraînent dans la boutique de farces et attrapes.", [C("Acheter de quoi faire une blague", "Votre maison rira longtemps.", { s: { gallions: -5, points: -5 }, r: { jumeaux: 3 } }), C("Juste regarder", "Les jumeaux vous trouvent bien sage.", {})]) ] },
+    { id: "tente", title: "Nuit sous la tente", icon: "☾", wd: 3, every: 1, cond: s => s.flags.hunt && !s.flags.victoire, people: ["ron", "hermione"], scene: "foret", variants: [
+      V("la garde", "Votre tour de garde. Des voix passent au loin, entre les arbres.", [C("Réveiller les autres et partir", "Vous transplanez juste à temps.", { s: { fatigue: 3, menace: -1 } }), C("Rester immobile sous les sortilèges de protection", "Les voix s’éloignent.", { s: { stress: 4 } })]),
+      V("la radio", "Une émission clandestine donne des nouvelles de vos amis.", [C("L’écouter jusqu’au bout", "Vous apprenez qu’ils tiennent bon.", { s: { stress: -4 } }), C("Couper pour économiser la batterie magique", "Le silence est lourd.", { s: { stress: 2 } })]),
+      V("une dispute", "La fatigue et la faim tendent l’atmosphère. Ron s’emporte.", [C("Calmer les choses", "La soirée s’apaise.", { s: { amitie: 2 }, r: { ron: 3 } }), C("Lui répondre sur le même ton", "La tente reste silencieuse jusqu’au matin.", { s: { amitie: -4 }, r: { ron: -5 } })]) ] },
+    { id: "aurors", title: "Réunion du bureau des Aurors", icon: "⚖", wd: 1, every: 1, cond: s => s.rank === "auror", people: ["ron"], scene: "parchemin", variants: [
+      V("un objet ensorcelé", "Un objet maudit a été vendu dans une boutique de Londres.", [C("Mener l’enquête vous-même", "Vous remontez jusqu’au vendeur.", { s: { reputation: 2, fatigue: 2 } }), C("Confier le dossier à une recrue", "Elle s’en sort bien.", { s: { fatigue: -1 } })]),
+      V("la formation", "Le bureau demande que vous formiez les nouvelles recrues au duel.", [C("Accepter", "Les recrues progressent vite.", { s: { reputation: 1, fatigue: 2 } }), C("Décliner : trop de dossiers", "Un collègue s’en charge.", {})]),
+      V("une fausse alerte", "Un sorcier âgé prétend que son voisin pratique la magie noire.", [C("Vérifier en personne", "C’était un jardinier excentrique.", { s: { reputation: 1 } }), C("Classer l’affaire", "Rien de grave.", {})]) ] },
+    { id: "corvees", title: "Corvées chez votre oncle", icon: "⌂", wd: 6, every: 2, cond: s => s.rank === "eleve" && !sch(s) && !s.flags.hunt, people: ["dursley"], scene: "parchemin", variants: [
+      V("le jardin", "Votre tante exige que les massifs soient désherbés avant la visite des voisins.", [C("Le faire sans un mot", "La journée passe, interminable.", { s: { stress: 3 }, r: { dursley: 2 } }), C("Négocier un peu de temps pour vos devoirs", "Elle refuse sèchement.", { s: { stress: 1 }, r: { dursley: -2 } })]),
+      V("votre cousin", "Votre cousin vous provoque. Vous n’avez pas le droit de faire de la magie hors de l’école.", [C("Ne pas répondre", "Il se lasse.", { s: { stress: 3 } }), C("Lui faire croire que vous allez lui jeter un sort", "Il court se cacher. Votre oncle hurle.", { s: { stress: -2 }, r: { dursley: -4 } })]) ] }
+  ];
+  H.rdv = [
+    { id: "h-biblio", cond: sch, title: "Révisions à la bibliothèque", icon: "▤", people: ["hermione"], scene: "bougies", text: "Hermione a réservé la meilleure table de la bibliothèque et préparé un planning de révisions en couleurs.", choices: [C("Suivre son planning", "Vous avancez beaucoup.", { s: { notes: 2, fatigue: 2 }, r: { hermione: 3 } }), C("Filer au bout d’une heure", "Elle soupire.", { r: { hermione: -2 } })] },
+    { id: "h-echecs", cond: s => alive(s, "ron"), title: "Partie d’échecs avec Ron", icon: "♞", people: ["ron"], scene: "bougies", text: "Ron vous propose une partie. Il gagne toujours.", choices: [C("Jouer quand même", "Vous perdez, mais vous riez beaucoup.", { s: { stress: -3 }, r: { ron: 3 } }), C("Proposer de vous apprendre ses ouvertures", "Il est flatté.", { s: { stress: -2 }, r: { ron: 4 } })] },
+    { id: "h-neville", cond: s => sch(s) && alive(s, "neville"), title: "Neville et ses plantes", icon: "✿", people: ["neville"], scene: "chateau", text: "Neville veut vous montrer une plante rare qu’il fait pousser en secret dans les serres.", choices: [C("L’accompagner", "Il est intarissable, et heureux.", { r: { neville: 4 }, s: { notes: 1 } }), C("Remettre à plus tard", "Il hoche la tête, déçu.", { r: { neville: -1 } })] },
+    { id: "h-luna", cond: s => alive(s, "luna") && yr(s) >= 1995, title: "Luna cherche ses affaires", icon: "☾", people: ["luna"], scene: "chateau", text: "Luna placarde des affiches : on lui a encore caché ses chaussures.", choices: [C("L’aider à chercher", "Vous les retrouvez dans une armure.", { r: { luna: 5 }, s: { amitie: 1 } }), C("Lui souhaiter bonne chance", "Elle sourit quand même.", {})] },
+    { id: "h-jumeaux", cond: s => sch(s) && alive(s, "jumeaux") && y(s) <= 6, title: "Les jumeaux cherchent un cobaye", icon: "✦", people: ["jumeaux"], scene: "chateau", text: "Fred et George testent un bonbon qui doit rendre malade juste assez longtemps pour sécher un cours.", choices: [C("Le goûter", "Une heure à l’infirmerie, mais quelle histoire.", { s: { sante: -2, stress: -2 }, r: { jumeaux: 4 } }), C("Refuser", "Ils trouveront un autre volontaire.", {})] },
+    { id: "h-mcgo", cond: s => sch(s) && alive(s, "mcgonagall"), title: "Convocation chez la directrice de maison", icon: "⚖", people: ["mcgonagall"], scene: "bougies", text: "La professeure McGonagall veut parler de vos notes et de votre avenir.", choices: [C("Lui parler du métier d’Auror", "Elle vous détaille les matières exigées.", { s: { notes: 2 }, r: { mcgonagall: 3 } }), C("Rester vague", "Elle note votre manque d’ambition.", { r: { mcgonagall: -1 } })] },
+    { id: "h-sirius", cond: s => alive(s, "sirius") && yr(s) >= 1994, title: "Une lettre de votre parrain", icon: "✉", people: ["sirius"], scene: "parchemin", text: "Une chouette inconnue apporte une lettre de Sirius. Il veut des nouvelles et vous demande d’être prudent.", choices: [C("Tout lui raconter", "Il répond très vite.", { s: { stress: -3 }, r: { sirius: 4 } }), C("Le rassurer en restant vague", "Il n’est pas dupe.", { r: { sirius: 1 } })] },
+    { id: "h-ginny", cond: s => s.flags.victoire && alive(s, "ginny"), title: "Match de Ginny", icon: "◎", people: ["ginny"], scene: "chateau", text: "Ginny joue un match important avec son équipe professionnelle.", choices: [C("Aller au stade", "Elle marque trois fois. Vous criez plus fort que tout le monde.", { s: { stress: -4 }, r: { ginny: 4 } }), C("Écouter à la radio, au bureau", "Elle vous racontera.", { r: { ginny: -1 } })] },
+    { id: "h-duel", cond: s => sch(s) && y(s) >= 2, title: "Club de duel", icon: "⚔", people: ["drago"], scene: "bougies", text: "Un professeur organise des duels d’entraînement. On vous désigne face à Malefoy.", choices: [C("Viser à désarmer, proprement", "Belle démonstration.", { s: { magie: 1, reputation: 1 }, r: { drago: -2 } }), C("Refuser le duel", "Malefoy s’en vante toute la semaine.", { s: { reputation: -1 } })] }
+  ];
+  H.paroleRdv = { action: { title: "Une occasion d’agir", text: "Vous avez un moment libre, et une idée en tête." }, parole: { title: "Réunion dans la salle commune", text: "Votre maison est rassemblée ; on attend que vous preniez la parole." }, confidence: { title: "Un moment avec vos amis", text: "Vous êtes seuls tous les trois ; c’est le moment de dire ce que vous avez sur le cœur." }, interview: { title: "Un journaliste à la porte", text: "Un journaliste du monde magique demande un entretien." }, rumeur: { title: "Les couloirs bruissent", text: "Une rumeur pourrait courir d’ici ce soir, si vous la lancez." } };
+}
+
+/* Identifiants des variantes */
+for (const ch of Object.values(CHARACTERS)) for (const r of (ch.recurring || [])) r.variants.forEach((v, i) => { v.id = v.id || String(i); });
+})();
+</script>
+<script>
+"use strict";
+/* =====================================================================
    MOTEUR — temps (semaine), effets, santé, mort, événements, mémoire
    ===================================================================== */
-const SAVE_VERSION = 3;
+const SAVE_VERSION = 4;
 const MONTHS = ["janvier","février","mars","avril","mai","juin","juillet","août","septembre","octobre","novembre","décembre"];
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 const esc = t => String(t ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
@@ -4128,7 +4385,7 @@ const GAME = {
       family: { spouse: st.family?.spouse || null, spouseName: null, exSpouses: [...(st.family?.exSpouses || [])], children: [...(st.family?.children || [])], heir: null },
       conditions: [], done, history: [], feed: [], journal: [], deferred: [], deadRel: {},
       counters: { battlesWon: 0, battlesLost: 0, reforms: 0, treaties: 0, weeks: 0, maxDep: stats.departements || 0, popSum: 0, powerWeeks: 0, ...(st.counters || {}) },
-      nextRandomIn: 6, nextRivalIn: 8, nextMailIn: 3, recentRandom: [], actionWeek: -1, corr: {}, corrQueue: [], fin: [], where: null, feedN: 0, dead: null, pending: null, speed: 0, savedAt: null
+      day: 0, agenda: null, agendaWeek: -1, rdvRecent: [], nextRandomIn: 6, nextRivalIn: 8, nextMailIn: 3, recentRandom: [], actionWeek: -1, corr: {}, corrQueue: [], fin: [], where: null, feedN: 0, dead: null, pending: null, speed: 0, savedAt: null
     };
     for (const r of ch.relations) if (r.dies && r.dies.date <= s.date) s.deadRel[r.id] = r.dies.date;
     if (ch.setup) ch.setup(s, st.id, false);
@@ -4176,6 +4433,8 @@ const GAME = {
     if (fx.heir) { s.family.heir = fx.heir; out.notes.push(`Héritier désigné : ${fx.heir}.`); }
     if (fx.danger && !out.death) { const p = clamp(+fx.danger.p || 0, 0, .3); if (Math.random() < p) out.death = { type: fx.danger.type || "accident", cause: fx.danger.cause || "Mort brutale." }; }
     if (fx.call && ch.fxCall) ch.fxCall(s, fx.call, out);
+    if (fx.opinion && ch.newsFx) { const before = { ...s.stats }; ch.newsFx(s, "fr", fx.opinion); for (const k in s.stats) { const d = s.stats[k] - before[k]; if (Math.abs(d) > 1e-6) out.deltas[k] = (out.deltas[k] || 0) + d; } }
+    if (fx.roll) { const ok = Math.random() < fx.roll.p; const r = fx.roll[ok ? "win" : "loss"]; if (r.txt) out.notes.push(r.txt); GAME.applyFx(s, r, out); }
     if (fx.gamble) { const g = fx.gamble; const v = s.rel[g.rel] ?? 0; const p = clamp(.35 + (v - g.threshold) / 120, .05, .9); const ok = Math.random() < p; out.notes.push(g[ok ? "win" : "loss"].txt); GAME.applyFx(s, g[ok ? "win" : "loss"], out); }
     ch.sync && ch.sync(s);
     return out;
@@ -4344,8 +4603,116 @@ const STORE = {
         for (const n of s.feed) { n.cat = n.cat || (ch.newsCat ? ch.newsCat(n.src) : "sys"); n.ton = n.ton || (n.cat === "sys" ? "" : "neu"); }
         s.v = 3;
       }
+      if (s.v < 4) {
+        // v4 : le temps avance jour par jour, avec un agenda de rendez-vous
+        s.day = 0; s.agenda = null; s.agendaWeek = -1; s.rdvRecent = []; s.v = 4;
+      }
       return s;
     } catch (e) { return null; }
+  }
+};
+</script>
+<script>
+"use strict";
+/* =====================================================================
+   AGENDA — la semaine du personnage, jour par jour.
+   Chaque semaine : 3 ou 4 rendez-vous (fixes, prises de parole, écrits par
+   Claude ou tirés de la banque du personnage), plus les grands moments
+   historiques et les matchs, placés à leur jour.
+   ===================================================================== */
+const AGENDA = {
+  WD: ["Dim.", "Lun.", "Mar.", "Mer.", "Jeu.", "Ven.", "Sam."],
+  WDL: ["dimanche", "lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi"],
+  wd(date){ const p = parseD(date); const t = new Date(Date.UTC(2000, p.m - 1, p.d)); t.setUTCFullYear(p.y); return t.getUTCDay(); },
+  today: s => addDays(s.date, s.day || 0),
+  dayOfWd(s, wd){ for (let d = 0; d < 7; d++) if (AGENDA.wd(addDays(s.date, d)) === wd) return d; return 0; },
+  dayLabel(s, d){ const dt = addDays(s.date, d); return `${AGENDA.WDL[AGENDA.wd(dt)]} ${parseD(dt).d}`; },
+  pick: a => a[Math.floor(Math.random() * a.length)],
+  ok(s, e){ try { return !e.cond || !!e.cond(s); } catch (err) { return false; } },
+  clone: o => JSON.parse(JSON.stringify(o)),
+  /* Atténue les effets d’un événement pensé pour être rare */
+  scaleFx(fx, k){
+    const c = AGENDA.clone(fx || {});
+    for (const key of ["s", "r"]) if (c[key]) for (const x in c[key]) if (typeof c[key][x] === "number") { const v = c[key][x] * k; c[key][x] = Math.abs(v) >= 1 ? Math.round(v) : Math.round(v * 100) / 100; }
+    if (typeof c.opinion === "number") c.opinion *= k;
+    return c;
+  },
+  /* Effets d’un rendez-vous : atténués, et de plus en plus faibles près des extrêmes */
+  K: .32,
+  tune(s, fx, k){
+    const c = AGENDA.scaleFx(fx, k ?? AGENDA.K);
+    if (c.roll) for (const w of ["win", "loss"]) if (c.roll[w]) c.roll[w] = AGENDA.tune(s, c.roll[w], k);
+    if (c.s) for (const x in c.s) { const d = GAME.statDef(s, x); const v = s.stats[x]; if (!d || typeof c.s[x] !== "number" || d.min !== 0 || d.max !== 100) continue;
+      const good = d.bad === "high" ? c.s[x] < 0 : c.s[x] > 0; const room = d.bad === "high" ? v : 100 - v;
+      if (good) c.s[x] = Math.round(c.s[x] * clamp((room - 15) / 45, .03, 1) * 100) / 100; }
+    if (typeof c.opinion === "number" && c.opinion > 0) { const st = GAME.ch(s).mainGauges(s)[0]; if (st && st.v > 60) c.opinion *= clamp((100 - st.v) / 40, .05, 1); }
+    return c;
+  },
+  soften(ev, k){ const e = AGENDA.clone(ev); for (const c of e.choices || []) if (c.fx) c.fx = AGENDA.scaleFx(c.fx, k); return e; },
+  build(r, v){ return { id: `rdv-${r.id}-${v.id}`, title: v.title ? `${r.title} : ${v.title}` : r.title, text: v.text, people: v.people || r.people || [], scene: v.scene || r.scene, place: v.place || r.place, choices: AGENDA.clone(v.choices) }; },
+  paroleChoices: () => [
+    { t: "Préparer avec soin, rester mesuré", res: "Un propos maîtrisé, sans faux pas. On le reprend sans passion.", fx: { opinion: 1, s: { stress: 1 } } },
+    { t: "Improviser et frapper fort", res: "Vous parlez sans notes.", fx: { roll: { p: .55, win: { opinion: 3, txt: "Le ton direct plaît : on ne parle que de ça." }, loss: { opinion: -3, txt: "Une formule malheureuse fait le tour des journaux." } } } },
+    { t: "Annuler au dernier moment", res: "On s’interroge un peu sur votre silence.", fx: { opinion: -.5, s: { stress: -2 } } }
+  ],
+
+  plan(s, forced = []){
+    const ch = GAME.ch(s); const items = []; const taken = {};
+    const recent = s.rdvRecent || (s.rdvRecent = []);
+    const remember = id => { recent.push(id); if (recent.length > 40) recent.shift(); };
+    const free = pref => {
+      if (pref != null && !taken[pref]) return pref;
+      const order = pref != null ? [1, -1, 2, -2, 3, -3, 4, -4, 5, -5, 6, -6].map(o => pref + o).filter(d => d >= 0 && d < 7) : [1, 2, 3, 4, 5, 6, 0].sort(() => Math.random() - .5);
+      for (const d of order) if (!taken[d]) return d;
+      return pref ?? 1;
+    };
+    const add = (it, pref) => { const d = free(pref); taken[d] = (taken[d] || 0) + 1; items.push({ ...it, day: d, uid: `${s.week}-${items.length}`, done: false }); };
+    for (const f of forced) add(f, f.pref);
+    const target = 3 + (Math.random() < .5 ? 1 : 0) + forced.filter(f => f.kind === "saison").length;
+    // 1. Rendez-vous fixes
+    for (const r of (ch.recurring || [])) {
+      if (items.length >= target) break;
+      if (!AGENDA.ok(s, r) || (s.week + (r.phase || 0)) % (r.every || 1)) continue;
+      const vs = r.variants.filter(v => AGENDA.ok(s, v)); if (!vs.length) continue;
+      const fresh = vs.filter(v => !recent.includes(`${r.id}:${v.id}`)); const v = AGENDA.pick(fresh.length ? fresh : vs); remember(`${r.id}:${v.id}`);
+      add({ kind: "rdv", src: "fixe", icon: r.icon || "•", title: r.title, ev: AGENDA.build(r, v) }, AGENDA.dayOfWd(s, r.wd));
+    }
+    // 2. Une prise de parole, une semaine sur deux environ
+    if (items.length < target && Math.random() < .5) {
+      const types = ch.speech.filter(t => AGENDA.ok(s, t));
+      if (types.length) { const tp = AGENDA.pick(types); const pr = (ch.paroleRdv || {})[tp.id] || {};
+        add({ kind: "parole", src: "parole", type: tp.id, icon: "✒", title: pr.title || tp.label, ev: { id: `parole-${tp.id}-${s.week}`, title: pr.title || tp.label, text: `${pr.text || ""} ${tp.hint}`.trim(), people: [], scene: s.scene, choices: AGENDA.paroleChoices() } }, null); }
+    }
+    // 3. Un rendez-vous écrit par Claude, s’il est prêt
+    if (items.length < target && typeof AI !== "undefined" && AI.usable()) { const ev = AI.take(s); if (ev) add({ kind: "rdv", src: "ai", icon: "✦", title: ev.title, ev: AGENDA.soften(ev, .6) }, null); }
+    // 4. La banque du personnage, et parfois une dépêche plus rare
+    let guard = 0;
+    while (items.length < target && guard++ < 12) {
+      const pool = (ch.rdv || []).filter(e => AGENDA.ok(s, e) && !recent.includes(e.id) && !items.some(i => i.ev && i.ev.id === e.id));
+      let e = null, src = "ecrit";
+      if (!pool.length || Math.random() < .22) { const rf = GAME.pickFallback(s); if (rf && !items.some(i => i.ev && i.ev.id === rf.id)) { e = AGENDA.soften(rf, .55); src = "dep"; s.recentRandom.push(rf.id); if (s.recentRandom.length > 6) s.recentRandom.shift(); } }
+      if (!e && pool.length) { e = AGENDA.clone(pickW(pool)); remember(e.id); }
+      if (!e) { if (!pool.length) break; continue; }
+      add({ kind: "rdv", src, icon: e.icon || "•", title: e.title, ev: e }, null);
+    }
+    items.sort((a, b) => a.day - b.day);
+    s.agenda = items; s.agendaWeek = s.week;
+    return items;
+  },
+  next(s){ return (s.agenda || []).find(i => !i.done && i.day <= (s.day || 0)); },
+  upcoming(s){ return (s.agenda || []).find(i => !i.done); },
+  mark(s, ev, how){ const it = (s.agenda || []).find(i => !i.done && i.ev && i.ev.id === ev.id); if (it) it.done = how || "fait"; return it; },
+
+  /* Déléguer : une issue moyenne, et la personne concernée peut le prendre mal */
+  delegate(s, ev, kind){
+    const out = { deltas: {}, rels: {}, notes: [], death: null };
+    if (kind === "parole") { out.notes.push("Un proche parle à votre place ; personne n’en retient grand-chose."); GAME.applyFx(s, { opinion: -.5 }, out); return out; }
+    const cs = (ev.choices || []).filter(c => !c.battle && !c.match);
+    if (cs.length) { const c = AGENDA.pick(cs); out.notes.push(`Vous déléguez. Votre représentant choisit : « ${c.t} ».${c.res ? " " + c.res : ""}`); GAME.applyFx(s, AGENDA.tune(s, c.fx || {}, AGENDA.K * .6), out); }
+    const r = {}; for (const p of ev.people || []) if (GAME.relDef(s, p) && GAME.relAlive(s, p)) r[p] = -2;
+    if (Object.keys(r).length) { GAME.applyFx(s, { r }, out); out.notes.push("Votre absence a été remarquée."); }
+    GAME.applyFx(s, { s: { stress: -1 } }, out);
+    return out;
   }
 };
 </script>
@@ -4446,8 +4813,10 @@ SANTÉ : ${s.conditions.length ? s.conditions.map(c => c.name).join(", ") : "pas
   findRel(s, k){ const ch = GAME.ch(s); const key = String(k || "").toLowerCase().trim(); if (!key) return null; return (ch.relations.find(r => r.id === key) || ch.relations.find(r => r.name.toLowerCase().includes(key) || key.includes(r.id) || key.includes(r.name.toLowerCase().split(" ").pop())))?.id || null; },
 
   /* ---------- 1. Action libre : validité et répercussions ---------- */
+  tp(s, type){ return GAME.ch(s).speech.find(x => x.id === type) || { id: type, label: "Réponse libre pendant un rendez-vous", hint: "ce que le personnage dit ou fait pendant ce rendez-vous" }; },
+  rdvCtx(a){ return a.rdv ? `\nRENDEZ-VOUS EN COURS DANS L’AGENDA : « ${a.rdv.title} » — ${a.rdv.text}\nOptions qui lui étaient proposées : ${(a.rdv.choices || []).map(c => c.t).join(" / ")}. Il a préféré agir avec ses propres mots ; juge son action dans ce contexte précis.\n` : ""; },
   actionPrompt(s, a){
-    const ch = GAME.ch(s); const tp = ch.speech.find(x => x.id === a.type);
+    const ch = GAME.ch(s); const tp = AI.tp(s, a.type);
     return `Tu es le moteur de simulation de « Legacy », un simulateur de vie historique sérieux, en français. Le joueur incarne le personnage et vient d’écrire UNE action libre. Tu dois juger si elle est possible, puis calculer ses répercussions de façon réaliste.
 
 ${AI.context(s)}
@@ -4455,7 +4824,7 @@ ${AI.context(s)}
 MÉMOIRE DE LA PARTIE :
 ${AI.memory(s)}
 
-ACTION DU JOUEUR — type : ${tp.label} (${tp.hint})${a.target ? ` — destinataire : ${a.target}` : ""}
+${AI.rdvCtx(a)}ACTION DU JOUEUR — type : ${tp.label} (${tp.hint})${a.target ? ` — destinataire : ${a.target}` : ""}
 « ${a.text} »
 
 RÈGLES :
@@ -4513,7 +4882,7 @@ RÉPONDS UNIQUEMENT par un objet JSON : {"media":"…","questions":["…","…"]
 
   /* ---------- 2. Conseiller : avis avant l’envoi, sans consommer l’action ---------- */
   async advise(s, a){
-    const ch = GAME.ch(s); const adv = ch.advisor(s); const tp = ch.speech.find(x => x.id === a.type);
+    const ch = GAME.ch(s); const adv = ch.advisor(s); const tp = AI.tp(s, a.type);
     const o = await AI.call(`Tu joues ${adv.name}, ${adv.role}, conseiller du personnage dans « Legacy », simulateur historique sérieux en français. Ton caractère : ${adv.style}. Tu donnes ton avis AVANT que l’action soit lancée. C’est une reconstitution : ne cite aucune phrase réelle de ${adv.name}, parle à la première personne en le paraphrasant, en vouvoyant le personnage.
 
 ${AI.context(s)}
@@ -4521,7 +4890,7 @@ ${AI.context(s)}
 MÉMOIRE DE LA PARTIE :
 ${AI.memory(s)}
 
-ACTION ENVISAGÉE — type : ${tp.label}${a.target ? ` — destinataire : ${a.target}` : ""}
+${AI.rdvCtx(a)}ACTION ENVISAGÉE — type : ${tp.label}${a.target ? ` — destinataire : ${a.target}` : ""}
 « ${a.text} »
 
 Dis franchement si l’action est possible à cette date, ce qu’elle risque de produire, et propose mieux si tu vois mieux. Reste bref et concret.
@@ -4544,11 +4913,11 @@ DERNIÈRES DÉCISIONS À CHOIX :
 ${s.history.slice(-6).map(h => `- ${frMonth(h.date)} — ${h.title} : ${h.choice}`).join("\n") || "- (début de partie)"}
 
 CONSIGNES :
-- Écris UN événement qui s’impose au personnage, plausible à cette date et dans cette situation précise : politique, militaire, diplomatique, économique, familial, santé. Il peut découler d’une action libre passée du joueur. Varie les thèmes.
+- Écris UN rendez-vous de l’agenda du personnage cette semaine (réunion, audience, visite, rencontre, appel, cérémonie…) où il se passe quelque chose et où il doit agir, plausible à cette date et dans cette situation précise : politique, militaire, diplomatique, économique, familial, santé. Il peut découler d’une action passée du joueur. Varie les thèmes.
 - Appuie-toi sur des faits, des lieux, des institutions et des personnes réels de l’époque. Si les choix du joueur ont changé l’Histoire, fais réagir le monde de façon crédible. Ne raconte pas le prochain grand moment historique.
 - Texte de 3 à 5 phrases, au présent, en vouvoyant le personnage. Ton sobre de récit historique.
 ${AI.rules(s)}
-- Entre 2 et 4 choix, avec de vrais compromis. Effets proportionnés : la plupart entre 2 et 8 points, dans les bornes indiquées.
+- Entre 2 et 4 choix, avec de vrais compromis. Effets proportionnés : la plupart entre 1 et 5 points, dans les bornes indiquées.
 - « danger » facultatif : seulement si le choix expose physiquement le personnage (probabilité 0.01 à 0.08, cause de mort courte).
 
 RÉPONDS UNIQUEMENT par un objet JSON de cette forme exacte :
@@ -5032,7 +5401,7 @@ const UI = {
           <p class="muted ui">Né le ${frDate(ch.born)} à ${esc(ch.birthplace)}</p><p class="muted" style="font-size:.95rem">${esc(ch.realTimeline)}</p></div>
         <div style="display:grid;gap:14px;min-width:0">
           <div><div class="label">Mode carrière</div><h2 style="font-size:1.5rem">Choisissez l’année de départ</h2>
-          <p class="muted">Vous jouez jusqu’à la mort du personnage. Le temps avance d’une semaine toutes les six secondes environ ; rien ne peut être annulé.${ch.fiction ? " Personnage de fiction : le récit des livres est résumé avec nos propres mots, sans citation ni image tirée des films." : ch.realStatus ? " Personne réelle et vivante : le jeu s’appuie sur des faits publics, et tout ce qui s’en écarte est de la fiction." : ""}</p></div>
+          <p class="muted">Vous jouez jusqu’à la mort du personnage. Le temps avance jour par jour et s’arrête à chaque rendez-vous de votre agenda (3 ou 4 par semaine) ; rien ne peut être annulé.${ch.fiction ? " Personnage de fiction : le récit des livres est résumé avec nos propres mots, sans citation ni image tirée des films." : ch.realStatus ? " Personne réelle et vivante : le jeu s’appuie sur des faits publics, et tout ce qui s’en écarte est de la fiction." : ""}</p></div>
           <div class="starts" role="radiogroup" aria-label="Année de départ">${ch.starts.map(st => `<button class="start" role="radio" data-start="${st.id}" aria-pressed="${st.id === pick}" aria-checked="${st.id === pick}"><span class="yr">${st.year}</span><h3>${esc(st.title)}</h3><span class="muted">${esc(st.summary)}</span></button>`).join("")}</div>
           <div class="slot-pick"><label class="label" for="slot-sel">Emplacement de sauvegarde</label>
             <select id="slot-sel" class="sel" style="width:auto">${[1, 2, 3].map(n => { const s = STORE.read(n); return `<option value="${n}" ${n === free ? "selected" : ""}>Emplacement ${n}${STORE.valid(s) ? ` (remplacera ${esc(CHARACTERS[s.char].short)}, ${esc(frMonth(s.date))})` : " (libre)"}</option>`; }).join("")}</select></div>
@@ -5052,9 +5421,10 @@ const UI = {
     UI.view = "general"; UI.subtab = null; UI.contact = null;
     UI.buildGame(); AUDIO.theme(ch.audio);
     if (fresh) { UI.save(); AI.prefetch(s); }
+    if (!s.agenda || s.agendaWeek !== s.week) { const due = GAME.dueHistorical(s); AGENDA.plan(s, due ? [{ kind: "hist", icon: "★", title: due.title, evId: due.id, pref: s.day || 0 }] : []); UI.update(true); UI.save(); }
     if (s.pending) { UI.restorePending(); return; }
-    const due = GAME.dueHistorical(s);
-    if (due) UI.showEvent(due, "hist"); else if (fresh) LOOP.setSpeed(1);
+    if (UI.openDay()) return;
+    if (fresh) LOOP.setSpeed(1);
   },
   restorePending(){
     const s = GAME.s, p = s.pending, ch = GAME.ch(s); let ev = null;
@@ -5080,17 +5450,16 @@ const UI = {
         <div class="who"><h1>${esc(ch.short)}</h1><span class="rank" id="rank"></span></div>
         <div class="clock"><span class="date" id="date"></span><span class="age" id="age"></span></div>
         <div class="speed" role="group" aria-label="Vitesse du temps"><button data-speed="0" title="Pause (espace)" aria-label="Pause">❚❚</button><button data-speed="1">x1</button><button data-speed="2">x2</button><button data-speed="4">x4</button></div>
-        <div class="agir"><button class="btn primary" id="b-agir">Agir</button><span class="count" id="agir-count"></span></div>
         <button class="icon-btn" id="b-music" aria-pressed="${AUDIO.musicOn}" title="Musique">Musique</button>
         <button class="icon-btn" id="b-sfx" aria-pressed="${AUDIO.sfxOn}" title="Bruitages">Sons</button>
         <button class="icon-btn" id="b-menu" title="Parties, réglages, quitter">Menu</button>
-      </div><div class="tick-bar"><i id="tickbar"></i></div></header>
+      </div><div class="cal" id="cal" role="list" aria-label="Agenda de la semaine"></div><div class="cal-next" id="cal-next"></div><div class="tick-bar"><i id="tickbar"></i></div></header>
       <div class="shell">
         <nav class="rail" id="rail" aria-label="Fenêtres">${ch.views.map(({ id, label, icon }) => `<button data-view="${id}" aria-pressed="false">${UI.ICONS[icon]}<span>${label}</span><i class="badge-dot" hidden></i></button>`).join("")}</nav>
         <main class="view" id="view"></main>
       </div>`;
     $$("[data-speed]").forEach(b => b.onclick = () => { AUDIO.sfx("click"); LOOP.setSpeed(+b.dataset.speed); });
-    $("#b-agir").onclick = () => UI.actionModal();
+    $("#cal").addEventListener("click", e => { const b = e.target.closest("[data-rv]"); if (b) UI.calClick(b.dataset.rv); });
     $("#b-music").onclick = e => { AUDIO.setMusic(!AUDIO.musicOn); e.currentTarget.setAttribute("aria-pressed", AUDIO.musicOn); };
     $("#b-sfx").onclick = e => { AUDIO.setSfx(!AUDIO.sfxOn); e.currentTarget.setAttribute("aria-pressed", AUDIO.sfxOn); AUDIO.sfx("click"); };
     $("#b-menu").onclick = () => UI.menuModal();
@@ -5160,9 +5529,9 @@ const UI = {
   update(force){
     const s = GAME.s; if (!s || !$("#date")) return;
     const ch = GAME.ch(s); if (force) UI.keys = {};
-    $("#date").textContent = frDate(s.date); $("#age").textContent = `${GAME.age(s)} ans · semaine ${s.week + 1}`; $("#rank").textContent = GAME.rankLabel(s);
+    const today = AGENDA.today(s); $("#date").textContent = frDate(today); $("#age").textContent = `${GAME.age(s)} ans · ${AGENDA.WDL[AGENDA.wd(today)]}`;
+    UI.renderCal(); $("#rank").textContent = GAME.rankLabel(s);
     $$("[data-speed]").forEach(b => b.setAttribute("aria-pressed", +b.dataset.speed === s.speed));
-    const can = GAME.canAct(s); $("#b-agir").classList.toggle("primary", can); $("#agir-count").innerHTML = `Action libre<b>${can ? "1 / 1 cette semaine" : "0 / 1 · semaine prochaine"}</b>`;
     const al = ch.alerts(s);
     // Pastilles rouges
     const unread = Object.values(s.corr).reduce((t, th) => t + th.filter(m => m.unread).length, 0);
@@ -5353,7 +5722,7 @@ const UI = {
     if (pid === "_rel") {
       const known = ch.relations.filter(r => GAME.relKnown(s, r.id)); const alive = known.filter(r => !s.deadRel[r.id]), dead = known.filter(r => s.deadRel[r.id]);
       html = [...alive, ...dead].map(r => { const v = s.rel[r.id]; const st = s.deadRel[r.id] ? "mort" : GAME.relStatus(v); return `<button class="rel ${s.deadRel[r.id] ? "dead" : ""}"><span class="n">${esc(r.name)}${s.deadRel[r.id] ? " †" : ""}</span><span class="chip ${st}">${GAME.relStatusLabel[st]}</span><span class="ro">${esc(r.role)}</span>${relbar(v)}<span class="rel-detail" hidden>${esc(r.bio)}</span></button>`; }).join("");
-    } else { let blocks = []; try { blocks = ch.panels.find(p => p.id === pid).blocks(s); } catch (e) { blocks = [{ k: "info", html: "Ce panneau n’est pas disponible pour le moment." }]; } html = blocks.map(ctl).join(""); }
+    } else { let blocks = []; try { blocks = ch.panels.find(p => p.id === pid).blocks(s); const nb = blocks.filter(c => !(c && c.k === "btn" && (c.act === "write" || c.act === "write_article"))); if (nb.length < blocks.length) { nb.push({ k: "info", html: "Vos prises de parole (interviews, discours, messages…) se font désormais lors des rendez-vous de votre agenda." }); blocks = nb; } } catch (e) { blocks = [{ k: "info", html: "Ce panneau n’est pas disponible pour le moment." }]; } html = blocks.map(ctl).join(""); }
     if (html !== UI.keys.panel) { const top = pb.scrollTop; pb.innerHTML = html; pb.scrollTop = top; UI.keys.panel = html; }
   },
   updateAIStatus(){
@@ -5407,22 +5776,24 @@ const UI = {
   pause(){ const s = GAME.s; if (!s) return 0; const was = s.speed; if (was > 0) { UI.resumeSpeed = was; LOOP.setSpeed(0); } return was; },
 
   /* ---------------- Action libre écrite ---------------- */
-  actionModal(preType){
+  actionModal(preType, opts = {}){
     const s = GAME.s, ch = GAME.ch(s); if (!s || s.dead || UI.modalOpen) return;
-    const was = UI.pause(); AUDIO.sfx("paper");
-    const types = ch.speech.filter(t => !t.cond || t.cond(s));
-    const A = UI.draft && UI.draft.char === s.char ? UI.draft : (UI.draft = { char: s.char, type: types[0].id, target: "", text: "" });
+    const was = UI.pause(); AUDIO.sfx("paper"); const R = opts.rdv || null;
+    let types = ch.speech.filter(t => !t.cond || t.cond(s));
+    if (R) { const t0 = AI.tp(s, preType); types = [t0.id === "__rdv" ? { ...t0, hint: "Décrivez ce que vous dites ou faites pendant ce rendez-vous, et à qui.", ph: "Ex. : Je demande à voir les comptes moi-même avant de décider, et je convoque le responsable pour demain…" } : t0]; }
+    const A = UI.draft && UI.draft.char === s.char && UI.draft.rdvId === (R ? R.id : null) ? UI.draft : (UI.draft = { char: s.char, rdvId: R ? R.id : null, type: types[0].id, target: "", text: "" });
     if (preType && types.some(t => t.id === preType)) A.type = preType;
     if (!types.some(t => t.id === A.type)) A.type = types[0].id;
     A.advice = null; A.msg = null; A.busy = null; A.itw = null;
-    const resume = () => { UI.closeModal(); UI.update(true); if (was || UI.resumeSpeed) LOOP.setSpeed(was || UI.resumeSpeed); };
+    const resume = R ? () => { AGENDA.mark(s, R, "fait"); UI.save(); UI.afterEvent(); } : () => { UI.closeModal(); UI.update(true); if (was || UI.resumeSpeed) LOOP.setSpeed(was || UI.resumeSpeed); };
+    const back = R ? () => { UI.closeModal(); UI.showEvent(R, opts.kind || "rdv"); } : resume;
     const render = () => {
-      const tp = types.find(t => t.id === A.type); const can = GAME.canAct(s); const adv = ch.advisor(s);
+      const tp = types.find(t => t.id === A.type) || types[0]; const can = R ? true : GAME.canAct(s); const adv = ch.advisor(s);
       const targets = ch.relations.filter(r => GAME.relAlive(s, r.id));
       const ov = UI.openModal(`
-        <div class="ev-kind"><span class="k hist">Action libre</span><span class="label">${esc(frDate(s.date))} · ${can ? "1 action disponible cette semaine" : "action de la semaine déjà utilisée"}</span></div>
-        <h2>Que faites-vous ?</h2>
-        <div class="types" role="group" aria-label="Type d’action">${types.map(t => `<button data-type="${t.id}" aria-pressed="${t.id === A.type}">${esc(t.label)}</button>`).join("")}</div>
+        <div class="ev-kind"><span class="k hist">${R ? esc(tp.label) : "Action libre"}</span><span class="label">${esc(frDate(AGENDA.today(s)))}${R ? "" : ` · ${can ? "1 action disponible cette semaine" : "action de la semaine déjà utilisée"}`}</span></div>
+        <h2>${R ? esc(R.title) : "Que faites-vous ?"}</h2>
+        ${R ? `<p class="ev-text" style="margin:0">${esc(R.text)}</p>` : `<div class="types" role="group" aria-label="Type d’action">${types.map(t => `<button data-type="${t.id}" aria-pressed="${t.id === A.type}">${esc(t.label)}</button>`).join("")}</div>`}
         <span class="note">${esc(tp.hint)} Le temps est en pause. Une action envoyée est définitive.</span>
         ${tp.target ? `<div class="ctl"><div class="ctl-top"><label for="a-target">Destinataire</label></div><select id="a-target" class="sel"><option value="">Quelqu’un d’autre (nommez-le dans le texte)</option>${targets.map(r => `<option value="${esc(r.name)}" ${A.target === r.name ? "selected" : ""}>${esc(r.name)}</option>`).join("")}</select></div>` : ""}
         ${tp.flow === "interview" ? (A.itw ? `<div class="advice"><div class="label">${esc(A.itw.media)} · interview</div>${A.itw.questions.map((q, i) => `<div class="ctl"><div class="ctl-top"><label for="a-q${i}">${esc(q)}</label></div><textarea class="write" style="min-height:70px" id="a-q${i}" data-q="${i}" maxlength="600" placeholder="Votre réponse…" ${A.busy ? "disabled" : ""}>${esc(A.itw.answers[i] || "")}</textarea></div>`).join("")}</div>` : `<div class="advice"><div>Un journaliste vous posera deux ou trois questions. Vos réponses forment l’action de la semaine.</div><div class="row" style="justify-content:flex-start"><button class="btn" id="a-itw" ${A.busy || !AI.usable() ? "disabled" : ""}>Commencer l’interview</button></div></div>`) : `<textarea class="write" id="a-text" maxlength="1500" placeholder="${esc(tp.ph)}" aria-label="Votre action" ${A.busy ? "disabled" : ""}>${esc(A.text)}</textarea>`}
@@ -5432,7 +5803,7 @@ const UI = {
         ${A.advice ? `<div class="advice"><div class="label">Avis de ${esc(A.advice.name)}, ${esc(A.advice.role)} · reconstitution</div><div>${esc(A.advice.avis)}</div>
           ${A.advice.risques.length ? `<h4>Risques</h4><ul>${A.advice.risques.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}${A.advice.effets.length ? `<h4>Effets probables</h4><ul>${A.advice.effets.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}${A.advice.alternatives.length ? `<h4>Autres voies</h4><ul>${A.advice.alternatives.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}</div>` : ""}
         ${!AI.usable() ? `<div class="refusal"><b>Claude n’est pas disponible dans cette vue.</b><br>L’action libre et le conseiller ont besoin de Claude pour calculer les répercussions. Les panneaux de gestion, eux, fonctionnent toujours.</div>` : ""}
-        <div class="row"><button class="btn ghost" id="a-close" ${A.busy ? "disabled" : ""}>Fermer sans agir</button><button class="btn" id="a-advise" ${A.busy || !AI.usable() ? "disabled" : ""}>Demander conseil à ${esc(adv.name)}</button><button class="btn primary" id="a-go" style="font-size:1rem;padding:.6em 2em" ${A.busy || !can || !AI.usable() ? "disabled" : ""}>Agir</button></div>`, { wide: true });
+        <div class="row"><button class="btn ghost" id="a-close" ${A.busy ? "disabled" : ""}>${R ? "Revenir aux choix" : "Fermer sans agir"}</button><button class="btn" id="a-advise" ${A.busy || !AI.usable() ? "disabled" : ""}>Demander conseil à ${esc(adv.name)}</button><button class="btn primary" id="a-go" style="font-size:1rem;padding:.6em 2em" ${A.busy || !can || !AI.usable() ? "disabled" : ""}>Agir</button></div>`, { wide: true });
       const ta = $("#a-text", ov) || { value: "", focus(){}, setSelectionRange(){} }; ta.oninput = () => { A.text = ta.value; };
       const ph = $("#a-photo", ov); if (ph) ph.oninput = () => { A.photo = ph.value; };
       $$("[data-q]", ov).forEach(q => q.oninput = () => { A.itw.answers[+q.dataset.q] = q.value; });
@@ -5440,13 +5811,13 @@ const UI = {
       if (!A.busy) setTimeout(() => { try { ta.focus({ preventScroll: true }); ta.setSelectionRange(ta.value.length, ta.value.length); } catch (e) {} }, 30);
       const tg = $("#a-target", ov); if (tg) tg.onchange = () => { A.target = tg.value; };
       $$("[data-type]", ov).forEach(b => b.onclick = () => { A.type = b.dataset.type; A.msg = null; render(); });
-      $("#a-close", ov).onclick = resume;
+      $("#a-close", ov).onclick = back;
       const compose = () => tp.flow === "interview" ? (A.itw ? `Interview accordée à ${A.itw.media}.\n` + A.itw.questions.map((q, i) => `Question : ${q}\nRéponse : ${(A.itw.answers[i] || "(pas de réponse)").trim()}`).join("\n") : "") : A.text.trim() + (tp.photo && A.photo ? `\n[Photo ou vidéo jointe : ${A.photo.trim()}]` : "");
       const need = () => { if (tp.flow === "interview") { if (!A.itw || !A.itw.answers.some(a => a && a.trim().length > 3)) { A.msg = { title: "Répondez d’abord aux questions.", text: "Lancez l’interview, puis répondez à au moins une question." }; render(); return false; } return true; } if (A.text.trim().length < 12) { A.msg = { title: "Écrivez d’abord votre action.", text: "Quelques phrases suffisent : ce que vous ordonnez, dites ou écrivez, et à qui." }; render(); return false; } return true; };
-      $("#a-advise", ov).onclick = async () => { if (!need()) return; A.msg = null; A.busy = `${adv.name} réfléchit à votre projet…`; render(); try { A.advice = await AI.advise(s, { type: A.type, target: A.target, text: compose() }); AUDIO.sfx("notify"); } catch (e) { A.msg = { title: `${adv.name} n’a pas pu répondre.`, text: "Vous pouvez redemander, ou agir sans son avis. Votre action n’est pas consommée." }; } A.busy = null; if (GAME.s === s && UI.modalOpen) render(); };
+      $("#a-advise", ov).onclick = async () => { if (!need()) return; A.msg = null; A.busy = `${adv.name} réfléchit à votre projet…`; render(); try { A.advice = await AI.advise(s, { type: A.type, target: A.target, text: compose(), rdv: R }); AUDIO.sfx("notify"); } catch (e) { A.msg = { title: `${adv.name} n’a pas pu répondre.`, text: "Vous pouvez redemander, ou agir sans son avis. Votre action n’est pas consommée." }; } A.busy = null; if (GAME.s === s && UI.modalOpen) render(); };
       $("#a-go", ov).onclick = async () => {
         if (!need() || !GAME.canAct(s)) return; A.msg = null; A.busy = "Les courriers partent. Claude calcule les répercussions…"; render();
-        const act = { type: A.type, target: A.target, text: compose() }; let res = null;
+        const act = { type: A.type, target: A.target, text: compose(), rdv: R }; let res = null;
         try { res = await AI.evaluateAction(s, act); } catch (e) { A.busy = null; A.msg = { title: "Claude n’a pas pu répondre, après deux essais.", text: "Votre action n’est pas consommée : vous pouvez la renvoyer telle quelle dans un instant." }; AUDIO.sfx("error"); if (GAME.s === s) render(); return; }
         if (GAME.s !== s) return; A.busy = null;
         if (!res.valide) { A.msg = { title: "Action impossible : elle n’est pas consommée.", text: res.raison }; AUDIO.sfx("error"); render(); return; }
@@ -5457,12 +5828,12 @@ const UI = {
   },
 
   applyAction(act, res, resume){
-    const s = GAME.s, ch = GAME.ch(s); const tp = ch.speech.find(x => x.id === act.type);
+    const s = GAME.s, ch = GAME.ch(s); const tp = AI.tp(s, act.type);
     const out = GAME.applyFx(s, res.fx);
     const jid = "j" + s.journal.length + "-" + s.week;
     for (const d of res.differes) s.deferred.push({ date: addDays(s.date, d.weeks * 7), title: d.title, text: d.text, fx: d.fx, from: jid });
     for (const n of [...res.news].reverse()) GAME.news(s, { src: n.src, title: n.title, text: n.text, kind: "action", ton: n.ton });
-    s.journal.push({ id: jid, d: s.date, type: act.type, typeLabel: tp.label, target: act.target || "", text: act.text, resume: res.resume, importance: res.importance, deltas: out.deltas, news: res.news.map(n => n.title), suites: [] });
+    s.journal.push({ id: jid, d: AGENDA.today(s), type: act.type, typeLabel: act.rdv ? `${tp.label} (${act.rdv.title})` : tp.label, target: act.target || "", text: act.text, resume: res.resume, importance: res.importance, deltas: out.deltas, news: res.news.map(n => n.title), suites: [] });
     s.actionWeek = s.week; UI.draft = null; UI.save();
     AUDIO.sfx(act.type === "discours" ? "crowd" : "notify");
     const ov = UI.openModal(`
@@ -5475,8 +5846,47 @@ const UI = {
           ${res.comments.length ? `<h4 style="margin-top:10px">${esc(ch.publicLabel)}</h4>${res.comments.map(c => `<div class="comment">${c.qui ? `<small>${esc(c.qui)}</small>` : ""}${esc(c.texte)}</div>`).join("")}` : ""}</div>
       </div>
       ${res.differes.length ? `<p class="later">${res.differes.length === 1 ? "Une autre conséquence se fera" : `${res.differes.length} autres conséquences se feront`} sentir plus tard.</p>` : ""}
-      <div class="row"><button class="btn primary" id="cont">Reprendre le cours du temps</button></div>`, { wide: true });
+      <div class="row"><button class="btn primary" id="cont">${UI.contLabel()}</button></div>`, { wide: true });
     $("#cont", ov).onclick = resume;
+  },
+
+  /* ---------------- Agenda de la semaine ---------------- */
+  contLabel(){ const s = GAME.s; const n = AGENDA.next(s); return n ? "Rendez-vous suivant" : "Reprendre le cours du temps"; },
+  renderCal(){
+    const s = GAME.s; if (!s || !$("#cal")) return; const items = s.agenda || []; const d0 = s.day || 0;
+    const cells = Array.from({ length: 7 }, (_, d) => { const dt = addDays(s.date, d); const its = items.filter(i => i.day === d);
+      return `<div class="cd ${d === d0 ? "today" : d < d0 ? "past" : ""}" role="listitem"><span class="cw">${AGENDA.WD[AGENDA.wd(dt)]} <b>${parseD(dt).d}</b></span>${its.map(i => `<button class="rv k-${i.kind} ${i.done ? "done" : ""}" data-rv="${i.uid}" title="${esc(i.title)}"><span class="ic" aria-hidden="true">${i.done ? (i.done === "delegue" ? "↷" : "✓") : esc(i.icon || "•")}</span><span class="tt">${esc(i.title)}</span></button>`).join("")}</div>`; }).join("");
+    UI.put("cal", cells);
+    const nx = AGENDA.upcoming(s); UI.put("cal-next", nx ? `<b>${esc(AGENDA.dayLabel(s, nx.day))}</b> · ${esc(nx.title)}` : `<span>Plus de rendez-vous cette semaine</span>`);
+  },
+  calClick(uid){
+    const s = GAME.s; const it = (s.agenda || []).find(i => i.uid === uid); if (!it || UI.modalOpen) return;
+    if (!it.done && it.day <= (s.day || 0)) { UI.openItem(it); return; }
+    const txt = it.done ? `${it.done === "delegue" ? "Délégué" : "Fait"} : ${it.title}` : `${AGENDA.dayLabel(s, it.day)} : ${it.title}${it.ev && it.ev.text ? " — " + it.ev.text.slice(0, 110) + (it.ev.text.length > 110 ? "…" : "") : ""}`;
+    UI.toast(txt);
+  },
+  openDay(){ const s = GAME.s; if (!s || s.dead || UI.modalOpen) return false; const it = AGENDA.next(s); if (!it) return false; UI.openItem(it); return true; },
+  openItem(it){
+    const s = GAME.s, ch = GAME.ch(s); if (s.speed > 0) UI.resumeSpeed = s.speed; LOOP.setSpeed(0); UI.update();
+    if (it.kind === "hist") { it.done = "fait"; const ev = ch.events.find(e => e.id === it.evId); if (ev && !s.done[ev.id]) UI.showEvent(ev, "hist"); else UI.afterEvent(); return; }
+    if (it.kind === "match") { it.done = "fait"; UI.save(); UI.playMatch(it.m); return; }
+    if (it.kind === "saison") { it.done = "fait"; UI.showEvent(it.ev, "saison"); return; }
+    UI.rdvAdvice = null; UI.showEvent(it.ev, it.kind === "parole" ? "parole" : "rdv");
+  },
+  async adviseRdv(ev, kind){
+    const s = GAME.s; UI.rdvAdvice = { id: ev.id, busy: true }; UI.closeModal(); UI.showEvent(ev, kind);
+    try { const a = await AI.advise(s, { type: "__rdv", text: "Comment aborder ce rendez-vous ? Que me conseillez-vous de faire ?", rdv: ev }); UI.rdvAdvice = { id: ev.id, ...a }; AUDIO.sfx("notify"); }
+    catch (e) { UI.rdvAdvice = { id: ev.id, err: "Le conseiller n’a pas pu répondre. Vous pouvez décider sans son avis." }; }
+    if (GAME.s === s && UI.currentEvent && UI.currentEvent.id === ev.id) { UI.closeModal(); UI.showEvent(ev, kind); }
+  },
+  delegateRdv(ev, kind){
+    const s = GAME.s; UI.currentEvent = null; AUDIO.sfx("click");
+    const out = AGENDA.delegate(s, ev, kind); AGENDA.mark(s, ev, "delegue"); s.pending = null; UI.save();
+    GAME.news(s, { src: "Carnet", title: ev.title, text: "Rendez-vous délégué.", tone: "" });
+    const ov = UI.openModal(`<div class="outcome"><div class="ev-kind"><span class="k">Délégué</span></div><h2>${esc(ev.title)}</h2>
+      <p class="ev-text">${out.notes.map(esc).join(" ")}</p><div class="deltas">${UI.deltaChips(out)}</div>
+      <div class="row"><button class="btn primary" id="cont">${UI.contLabel()}</button></div></div>`, { scene: ev.scene || s.scene });
+    $("#cont", ov).onclick = () => UI.afterEvent();
   },
 
   /* ---------------- Décisions imposées ---------------- */
@@ -5486,14 +5896,21 @@ const UI = {
     UI.currentEvent = ev; UI.currentKind = kind;
     s.pending = { kind, id: ev.id, ev: kind === "hist" || kind === "ecrit" ? null : ev };
     const people = (ev.people || []).map(p => { const r = GAME.relDef(s, p); return r ? r.name : p; }).filter(Boolean);
-    const kindLabel = kind === "hist" ? (GAME.ch(s).histLabel || "Moment historique") : kind === "ai" ? "Dépêche · écrite par Claude" : kind === "guerre" ? "Alerte" : kind === "saison" ? "Carrière" : "Dépêche";
+    const it = (kind === "rdv" || kind === "parole") ? (s.agenda || []).find(i => !i.done && i.ev && i.ev.id === ev.id) : null;
+    const kindLabel = kind === "hist" ? (GAME.ch(s).histLabel || "Moment historique") : kind === "ai" ? "Dépêche · écrite par Claude" : kind === "guerre" ? "Alerte" : kind === "saison" ? "Carrière" : kind === "parole" ? "Prise de parole" : kind === "rdv" ? (it && it.src === "ai" ? "Rendez-vous · écrit par Claude" : it && it.src === "fixe" ? "Rendez-vous habituel" : "Rendez-vous") : "Dépêche";
+    const adv = GAME.ch(s).advisor(s); const advice = UI.rdvAdvice && UI.rdvAdvice.id === ev.id ? UI.rdvAdvice : null;
+    const extra = it ? `<div class="rdv-extra">${AI.usable() ? `<button class="btn" id="rv-free">${kind === "parole" ? "Écrire mes propres mots" : "Répondre avec mes mots"}</button><button class="btn ghost" id="rv-adv" ${advice && advice.busy ? "disabled" : ""}>Conseil de ${esc(adv.name)}</button>` : ""}${(ev.choices || []).some(c => !c.battle && !c.match) || kind === "parole" ? `<button class="btn ghost" id="rv-del">${kind === "parole" ? "Laisser un proche parler" : "Déléguer"}</button>` : ""}</div>
+      ${advice ? `<div class="advice"><div class="label">Avis de ${esc(adv.name)} · reconstitution</div>${advice.busy ? `<div>${esc(adv.name)} réfléchit…</div>` : advice.err ? `<div>${esc(advice.err)}</div>` : `<div>${esc(advice.avis)}</div>${advice.risques.length ? `<h4>Risques</h4><ul>${advice.risques.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}${advice.alternatives.length ? `<h4>Autres voies</h4><ul>${advice.alternatives.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}`}</div>` : ""}` : "";
     AUDIO.sfx(kind === "guerre" ? "drum" : "event");
     const ov = UI.openModal(`
-      <div class="ev-kind"><span class="k ${kind === "hist" ? "hist" : ""}">${kindLabel}</span><span class="label">${esc(frDate(kind === "hist" && ev.date && ev.date.slice(0, 7) === s.date.slice(0, 7) ? ev.date : s.date))} · ${esc(ev.place || s.place)}</span></div>
+      <div class="ev-kind"><span class="k ${kind === "hist" ? "hist" : ""}">${kindLabel}</span><span class="label">${esc(it ? AGENDA.dayLabel(s, it.day) : frDate(kind === "hist" && ev.date && ev.date.slice(0, 7) === s.date.slice(0, 7) ? ev.date : AGENDA.today(s)))} · ${esc(ev.place || s.place)}</span></div>
       <h2>${esc(ev.title)}</h2><p class="ev-text">${esc(ev.text)}</p>
       ${people.length ? `<div class="people">${people.map(p => `<span>${esc(p)}</span>`).join("")}</div>` : ""}
-      <div class="choices">${ev.choices.map((c, i) => `<button class="choice" data-choice="${i}">${esc(c.t)}${c.battle ? `<small>${GAME.ch(s).fiction ? "Duel" : "Bataille"} : ${esc(c.battle.name)}</small>` : ""}${c.match ? `<small>Match à jouer</small>` : ""}</button>`).join("")}</div>`, { scene: ev.scene || s.scene });
+      <div class="choices">${ev.choices.map((c, i) => `<button class="choice" data-choice="${i}">${esc(c.t)}${c.battle ? `<small>${GAME.ch(s).fiction ? "Duel" : "Bataille"} : ${esc(c.battle.name)}</small>` : ""}${c.match ? `<small>Match à jouer</small>` : ""}</button>`).join("")}</div>${extra}`, { scene: ev.scene || s.scene });
     $$("[data-choice]", ov).forEach(b => b.onclick = () => UI.choose(+b.dataset.choice));
+    const fb = $("#rv-free", ov); if (fb) fb.onclick = () => { UI.closeModal(); UI.actionModal(kind === "parole" ? it.type : "__rdv", { rdv: ev, kind }); };
+    const ab = $("#rv-adv", ov); if (ab) ab.onclick = () => UI.adviseRdv(ev, kind);
+    const db = $("#rv-del", ov); if (db) db.onclick = () => UI.delegateRdv(ev, kind);
   },
 
   choose(i){
@@ -5501,9 +5918,10 @@ const UI = {
     const c = ev.choices[i]; UI.currentEvent = null; AUDIO.sfx("click");
     const out = { deltas: {}, rels: {}, notes: [], death: null };
     if (ev.pre) GAME.applyFx(s, ev.pre, out);
-    GAME.applyFx(s, c.fx, out);
+    GAME.applyFx(s, kind === "rdv" || kind === "parole" ? AGENDA.tune(s, c.fx) : c.fx, out);
     const finish = () => {
       if (kind === "hist" || (kind === "ecrit" && ev.once)) s.done[ev.id] = kind;
+      if (kind === "rdv" || kind === "parole") AGENDA.mark(s, ev, "fait");
       if (kind === "saison") { s.pending = null; UI.save(); UI.closeModal(); const nx = GAME.ch(s).week ? GAME.ch(s).week(s, true) : null; if (nx && nx.event) { UI.showEvent(nx.event, "saison"); return; } if (nx && nx.match) { UI.playMatch(nx.match); return; } UI.afterEvent(); return; }
       if (kind === "ecrit") { s.recentRandom.push(ev.id); if (s.recentRandom.length > 6) s.recentRandom.shift(); }
       const outcome = out.battle ? `${out.battle.win ? "Victoire" : "Défaite"} — ${out.battle.name}` : (c.res || "");
@@ -5519,7 +5937,7 @@ const UI = {
         <h2>${esc(ev.title)}</h2>${verdict}
         <p class="ev-text">${esc(c.res || "")}${out.notes.length ? " " + out.notes.map(esc).join(" ") : ""}</p>
         <div class="deltas">${UI.deltaChips(out)}</div>${real}
-        <div class="row"><button class="btn primary" id="cont">${out.death ? "Continuer…" : "Reprendre le cours du temps"}</button></div></div>`, { scene: s.scene });
+        <div class="row"><button class="btn primary" id="cont">${out.death ? "Continuer…" : UI.contLabel()}</button></div></div>`, { scene: s.scene });
       $("#cont", ov).onclick = () => UI.afterEvent();
     };
     if (c.match) { UI.closeModal(); MATCH.start(s, c.match, res => { const chm = GAME.ch(s); const r = chm.applyMatch(s, c.match, res); out.battle = { name: c.match.title, win: r.win, draw: r.draw }; const o = r.win ? c.match.win : r.draw ? (c.match.draw || c.match.loss) : c.match.loss; if (o) { GAME.applyFx(s, o, out); if (o.txt) out.notes.unshift(o.txt); } out.notes.unshift(r.line); finish(); }); }
@@ -5530,8 +5948,7 @@ const UI = {
   afterEvent(){
     const s = GAME.s; UI.closeModal(); UI.update(true);
     if (s.deathPending) { const d = s.deathPending; delete s.deathPending; UI.die(d); return; }
-    const due = GAME.dueHistorical(s);
-    if (due) { UI.showEvent(due, "hist"); return; }
+    if (UI.openDay()) return;
     LOOP.setSpeed(UI.resumeSpeed || 1);
   },
 
@@ -5689,7 +6106,7 @@ const UI = {
    BOUCLE DE TEMPS — une semaine toutes les 6 secondes à x1 (≈ 5 min par an)
    ===================================================================== */
 const LOOP = {
-  timer: null, ms: { 1: 6000, 2: 3000, 4: 1500 },
+  timer: null, ms: { 1: 1100, 2: 550, 4: 260 },
   setSpeed(n){
     const s = GAME.s; if (!s) return;
     if (s.dead) n = 0;
@@ -5709,25 +6126,35 @@ const LOOP = {
   },
   step(){
     const s = GAME.s; if (!s || s.dead || UI.modalOpen || s.speed <= 0) return;
-    const ch = GAME.ch(s);
+    if (!s.agenda || s.agendaWeek !== s.week) AGENDA.plan(s);
+    s.day = (s.day || 0) + 1;
+    if (s.day >= 7) { LOOP.weekEnd(); return; }
+    UI.update(); UI.save();
+    if (UI.openDay()) return;
+    LOOP.schedule();
+  },
+  weekEnd(){
+    const s = GAME.s; const ch = GAME.ch(s); s.day = 0;
     const { death, fired, arrived, mail } = GAME.tick(s);
     if (fired.length) { AUDIO.sfx("notify"); UI.toast(fired[0].d.title); UI.flagGeneral = true; }
     for (const a of arrived) UI.fetchReply(a.id, ch.mailDays(s, a.id) || 3);
     if (mail.length) { AUDIO.sfx("notify"); UI.toast(`Lettre de ${GAME.relDef(s, mail[0].id).name}`); }
     UI.update(); UI.save();
     if (death) { UI.die(death); return; }
+    const forced = []; let hold = false;
     const due = GAME.dueHistorical(s);
-    if (due) { UI.showEvent(due, "hist"); return; }
-    if (ch.week) { const w = ch.week(s); UI.update(); if (w && w.hold) return; if (w && w.event) { UI.showEvent(w.event, "saison"); return; } if (w && w.match) { UI.playMatch(w.match); return; } }
+    if (due) forced.push({ kind: "hist", icon: "★", title: due.title, evId: due.id, pref: 1 + Math.floor(Math.random() * 3) });
+    if (ch.week) { const w = ch.week(s); if (w && w.hold) hold = true; else if (w && w.event) forced.push({ kind: "saison", icon: "◆", title: w.event.title, ev: w.event, pref: 0 }); else if (w && w.match) forced.push({ kind: "match", icon: "◎", title: w.match.title, m: w.match, pref: AGENDA.dayOfWd(s, 6) }); }
+    AGENDA.plan(s, forced); UI.update(true); UI.save();
+    if (AI.usable()) AI.prefetch(s);
+    if (hold) return;
     const mt = ch.meet ? ch.meet(s) : null;
     if (mt) { UI.fieldBattle(mt); return; }
     if (--s.nextMailIn <= 0) { s.nextMailIn = 5 + Math.floor(Math.random() * 5); UI.mailTurn(); }
     const off = ch.enemyMove ? ch.enemyMove(s) : null;
     if (off) { UI.showEvent(off, "guerre"); return; }
     if (--s.nextRivalIn <= 0) { s.nextRivalIn = 10 + Math.floor(Math.random() * 5); UI.rivalsTurn(); }
-    s.nextRandomIn--;
-    if (s.nextRandomIn <= 3) AI.prefetch(s);
-    if (s.nextRandomIn <= 0) { s.nextRandomIn = 13 + Math.floor(Math.random() * 5); if (s.speed > 0) UI.resumeSpeed = s.speed; UI.randomEvent(); return; }
+    if (UI.openDay()) return;
     LOOP.schedule();
   }
 };
@@ -5738,7 +6165,6 @@ document.addEventListener("keydown", e => {
   if (e.target.closest("input,textarea,select")) return;
   if (e.code === "Space") { e.preventDefault(); LOOP.setSpeed(s.speed > 0 ? 0 : (UI.resumeSpeed || 1)); }
   else if (e.key === "1") LOOP.setSpeed(1); else if (e.key === "2") LOOP.setSpeed(2); else if (e.key === "3") LOOP.setSpeed(4);
-  else if (e.key === "a" || e.key === "A") { e.preventDefault(); UI.actionModal(); }
 });
 
 UI.title();

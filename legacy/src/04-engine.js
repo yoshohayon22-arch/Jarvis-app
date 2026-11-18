@@ -3,7 +3,7 @@
 /* =====================================================================
    MOTEUR — temps (semaine), effets, santé, mort, événements, mémoire
    ===================================================================== */
-const SAVE_VERSION = 3;
+const SAVE_VERSION = 4;
 const MONTHS = ["janvier","février","mars","avril","mai","juin","juillet","août","septembre","octobre","novembre","décembre"];
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 const esc = t => String(t ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
@@ -43,7 +43,7 @@ const GAME = {
       family: { spouse: st.family?.spouse || null, spouseName: null, exSpouses: [...(st.family?.exSpouses || [])], children: [...(st.family?.children || [])], heir: null },
       conditions: [], done, history: [], feed: [], journal: [], deferred: [], deadRel: {},
       counters: { battlesWon: 0, battlesLost: 0, reforms: 0, treaties: 0, weeks: 0, maxDep: stats.departements || 0, popSum: 0, powerWeeks: 0, ...(st.counters || {}) },
-      nextRandomIn: 6, nextRivalIn: 8, nextMailIn: 3, recentRandom: [], actionWeek: -1, corr: {}, corrQueue: [], fin: [], where: null, feedN: 0, dead: null, pending: null, speed: 0, savedAt: null
+      day: 0, agenda: null, agendaWeek: -1, rdvRecent: [], nextRandomIn: 6, nextRivalIn: 8, nextMailIn: 3, recentRandom: [], actionWeek: -1, corr: {}, corrQueue: [], fin: [], where: null, feedN: 0, dead: null, pending: null, speed: 0, savedAt: null
     };
     for (const r of ch.relations) if (r.dies && r.dies.date <= s.date) s.deadRel[r.id] = r.dies.date;
     if (ch.setup) ch.setup(s, st.id, false);
@@ -91,6 +91,8 @@ const GAME = {
     if (fx.heir) { s.family.heir = fx.heir; out.notes.push(`Héritier désigné : ${fx.heir}.`); }
     if (fx.danger && !out.death) { const p = clamp(+fx.danger.p || 0, 0, .3); if (Math.random() < p) out.death = { type: fx.danger.type || "accident", cause: fx.danger.cause || "Mort brutale." }; }
     if (fx.call && ch.fxCall) ch.fxCall(s, fx.call, out);
+    if (fx.opinion && ch.newsFx) { const before = { ...s.stats }; ch.newsFx(s, "fr", fx.opinion); for (const k in s.stats) { const d = s.stats[k] - before[k]; if (Math.abs(d) > 1e-6) out.deltas[k] = (out.deltas[k] || 0) + d; } }
+    if (fx.roll) { const ok = Math.random() < fx.roll.p; const r = fx.roll[ok ? "win" : "loss"]; if (r.txt) out.notes.push(r.txt); GAME.applyFx(s, r, out); }
     if (fx.gamble) { const g = fx.gamble; const v = s.rel[g.rel] ?? 0; const p = clamp(.35 + (v - g.threshold) / 120, .05, .9); const ok = Math.random() < p; out.notes.push(g[ok ? "win" : "loss"].txt); GAME.applyFx(s, g[ok ? "win" : "loss"], out); }
     ch.sync && ch.sync(s);
     return out;
@@ -258,6 +260,10 @@ const STORE = {
         for (const c of (s.corps || [])) c.stance = c.stance || "marche";
         for (const n of s.feed) { n.cat = n.cat || (ch.newsCat ? ch.newsCat(n.src) : "sys"); n.ton = n.ton || (n.cat === "sys" ? "" : "neu"); }
         s.v = 3;
+      }
+      if (s.v < 4) {
+        // v4 : le temps avance jour par jour, avec un agenda de rendez-vous
+        s.day = 0; s.agenda = null; s.agendaWeek = -1; s.rdvRecent = []; s.v = 4;
       }
       return s;
     } catch (e) { return null; }

@@ -67,6 +67,27 @@
 .theme-magie .st-home{fill:#f0c35a} .theme-magie .st-allie{fill:#6f86d6} .theme-magie .st-vassal{fill:#3b4480} .theme-magie .st-paix{fill:#23274a} .theme-magie .st-guerre{fill:#7a3050}
 .theme-magie .map-legend .st-home{background:#f0c35a} .theme-magie .map-legend .st-allie{background:#6f86d6} .theme-magie .map-legend .st-vassal{background:#3b4480} .theme-magie .map-legend .st-paix{background:#23274a} .theme-magie .map-legend .st-guerre{background:#7a3050}
 .theme-magie .pin circle{fill:#f0c35a} .theme-magie .pin text{fill:#231a04} .theme-magie .bub.me{background:#3b4480}
+/* Agenda de la semaine */
+.cal{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px;margin-top:8px}
+.cal .cd{border:1px solid var(--line);border-radius:10px;background:var(--panel);padding:5px 6px 6px;display:flex;flex-direction:column;gap:4px;min-height:62px;min-width:0}
+.cal .cd.past{opacity:.55}
+.cal .cd.today{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent);background:var(--panel2)}
+.cal .cw{font-family:var(--f-ui);font-size:.72rem;color:var(--muted);letter-spacing:.04em;text-transform:uppercase}
+.cal .cw b{color:var(--ink);font-size:.86rem}
+.cal .rv{display:flex;align-items:center;gap:5px;min-height:30px;width:100%;text-align:left;border:1px solid var(--line);border-radius:7px;background:var(--bg2);padding:3px 6px;font-family:var(--f-ui);font-size:.74rem;line-height:1.15;color:var(--ink)}
+.cal .rv .tt{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.cal .rv .ic{flex:none;color:var(--accent);font-size:.85rem}
+.cal .rv.k-hist,.cal .rv.k-match{border-color:var(--accent)}
+.cal .rv.done{opacity:.55}
+.cal .rv.done .ic{color:var(--good)}
+.cal-next{display:none;font-family:var(--f-ui);font-size:.8rem;color:var(--muted);margin-top:4px}
+.cal-next b{color:var(--accent)}
+.rdv-extra{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end}
+.rdv-extra .btn{min-height:44px}
+@media (max-width:760px){
+  .cal{gap:3px}.cal .cd{padding:4px 3px;min-height:52px;align-items:center}.cal .cw{font-size:.62rem;text-align:center}
+  .cal .rv{justify-content:center;padding:2px;min-height:26px}.cal .rv .tt{display:none}.cal-next{display:block}
+}
 html,body{height:100%}
 body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.5;
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));}

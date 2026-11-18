@@ -95,8 +95,10 @@ SANTÉ : ${s.conditions.length ? s.conditions.map(c => c.name).join(", ") : "pas
   findRel(s, k){ const ch = GAME.ch(s); const key = String(k || "").toLowerCase().trim(); if (!key) return null; return (ch.relations.find(r => r.id === key) || ch.relations.find(r => r.name.toLowerCase().includes(key) || key.includes(r.id) || key.includes(r.name.toLowerCase().split(" ").pop())))?.id || null; },
 
   /* ---------- 1. Action libre : validité et répercussions ---------- */
+  tp(s, type){ return GAME.ch(s).speech.find(x => x.id === type) || { id: type, label: "Réponse libre pendant un rendez-vous", hint: "ce que le personnage dit ou fait pendant ce rendez-vous" }; },
+  rdvCtx(a){ return a.rdv ? `\nRENDEZ-VOUS EN COURS DANS L’AGENDA : « ${a.rdv.title} » — ${a.rdv.text}\nOptions qui lui étaient proposées : ${(a.rdv.choices || []).map(c => c.t).join(" / ")}. Il a préféré agir avec ses propres mots ; juge son action dans ce contexte précis.\n` : ""; },
   actionPrompt(s, a){
-    const ch = GAME.ch(s); const tp = ch.speech.find(x => x.id === a.type);
+    const ch = GAME.ch(s); const tp = AI.tp(s, a.type);
     return `Tu es le moteur de simulation de « Legacy », un simulateur de vie historique sérieux, en français. Le joueur incarne le personnage et vient d’écrire UNE action libre. Tu dois juger si elle est possible, puis calculer ses répercussions de façon réaliste.
 
 ${AI.context(s)}
@@ -104,7 +106,7 @@ ${AI.context(s)}
 MÉMOIRE DE LA PARTIE :
 ${AI.memory(s)}
 
-ACTION DU JOUEUR — type : ${tp.label} (${tp.hint})${a.target ? ` — destinataire : ${a.target}` : ""}
+${AI.rdvCtx(a)}ACTION DU JOUEUR — type : ${tp.label} (${tp.hint})${a.target ? ` — destinataire : ${a.target}` : ""}
 « ${a.text} »
 
 RÈGLES :
@@ -162,7 +164,7 @@ RÉPONDS UNIQUEMENT par un objet JSON : {"media":"…","questions":["…","…"]
 
   /* ---------- 2. Conseiller : avis avant l’envoi, sans consommer l’action ---------- */
   async advise(s, a){
-    const ch = GAME.ch(s); const adv = ch.advisor(s); const tp = ch.speech.find(x => x.id === a.type);
+    const ch = GAME.ch(s); const adv = ch.advisor(s); const tp = AI.tp(s, a.type);
     const o = await AI.call(`Tu joues ${adv.name}, ${adv.role}, conseiller du personnage dans « Legacy », simulateur historique sérieux en français. Ton caractère : ${adv.style}. Tu donnes ton avis AVANT que l’action soit lancée. C’est une reconstitution : ne cite aucune phrase réelle de ${adv.name}, parle à la première personne en le paraphrasant, en vouvoyant le personnage.
 
 ${AI.context(s)}
@@ -170,7 +172,7 @@ ${AI.context(s)}
 MÉMOIRE DE LA PARTIE :
 ${AI.memory(s)}
 
-ACTION ENVISAGÉE — type : ${tp.label}${a.target ? ` — destinataire : ${a.target}` : ""}
+${AI.rdvCtx(a)}ACTION ENVISAGÉE — type : ${tp.label}${a.target ? ` — destinataire : ${a.target}` : ""}
 « ${a.text} »
 
 Dis franchement si l’action est possible à cette date, ce qu’elle risque de produire, et propose mieux si tu vois mieux. Reste bref et concret.
@@ -193,11 +195,11 @@ DERNIÈRES DÉCISIONS À CHOIX :
 ${s.history.slice(-6).map(h => `- ${frMonth(h.date)} — ${h.title} : ${h.choice}`).join("\n") || "- (début de partie)"}
 
 CONSIGNES :
-- Écris UN événement qui s’impose au personnage, plausible à cette date et dans cette situation précise : politique, militaire, diplomatique, économique, familial, santé. Il peut découler d’une action libre passée du joueur. Varie les thèmes.
+- Écris UN rendez-vous de l’agenda du personnage cette semaine (réunion, audience, visite, rencontre, appel, cérémonie…) où il se passe quelque chose et où il doit agir, plausible à cette date et dans cette situation précise : politique, militaire, diplomatique, économique, familial, santé. Il peut découler d’une action passée du joueur. Varie les thèmes.
 - Appuie-toi sur des faits, des lieux, des institutions et des personnes réels de l’époque. Si les choix du joueur ont changé l’Histoire, fais réagir le monde de façon crédible. Ne raconte pas le prochain grand moment historique.
 - Texte de 3 à 5 phrases, au présent, en vouvoyant le personnage. Ton sobre de récit historique.
 ${AI.rules(s)}
-- Entre 2 et 4 choix, avec de vrais compromis. Effets proportionnés : la plupart entre 2 et 8 points, dans les bornes indiquées.
+- Entre 2 et 4 choix, avec de vrais compromis. Effets proportionnés : la plupart entre 1 et 5 points, dans les bornes indiquées.
 - « danger » facultatif : seulement si le choix expose physiquement le personnage (probabilité 0.01 à 0.08, cause de mort courte).
 
 RÉPONDS UNIQUEMENT par un objet JSON de cette forme exacte :

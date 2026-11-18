@@ -202,6 +202,26 @@ N.panels = [
       { k: "h", text: "Économie et Blocus" }, ...O.eco.blocks(s).filter(c => c.k !== "kpi" && c.arg !== "douanes"));
     return out; } }
 ];
+/* Fenêtres, pastilles et points d’entrée génériques */
+N.views = [{ id: "general", label: "Vue générale", icon: "general", kind: "general" }, { id: "armee", label: "Armée", icon: "armee", kind: "ops" }, { id: "presse", label: "Presse", icon: "presse", kind: "presse" }, { id: "finances", label: "Finances", icon: "finances", kind: "finances" }, { id: "corr", label: "Correspondance", icon: "corr", kind: "corr" }];
+N.badges = (s, c) => ({ general: c.view !== "general" && (c.flagGeneral || c.al.general.length > 0), armee: c.view !== "armee" && c.al.armee.length > 0 && c.al.armee.join("|") !== s.seen.armee, presse: c.view !== "presse" && c.newsNew, finances: c.view !== "finances" && c.al.finances.length > 0, corr: c.unread > 0 });
+N.statusLabel = s => P(s) === 0 ? "Exil" : s.flags.atWar ? "En guerre" : "En paix";
+N.opinions = s => [["En France", s.stats.popularite], ["À l’étranger", N.opinionAbroad(s)]];
+N.newsFx = (s, cat, sign) => { if (cat === "etr") { s.stats.coalition = clamp(s.stats.coalition - sign * .4, 0, 100); return { k: "à l’étranger", v: sign * .4 }; } const v = sign * (cat === "rum" ? .6 : 1); s.stats.popularite = clamp(s.stats.popularite + v, 0, 100); return { k: "en France", v }; };
+N.fin = { stat: "tresor", unit: "M F", chartTitle: "Trésor sur les douze derniers mois, en millions de francs",
+  kpis: (s, b, f) => [["Trésor", f(s.stats.tresor)], ["Revenus par mois", "+" + b.R.toFixed(1).replace(".", ",")], ["Dépenses par mois", "−" + b.D.toFixed(1).replace(".", ",")], ["Solde par mois", (b.solde >= 0 ? "+" : "−") + Math.abs(b.solde).toFixed(1).replace(".", ",")], ["Dette", f(s.dette || 0)], ["Activité économique", Math.round(s.eco || 100)]] };
+N.accidentCause = "Mort dans un accident de voiture, les chevaux s’étant emballés.";
+N.histLabel = "Moment historique";
+N.endTiles = (s, x) => { const rd = N.realDeath; return [["Âge à la mort", `${s.dead ? s.dead.age : GAME.age(s)} ans`, `Réalité : ${rd.age} ans`], ["Batailles", `${s.counters.battlesWon} V · ${s.counters.battlesLost} D`, "Sur toute la vie"], ["Territoire maximal", `${Math.round(s.counters.maxDep || 0)} dép.`, "Réalité : 130 en 1811"], ["Années au pouvoir", `${Math.round((s.counters.powerWeeks || 0) / 52)} ans`, "Réalité : 15 ans, plus les Cent-Jours"], ["Fidélité à l’Histoire", `${x.fidelity} %`, `${x.same} choix sur ${x.total} comme le vrai Napoléon`]]; };
+N.mapInfo = (s, id) => {
+  const reg = REG(id); const st = N.map.status(s, id); const c = s.pays[id];
+  const here = s.corps.filter(x => x.loc === id && !x.dest), coming = s.corps.filter(x => x.dest === id);
+  return `<div class="map-info"><button class="x" data-do="mapclose" aria-label="Fermer">×</button>
+    <h3>${esc(reg.name)} <span class="chip ${st === "home" ? "allie" : st}">${esc(N.map.statusLabel[st])}</span></h3>
+    ${c ? `<span class="note">Relation ${Math.round(c.rel)} · armée estimée ${Math.round(c.armee)} 000 h.${st === "guerre" ? ` · avantage militaire ${Math.round(c.ws || 0)}` : ""}</span>` : ""}
+    <span class="note">${here.length ? "Sur place : " + here.map(x => `${esc(x.name)} (${Math.round(x.men)} 000)`).join(", ") + "." : "Aucun de vos corps sur place."}${coming.length ? " En marche : " + coming.map(x => esc(x.name)).join(", ") + "." : ""}</span>
+    <div class="ops">${c && P(s) >= 2 ? `<button class="btn small" data-do="goto|diplomatie">Diplomatie</button>` : ""}<span class="note" style="align-self:center">Pour y envoyer un corps : fenêtre Armée.</span></div></div>`;
+};
 /* Répartition des panneaux dans les fenêtres */
 N.windows = { general: ["lois", "diplomatie", "nominations", "police", "travaux", "famille"], armee: "armee", presse: "presse", finances: "finances" };
 const tr = N.act; N.act = (s, act, arg, val) => act === "tribut" ? tr(s, act, arg || val, val) : tr(s, act, arg, val);

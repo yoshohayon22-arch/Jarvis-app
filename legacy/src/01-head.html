@@ -23,6 +23,17 @@
   --ink:#f0e8d5; --muted:#b0a88f; --faint:#7a7461; --line:rgba(207,165,73,.2);
   --accent:#d2a74b; --accent-ink:#1c1505; --accent2:#9a2633; --sea:#0c1f2b;
 }
+/* Thème Stade : nuit de match, projecteurs, rouge du maillot */
+.theme-stade{
+  --bg:#0a1119; --bg2:#0f1823; --panel:#131e2b; --panel2:#1a2838;
+  --ink:#eef2f6; --muted:#9fadbd; --faint:#6c7a8a; --line:rgba(159,173,189,.2);
+  --accent:#f2c14e; --accent-ink:#1a1405; --accent2:#c8102e; --sea:#0c1a29;
+  --f-display:"Barlow Semi Condensed","Arial Narrow",system-ui,sans-serif;
+}
+.theme-stade h1,.theme-stade h2,.theme-stade h3,.theme-stade .blk-h,.theme-stade .legend-title{font-weight:600;letter-spacing:.06em}
+.theme-stade .st-home{fill:#c8102e} .theme-stade .st-vassal{fill:#4d6a8a} .theme-stade .st-allie{fill:#2f9a63} .theme-stade .st-paix{fill:#33465c}
+.theme-stade .map-legend .st-home{background:#c8102e} .theme-stade .map-legend .st-vassal{background:#4d6a8a} .theme-stade .map-legend .st-allie{background:#2f9a63} .theme-stade .map-legend .st-paix{background:#33465c}
+.theme-stade .bub.me{background:#1d5a8a}
 html,body{height:100%}
 body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.5;
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));}
@@ -331,6 +342,24 @@ body.in-game #app{height:100%;display:flex;flex-direction:column}
   .kpi.four{grid-template-columns:repeat(2,minmax(0,1fr))}
   .up{grid-template-columns:minmax(0,1fr);gap:0}
 }
+
+.res{display:grid;gap:1px;border-left:3px solid var(--line);padding:3px 0 3px 10px;margin-bottom:6px;font-size:.92rem}
+.res small{font-family:var(--f-ui);font-size:.72rem;color:var(--faint);letter-spacing:.04em;text-transform:uppercase}
+.res.w{border-left-color:var(--good)} .res.l{border-left-color:var(--bad)} .res.d{border-left-color:var(--warn)}
+#board{display:flex;flex-direction:column;gap:10px}
+.mt{gap:10px}
+.mt-score{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:14px;align-items:center;text-align:center}
+.mt-score .team{font-family:var(--f-display);font-size:1.15rem;letter-spacing:.04em;overflow-wrap:anywhere}
+.mt-score b{font-family:var(--f-ui);font-size:2.4rem;font-weight:600;line-height:1}
+.mt-clock{display:flex;justify-content:space-between;gap:10px;font-family:var(--f-ui);font-size:.86rem;color:var(--muted)}
+.mt-feed{height:210px;overflow:auto;border:1px solid var(--line);border-radius:8px;padding:8px 10px;display:grid;gap:6px;align-content:start;background:rgba(0,0,0,.2)}
+.mt-line{display:grid;grid-template-columns:38px minmax(0,1fr);gap:8px;font-size:.96rem}
+.mt-line .num{color:var(--faint);font-size:.82rem;padding-top:2px}
+.mt-line.goal{color:#b6e3a3;font-weight:600} .mt-line.bad{color:#f0a390} .mt-line.key{color:var(--accent);font-weight:600}
+.mt-choice{display:grid;gap:8px}
+.mt-opts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.mt-opts .btn{min-height:58px;padding:.4em .5em;font-size:.86rem;text-transform:none;letter-spacing:0}
+@media (max-width:560px){.mt-opts{grid-template-columns:minmax(0,1fr)}.mt-score b{font-size:1.9rem}}
 
 /* ---------- Fenêtres ---------- */
 .scene{position:relative;overflow:hidden;aspect-ratio:1200/330;max-width:100%;background:#000}

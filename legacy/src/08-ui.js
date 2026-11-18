@@ -50,7 +50,7 @@ const UI = {
           <p class="muted ui">Né le ${frDate(ch.born)} à ${esc(ch.birthplace)}</p><p class="muted" style="font-size:.95rem">${esc(ch.realTimeline)}</p></div>
         <div style="display:grid;gap:14px;min-width:0">
           <div><div class="label">Mode carrière</div><h2 style="font-size:1.5rem">Choisissez l’année de départ</h2>
-          <p class="muted">Vous jouez jusqu’à la mort du personnage. Le temps avance d’une semaine toutes les six secondes environ ; rien ne peut être annulé.</p></div>
+          <p class="muted">Vous jouez jusqu’à la mort du personnage. Le temps avance d’une semaine toutes les six secondes environ ; rien ne peut être annulé.${ch.realStatus ? " Personne réelle et vivante : le jeu s’appuie sur des faits publics, et tout ce qui s’en écarte est de la fiction." : ""}</p></div>
           <div class="starts" role="radiogroup" aria-label="Année de départ">${ch.starts.map(st => `<button class="start" role="radio" data-start="${st.id}" aria-pressed="${st.id === pick}" aria-checked="${st.id === pick}"><span class="yr">${st.year}</span><h3>${esc(st.title)}</h3><span class="muted">${esc(st.summary)}</span></button>`).join("")}</div>
           <div class="slot-pick"><label class="label" for="slot-sel">Emplacement de sauvegarde</label>
             <select id="slot-sel" class="sel" style="width:auto">${[1, 2, 3].map(n => { const s = STORE.read(n); return `<option value="${n}" ${n === free ? "selected" : ""}>Emplacement ${n}${STORE.valid(s) ? ` (remplacera ${esc(CHARACTERS[s.char].short)}, ${esc(frMonth(s.date))})` : " (libre)"}</option>`; }).join("")}</select></div>
@@ -85,6 +85,7 @@ const UI = {
     armee: `<svg viewBox="0 0 32 32" aria-hidden="true"><path d="M9 4v24M9 5h15l-4 5 4 5H9" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/></svg>`,
     presse: `<svg viewBox="0 0 32 32" aria-hidden="true"><rect x="5" y="6" width="22" height="20" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9 11h14M9 16h6M9 21h6M19 16h4v5h-4z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`,
     finances: `<svg viewBox="0 0 32 32" aria-hidden="true"><ellipse cx="16" cy="9" rx="9" ry="4" fill="none" stroke="currentColor" stroke-width="2"/><path d="M7 9v7c0 2.2 4 4 9 4s9-1.8 9-4V9M7 16v7c0 2.2 4 4 9 4s9-1.8 9-4v-7" fill="none" stroke="currentColor" stroke-width="2"/></svg>`,
+    ballon: `<svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="11" fill="none" stroke="currentColor" stroke-width="2"/><path d="M16 10.5l5 3.6-1.9 5.9h-6.2L11 14.1zM16 5v5.5M26.5 13l-5.5 1.1M22.5 25l-3.4-5M9.5 25l3.4-5M5.5 13l5.5 1.1" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>`,
     corr: `<svg viewBox="0 0 32 32" aria-hidden="true"><rect x="4" y="8" width="24" height="17" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M5 10l11 8 11-8" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>`
   },
   VIEWS: [["general", "Vue générale"], ["armee", "Armée"], ["presse", "Presse"], ["finances", "Finances"], ["corr", "Correspondance"]],
@@ -103,7 +104,7 @@ const UI = {
         <button class="icon-btn" id="b-menu" title="Parties, réglages, quitter">Menu</button>
       </div><div class="tick-bar"><i id="tickbar"></i></div></header>
       <div class="shell">
-        <nav class="rail" id="rail" aria-label="Fenêtres">${UI.VIEWS.map(([id, label]) => `<button data-view="${id}" aria-pressed="false">${UI.ICONS[id]}<span>${label}</span><i class="badge-dot" hidden></i></button>`).join("")}</nav>
+        <nav class="rail" id="rail" aria-label="Fenêtres">${ch.views.map(({ id, label, icon }) => `<button data-view="${id}" aria-pressed="false">${UI.ICONS[icon]}<span>${label}</span><i class="badge-dot" hidden></i></button>`).join("")}</nav>
         <main class="view" id="view"></main>
       </div>`;
     $$("[data-speed]").forEach(b => b.onclick = () => { AUDIO.sfx("click"); LOOP.setSpeed(+b.dataset.speed); });
@@ -137,28 +138,30 @@ const UI = {
     UI.updateAIStatus();
   },
 
+  kind(view){ const v = GAME.ch().views.find(x => x.id === (view || UI.view)); return v ? v.kind : "general"; },
   setView(view){
-    const s = GAME.s, ch = GAME.ch(s); UI.view = view; UI.keys = {}; UI.armed = null; UI.mapSel = null; UI.ord = { corps: null, dest: null };
+    const s = GAME.s, ch = GAME.ch(s); if (!ch.views.some(v => v.id === view)) view = "general"; UI.view = view; UI.keys = {}; UI.armed = null; UI.mapSel = null; UI.ord = { corps: null, dest: null };
     const legend = `<div class="map-legend">${Object.entries(ch.map.statusLabel).map(([k, l]) => `<span><i class="st-${k}"></i>${esc(l)}</span>`).join("")}</div>`;
     const html = {
       general: `<div class="vw"><div class="vcol grow"><div class="mapbox"><div id="map" class="mapfit"></div>${legend}<div id="map-info"></div></div>
           <div class="panel upcoming"><h2>À venir</h2><div id="upcoming"></div></div></div>
         <div class="vcol side"><div class="panel"><div class="idrow"><div id="portrait"></div><div><div class="place" id="place"></div><span class="status" id="status"></span></div></div><div class="gauges" id="mainG" style="margin-top:10px"></div><div class="facts4" id="facts"></div><div id="conds"></div><div id="g-alerts"></div></div>
           <div class="subtabs" id="subtabs" role="tablist"></div><div class="pbody panel" id="pbody"></div></div></div>`,
-      armee: `<div class="vw"><div class="vcol grow"><div class="mapbox"><div id="map" class="mapfit"></div>${legend}<div id="order-sheet"></div></div></div>
+      ops: `<div class="vw"><div class="vcol grow"><div class="mapbox"><div id="map" class="mapfit"></div>${legend}<div id="order-sheet"></div></div></div>
         <div class="vcol side"><div id="alerts"></div><div class="pbody panel" id="pbody"></div></div></div>`,
       presse: `<div class="vw"><div class="vcol grow"><div class="panel"><h2>Opinion publique</h2><div class="gauges two" id="opinion"></div></div><div class="chips" id="pcats"></div><div class="panel scroll" id="press"></div></div>
         <div class="vcol side"><div class="pbody panel" id="pbody"></div></div></div>`,
-      finances: `<div class="vw"><div class="vcol grow scrolly"><div id="alerts"></div><div class="panel"><div class="kpi four" id="fkpi"></div><h2 style="margin-top:12px">Trésor sur les douze derniers mois, en millions de francs</h2><div id="chart"></div></div><div class="two-col" id="ftables"></div></div>
+      finances: `<div class="vw"><div class="vcol grow scrolly"><div id="alerts"></div><div class="panel"><div class="kpi four" id="fkpi"></div><h2 style="margin-top:12px">${esc(ch.fin.chartTitle)}</h2><div id="chart"></div></div><div class="two-col" id="ftables"></div></div>
         <div class="vcol side"><div class="pbody panel" id="pbody"></div></div></div>`,
+      board: `<div class="vw"><div class="vcol grow scrolly" id="board"></div><div class="vcol side"><div id="alerts"></div><div class="pbody panel" id="pbody"></div></div></div>`,
       corr: `<div class="vw corr"><div class="vcol contacts panel" id="contacts"></div><div class="vcol grow panel convo"><div class="conv-h" id="conv-h"></div><div class="conv" id="conv"></div>
           <div class="composer"><textarea id="msg" rows="2" maxlength="1200" placeholder="Écrivez votre lettre…" aria-label="Votre lettre"></textarea><button class="btn primary" id="send">Envoyer</button></div></div></div>`
-    }[view];
+    }[UI.kind(view)];
     $("#view").innerHTML = html; $("#view").dataset.view = view;
     $$("#rail [data-view]").forEach(b => b.setAttribute("aria-pressed", b.dataset.view === view));
-    if (view === "corr") { $("#send").onclick = () => UI.sendMail(); if (!UI.contact || !GAME.relKnown(s, UI.contact)) UI.contact = ch.contactGroups.flatMap(g => g[1]).find(id => GAME.relAlive(s, id)); }
-    if (view === "presse") s.seen.feedN = s.feedN;
-    if (view === "armee") s.seen.armee = ch.alerts(s).armee.join("|");
+    if (UI.kind(view) === "corr") { $("#send").onclick = () => UI.sendMail(); if (!UI.contact || !GAME.relKnown(s, UI.contact)) UI.contact = ch.contactGroups.flatMap(g => g[1]).find(id => GAME.relAlive(s, id)); }
+    if (UI.kind(view) === "presse") s.seen.feedN = s.feedN;
+    if (UI.kind(view) === "ops") s.seen.armee = (ch.alerts(s).armee || []).join("|");
     if (view === "general") UI.flagGeneral = false;
     UI.lastPortraitAge = -1;
     UI.update(true);
@@ -182,13 +185,13 @@ const UI = {
     // Pastilles rouges
     const unread = Object.values(s.corr).reduce((t, th) => t + th.filter(m => m.unread).length, 0);
     const newsNew = s.feed.slice(0, Math.max(0, (s.feedN || 0) - (s.seen.feedN || 0))).some(n => n.ton === "hos" || n.kind === "rival" || n.kind === "differe");
-    const flags = { general: UI.view !== "general" && (UI.flagGeneral || al.general.length > 0), armee: UI.view !== "armee" && al.armee.length > 0 && al.armee.join("|") !== s.seen.armee, presse: UI.view !== "presse" && newsNew, finances: UI.view !== "finances" && al.finances.length > 0, corr: unread > 0 };
+    const flags = ch.badges(s, { al, unread, newsNew, view: UI.view, flagGeneral: UI.flagGeneral });
     $$("#rail [data-view]").forEach(b => { const d = b.querySelector(".badge-dot"); const on = !!flags[b.dataset.view]; d.hidden = !on; d.textContent = b.dataset.view === "corr" && unread ? unread : ""; });
-    const view = UI.view;
-    if (view === "general" || view === "armee") UI.updateMap(force);
+    const view = UI.kind();
+    if (view === "general" || view === "ops") UI.updateMap(force);
     if (view === "general") {
       const age = GAME.age(s); if (Math.abs(age - UI.lastPortraitAge) >= 2) { $("#portrait").innerHTML = ch.portrait(s); UI.lastPortraitAge = age; }
-      $("#place").textContent = s.place; $("#status").textContent = GAME.power(s) === 0 ? "Exil" : s.flags.atWar ? "En guerre" : "En paix";
+      $("#place").textContent = s.place; $("#status").textContent = ch.statusLabel(s);
       UI.put("mainG", ch.mainGauges(s).map(g => { const d = { bad: g.bad || "low" }; return `<div class="gauge"><div class="top"><span class="name">${esc(g.label)}</span><span class="val">${Math.round(g.v)}</span></div><span class="bar"><i class="lvl-${UI.level(d, g.v)}" style="width:${clamp(g.v, 0, 100)}%"></i></span></div>`; }).join(""));
       UI.put("facts", ch.sideFacts(s).map(([l, v]) => `<div><span>${esc(l)}</span><b>${esc(v)}</b></div>`).join(""));
       UI.put("conds", s.conditions.map(c => `<span class="cond-chip">${esc(c.name)}</span>`).join(""));
@@ -196,7 +199,8 @@ const UI = {
       const up = ch.upcoming(s);
       UI.put("upcoming", up.length ? up.map(u => `<div class="up"><span class="when">${u.approx ? "vers " + esc(frMonth(u.d)) : esc(frDate(u.d))}</span><span class="what"><small>${esc(u.k)}</small>${esc(u.t)}</span></div>`).join("") : `<span class="note">Rien d’annoncé pour l’instant. Les conséquences de vos actions et les mouvements en cours apparaîtront ici.</span>`);
     }
-    if (view === "armee") { UI.put("alerts", UI.alertBox(al.armee)); UI.orderSheet(); }
+    if (view === "ops") { UI.put("alerts", UI.alertBox(al.armee)); UI.orderSheet(); }
+    if (view === "board") { UI.put("alerts", UI.alertBox(al[UI.view] || [])); UI.put("board", ch.boards[UI.view](s)); }
     if (view === "presse") UI.updatePress();
     if (view === "finances") UI.updateFinances(al);
     if (view === "corr") UI.updateCorr(); else UI.renderPanel(force);
@@ -205,17 +209,17 @@ const UI = {
   updateMap(force){
     const s = GAME.s, ch = GAME.ch(s), m = ch.map; if (!$("#map")) return;
     const key = JSON.stringify([m.regions.map(r => m.status(s, r.id)), m.markers(s).map(k => [k.id, k.region, k.moving]), UI.mapSel, UI.ord.corps, UI.ord.dest]);
-    if (key !== UI.keys.map) { UI.keys.map = key; $("#map").innerHTML = ART.map(ch, s, UI.view === "armee" ? UI.ord.dest : UI.mapSel, UI.ord.corps); }
+    if (key !== UI.keys.map) { UI.keys.map = key; $("#map").innerHTML = ART.map(ch, s, UI.kind() === "ops" ? UI.ord.dest : UI.mapSel, UI.ord.corps); }
     if (UI.view === "general") UI.mapInfo();
   },
   mapClick(e){
-    const s = GAME.s; const pin = e.target.closest("[data-marker]"), rg = e.target.closest("[data-region]");
-    if (pin) { AUDIO.sfx("click"); if (UI.view !== "armee") { UI.ord = { corps: pin.dataset.marker, dest: null }; UI.setViewKeep("armee"); return; }
+    const s = GAME.s, ch = GAME.ch(s); const pin = e.target.closest("[data-marker]"), rg = e.target.closest("[data-region]");
+    if (pin) { AUDIO.sfx("click"); if (UI.kind() !== "ops") { const ops = ch.views.find(v => v.kind === "ops"); if (ops) { UI.ord = { corps: pin.dataset.marker, dest: null }; UI.setViewKeep(ops.id); return; } const mk = ch.map.markers(s).find(k => k.id === pin.dataset.marker); UI.mapSel = mk ? mk.region : null; UI.update(); return; }
       // Un corps est déjà choisi : toucher un autre pion désigne sa région comme destination
       if (UI.ord.corps && UI.ord.corps !== pin.dataset.marker) { const o = s.corps.find(x => x.id === pin.dataset.marker); if (o) { UI.ord.dest = o.dest || o.loc; UI.update(); return; } }
       UI.pickCorps(pin.dataset.marker); return; }
     if (!rg) return; AUDIO.sfx("click");
-    if (UI.view === "armee") { if (!UI.ord.corps) { UI.toast("Touchez d’abord un corps d’armée."); return; } UI.ord.dest = rg.dataset.region; UI.update(); return; }
+    if (UI.kind() === "ops") { if (!UI.ord.corps) { UI.toast("Touchez d’abord un corps d’armée."); return; } UI.ord.dest = rg.dataset.region; UI.update(); return; }
     UI.mapSel = UI.mapSel === rg.dataset.region ? null : rg.dataset.region; UI.update();
   },
   setViewKeep(view){ const o = UI.ord; UI.setView(view); UI.ord = o; UI.update(true); },
@@ -241,44 +245,33 @@ const UI = {
     else if (a === "goto") { UI.subtab = x; UI.keys.subtabs = null; UI.renderPanel(true); }
     else if (a === "offensive") UI.act("offensive", x);
   },
-  mapInfo(){
-    const s = GAME.s, ch = GAME.ch(s), id = UI.mapSel;
-    if (!id) { UI.put("map-info", ""); return; }
-    const reg = ch.map.regions.find(x => x.id === id); const st = ch.map.status(s, id); const c = s.pays[id];
-    const here = s.corps.filter(x => x.loc === id && !x.dest), coming = s.corps.filter(x => x.dest === id);
-    UI.put("map-info", `<div class="map-info"><button class="x" data-do="mapclose" aria-label="Fermer">×</button>
-      <h3>${esc(reg.name)} <span class="chip ${st === "home" ? "allie" : st}">${esc(ch.map.statusLabel[st])}</span></h3>
-      ${c ? `<span class="note">Relation ${Math.round(c.rel)} · armée estimée ${Math.round(c.armee)} 000 h.${st === "guerre" ? ` · avantage militaire ${Math.round(c.ws || 0)}` : ""}</span>` : ""}
-      <span class="note">${here.length ? "Sur place : " + here.map(x => `${esc(x.name)} (${Math.round(x.men)} 000)`).join(", ") + "." : "Aucun de vos corps sur place."}${coming.length ? " En marche : " + coming.map(x => esc(x.name)).join(", ") + "." : ""}</span>
-      <div class="ops">${c && GAME.power(s) >= 2 ? `<button class="btn small" data-do="goto|diplomatie">Diplomatie</button>` : ""}<span class="note" style="align-self:center">Pour y envoyer un corps : fenêtre Armée.</span></div></div>`);
-  },
+  mapInfo(){ const s = GAME.s, ch = GAME.ch(s); UI.put("map-info", UI.mapSel ? ch.mapInfo(s, UI.mapSel) : ""); },
 
   updatePress(){
     const s = GAME.s, ch = GAME.ch(s); const cat = UI.pressCat || "tous"; s.seen.feedN = s.feedN;
-    const ab = ch.opinionAbroad(s), fr = s.stats.popularite;
-    UI.put("opinion", [["En France", fr], ["À l’étranger", ab]].map(([l, v]) => `<div class="gauge"><div class="top"><span class="name">${l}</span><span class="val">${Math.round(v)} / 100 · ${v >= 65 ? "favorable" : v >= 40 ? "partagée" : "hostile"}</span></div><span class="bar"><i class="lvl-${v < 30 ? "bad" : v < 50 ? "warn" : "good"}" style="width:${v}%"></i></span></div>`).join(""));
+    UI.put("opinion", ch.opinions(s).map(([l, v]) => `<div class="gauge"><div class="top"><span class="name">${l}</span><span class="val">${Math.round(v)} / 100 · ${v >= 65 ? "favorable" : v >= 40 ? "partagée" : "hostile"}</span></div><span class="bar"><i class="lvl-${v < 30 ? "bad" : v < 50 ? "warn" : "good"}" style="width:${v}%"></i></span></div>`).join(""));
     UI.put("pcats", ch.pressCats.map(([k, l]) => `<button data-do="pcat|${k}" aria-pressed="${k === cat}">${esc(l)}</button>`).join(""));
     const items = s.feed.filter(n => cat === "tous" ? n.cat !== "sys" : n.cat === cat).slice(0, 70);
     UI.put("press", `<div class="ai-status" id="ai-status"></div>` + (items.length ? items.map(n => `<article class="art ${n.ton || ""}"><div class="m">${esc(frDate(n.d))} · ${esc(n.src)}</div>${n.title ? `<h3>${esc(n.title)}</h3>` : ""}${n.text ? `<p>${esc(n.text)}</p>` : ""}
-      ${n.ton ? `<div class="tags"><span class="ton ${n.ton}">${ch.tonLabel[n.ton]}</span>${n.fx ? `<span class="fxo">Opinion ${n.fx.k === "France" ? "en France" : "à l’étranger"} ${n.fx.v > 0 ? "+" : "−"}${String(Math.abs(n.fx.v)).replace(".", ",")}</span>` : `<span class="fxo">Sans effet sur l’opinion</span>`}</div>` : ""}</article>`).join("") : `<span class="note">Aucun article dans cette rubrique pour l’instant.</span>`));
+      ${n.ton ? `<div class="tags"><span class="ton ${n.ton}">${ch.tonLabel[n.ton]}</span>${n.fx ? `<span class="fxo">Opinion ${esc({ France: "en France", "étranger": "à l’étranger" }[n.fx.k] || n.fx.k)} ${n.fx.v > 0 ? "+" : "−"}${String(Math.abs(n.fx.v)).replace(".", ",")}</span>` : `<span class="fxo">Sans effet sur l’opinion</span>`}</div>` : ""}</article>`).join("") : `<span class="note">Aucun article dans cette rubrique pour l’instant.</span>`));
     UI.updateAIStatus();
   },
 
   updateFinances(al){
-    const s = GAME.s, ch = GAME.ch(s); const b = ch.budget(s); const f = v => `${v < 0 ? "−" : ""}${Math.abs(Math.round(v)).toLocaleString("fr-FR")} M F`;
-    UI.put("alerts", UI.alertBox(al.finances));
-    UI.put("fkpi", [["Trésor", f(s.stats.tresor)], ["Revenus par mois", "+" + b.R.toFixed(1).replace(".", ",")], ["Dépenses par mois", "−" + b.D.toFixed(1).replace(".", ",")], ["Solde par mois", (b.solde >= 0 ? "+" : "−") + Math.abs(b.solde).toFixed(1).replace(".", ",")], ["Dette", f(s.dette || 0)], ["Activité économique", Math.round(s.eco || 100)]].map(([l, v]) => `<div><small>${l}</small><b>${v}</b></div>`).join(""));
+    const s = GAME.s, ch = GAME.ch(s); const b = ch.budget(s); const f = v => `${v < 0 ? "−" : ""}${Math.abs(Math.round(v)).toLocaleString("fr-FR")} ${ch.fin.unit}`;
+    UI.put("alerts", UI.alertBox(al[UI.view] || al.finances || []));
+    UI.put("fkpi", ch.fin.kpis(s, b, f).map(([l, v]) => `<div><small>${l}</small><b>${v}</b></div>`).join(""));
     const tbl = (title, rows, sign) => `<div class="panel"><h2>${title}</h2><div class="tbl">${rows.map(([l, v]) => `<div><span>${esc(l)}</span><span>${sign}${v.toFixed(1).replace(".", ",")}</span></div>`).join("")}<div class="tot"><span>Total</span><span>${sign}${rows.reduce((t, x) => t + x[1], 0).toFixed(1).replace(".", ",")}</span></div></div></div>`;
     UI.put("ftables", tbl("Revenus par mois", b.rec, "+") + tbl("Dépenses par mois", b.dep, "−"));
     // Graphique : une seule série (le Trésor), ligne fine, grille discrète, survol avec valeur
-    const pts = [...s.fin.slice(-12), { d: s.date, t: s.stats.tresor }];
+    const pts = [...s.fin.slice(-12), { d: s.date, t: s.stats[ch.fin.stat] }];
     if (pts.length < 3) { UI.put("chart", `<span class="note">Le relevé se construit mois après mois : revenez dans quelques semaines.</span>`); return; }
     const W = 640, H = 190, L = 54, R = 14, T = 12, B = 26; const vals = pts.map(p => p.t); let lo = Math.min(0, ...vals), hi = Math.max(0, ...vals); if (hi - lo < 50) hi = lo + 50; const pad = (hi - lo) * .08; hi += pad; if (lo < 0) lo -= pad;
     const X = i => L + i * (W - L - R) / (pts.length - 1), Y = v => T + (hi - v) / (hi - lo) * (H - T - B);
     const step = (() => { const raw = (hi - lo) / 4; const m = Math.pow(10, Math.floor(Math.log10(raw))); return [1, 2, 5, 10].map(k => k * m).find(k => k >= raw); })();
     const ticks = []; for (let v = Math.ceil(lo / step) * step; v <= hi; v += step) ticks.push(v);
     UI.chartData = { pts, X, Y, W, H, L, R, T, B };
-    UI.put("chart", `<div class="chartbox"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Évolution du Trésor : de ${Math.round(vals[0])} à ${Math.round(vals[vals.length - 1])} millions de francs">
+    UI.put("chart", `<div class="chartbox"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(ch.fin.chartTitle)} : de ${Math.round(vals[0])} à ${Math.round(vals[vals.length - 1])}">
       ${ticks.map(v => `<line class="grid ${v === 0 ? "zero" : ""}" x1="${L}" x2="${W - R}" y1="${Y(v)}" y2="${Y(v)}"/><text class="ax" x="${L - 8}" y="${Y(v) + 4}" text-anchor="end">${Math.round(v)}</text>`).join("")}
       ${pts.map((p, i) => (i % 3 === 0 && pts.length - 1 - i >= 2) || i === pts.length - 1 ? `<text class="ax" x="${X(i)}" y="${H - 6}" text-anchor="${i === pts.length - 1 ? "end" : i === 0 ? "start" : "middle"}">${esc(MONTHS[parseD(p.d).m - 1].slice(0, 4))} ${String(parseD(p.d).y).slice(2)}</text>` : "").join("")}
       <polyline class="line" points="${pts.map((p, i) => `${X(i).toFixed(1)},${Y(p.t).toFixed(1)}`).join(" ")}"/>
@@ -290,7 +283,7 @@ const UI = {
     if (!e || !D) { g.hidden = true; tip.hidden = true; return; }
     const r = svg.getBoundingClientRect(); const x = (e.clientX - r.left) / r.width * D.W; const i = clamp(Math.round((x - D.L) / ((D.W - D.L - D.R) / (D.pts.length - 1))), 0, D.pts.length - 1); const p = D.pts[i];
     g.hidden = false; g.querySelector("line").setAttribute("x1", D.X(i)); g.querySelector("line").setAttribute("x2", D.X(i)); g.querySelector("circle").setAttribute("cx", D.X(i)); g.querySelector("circle").setAttribute("cy", D.Y(p.t));
-    tip.hidden = false; tip.textContent = `${frMonth(p.d)} : ${Math.round(p.t)} M F`; tip.style.left = clamp(D.X(i) / D.W * 100, 12, 88) + "%";
+    tip.hidden = false; tip.textContent = `${frMonth(p.d)} : ${Math.round(p.t)} ${GAME.ch().fin.unit}`; tip.style.left = clamp(D.X(i) / D.W * 100, 12, 88) + "%";
   },
 
   /* ---------------- Correspondance ---------------- */
@@ -329,7 +322,7 @@ const UI = {
     if (!rep) rep = { t: ch.mailFallback(s, id), rel: 0 };
     if (!GAME.relAlive(s, id)) return;
     if (days) s.corrQueue.push({ id, t: rep.t, rel: rep.rel, at: addDays(s.date, days) });
-    else { s.corr[id].push({ d: s.date, me: false, t: rep.t, unread: !(UI.view === "corr" && UI.contact === id) }); if (rep.rel) GAME.applyFx(s, { r: { [id]: rep.rel } }); AUDIO.sfx("notify"); }
+    else { s.corr[id].push({ d: s.date, me: false, t: rep.t, unread: !(UI.kind() === "corr" && UI.contact === id) }); if (rep.rel) GAME.applyFx(s, { r: { [id]: rep.rel } }); AUDIO.sfx("notify"); }
     UI.save(); UI.update(true);
   },
   /* Un contact écrit de lui-même */
@@ -386,6 +379,7 @@ const UI = {
   act(act, arg, val){
     const s = GAME.s, ch = GAME.ch(s); if (!s || s.dead || UI.modalOpen) return;
     if (act === "write_article") { UI.actionModal("article"); return; }
+    if (act === "write") { UI.actionModal(arg); return; }
     let res = {}; try { res = ch.act(s, act, arg, val) || {}; } catch (e) { res = { msg: "Impossible pour le moment.", tone: "bad" }; }
     ch.sync && ch.sync(s);
     if (res.msg) { GAME.news(s, { src: res.src || "Carnet", text: res.msg, tone: res.tone || "" }); UI.toast(res.msg); } else if (res.toast) UI.toast(res.toast);
@@ -433,7 +427,7 @@ const UI = {
     const A = UI.draft && UI.draft.char === s.char ? UI.draft : (UI.draft = { char: s.char, type: types[0].id, target: "", text: "" });
     if (preType && types.some(t => t.id === preType)) A.type = preType;
     if (!types.some(t => t.id === A.type)) A.type = types[0].id;
-    A.advice = null; A.msg = null; A.busy = null;
+    A.advice = null; A.msg = null; A.busy = null; A.itw = null;
     const resume = () => { UI.closeModal(); UI.update(true); if (was || UI.resumeSpeed) LOOP.setSpeed(was || UI.resumeSpeed); };
     const render = () => {
       const tp = types.find(t => t.id === A.type); const can = GAME.canAct(s); const adv = ch.advisor(s);
@@ -444,23 +438,28 @@ const UI = {
         <div class="types" role="group" aria-label="Type d’action">${types.map(t => `<button data-type="${t.id}" aria-pressed="${t.id === A.type}">${esc(t.label)}</button>`).join("")}</div>
         <span class="note">${esc(tp.hint)} Le temps est en pause. Une action envoyée est définitive.</span>
         ${tp.target ? `<div class="ctl"><div class="ctl-top"><label for="a-target">Destinataire</label></div><select id="a-target" class="sel"><option value="">Quelqu’un d’autre (nommez-le dans le texte)</option>${targets.map(r => `<option value="${esc(r.name)}" ${A.target === r.name ? "selected" : ""}>${esc(r.name)}</option>`).join("")}</select></div>` : ""}
-        <textarea class="write" id="a-text" maxlength="1500" placeholder="${esc(tp.ph)}" aria-label="Votre action" ${A.busy ? "disabled" : ""}>${esc(A.text)}</textarea>
+        ${tp.flow === "interview" ? (A.itw ? `<div class="advice"><div class="label">${esc(A.itw.media)} · interview</div>${A.itw.questions.map((q, i) => `<div class="ctl"><div class="ctl-top"><label for="a-q${i}">${esc(q)}</label></div><textarea class="write" style="min-height:70px" id="a-q${i}" data-q="${i}" maxlength="600" placeholder="Votre réponse…" ${A.busy ? "disabled" : ""}>${esc(A.itw.answers[i] || "")}</textarea></div>`).join("")}</div>` : `<div class="advice"><div>Un journaliste vous posera deux ou trois questions. Vos réponses forment l’action de la semaine.</div><div class="row" style="justify-content:flex-start"><button class="btn" id="a-itw" ${A.busy || !AI.usable() ? "disabled" : ""}>Commencer l’interview</button></div></div>`) : `<textarea class="write" id="a-text" maxlength="1500" placeholder="${esc(tp.ph)}" aria-label="Votre action" ${A.busy ? "disabled" : ""}>${esc(A.text)}</textarea>`}
+        ${tp.photo ? `<div class="ctl"><div class="ctl-top"><label for="a-photo">Photo ou vidéo jointe (décrivez-la)</label></div><input class="sel" id="a-photo" maxlength="200" value="${esc(A.photo || "")}" placeholder="Ex. : moi à l’entraînement, torse nu, sourire, pouce levé"></div>` : ""}
         ${A.busy ? `<div class="loading" style="grid-template-columns:auto 1fr;align-items:center"><div class="quill" aria-hidden="true"></div><span>${esc(A.busy)}</span></div>` : ""}
         ${A.msg ? `<div class="refusal" role="alert"><b>${esc(A.msg.title)}</b><br>${esc(A.msg.text)}</div>` : ""}
         ${A.advice ? `<div class="advice"><div class="label">Avis de ${esc(A.advice.name)}, ${esc(A.advice.role)} · reconstitution</div><div>${esc(A.advice.avis)}</div>
           ${A.advice.risques.length ? `<h4>Risques</h4><ul>${A.advice.risques.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}${A.advice.effets.length ? `<h4>Effets probables</h4><ul>${A.advice.effets.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}${A.advice.alternatives.length ? `<h4>Autres voies</h4><ul>${A.advice.alternatives.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}</div>` : ""}
         ${!AI.usable() ? `<div class="refusal"><b>Claude n’est pas disponible dans cette vue.</b><br>L’action libre et le conseiller ont besoin de Claude pour calculer les répercussions. Les panneaux de gestion, eux, fonctionnent toujours.</div>` : ""}
         <div class="row"><button class="btn ghost" id="a-close" ${A.busy ? "disabled" : ""}>Fermer sans agir</button><button class="btn" id="a-advise" ${A.busy || !AI.usable() ? "disabled" : ""}>Demander conseil à ${esc(adv.name)}</button><button class="btn primary" id="a-go" style="font-size:1rem;padding:.6em 2em" ${A.busy || !can || !AI.usable() ? "disabled" : ""}>Agir</button></div>`, { wide: true });
-      const ta = $("#a-text", ov); ta.oninput = () => { A.text = ta.value; };
+      const ta = $("#a-text", ov) || { value: "", focus(){}, setSelectionRange(){} }; ta.oninput = () => { A.text = ta.value; };
+      const ph = $("#a-photo", ov); if (ph) ph.oninput = () => { A.photo = ph.value; };
+      $$("[data-q]", ov).forEach(q => q.oninput = () => { A.itw.answers[+q.dataset.q] = q.value; });
+      const ib = $("#a-itw", ov); if (ib) ib.onclick = async () => { A.msg = null; A.busy = "Le journaliste prépare ses questions…"; render(); try { A.itw = await AI.interview(s); A.itw.answers = []; } catch (e) { A.msg = { title: "L’interview n’a pas pu commencer.", text: "Réessayez dans un instant. Votre action n’est pas consommée." }; } A.busy = null; if (GAME.s === s && UI.modalOpen) render(); };
       if (!A.busy) setTimeout(() => { try { ta.focus({ preventScroll: true }); ta.setSelectionRange(ta.value.length, ta.value.length); } catch (e) {} }, 30);
       const tg = $("#a-target", ov); if (tg) tg.onchange = () => { A.target = tg.value; };
       $$("[data-type]", ov).forEach(b => b.onclick = () => { A.type = b.dataset.type; A.msg = null; render(); });
       $("#a-close", ov).onclick = resume;
-      const need = () => { if (A.text.trim().length < 12) { A.msg = { title: "Écrivez d’abord votre action.", text: "Quelques phrases suffisent : ce que vous ordonnez, dites ou écrivez, et à qui." }; render(); return false; } return true; };
-      $("#a-advise", ov).onclick = async () => { if (!need()) return; A.msg = null; A.busy = `${adv.name} réfléchit à votre projet…`; render(); try { A.advice = await AI.advise(s, { type: A.type, target: A.target, text: A.text.trim() }); AUDIO.sfx("notify"); } catch (e) { A.msg = { title: `${adv.name} n’a pas pu répondre.`, text: "Vous pouvez redemander, ou agir sans son avis. Votre action n’est pas consommée." }; } A.busy = null; if (GAME.s === s && UI.modalOpen) render(); };
+      const compose = () => tp.flow === "interview" ? (A.itw ? `Interview accordée à ${A.itw.media}.\n` + A.itw.questions.map((q, i) => `Question : ${q}\nRéponse : ${(A.itw.answers[i] || "(pas de réponse)").trim()}`).join("\n") : "") : A.text.trim() + (tp.photo && A.photo ? `\n[Photo ou vidéo jointe : ${A.photo.trim()}]` : "");
+      const need = () => { if (tp.flow === "interview") { if (!A.itw || !A.itw.answers.some(a => a && a.trim().length > 3)) { A.msg = { title: "Répondez d’abord aux questions.", text: "Lancez l’interview, puis répondez à au moins une question." }; render(); return false; } return true; } if (A.text.trim().length < 12) { A.msg = { title: "Écrivez d’abord votre action.", text: "Quelques phrases suffisent : ce que vous ordonnez, dites ou écrivez, et à qui." }; render(); return false; } return true; };
+      $("#a-advise", ov).onclick = async () => { if (!need()) return; A.msg = null; A.busy = `${adv.name} réfléchit à votre projet…`; render(); try { A.advice = await AI.advise(s, { type: A.type, target: A.target, text: compose() }); AUDIO.sfx("notify"); } catch (e) { A.msg = { title: `${adv.name} n’a pas pu répondre.`, text: "Vous pouvez redemander, ou agir sans son avis. Votre action n’est pas consommée." }; } A.busy = null; if (GAME.s === s && UI.modalOpen) render(); };
       $("#a-go", ov).onclick = async () => {
         if (!need() || !GAME.canAct(s)) return; A.msg = null; A.busy = "Les courriers partent. Claude calcule les répercussions…"; render();
-        const act = { type: A.type, target: A.target, text: A.text.trim() }; let res = null;
+        const act = { type: A.type, target: A.target, text: compose() }; let res = null;
         try { res = await AI.evaluateAction(s, act); } catch (e) { A.busy = null; A.msg = { title: "Claude n’a pas pu répondre, après deux essais.", text: "Votre action n’est pas consommée : vous pouvez la renvoyer telle quelle dans un instant." }; AUDIO.sfx("error"); if (GAME.s === s) render(); return; }
         if (GAME.s !== s) return; A.busy = null;
         if (!res.valide) { A.msg = { title: "Action impossible : elle n’est pas consommée.", text: res.raison }; AUDIO.sfx("error"); render(); return; }
@@ -500,13 +499,13 @@ const UI = {
     UI.currentEvent = ev; UI.currentKind = kind;
     s.pending = { kind, id: ev.id, ev: kind === "hist" || kind === "ecrit" ? null : ev };
     const people = (ev.people || []).map(p => { const r = GAME.relDef(s, p); return r ? r.name : p; }).filter(Boolean);
-    const kindLabel = kind === "hist" ? "Moment historique" : kind === "ai" ? "Dépêche · écrite par Claude" : kind === "guerre" ? "Alerte" : "Dépêche";
+    const kindLabel = kind === "hist" ? (GAME.ch(s).histLabel || "Moment historique") : kind === "ai" ? "Dépêche · écrite par Claude" : kind === "guerre" ? "Alerte" : kind === "saison" ? "Carrière" : "Dépêche";
     AUDIO.sfx(kind === "guerre" ? "drum" : "event");
     const ov = UI.openModal(`
       <div class="ev-kind"><span class="k ${kind === "hist" ? "hist" : ""}">${kindLabel}</span><span class="label">${esc(frDate(kind === "hist" && ev.date && ev.date.slice(0, 7) === s.date.slice(0, 7) ? ev.date : s.date))} · ${esc(ev.place || s.place)}</span></div>
       <h2>${esc(ev.title)}</h2><p class="ev-text">${esc(ev.text)}</p>
       ${people.length ? `<div class="people">${people.map(p => `<span>${esc(p)}</span>`).join("")}</div>` : ""}
-      <div class="choices">${ev.choices.map((c, i) => `<button class="choice" data-choice="${i}">${esc(c.t)}${c.battle ? `<small>Bataille : ${esc(c.battle.name)}</small>` : ""}</button>`).join("")}</div>`, { scene: ev.scene || s.scene });
+      <div class="choices">${ev.choices.map((c, i) => `<button class="choice" data-choice="${i}">${esc(c.t)}${c.battle ? `<small>Bataille : ${esc(c.battle.name)}</small>` : ""}${c.match ? `<small>Match à jouer</small>` : ""}</button>`).join("")}</div>`, { scene: ev.scene || s.scene });
     $$("[data-choice]", ov).forEach(b => b.onclick = () => UI.choose(+b.dataset.choice));
   },
 
@@ -518,6 +517,7 @@ const UI = {
     GAME.applyFx(s, c.fx, out);
     const finish = () => {
       if (kind === "hist" || (kind === "ecrit" && ev.once)) s.done[ev.id] = kind;
+      if (kind === "saison") { s.pending = null; UI.save(); UI.closeModal(); const nx = GAME.ch(s).week ? GAME.ch(s).week(s, true) : null; if (nx && nx.event) { UI.showEvent(nx.event, "saison"); return; } if (nx && nx.match) { UI.playMatch(nx.match); return; } UI.afterEvent(); return; }
       if (kind === "ecrit") { s.recentRandom.push(ev.id); if (s.recentRandom.length > 6) s.recentRandom.shift(); }
       const outcome = out.battle ? `${out.battle.win ? "Victoire" : "Défaite"} — ${out.battle.name}` : (c.res || "");
       s.history.push({ date: s.date, id: ev.id, kind, title: ev.title, choice: c.t, hist: kind === "hist" ? !!c.hist : null, histExists: kind === "hist" ? ev.choices.some(x => x.hist) : false, outcome });
@@ -525,17 +525,18 @@ const UI = {
       GAME.news(s, { src: "Carnet", title: ev.title, text: `${c.t}.${out.battle ? ` ${out.battle.win ? "Victoire" : "Défaite"} : ${out.battle.name}.` : ""}`, tone: kind === "hist" ? "key" : out.battle ? (out.battle.win ? "good" : "bad") : "" });
       const chx = GAME.ch(s); if (chx.press) { if (out.battle) chx.press(s, "bataille", out.battle); else chx.press(s, "evenement", { title: ev.title, res: c.res, hist: kind === "hist" }); }
       s.pending = null; if (out.death) s.deathPending = out.death; UI.save();
-      const real = kind === "hist" && ev.real ? `<div class="realbox"><b>Dans l’Histoire :</b> ${esc(ev.real)}${ev.anecdote ? `<br><i>${esc(ev.anecdote)}</i>` : ""}</div>` : "";
-      const verdict = out.battle ? `<div class="verdict ${out.battle.win ? "win" : "loss"}">${out.battle.win ? "Victoire" : "Défaite"} · ${esc(out.battle.name)}</div>` : "";
+      const real = kind === "hist" && ev.real ? `<div class="realbox"><b>Dans la réalité :</b> ${esc(ev.real)}${ev.anecdote ? `<br><i>${esc(ev.anecdote)}</i>` : ""}</div>` : "";
+      const verdict = out.battle ? `<div class="verdict ${out.battle.win ? "win" : "loss"}">${out.battle.win ? "Victoire" : out.battle.draw ? "Match nul" : "Défaite"} · ${esc(out.battle.name)}</div>` : "";
       const ov = UI.openModal(`<div class="outcome">
-        <div class="ev-kind"><span class="k ${kind === "hist" ? "hist" : ""}">${kind === "hist" ? (c.hist ? "Comme dans l’Histoire" : "L’Histoire bifurque") : "Conséquences"}</span></div>
+        <div class="ev-kind"><span class="k ${kind === "hist" ? "hist" : ""}">${kind === "hist" ? (c.hist ? "Comme dans la réalité" : "Ton histoire bifurque") : "Conséquences"}</span></div>
         <h2>${esc(ev.title)}</h2>${verdict}
         <p class="ev-text">${esc(c.res || "")}${out.notes.length ? " " + out.notes.map(esc).join(" ") : ""}</p>
         <div class="deltas">${UI.deltaChips(out)}</div>${real}
         <div class="row"><button class="btn primary" id="cont">${out.death ? "Continuer…" : "Reprendre le cours du temps"}</button></div></div>`, { scene: s.scene });
       $("#cont", ov).onclick = () => UI.afterEvent();
     };
-    if (c.battle) { const b = { ...c.battle, region: c.battle.region || ev.region }; UI.closeModal(); BATTLE.start(s, b, ev.title, res => { GAME.battleOutcome(s, b, res, out); finish(); }); }
+    if (c.match) { UI.closeModal(); MATCH.start(s, c.match, res => { const chm = GAME.ch(s); const r = chm.applyMatch(s, c.match, res); out.battle = { name: c.match.title, win: r.win, draw: r.draw }; const o = r.win ? c.match.win : r.draw ? (c.match.draw || c.match.loss) : c.match.loss; if (o) { GAME.applyFx(s, o, out); if (o.txt) out.notes.unshift(o.txt); } out.notes.unshift(r.line); finish(); }); }
+    else if (c.battle) { const b = { ...c.battle, region: c.battle.region || ev.region }; UI.closeModal(); BATTLE.start(s, b, ev.title, res => { GAME.battleOutcome(s, b, res, out); finish(); }); }
     else finish();
   },
 
@@ -568,6 +569,12 @@ const UI = {
       $("#skip-ai", ov).onclick = () => finish(false);
       AI.pending.then(ev => finish(!!ev), () => finish(false));
     });
+  },
+
+  /* Un match joué en direct, hors événement */
+  playMatch(m){
+    const s = GAME.s, ch = GAME.ch(s); if (s.speed > 0) UI.resumeSpeed = s.speed; LOOP.setSpeed(0);
+    MATCH.start(s, m, res => { ch.applyMatch(s, m, res); UI.save(); UI.update(true); const next = ch.week ? ch.week(s, true) : null; if (next && next.event) { UI.showEvent(next.event, "saison"); return; } if (next && next.match) { UI.playMatch(next.match); return; } UI.afterEvent(); });
   },
 
   /* Les rivaux avancent leurs plans : par Claude si possible, sinon par le jeu */
@@ -615,24 +622,17 @@ const UI = {
     }
     const rd = ch.realDeath;
     rows.push(`<div class="frise-row"><div class="when">Fin</div><div class="you"><h3>Ta mort</h3><div><b>${s.dead ? esc(frDate(s.dead.date)) : "—"}</b>, à ${s.dead ? s.dead.age : GAME.age(s)} ans</div><div class="muted">${esc(s.dead ? s.dead.cause : "")} ${esc(s.place)}.</div></div>
-      <div class="real"><div class="label" style="margin-bottom:4px">Sa mort réelle</div><div><b>${esc(frDate(rd.date))}</b>, à ${rd.age} ans, ${esc(rd.place)}.</div><div class="anec">${esc(rd.cause)}</div></div></div>`);
+      <div class="real">${rd ? `<div class="label" style="margin-bottom:4px">Sa mort réelle</div><div><b>${esc(frDate(rd.date))}</b>, à ${rd.age} ans, ${esc(rd.place)}.</div><div class="anec">${esc(rd.cause)}</div>` : `<div class="label" style="margin-bottom:4px">${esc(ch.realStatus.title)}</div><div>${esc(ch.realStatus.text)}</div>`}</div></div>`);
     const top = [...s.journal].sort((a, b) => (b.importance || 1) - (a.importance || 1) || b.d.localeCompare(a.d)).slice(0, 8).sort((a, b) => a.d.localeCompare(b.d));
     app().innerHTML = `<div class="wrap"><div class="label" style="margin-top:10px">Toi contre l’Histoire</div>
       <section class="end-hero"><div class="portrait">${ch.portrait(s)}</div>
         <div style="display:grid;gap:10px;min-width:0"><div class="muted ui">${esc(ch.name)} · ${esc(frDate(ch.born))} – ${esc(frDate(deathDate))}</div>
           <div class="legend-title">${esc(legend.title)}</div><p class="epitaph">${esc(legend.text)}</p>
           <div class="title-actions" style="margin-top:4px"><button class="btn primary" id="again">Nouvelle partie</button><button class="btn" id="exp">Exporter la partie</button><button class="btn ghost" id="home">Menu principal</button></div></div></section>
-      <div class="vs">
-        <div><small>Âge à la mort</small><b>${s.dead ? s.dead.age : GAME.age(s)} ans</b><small>Réalité : ${rd.age} ans</small></div>
-        <div><small>Batailles</small><b>${s.counters.battlesWon} V · ${s.counters.battlesLost} D</b><small>Sur toute la vie</small></div>
-        <div><small>Territoire maximal</small><b>${Math.round(s.counters.maxDep || 0)} dép.</b><small>Réalité : 130 en 1811</small></div>
-        <div><small>Années au pouvoir</small><b>${Math.round((s.counters.powerWeeks || 0) / 52)} ans</b><small>Réalité : 15 ans, plus les Cent-Jours</small></div>
-        <div><small>Fidélité à l’Histoire</small><b>${fidelity} %</b><small>${same} choix sur ${histChoices.length} comme le vrai ${esc(ch.short)}</small></div>
-        <div><small>Actions libres</small><b>${s.journal.length}</b><small>Écrites de ta main</small></div>
-      </div>
+      <div class="vs">${[...ch.endTiles(s, { fidelity, same, total: histChoices.length }), ["Actions libres", s.journal.length, "Écrites de ta main"]].map(([l, v, sub]) => `<div><small>${esc(l)}</small><b>${esc(v)}</b><small>${esc(sub)}</small></div>`).join("")}</div>
       ${top.length ? `<h2 style="font-size:1.3rem;margin-top:8px">Tes actions les plus marquantes</h2><div style="display:grid;gap:12px;margin:10px 0 22px">${top.map(j => `<div class="news key"><span class="m">${esc(frDate(j.d))} · ${esc(j.typeLabel)}${j.target ? " à " + esc(j.target) : ""}</span><b>${esc(j.resume)}</b><span class="muted">« ${esc(j.text.length > 260 ? j.text.slice(0, 260) + "…" : j.text)} »</span>${j.suites && j.suites.length ? `<span class="note">Suites : ${j.suites.map(q => esc(q.t)).join(" ; ")}</span>` : ""}</div>`).join("")}</div>` : ""}
       <h2 style="font-size:1.3rem;margin-top:8px">La frise comparée</h2>
-      <div class="frise"><div class="frise-h label"><span>Date</span><span>Toi</span><span>L’Histoire</span></div>${rows.join("")}</div></div>`;
+      <div class="frise"><div class="frise-h label"><span>Date</span><span>Toi</span><span>${ch.realStatus ? "La réalité" : "L’Histoire"}</span></div>${rows.join("")}</div></div>`;
     $("#again").onclick = () => UI.setup(s.char); $("#home").onclick = () => UI.title(); $("#exp").onclick = () => UI.exportGame(s);
     window.scrollTo(0, 0);
   },
@@ -731,6 +731,7 @@ const LOOP = {
     if (death) { UI.die(death); return; }
     const due = GAME.dueHistorical(s);
     if (due) { UI.showEvent(due, "hist"); return; }
+    if (ch.week) { const w = ch.week(s); UI.update(); if (w && w.event) { UI.showEvent(w.event, "saison"); return; } if (w && w.match) { UI.playMatch(w.match); return; } }
     const mt = ch.meet ? ch.meet(s) : null;
     if (mt) { UI.fieldBattle(mt); return; }
     if (--s.nextMailIn <= 0) { s.nextMailIn = 5 + Math.floor(Math.random() * 5); UI.mailTurn(); }

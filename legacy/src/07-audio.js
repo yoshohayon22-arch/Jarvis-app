@@ -51,6 +51,8 @@ const AUDIO = {
         case "victory": [0, 4, 7, 12].forEach((n, i) => T({ f: 293.66 * Math.pow(2, n / 12), t: i * .14, d: .5, g: .16, type: "triangle" })); break;
         case "defeat": [7, 3, 0, -5].forEach((n, i) => T({ f: 220 * Math.pow(2, n / 12), t: i * .22, d: .7, g: .14, type: "triangle" })); break;
         case "error": T({ f: 150, d: .16, g: .14, type: "square" }); break;
+        case "whistle": T({ f: 2300, d: .22, g: .1, type: "square" }); T({ f: 2500, t: .02, d: .22, g: .06, type: "square" }); T({ f: 2300, t: .34, d: .5, g: .1, type: "square" }); break;
+        case "goal": for (let i = 0; i < 8; i++) Nz({ t: i * .08, d: 1.6, g: .09, freq: 600 + Math.random() * 1200, q: 1.2, type: "bandpass", a: .12 }); T({ f: 392, d: .25, g: .1, type: "triangle" }); T({ f: 523, t: .12, d: .25, g: .1, type: "triangle" }); T({ f: 659, t: .24, d: .5, g: .12, type: "triangle" }); break;
         case "death": T({ f: 110, d: 2.4, g: .2, type: "triangle" }); T({ f: 130.8, t: .05, d: 2.4, g: .12 }); Nz({ d: 1.6, g: .05, freq: 300 }); break;
       }
     } catch (e) {}
@@ -75,7 +77,14 @@ const AUDIO = {
           if (pos === 0) { AUDIO.tone(m, { f: sp.root / 2, t, d: beat * 3.8, g: .09, type: "triangle", a: .08 }); AUDIO.tone(m, { f: sp.root / 2 * (bar % 4 === 2 ? 1.335 : 1.498), t, d: beat * 3.8, g: .05, a: .1 }); }
           if (pos === 0 || pos === 8) AUDIO.noise(m, { t, d: .22, g: .08, freq: 130 });
         }
-        if (pos % 4 === 0 && bar % 16 < 8) { const dg = AUDIO.phrase[(bar % 8) * 4 + pos / 4]; if (dg !== null && dg !== undefined) AUDIO.tone(m, { f: note(dg) * 2, t, d: beat * 1.7, g: .055, type: "triangle", a: .03 }); }
+        if (sp.style === "stade") {
+          if (pos % 4 === 0) { AUDIO.tone(m, { f: 120, f2: 45, t, d: .16, g: .16 }); }
+          if (pos % 4 === 2) AUDIO.noise(m, { t, d: .04, g: .03, freq: 7000, type: "highpass" });
+          if (pos === 4 || pos === 12) AUDIO.noise(m, { t, d: .1, g: .05, freq: 1800, q: .9, type: "bandpass" });
+          if ([0, 3, 6, 10].includes(pos)) AUDIO.tone(m, { f: sp.root / 2 * Math.pow(2, sp.scale[[0, 0, 3, 2][Math.floor(bar / 2) % 4]] / 12), t, d: six * 2.4, g: .09, type: "sawtooth", a: .01 });
+          if (bar % 8 >= 4 && pos % 2 === 0) { const dg = AUDIO.phrase[(bar * 8 + pos / 2) % 32]; if (dg !== null && dg !== undefined) AUDIO.tone(m, { f: note(dg % 8), t, d: six * 1.6, g: .028, type: "square", a: .005 }); }
+        }
+        if (sp.style !== "stade" && pos % 4 === 0 && bar % 16 < 8) { const dg = AUDIO.phrase[(bar % 8) * 4 + pos / 4]; if (dg !== null && dg !== undefined) AUDIO.tone(m, { f: note(dg) * 2, t, d: beat * 1.7, g: .055, type: "triangle", a: .03 }); }
         AUDIO.step++; AUDIO.next += six;
       }
     }, 110);

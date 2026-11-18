@@ -95,6 +95,48 @@ const ART = {};
        <g fill="#d8d2c2"><rect x="380" y="150" width="120" height="50"/><path d="M372 150 L440 122 L508 150Z" fill="#8a3b2e"/><rect x="400" y="168" width="14" height="18" fill="#3a3a3a"/><rect x="460" y="168" width="14" height="18" fill="#3a3a3a"/></g>
        <g stroke="#9cb2ba" stroke-width="2" opacity=".35" fill="none">${Array.from({length:12},(_,i)=>`<path d="M${(i*110)%1200} ${250+(i%3)*22} q22 -8 44 0 t44 0"/>`).join("")}</g>`); }
   };
+  ART.scenes.stade = function(){ const g = id("sk");
+    return wrap(sky(g, "#0b1626", "#1d3a5c") + stars(26, 11, 110) +
+    `<g fill="#f6f2d8" opacity=".9">${[90, 330, 870, 1110].map(x => `<rect x="${x - 3}" y="40" width="6" height="120" fill="#2a3a4d"/><rect x="${x - 34}" y="22" width="68" height="26" rx="4"/><path d="M${x - 34} 48 L${x - 150} 250 L${x + 150} 250 L${x + 34} 48Z" opacity=".08"/>`).join("")}</g>
+     <path d="M0 150 Q600 96 1200 150 L1200 236 L0 236Z" fill="#15263a"/>
+     <g fill="#d9dee6" opacity=".35">${Array.from({ length: 150 }, (_, i) => `<circle cx="${(i * 71) % 1200}" cy="${150 + (i * 37) % 78}" r="2.4"/>`).join("")}</g>
+     <rect y="232" width="1200" height="8" fill="#c8102e"/>
+     <path d="M0 240 L1200 240 L1200 330 L0 330Z" fill="#1f7a43"/>
+     <g fill="#238a4c">${Array.from({ length: 6 }, (_, i) => `<rect x="${i * 200}" y="240" width="100" height="90"/>`).join("")}</g>
+     <g stroke="#e9f3ea" stroke-width="3" fill="none" opacity=".85"><line x1="600" y1="240" x2="600" y2="330"/><ellipse cx="600" cy="300" rx="110" ry="34"/><path d="M0 262 H130 V330 M1200 262 H1070 V330"/></g>`); };
+  ART.scenes.vestiaire = function(){ return wrap(
+    `<rect width="1200" height="330" fill="#1b2430"/>
+     <g>${Array.from({ length: 9 }, (_, i) => `<rect x="${40 + i * 128}" y="46" width="104" height="210" rx="4" fill="#243242" stroke="#324457" stroke-width="3"/><rect x="${56 + i * 128}" y="60" width="72" height="8" fill="#324457"/><path d="M${70 + i * 128} 86 h44 l10 16 -12 8 v70 h-40 v-70 l-12 -8z" fill="${i % 3 === 1 ? "#c8102e" : "#d9dee6"}" opacity=".85"/>`).join("")}</g>
+     <rect y="256" width="1200" height="20" fill="#3a2c20"/><rect y="276" width="1200" height="54" fill="#141b24"/>`); };
+  ART.scenes.plateau = function(){ return wrap(
+    `<rect width="1200" height="330" fill="#101823"/>
+     <g fill="#1b2a3c">${Array.from({ length: 12 }, (_, i) => `<rect x="${i * 100}" y="0" width="96" height="60"/><rect x="${i * 100}" y="64" width="96" height="60"/>`).join("")}</g>
+     <g fill="#2b415c" opacity=".7">${Array.from({ length: 12 }, (_, i) => `<circle cx="${48 + i * 100}" cy="${i % 2 ? 30 : 94}" r="13"/>`).join("")}</g>
+     <rect x="250" y="176" width="700" height="64" rx="4" fill="#243242"/><rect x="250" y="240" width="700" height="90" fill="#1a2532"/>
+     <g fill="#0b1118">${[430, 600, 770].map(x => `<rect x="${x - 3}" y="140" width="6" height="40"/><rect x="${x - 12}" y="124" width="24" height="20" rx="8"/>`).join("")}</g>
+     <g fill="#f6f2d8" opacity=".5">${[120, 1080].map(x => `<circle cx="${x}" cy="150" r="26"/><path d="M${x - 26} 150 L${x === 120 ? 420 : 780} 330 L${x === 120 ? 560 : 640} 330Z" opacity=".12"/>`).join("")}</g>`); };
+  /* Footballeur stylisé : maillot uni aux couleurs du club, sans logo ni sponsor */
+  ART.footballer = function(o = {}){
+    const [c1, c2] = o.col || ["#c8102e", "#ffffff"]; const age = o.age || 20; const g = id("fg"), c = id("fc"); const old = age >= 36;
+    return `<svg viewBox="0 0 200 240" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Portrait stylisé d’un footballeur, numéro 7">
+      <defs><radialGradient id="${g}" cx=".5" cy=".36" r=".72"><stop offset="0" stop-color="#2f5d86"/><stop offset="1" stop-color="#0b1a2b"/></radialGradient><clipPath id="${c}"><circle cx="100" cy="115" r="92"/></clipPath></defs>
+      <circle cx="100" cy="115" r="98" fill="#cfd6df"/><circle cx="100" cy="115" r="92" fill="url(#${g})"/>
+      <g clip-path="url(#${c})">
+        <path d="M18 240 C24 176 62 158 100 158 C138 158 176 176 182 240Z" fill="${c1}"/>
+        <path d="M82 158 Q100 178 118 158 L112 152 Q100 164 88 152Z" fill="${c2}"/>
+        <path d="M18 240 C22 196 34 178 52 170 L60 240Z M182 240 C178 196 166 178 148 170 L140 240Z" fill="${c2}" opacity=".28"/>
+        <text x="100" y="222" text-anchor="middle" font-family="Barlow Semi Condensed, Arial Narrow, sans-serif" font-weight="600" font-size="38" fill="${c2}">7</text>
+        <rect x="88" y="130" width="24" height="32" fill="#d9a878"/>
+        <ellipse cx="100" cy="106" rx="27" ry="33" fill="#e0b184"/>
+        <path d="M73 100 Q72 68 100 66 Q128 68 127 100 Q122 82 112 80 Q100 76 88 80 Q78 82 73 100Z" fill="${old ? "#2a2522" : "#1c1612"}"/>
+        <path d="M86 70 Q100 56 116 70 Q104 64 86 70Z" fill="${old ? "#2a2522" : "#1c1612"}"/>
+        <path d="M84 102 q7 -4 13 0 M103 102 q7 -4 13 0" stroke="#1c1612" stroke-width="2.4" fill="none"/>
+        <ellipse cx="91" cy="109" rx="3" ry="2.2" fill="#2a1c12"/><ellipse cx="109" cy="109" rx="3" ry="2.2" fill="#2a1c12"/>
+        <path d="M100 109 Q97 122 101 125" stroke="#b98558" stroke-width="2" fill="none"/>
+        <path d="M91 132 Q100 137 109 132" stroke="#8f4f3c" stroke-width="2.4" fill="none"/>
+        ${old ? `<path d="M80 118 q-2 6 1 11 M120 118 q2 6 -1 11" stroke="#c39566" stroke-width="1.5" fill="none"/>` : ""}
+      </g><circle cx="100" cy="115" r="92" fill="none" stroke="#7b8794" stroke-width="1.5"/></svg>`;
+  };
   ART.scene = key => (ART.scenes[key] || ART.scenes.paris)();
 
   /* Portrait de Napoléon : médaillon, bicorne porté « en bataille », habit des chasseurs de la Garde.

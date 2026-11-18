@@ -64,7 +64,7 @@ RELATIONS VIVANTES (-100 ennemi … +100 allié) :
 ${rels}
 ${pays ? `\nPUISSANCES :\n${pays}` : ""}
 ${s.corps ? `\nCORPS D’ARMÉE :\n${corps}\nDépôts : ${Math.round(s.depot)} 000 h.` : ""}
-FAMILLE : ${fam}
+${ch.aiState ? ch.aiState(s) + "\n" : ""}FAMILLE : ${fam}
 SANTÉ : ${s.conditions.length ? s.conditions.map(c => c.name).join(", ") : "pas de maladie déclarée"}`;
   },
 
@@ -142,6 +142,22 @@ RÉPONDS UNIQUEMENT par un objet JSON de cette forme exacte :
       catch (e) { last = e; if (e && ["unavailable", "not_granted", "sampling_disabled", "capability_disabled", "not_declared", "rate_limited", "refused"].includes(e.code)) break; }
     }
     throw last || new Error("échec");
+  },
+
+  /* ---------- Interview : le journaliste pose ses questions ---------- */
+  async interview(s){
+    const ch = GAME.ch(s);
+    const o = await AI.call(`Dans « Legacy », simulateur de vie sérieux en français, un journaliste interviewe le personnage. Choisis un média réel et crédible à cette date pour ce personnage, puis pose 2 ou 3 questions courtes, précises et un peu délicates, liées à sa situation actuelle et à ses actions récentes. Pas de question sur sa vie intime, sa santé privée ou des affaires judiciaires.
+
+${AI.context(s)}
+
+MÉMOIRE DE LA PARTIE :
+${AI.memory(s)}
+${AI.rules(s)}
+RÉPONDS UNIQUEMENT par un objet JSON : {"media":"…","questions":["…","…"]}`, { timeout: 70000 });
+    const qs = (o && Array.isArray(o.questions) ? o.questions : []).slice(0, 3).map(q => String(q).slice(0, 240)).filter(Boolean);
+    if (qs.length < 2) throw new Error("forme");
+    return { media: String(o.media || "un grand média").slice(0, 60), questions: qs };
   },
 
   /* ---------- 2. Conseiller : avis avant l’envoi, sans consommer l’action ---------- */

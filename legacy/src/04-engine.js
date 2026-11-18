@@ -22,7 +22,7 @@ const GAME = {
   ch: s => CHARACTERS[(s || GAME.s).char],
   age: s => yearsBetween(GAME.ch(s).born, s.date),
   power: s => (GAME.ch(s).ranks[s.rank] || { power: 0 }).power,
-  rankLabel: s => (GAME.ch(s).ranks[s.rank] || { label: s.rank }).label,
+  rankLabel: s => GAME.ch(s).rankLabel ? GAME.ch(s).rankLabel(s) : (GAME.ch(s).ranks[s.rank] || { label: s.rank }).label,
   statDef: (s, id) => GAME.ch(s).stats.find(x => x.id === id),
   relDef: (s, id) => GAME.ch(s).relations.find(x => x.id === id),
   relKnown: (s, id) => { const r = GAME.relDef(s, id); return !!r && r.from <= s.date; },
@@ -58,11 +58,7 @@ const GAME = {
     let ton = { favorable: "fav", hostile: "hos", neutre: "neu", fav: "fav", hos: "hos", neu: "neu" }[String(it.ton || "").toLowerCase()] || (cat === "sys" ? "" : "neu");
     // Effet visible de l’article sur l’opinion, en France ou à l’étranger
     let fx = null;
-    if (cat !== "sys" && ton && ton !== "neu" && s.stats.popularite !== undefined) {
-      const sign = ton === "fav" ? 1 : -1;
-      if (cat === "etr") { const v = -sign * .4; s.stats.coalition = clamp(s.stats.coalition + v, 0, 100); fx = { k: "étranger", v: sign * .4 }; }
-      else { const v = sign * (cat === "rum" ? .6 : 1); s.stats.popularite = clamp(s.stats.popularite + v, 0, 100); fx = { k: "France", v }; }
-    }
+    if (cat !== "sys" && ton && ton !== "neu" && ch.newsFx) fx = ch.newsFx(s, cat, ton === "fav" ? 1 : -1);
     s.feed.unshift({ d: s.date, src, title: it.title || "", text: it.text || "", tone: it.tone || "", kind: it.kind || "", cat, ton, fx });
     s.feedN = (s.feedN || 0) + 1; if (s.feed.length > 220) s.feed.length = 220;
   },
@@ -94,6 +90,7 @@ const GAME = {
     if (fx.child) { s.family.children.push({ name: fx.child.name, born: s.date }); out.notes.push(`Naissance : ${fx.child.name}.`); }
     if (fx.heir) { s.family.heir = fx.heir; out.notes.push(`Héritier désigné : ${fx.heir}.`); }
     if (fx.danger && !out.death) { const p = clamp(+fx.danger.p || 0, 0, .3); if (Math.random() < p) out.death = { type: fx.danger.type || "accident", cause: fx.danger.cause || "Mort brutale." }; }
+    if (fx.call && ch.fxCall) ch.fxCall(s, fx.call, out);
     if (fx.gamble) { const g = fx.gamble; const v = s.rel[g.rel] ?? 0; const p = clamp(.35 + (v - g.threshold) / 120, .05, .9); const ok = Math.random() < p; out.notes.push(g[ok ? "win" : "loss"].txt); GAME.applyFx(s, g[ok ? "win" : "loss"], out); }
     ch.sync && ch.sync(s);
     return out;
@@ -153,13 +150,14 @@ const GAME = {
     const fired = [];
     for (const d of [...s.deferred]) if (d.date <= s.date) { s.deferred = s.deferred.filter(x => x !== d); const o = GAME.applyFx(s, d.fx); GAME.news(s, { src: d.src || "Conséquence", title: d.title, text: d.text, tone: "key", kind: "differe" }); const j = s.journal.find(x => x.id === d.from); if (j) (j.suites = j.suites || []).push({ d: s.date, t: d.title }); fired.push({ d, o }); }
     // Finances : un relevé par mois pour le graphique
-    if (ch.budget && s.week % 4 === 0) { const bu = ch.budget(s); s.fin.push({ d: s.date, t: s.stats.tresor, R: bu.R, D: bu.D }); if (s.fin.length > 14) s.fin.shift(); }
+    if (ch.budget && s.week % 4 === 0) { const bu = ch.budget(s); s.fin.push({ d: s.date, t: s.stats[ch.fin.stat], R: bu.R, D: bu.D }); if (s.fin.length > 14) s.fin.shift(); }
     // Courrier : lettres arrivées chez leur destinataire, réponses arrivées chez vous
     const arrived = [], mail = [];
     for (const [id, th] of Object.entries(s.corr)) for (const m of th) if (m.me && m.arrive && !m.asked && m.arrive <= s.date) { m.asked = true; arrived.push({ id, m }); }
     for (const q of [...s.corrQueue]) if (q.at <= s.date) { s.corrQueue = s.corrQueue.filter(x => x !== q); if (!GAME.relAlive(s, q.id)) continue; (s.corr[q.id] = s.corr[q.id] || []).push({ d: s.date, me: false, t: q.t, unread: true }); if (q.rel) GAME.applyFx(s, { r: { [q.id]: q.rel } }); mail.push(q); }
     const b = parseD(ch.born); if (p.m === b.m && p.d >= b.d && p.d < b.d + 7) GAME.log(s, `Vous avez ${GAME.age(s)} ans.`);
     ch.sync && ch.sync(s);
+    if (ch.weekEnd) ch.weekEnd(s, h);
     s.counters.maxDep = Math.max(s.counters.maxDep || 0, s.stats.departements || 0);
     s.counters.popSum = (s.counters.popSum || 0) + (s.stats.popularite || 0);
     if (GAME.power(s) >= 2) s.counters.powerWeeks = (s.counters.powerWeeks || 0) + 1;
@@ -171,16 +169,16 @@ const GAME = {
     const worst = [...s.conditions].filter(c => c.sev >= .5).sort((a, b) => b.sev - a.sev)[0];
     if (st.sante <= 0) return { type: "maladie", cause: worst ? `Emporté par la maladie (${worst.name.toLowerCase()}), à ${age} ans.` : `Mort d’épuisement, le corps usé, à ${age} ans.` };
     const condLoad = s.conditions.reduce((t, c) => t + c.sev, 0);
-    const nat = (.00035 * Math.exp(.088 * (age - 40)) * (1 + Math.max(0, 65 - st.sante) / 14) + condLoad * .0012) * dt;
+    const nat = (.00035 * Math.exp(.088 * (age - 40)) * (1 + Math.max(0, 65 - st.sante) / 14) + condLoad * .0012) * dt * (ch.mortality || 1);
     const plot = (ch.plotHazard ? ch.plotHazard(s) : 0) * dt;
     const acc = .00012 * dt;
     const r = Math.random();
     if (age >= 99 || r < nat) {
       if (age >= 72) return { type: "vieillesse", cause: `Mort de vieillesse, à ${age} ans.` };
-      return { type: "maladie", cause: worst ? `Emporté par la maladie (${worst.name.toLowerCase()}), à ${age} ans.` : `Foudroyé par une attaque d’apoplexie, à ${age} ans.` };
+      return { type: "maladie", cause: worst ? `Emporté par la maladie (${worst.name.toLowerCase()}), à ${age} ans.` : `${ch.suddenCause || "Foudroyé par une attaque d’apoplexie"}, à ${age} ans.` };
     }
     if (r < nat + plot) return { type: "assassinat", cause: ch.plotCause ? ch.plotCause(s) : "Assassiné." };
-    if (r < nat + plot + acc) return { type: "accident", cause: "Mort dans un accident de voiture, les chevaux s’étant emballés." };
+    if (r < nat + plot + acc) return { type: "accident", cause: ch.accidentCause || "Mort dans un accident." };
     return null;
   },
 

@@ -50,7 +50,7 @@ const UI = {
           <p class="muted ui">Né le ${frDate(ch.born)} à ${esc(ch.birthplace)}</p><p class="muted" style="font-size:.95rem">${esc(ch.realTimeline)}</p></div>
         <div style="display:grid;gap:14px;min-width:0">
           <div><div class="label">Mode carrière</div><h2 style="font-size:1.5rem">Choisissez l’année de départ</h2>
-          <p class="muted">Vous jouez jusqu’à la mort du personnage. Le temps avance jour par jour et s’arrête à chaque rendez-vous de votre agenda (3 ou 4 par semaine) ; rien ne peut être annulé.${ch.fiction ? " Personnage de fiction : le récit des livres est résumé avec nos propres mots, sans citation ni image tirée des films." : ch.realStatus ? " Personne réelle et vivante : le jeu s’appuie sur des faits publics, et tout ce qui s’en écarte est de la fiction." : ""}</p></div>
+          <p class="muted">Vous jouez jusqu’à la mort du personnage. C’est vous qui faites avancer le temps : jour par jour, ou directement jusqu’au prochain rendez-vous de votre agenda (3 ou 4 par semaine). Rien ne peut être annulé.${ch.fiction ? " Personnage de fiction : le récit des livres est résumé avec nos propres mots, sans citation ni image tirée des films." : ch.realStatus ? " Personne réelle et vivante : le jeu s’appuie sur des faits publics, et tout ce qui s’en écarte est de la fiction." : ""}</p></div>
           <div class="starts" role="radiogroup" aria-label="Année de départ">${ch.starts.map(st => `<button class="start" role="radio" data-start="${st.id}" aria-pressed="${st.id === pick}" aria-checked="${st.id === pick}"><span class="yr">${st.year}</span><h3>${esc(st.title)}</h3><span class="muted">${esc(st.summary)}</span></button>`).join("")}</div>
           <div class="slot-pick"><label class="label" for="slot-sel">Emplacement de sauvegarde</label>
             <select id="slot-sel" class="sel" style="width:auto">${[1, 2, 3].map(n => { const s = STORE.read(n); return `<option value="${n}" ${n === free ? "selected" : ""}>Emplacement ${n}${STORE.valid(s) ? ` (remplacera ${esc(CHARACTERS[s.char].short)}, ${esc(frMonth(s.date))})` : " (libre)"}</option>`; }).join("")}</select></div>
@@ -98,7 +98,7 @@ const UI = {
       <header class="topbar"><div class="topbar-in">
         <div class="who"><h1>${esc(ch.short)}</h1><span class="rank" id="rank"></span></div>
         <div class="clock"><span class="date" id="date"></span><span class="age" id="age"></span></div>
-        <div class="speed" role="group" aria-label="Vitesse du temps"><button data-speed="0" title="Pause (espace)" aria-label="Pause">❚❚</button><button data-speed="1">x1</button><button data-speed="2">x2</button><button data-speed="4">x4</button></div>
+        <div class="advance" role="group" aria-label="Faire avancer le temps"><button class="btn" id="b-day" title="Jour suivant (espace)">Jour suivant</button><button class="btn primary" id="b-next" title="Prochain rendez-vous (Entrée)">Prochain rendez-vous</button></div>
         <button class="icon-btn" id="b-music" aria-pressed="${AUDIO.musicOn}" title="Musique">Musique</button>
         <button class="icon-btn" id="b-sfx" aria-pressed="${AUDIO.sfxOn}" title="Bruitages">Sons</button>
         <button class="icon-btn" id="b-menu" title="Parties, réglages, quitter">Menu</button>
@@ -107,7 +107,7 @@ const UI = {
         <nav class="rail" id="rail" aria-label="Fenêtres">${ch.views.map(({ id, label, icon }) => `<button data-view="${id}" aria-pressed="false">${UI.ICONS[icon]}<span>${label}</span><i class="badge-dot" hidden></i></button>`).join("")}</nav>
         <main class="view" id="view"></main>
       </div>`;
-    $$("[data-speed]").forEach(b => b.onclick = () => { AUDIO.sfx("click"); LOOP.setSpeed(+b.dataset.speed); });
+    $("#b-day").onclick = () => { AUDIO.sfx("click"); LOOP.advance("day"); }; $("#b-next").onclick = () => { AUDIO.sfx("click"); LOOP.advance("next"); };
     $("#cal").addEventListener("click", e => { const b = e.target.closest("[data-rv]"); if (b) UI.calClick(b.dataset.rv); });
     $("#b-music").onclick = e => { AUDIO.setMusic(!AUDIO.musicOn); e.currentTarget.setAttribute("aria-pressed", AUDIO.musicOn); };
     $("#b-sfx").onclick = e => { AUDIO.setSfx(!AUDIO.sfxOn); e.currentTarget.setAttribute("aria-pressed", AUDIO.sfxOn); AUDIO.sfx("click"); };
@@ -401,7 +401,7 @@ const UI = {
       GAME.news(s, { src: "Carnet", title: `${res.win ? "Victoire" : "Revers"} : ${o.battle.name}`, text: out.notes.join(" "), tone: res.win ? "good" : "bad" }); if (GAME.ch(s).press) GAME.ch(s).press(s, "bataille", out.battle);
       s.history.push({ date: s.date, id: "bat-" + s.week, kind: "bataille", title: o.title, choice: "Offensive ordonnée", hist: null, histExists: false, outcome: `${res.win ? "Victoire" : "Défaite"} — ${o.battle.name}` });
       if (out.death) s.deathPending = out.death; UI.save();
-      const ov = UI.openModal(`<div class="outcome"><div class="ev-kind"><span class="k">Bataille</span></div><h2>${esc(o.title)}</h2><div class="verdict ${res.win ? "win" : "loss"}">${res.win ? "Victoire" : "Défaite"}</div><p class="ev-text">${out.notes.map(esc).join(" ")}</p><div class="deltas">${UI.deltaChips(out)}</div><div class="row"><button class="btn primary" id="cont">Reprendre le cours du temps</button></div></div>`, { scene: "bataille" });
+      const ov = UI.openModal(`<div class="outcome"><div class="ev-kind"><span class="k">Bataille</span></div><h2>${esc(o.title)}</h2><div class="verdict ${res.win ? "win" : "loss"}">${res.win ? "Victoire" : "Défaite"}</div><p class="ev-text">${out.notes.map(esc).join(" ")}</p><div class="deltas">${UI.deltaChips(out)}</div><div class="row"><button class="btn primary" id="cont">Continuer</button></div></div>`, { scene: "bataille" });
       $("#cont", ov).onclick = () => UI.afterEvent();
     });
   },
@@ -500,7 +500,7 @@ const UI = {
   },
 
   /* ---------------- Agenda de la semaine ---------------- */
-  contLabel(){ const s = GAME.s; const n = AGENDA.next(s); return n ? "Rendez-vous suivant" : "Reprendre le cours du temps"; },
+  contLabel(){ const s = GAME.s; const n = AGENDA.next(s); return n ? "Rendez-vous suivant" : "Continuer"; },
   renderCal(){
     const s = GAME.s; if (!s || !$("#cal")) return; const items = s.agenda || []; const d0 = s.day || 0;
     const cells = Array.from({ length: 7 }, (_, d) => { const dt = addDays(s.date, d); const its = items.filter(i => i.day === d);
@@ -755,23 +755,25 @@ const UI = {
    BOUCLE DE TEMPS — une semaine toutes les 6 secondes à x1 (≈ 5 min par an)
    ===================================================================== */
 const LOOP = {
-  timer: null, ms: { 1: 1100, 2: 550, 4: 260 },
+  /* Le temps n’avance que quand le joueur le demande : un jour, ou jusqu’au prochain rendez-vous.
+     setSpeed(0) interrompt une avance en cours ; setSpeed(n > 0) la reprend seulement si elle n’est pas terminée. */
+  timer: null, target: null, ms: { 1: 140, 2: 140, 4: 140 },
+  advance(mode){ const s = GAME.s; if (!s || s.dead || UI.modalOpen) return; LOOP.target = mode; s.speed = 1; LOOP.step(); },
   setSpeed(n){
     const s = GAME.s; if (!s) return;
     if (s.dead) n = 0;
     if (n > 0 && UI.modalOpen) return;
-    s.speed = n; if (n > 0) UI.resumeSpeed = n;
+    if (n <= 0) LOOP.target = null;
+    s.speed = n > 0 && LOOP.target ? 1 : 0;
     LOOP.schedule();
-    $$("[data-speed]").forEach(b => b.setAttribute("aria-pressed", +b.dataset.speed === s.speed));
   },
   stop(){ clearTimeout(LOOP.timer); LOOP.timer = null; const tb = $("#tickbar"); if (tb) { tb.style.transition = "none"; tb.style.width = "0"; } },
   schedule(){
     clearTimeout(LOOP.timer); LOOP.timer = null;
     const s = GAME.s; const tb = $("#tickbar");
     if (!s || s.speed <= 0 || UI.modalOpen || s.dead) { if (tb) { tb.style.transition = "none"; tb.style.width = "0"; } return; }
-    const ms = LOOP.ms[s.speed] || 6000;
-    if (tb) { tb.style.transition = "none"; tb.style.width = "0"; void tb.offsetWidth; tb.style.transition = `width ${ms}ms linear`; tb.style.width = "100%"; }
-    LOOP.timer = setTimeout(LOOP.step, ms);
+    if (!LOOP.target) { s.speed = 0; return; }
+    LOOP.timer = setTimeout(LOOP.step, LOOP.ms[1]);
   },
   step(){
     const s = GAME.s; if (!s || s.dead || UI.modalOpen || s.speed <= 0) return;
@@ -780,7 +782,7 @@ const LOOP = {
     if (s.day >= 7) { LOOP.weekEnd(); return; }
     UI.update(); UI.save();
     if (UI.openDay()) return;
-    LOOP.schedule();
+    if (LOOP.target === "day") LOOP.setSpeed(0); else LOOP.schedule();
   },
   weekEnd(){
     const s = GAME.s; const ch = GAME.ch(s); s.day = 0;
@@ -804,7 +806,7 @@ const LOOP = {
     if (off) { UI.showEvent(off, "guerre"); return; }
     if (--s.nextRivalIn <= 0) { s.nextRivalIn = 10 + Math.floor(Math.random() * 5); UI.rivalsTurn(); }
     if (UI.openDay()) return;
-    LOOP.schedule();
+    if (LOOP.target === "day") LOOP.setSpeed(0); else LOOP.schedule();
   }
 };
 
@@ -812,8 +814,8 @@ document.addEventListener("visibilitychange", () => { const s = GAME.s; if (docu
 document.addEventListener("keydown", e => {
   const s = GAME.s; if (!s || s.dead || UI.modalOpen || !$("#date")) return;
   if (e.target.closest("input,textarea,select")) return;
-  if (e.code === "Space") { e.preventDefault(); LOOP.setSpeed(s.speed > 0 ? 0 : (UI.resumeSpeed || 1)); }
-  else if (e.key === "1") LOOP.setSpeed(1); else if (e.key === "2") LOOP.setSpeed(2); else if (e.key === "3") LOOP.setSpeed(4);
+  if (e.code === "Space") { e.preventDefault(); LOOP.advance("day"); }
+  else if (e.key === "Enter") { e.preventDefault(); LOOP.advance("next"); }
 });
 
 UI.title();

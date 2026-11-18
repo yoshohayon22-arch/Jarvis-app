@@ -206,7 +206,7 @@ B.release = async s => {
     <div class="kpi four"><div><small>Vues le premier mois</small><b>${MM(views)}</b></div><div><small>Par rapport à la moyenne</small><b>×${r.mult.toFixed(1).replace(".", ",")}</b></div><div><small>Vidéo regardée à</small><b>${r.ret} %</b></div><div><small>Nouveaux abonnés</small><b>${MM(subs)}</b></div><div><small>Recettes de la vidéo</small><b>${MS(views * B.rpm(y) + spons)}</b></div><div><small>Budget engagé</small><b>${MS(v.budget)}</b></div></div>
     <p class="ev-text">${esc(r.verdict)}</p><div class="deltas">${UI.deltaChips(out)}</div>
     ${r.comments.length ? `<div>${r.comments.map(c => `<div class="comment">${c.qui ? `<small>${esc(c.qui)}</small>` : ""}${esc(c.texte)}</div>`).join("")}</div>` : ""}
-    <div class="row"><button class="btn primary" id="cont">Reprendre le cours du temps</button></div></div>`, { scene: "studio", wide: true });
+    <div class="row"><button class="btn primary" id="cont">Continuer</button></div></div>`, { scene: "studio", wide: true });
   $("#cont", o2).onclick = () => UI.afterEvent();
 };
 B.week = (s, cont) => { if (s.dead || cont) return null; if (s.prod) { s.prod.w--; if (s.prod.w <= 0) { B.release(s); return { hold: true }; } } return null; };

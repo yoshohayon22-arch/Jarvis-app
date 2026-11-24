@@ -24,7 +24,7 @@ Souvenirs de la Zone 1 : 5 journaux (dont 1 secret) + 3 hologrammes (dont 1 secr
 - [x] 14. Le réacteur · [x] 15. Le poste de commandement · [x] 16. Les capsules · [x] 17. La descente
 - Secrets : [x] journal de l'ancien équipage (alcôve du pont brisé, révélée au scanner) · [x] hologramme de Samir qui chante (cabine obscure de la section de gravité) · [x] casque de Kenji (antenne sur la coque, entre le sas du vestiaire et la tour)
 
-## Zone 3 · Planète
+## Acte 2 · début (ancienne Zone 3 · Planète, voir docs/plan-general.md)
 - [ ] 18. Atterrissage · [ ] 19. Le campement · [ ] 20. La brume · [ ] 21. Les spores
 - [ ] 22. La pluie · [ ] 23. Le dernier message · [ ] 24. La balise · [ ] 25. Le choix
 - Secrets : [ ] traduction de Samir · [ ] dessin de R-12 par Naomi · [ ] hologramme de tout l'équipage

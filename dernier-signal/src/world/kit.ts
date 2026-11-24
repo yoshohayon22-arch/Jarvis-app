@@ -31,6 +31,7 @@ export class Kit {
     this.m.grate = tex('metal_grate_rusty', { color: 0x4d535b, map: false, uv: 0.9 });
     this.m.ceiling = tex('corrugated_iron_02', { color: 0x7d8792, uv: 0.5 });
     this.m.wallWhite = M.addWear(tex('painted_metal_shutter', { color: 0xdfe4ea, uv: 0.55, normal: 0.6 }), { wear: 0, scratches: 0.1, dirt: 0.25, roughVar: 0.2, scale: 0.6 });
+    this.m.wallWreck = M.addWear(tex('rusty_painted_metal', { color: 0x8a7a70, uv: 0.35 }), { wear: 0, scratches: 0.2, dirt: 0.55, roughVar: 0.25, scale: 0.6 });
     this.m.concrete = tex('concrete_floor_worn_001', { color: 0x9aa0a8, metal: 0, uv: 0.22 });
     this.m.shutter = tex('painted_metal_shutter', { color: 0xaeb6c0, uv: 0.8 });
     this.m.container = tex('container_side', { color: 0xffffff, uv: 0.4 });
@@ -76,6 +77,10 @@ export interface RoomSpec {
   wall?: 'blue' | 'white';
   /** Côtés sans mur (fournis par la pièce voisine). */
   skip?: Side[];
+  /** Parois magnétiques (bottes). */
+  mag?: boolean;
+  /** Teinte des néons et ambiance (épave : rouge / ambre). */
+  wreck?: boolean;
 }
 
 export interface Room {
@@ -100,7 +105,7 @@ export function buildRoom(kit: Kit, ph: Physics, pool: LightPool, s: RoomSpec): 
   // --- sol (avec trous éventuels) ---
   const floorRects = subtract({ x0: x0 - T, z0: z0 - T, x1: x1 + T, z1: z1 + T }, s.holes ?? []);
   for (const r of floorRects) {
-    ph.add([r.x0, y - 0.4, r.z0], [r.x1, y, r.z1], { surface });
+    ph.add([r.x0, y - 0.4, r.z0], [r.x1, y, r.z1], { surface, tag: s.mag ? 'mag' : undefined });
     const mat = s.floor === 'concrete' ? kit.m.concrete : kit.m.floor;
     B.add(group, mat, new THREE.BoxGeometry(r.x1 - r.x0, 0.4, r.z1 - r.z0), [(r.x0 + r.x1) / 2, y - 0.2, (r.z0 + r.z1) / 2]);
   }
@@ -124,7 +129,7 @@ export function buildRoom(kit: Kit, ph: Physics, pool: LightPool, s: RoomSpec): 
 
   // --- plafond ---
   if (!s.noCeiling) {
-    ph.add([x0 - T, y + h, z0 - T], [x1 + T, y + h + 0.4, z1 + T]);
+    ph.add([x0 - T, y + h, z0 - T], [x1 + T, y + h + 0.4, z1 + T], { tag: s.mag ? 'mag' : undefined });
     B.add(group, kit.m.ceiling, new THREE.BoxGeometry(x1 - x0 + 2 * T, 0.3, z1 - z0 + 2 * T), [(x0 + x1) / 2, y + h + 0.15, (z0 + z1) / 2]);
     const alongX = x1 - x0 > z1 - z0;
     const len = alongX ? x1 - x0 : z1 - z0;
@@ -168,10 +173,10 @@ export function buildRoom(kit: Kit, ph: Physics, pool: LightPool, s: RoomSpec): 
     };
     const coll = (a: number, b: number, yb: number, yt: number) => {
       const r = box(a, b, yb, yt, null);
-      if (r) ph.addCentered(r.pos, r.size);
+      if (r) ph.addCentered(r.pos, r.size, { tag: s.mag ? 'mag' : undefined });
     };
     for (const [a, b] of solid) {
-      box(a, b, y, y + h, s.wall === 'white' ? kit.m.wallWhite : kit.m.wall); coll(a, b, y, y + h);
+      box(a, b, y, y + h, s.wreck ? kit.m.wallWreck : s.wall === 'white' ? kit.m.wallWhite : kit.m.wall); coll(a, b, y, y + h);
       // plinthe
       box(a, b, y, y + 0.14, kit.m.dark, 0.08, T / 2 + 0.04);
       // détails intérieurs : pilastres tous les ~2 m, bandeau lumineux
@@ -214,7 +219,7 @@ export function buildRoom(kit: Kit, ph: Physics, pool: LightPool, s: RoomSpec): 
     for (const o of ops) {
       const oy = y + (o.y ?? 0);
       const a = o.c - o.w / 2, b = o.c + o.w / 2;
-      const wm = s.wall === 'white' ? kit.m.wallWhite : kit.m.wall;
+      const wm = s.wreck ? kit.m.wallWreck : s.wall === 'white' ? kit.m.wallWhite : kit.m.wall;
       box(a, b, oy + o.h, y + h, wm); coll(a, b, oy + o.h, y + h);
       if (oy > y) { box(a, b, y, oy, wm); coll(a, b, y, oy); }
       if (o.frame !== false) {

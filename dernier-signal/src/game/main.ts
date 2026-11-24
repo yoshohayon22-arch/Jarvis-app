@@ -8,13 +8,15 @@ import { setMaterialRes, unifyScene } from '../robots/materials';
 import { Input } from './input';
 import { Player } from './player';
 import { ThirdPersonCamera } from './camera';
-import { Zone1, CP_ORDER, type GameApi, type ObjectiveKey, type Shot } from '../world/zone1';
+import { Zone1, type GameApi, type Shot } from '../world/zone1';
+import { Zone2 } from '../world/zone2';
+import type { ObjectiveKey } from '../story';
 import type { Hologram } from '../world/elements';
 import { Sky } from '../world/sky';
 import { AudioEngine, Voices } from '../audio/audio';
 import { Hud } from '../ui/hud';
 import { loadSave, writeSave, newSave, clearSave, loadOptions, saveOptions, type SaveData, type Options } from './save';
-import { LOGS, HOLOS, CLUES, OBJECTIVES, ROOMS, MISSION_NAMES } from '../story/zone1';
+import { LOGS, HOLOS, CLUES, OBJECTIVES, ROOMS, MISSION_NAMES } from '../story';
 import { CREW } from '../story/crew';
 
 const $ = <T extends HTMLElement = HTMLElement>(s: string) => document.querySelector(s) as T;
@@ -97,10 +99,18 @@ const api: GameApi = {
   flags: save.flags,
   playLog, playHolo, setObjective, completeMission, checkpoint, kill, toast: (a, b) => hud.toast(a, b), enterRoom, clue, unlock, openKeypad, cinematic, endOfZone,
   saveNow: () => writeSave(save),
+  alert: (txt) => setAlert(txt),
+  radiation: (v) => setRadiation(v),
+  rumble: (a, b, ms) => input.rumble(a, b, ms),
 };
+const zoneNum = (save.flags.zone2 ? 2 : 1) as 1 | 2;
+if (zoneNum === 2) { scene.fog = new THREE.FogExp2(0x0a0605, 0.012); sky.planet.position.set(-80, -520, -120); sky.planet.scale.setScalar(1.6); sky.asterion.visible = false; }
 (window as unknown as { __stage?: (s: string) => void }).__stage?.('Construction de la station');
 const _t0 = performance.now();
-const level = new Zone1(scene, q, api, audio);
+const level: Zone1 | Zone2 = zoneNum === 2 ? new Zone2(scene, q, api, audio) : new Zone1(scene, q, api, audio);
+const z1 = level instanceof Zone1 ? level : null;
+const z2 = level instanceof Zone2 ? level : null;
+if (z2) z2.onTeleport = (cp) => { save.cp = cp; writeSave(save); flashSaved(); respawn(); };
 (window as unknown as { __timing: Record<string, number> }).__timing = { level: performance.now() - _t0, sinceNav: performance.now() };
 (window as unknown as { __stage?: (s: string) => void }).__stage?.('Assemblage de R-12');
 const player = new Player(scene, q);
@@ -182,19 +192,19 @@ function completeMission(k: ObjectiveKey, next: ObjectiveKey) {
 }
 
 function checkpoint(id: string) {
-  if (CP_ORDER.indexOf(id) < CP_ORDER.indexOf(save.cp)) return;
+  if (level.cpOrder.indexOf(id) < level.cpOrder.indexOf(save.cp)) return;
   if (id !== save.cp) { save.cp = id; writeSave(save); flashSaved(); }
 }
 function flashSaved() { const e = $('#saved'); e.classList.remove('show'); void e.offsetWidth; e.classList.add('show'); }
 
 function enterRoom(id: string) {
-  hud.setZone('Station Halcyon', ROOMS[id] ?? '');
+  hud.setZone(level.zoneName, ROOMS[id] ?? '');
   if (!save.visited.includes(id)) { save.visited.push(id); writeSave(save); }
   if (id === 'E' && objective === 'm3' && save.flags.notebook) setObjective('m4');
   if (id === 'F' && objective === 'm5') { /* déjà la bonne mission */ }
 }
 
-function unlock(what: 'lamp' | 'scan' | 'jetpack' | 'notebook') {
+function unlock(what: 'lamp' | 'scan' | 'jetpack' | 'notebook' | 'boots') {
   save.flags[what] = true;
   audio.discovery(); input.rumble(0.3, 0.5, 250);
   if (what === 'lamp') {
@@ -205,12 +215,16 @@ function unlock(what: 'lamp' | 'scan' | 'jetpack' | 'notebook') {
   } else if (what === 'scan') {
     audio.beep('happy', player.pos);
     hud.toast('Module de scan installé', `${hud.icon('scan')} envoie une onde qui révèle les traces et les indices`);
-    level.doors.dFG.setState('closed');
+    z1?.doors.dFG.setState('closed');
     completeMission('m5', 'm6');
   } else if (what === 'jetpack') {
     player.hasJetpack = true;
     audio.beep('happy', player.pos);
     hud.toast('Jetpack installé', `Maintiens ${hud.icon('jump')} en l'air pour voler`);
+  } else if (what === 'boots') {
+    player.hasBoots = true;
+    audio.beep('happy', player.pos);
+    hud.toast('Bottes magnétiques installées', 'Tu restes collé au métal : marche sur les murs, les plafonds… et la coque.');
   } else if (what === 'notebook') {
     setTimeout(() => hud.toast('Carnet débloqué', `Pause → Carnet : journaux, indices et carte de la station`), 4500);
   }
@@ -268,11 +282,13 @@ function updateCinematic(dt: number) {
   if (!cine) return;
   const s = cine.shots[cine.i];
   cine.t += dt;
+  camera.up.set(0, 1, 0);
   const k = Math.min(1, cine.t / s.dur), e = k * k * (3 - 2 * k);
   const from = new THREE.Vector3(...s.pos), to = new THREE.Vector3(...(s.to ?? s.pos));
   const lf = new THREE.Vector3(...s.look), lt = new THREE.Vector3(...(s.lookTo ?? s.look));
   camera.position.copy(from.lerp(to, e));
   camera.lookAt(lf.lerp(lt, e));
+  if (s.shake) { const a = s.shake * 0.012; camera.rotation.x += (Math.random() - 0.5) * a; camera.rotation.y += (Math.random() - 0.5) * a; }
   if (s.fov) { camera.fov += (s.fov - camera.fov) * Math.min(1, dt * 2); camera.updateProjectionMatrix(); }
   if (k >= 1) {
     cine.i++; cine.t = 0;
@@ -291,8 +307,14 @@ function updateCinematic(dt: number) {
 function endOfZone() {
   if (endShown) return;
   endShown = true;
-  save.flags.zone1done = true;
-  setObjective('end');
+  save.flags[zoneNum === 2 ? 'zone2done' : 'zone1done'] = true;
+  setObjective(zoneNum === 2 ? 'end2' : 'end');
+  if (zoneNum === 2) {
+    $('#endcard small').textContent = 'Fin de la Zone 2 · Épave de l\'Asterion';
+    $('#endcard h2').textContent = 'La surface';
+    $('#endcard p').textContent = 'La capsule s\'écrase dans une forêt qui luit dans la nuit. Le signal est tout proche. La suite : Zone 3.';
+    $('#btn-end-continue').textContent = 'Retour à l\'écran titre';
+  } else $('#btn-end-continue').textContent = 'Continuer vers la Zone 2';
   writeSave(save);
   const f = (a: number, b: number) => `${a} / ${b}`;
   $('#end-logs').textContent = f(save.logs.length, Object.keys(LOGS).length);
@@ -314,7 +336,7 @@ function kill(reason: string) {
   $('#reboot').classList.add('show');
 }
 function respawn() {
-  const cp = level.checkpoints[save.cp] ?? level.checkpoints.A;
+  const cp = level.checkpoints[save.cp] ?? level.checkpoints[level.cpOrder[0]];
   player.teleport(cp.pos, cp.yaw);
   tp.snap(cp.pos, cp.yaw + Math.PI);
   level.current = cp.room;
@@ -342,7 +364,7 @@ let nearest: (typeof level.interact)[number] | null = null;
 function updateInteract() {
   nearest = null;
   let best = Infinity;
-  const p = player.pos.clone().add(new THREE.Vector3(0, 0.6, 0));
+  const p = player.pos.clone().addScaledVector(player.up, 0.6);
   for (const it of level.interact) {
     if (!it.enabled()) continue;
     const d = it.pos.distanceTo(p);
@@ -357,7 +379,7 @@ function doScan() {
   audio.scan();
   input.rumble(0.1, 0.3, 150);
   setTimeout(() => {
-    const eye = player.pos.clone().add(new THREE.Vector3(0, 0.9, 0));
+    const eye = player.pos.clone().addScaledVector(player.up, 0.9);
     const visible = (p: THREE.Vector3) => {
       const d = p.clone().sub(eye); const len = d.length();
       const hit = level.ph.raycast(eye, d.normalize(), len, true);
@@ -440,7 +462,15 @@ $('#btn-quit').onclick = () => { closeAllPanels(); stopStory(); toTitle(); };
 $$('.back').forEach((b) => (b.onclick = () => backPanel()));
 $('#btn-continue').onclick = () => startGame(false);
 $('#btn-new').onclick = () => { if (loadSave() && !confirm('Recommencer une nouvelle partie ? La progression actuelle sera effacée.')) return; startGame(true); };
-$('#btn-end-continue').onclick = () => { closeAllPanels(); toTitle(); };
+$('#btn-end-continue').onclick = () => {
+  closeAllPanels();
+  if (zoneNum === 1) { goToZone2(); return; }
+  toTitle();
+};
+function goToZone2() {
+  save.flags.zone2 = true; save.cp = 'X'; save.objective = 'm10'; writeSave(save);
+  location.hash = 'go'; location.reload();
+}
 $('#pausebtn').addEventListener('pointerdown', (e) => { e.stopPropagation(); pause(); });
 
 // carnet
@@ -480,7 +510,7 @@ function renderNotebook(tab: string) {
     body.appendChild(cv);
     drawMap(cv);
   } else if (tab === 'crew') {
-    for (const c of Object.values(CREW)) {
+    for (const c of Object.values(CREW).filter((c) => c.id !== 'inconnu')) {
       const d = document.createElement('div'); d.className = 'entry';
       d.innerHTML = `<b>${c.name}</b><small>${c.role}</small><p>${c.bio}</p>`;
       body.appendChild(d);
@@ -491,7 +521,7 @@ function renderNotebook(tab: string) {
 function drawMap(cv: HTMLCanvasElement) {
   const g = cv.getContext('2d')!;
   const rooms = Object.values(level.rooms);
-  const minX = -26, maxX = 52, minZ = -72, maxZ = 12;
+  const { minX, maxX, minZ, maxZ } = level.mapBounds;
   const s = Math.min(cv.width / (maxX - minX), cv.height / (maxZ - minZ)) * 0.92;
   const ox = (cv.width - (maxX - minX) * s) / 2, oz = (cv.height - (maxZ - minZ) * s) / 2;
   const X = (x: number) => ox + (x - minX) * s, Z = (z: number) => oz + (z - minZ) * s;
@@ -556,8 +586,7 @@ function refreshHints() {
 let titleT = 0;
 function toTitle() {
   state = 'title';
-  level.current = 'E';
-  level.shutter.open = 1;
+  if (z1) { level.current = 'E'; z1.shutter.open = 1; }
   $('#hud').classList.remove('show'); $('#touch').classList.remove('show');
   $('#btn-continue').hidden = !loadSave();
   $('#title').classList.add('show');
@@ -568,10 +597,12 @@ function restoreFromSave() {
   api.flags = save.flags;
   player.hasJetpack = !!save.flags.jetpack;
   player.lampOn = !!save.flags.lamp && !save.flags.lampOff;
-  level.shutter.open = save.flags.shutter ? 1 : 0;
+  player.hasBoots = !!save.flags.boots;
+  if (z1) z1.shutter.open = save.flags.shutter ? 1 : 0;
   level.applyFlags();
-  if (save.flags.power) applyPower();
-  endShown = !!save.flags.zone1done;
+  if (z1 && save.flags.power) applyPower();
+  if (z2) { audio.setPowered(!!save.flags.reactor); envTarget = 0.12; }
+  endShown = !!save.flags[zoneNum === 2 ? 'zone2done' : 'zone1done'];
   objective = (save.objective as ObjectiveKey) in OBJECTIVES ? (save.objective as ObjectiveKey) : 'init';
   hud.setObjective(OBJECTIVES[objective]);
   refreshUnlocks();
@@ -580,16 +611,18 @@ function restoreFromSave() {
 async function startGame(fresh: boolean) {
   audio.unlock();
   if (fresh) { clearSave(); location.hash = 'new'; location.reload(); return; }
+  if (zoneNum === 1 && save.flags.zone1done) { goToZone2(); return; }
   closeAllPanels();
   $('#title').classList.remove('show');
   restoreFromSave();
   respawn();
   audio.startAmbience('station');
-  audio.setPowered(!!save.flags.power);
+  audio.setPowered(!!save.flags[z2 ? 'reactor' : 'power']);
   $('#hud').classList.add('show'); $('#touch').classList.add('show');
   refreshHints();
-  if (save.cp === 'A' && !save.flags.prologue) await intro();
+  if (z1 && save.cp === 'A' && !save.flags.prologue) await intro();
   else robotEyes.eyePower = 1;
+  if (z2 && !save.flags.z2intro) dockingIntro();
   if (state !== 'cinematic') state = 'play';
 }
 
@@ -618,7 +651,7 @@ async function intro() {
   boot.classList.remove('show', 'fade');
   await new Promise((r) => setTimeout(r, 5200));
   canvas.style.filter = '';
-  level.openCradle();
+  z1?.openCradle();
   save.flags.prologue = true;
   // la caméra recule : vue à la troisième personne
   const head = player.pos.clone().add(new THREE.Vector3(0, 0.92, 0));
@@ -631,6 +664,37 @@ async function intro() {
   });
 }
 let prologueT = -1;
+
+/** Mission 10 · L'amarrage : la navette arrive de travers contre l'épave, éclairée par les orages de la planète. */
+function dockingIntro() {
+  if (!z2) return;
+  save.flags.z2intro = true;
+  z2.dockT = 0;
+  player.robot.visible = false;
+  setObjective('m10');
+  cinematic([
+    { pos: [70, 30, 70], look: [24, 4, 8], to: [55, 18, 50], lookTo: [20, 0, 6], dur: 4.5, fov: 50 },
+    { pos: [30, 4, -4], look: [22, 1, 8], to: [28, 3, -2], lookTo: [22, 1.5, 6], dur: 2.5, fov: 55, shake: 0.6 },
+  ], () => {
+    player.robot.visible = true;
+    hud.toast('Apesanteur', input.device === 'touch' ? 'Boutons ▲ ▼ pour monter et descendre' : input.device === 'gamepad' ? 'Gâchettes : monter / descendre' : 'Maj : monter · Ctrl : descendre');
+    writeSave(save);
+  });
+}
+
+// ---------- alertes & radiations ----------
+let alertTxt: string | null = null;
+function setAlert(txt: string | null) {
+  if (txt === alertTxt) return;
+  alertTxt = txt;
+  const e = $('#alert'); e.textContent = txt ?? ''; e.classList.toggle('show', !!txt);
+  if (txt) audio.beep('alert');
+}
+let radV = 0;
+function setRadiation(v: number) {
+  if (Math.abs(v - radV) < 0.01) return;
+  radV = v; $('#rad').style.opacity = String(Math.min(1, v * 1.2));
+}
 
 // ---------- boucle ----------
 let envTarget = 0.06;
@@ -666,9 +730,7 @@ function step(dt: number) {
   if (state === 'title') {
     titleT += dt;
     // caméra qui dérive lentement dans la baie d'observation, face à la planète
-    const a = titleT * 0.05;
-    camera.position.set(Math.sin(a) * 2.2, 2.3 + Math.sin(a * 0.7) * 0.3, -41.5 + Math.cos(a * 0.6) * 0.6);
-    camera.lookAt(Math.sin(a * 0.8) * 1.5, 3.4, -60);
+    level.titleCamera(titleT, camera);
     level.update(dt, t, camera.position, () => false, false);
   } else {
     if (state === 'play') {
@@ -690,17 +752,19 @@ function step(dt: number) {
         const k = Math.min(1, prologueT / 5);
         canvas.style.filter = `blur(${(14 * (1 - k)).toFixed(1)}px) brightness(${(0.6 + 0.4 * k).toFixed(2)})`;
         robotEyes.eyePower = THREE.MathUtils.clamp((prologueT - 1.5) / 1.2, 0, 1) * (prologueT < 2.2 && Math.sin(prologueT * 40) > 0 ? 0.3 : 1);
-        const rm = level.eyeReflection.userData.mat as THREE.MeshBasicMaterial; rm.opacity = robotEyes.eyePower * 0.55;
+        if (z1) { const rm = z1.eyeReflection.userData.mat as THREE.MeshBasicMaterial; rm.opacity = robotEyes.eyePower * 0.55; }
         const hp = player.pos.clone().add(new THREE.Vector3(0, 0.92, 0));
         camera.position.set(hp.x + Math.sin(prologueT * 0.5) * 0.02, hp.y + Math.sin(prologueT * 0.8) * 0.01, hp.z - 0.15);
         camera.lookAt(Math.sin(prologueT * 0.3) * 0.3, 1.0 + Math.sin(prologueT * 0.4) * 0.08, hp.z - 4);
-      } else if (state !== 'reboot') tp.update(dt, input.look, player.pos, player.body.vel, level.ph, t);
+      } else if (state !== 'reboot') tp.update(dt, input.look, player.pos, player.body.vel, player.visUp, level.ph, t);
       player.external.copy(level.external);
+      player.env = level.env(player.pos);
+      document.body.classList.toggle('zerog', player.env.zeroG);
       player.robot.visible = !(state === 'intro' && prologueT >= 0 && prologueT < 6.6);
-      player.update(dt, t, input, tp.yaw, level.ph, audio);
-      if (player.pos.y < -8) kill('Chute');
+      player.update(dt, t, input, tp.frame, tp.yaw, tp.forward(), level.ph, audio);
+      if (z1 && player.pos.y < -8) kill('Chute');
       level.update(dt, t, player.pos, (box) => {
-        const b = new THREE.Box3(player.pos.clone().add(new THREE.Vector3(-0.25, 0, -0.25)), player.pos.clone().add(new THREE.Vector3(0.25, 1, 0.25)));
+        const b = new THREE.Box3().setFromCenterAndSize(player.pos.clone().addScaledVector(player.up, 0.5), new THREE.Vector3(0.6, 0.6, 0.6).addScaledVector(new THREE.Vector3(Math.abs(player.up.x), Math.abs(player.up.y), Math.abs(player.up.z)), 0.4));
         return b.intersectsBox(box);
       });
       if (state === 'play') updateInteract(); else hud.setPrompt(null);
@@ -717,6 +781,7 @@ function step(dt: number) {
   scene.environmentIntensity += (envTarget - scene.environmentIntensity) * Math.min(1, dt);
   hemi.intensity = 0.1 + scene.environmentIntensity * 0.3;
   sky.position.copy(camera.position);
+  if (z2) sky.planet.visible = z2.descentT < 10;
   sky.update(t);
   audio.updateListener(camera);
 }
@@ -739,7 +804,7 @@ async function boot() {
   clearInterval(prog);
   tm.textures = performance.now() - _t; _t = performance.now();
   // compilation des shaders avant d'afficher (évite les saccades)
-  level.current = 'E';
+  level.current = z1 ? 'E' : 'X';
   for (const r of Object.values(level.rooms)) r.group.visible = true;
   (window as unknown as { __stage?: (s: string) => void }).__stage?.('Préparation des effets graphiques');
   await new Promise((r) => requestAnimationFrame(r));
@@ -769,7 +834,8 @@ async function boot() {
   };
   addEventListener('pointerdown', wake, true); addEventListener('keydown', wake, true); addEventListener('touchend', wake, true);
   document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') audio.ensure(); });
-  if (location.hash === '#new') { history.replaceState(null, '', location.pathname); save = newSave(); api.flags = save.flags; writeSave(save); toTitleThen(true); }
+  if (location.hash === '#go') { history.replaceState(null, '', location.pathname); toTitleThen(true); }
+  else if (location.hash === '#new') { history.replaceState(null, '', location.pathname); save = newSave(); api.flags = save.flags; writeSave(save); toTitleThen(true); }
   else toTitle();
 }
 function toTitleThen(fresh: boolean) {
@@ -789,5 +855,5 @@ const simulate = (sec: number, keys: string[] = []) => {
   keys.forEach((c) => k.delete(c));
 };
 const press = (b: string) => { (input as unknown as { pressed: Set<string> }).pressed.add(b); step(1 / 30); input.endFrame(); };
-(window as unknown as { __game: unknown }).__game = { level, player, save: () => save, state: () => state, tp, kill, startGame, simulate, press, input, renderer, setPrologue: (v: number) => { prologueT = v; state = 'intro'; } };
+(window as unknown as { __game: unknown }).__game = { zone: zoneNum, goToZone2, level, player, save: () => save, state: () => state, tp, kill, startGame, simulate, press, input, renderer, setPrologue: (v: number) => { prologueT = v; state = 'intro'; } };
 boot().catch((e) => { $('#loader').textContent = 'Erreur : ' + e; console.error(e); });

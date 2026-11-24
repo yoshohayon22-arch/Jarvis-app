@@ -20,9 +20,9 @@ Souvenirs de la Zone 1 : 5 journaux (dont 1 secret) + 3 hologrammes (dont 1 secr
 - Secrets : [x] journal caché de Samir · [x] hologramme de l'anniversaire de Léa · [x] photo de famille de Kenji
 
 ## Zone 2 · Épave de l'Asterion
-- [ ] 10. L'amarrage · [ ] 11. Le pont brisé · [ ] 12. La gravité folle · [ ] 13. Les bottes magnétiques
-- [ ] 14. Le réacteur · [ ] 15. Le poste de commandement · [ ] 16. Les capsules · [ ] 17. La descente
-- Secrets : [ ] journal de l'ancien équipage · [ ] hologramme de Samir qui chante · [ ] casque de Kenji
+- [x] 10. L'amarrage · [x] 11. Le pont brisé · [x] 12. La gravité folle · [x] 13. Les bottes magnétiques
+- [x] 14. Le réacteur · [x] 15. Le poste de commandement · [x] 16. Les capsules · [x] 17. La descente
+- Secrets : [x] journal de l'ancien équipage (alcôve du pont brisé, révélée au scanner) · [x] hologramme de Samir qui chante (cabine obscure de la section de gravité) · [x] casque de Kenji (antenne sur la coque, entre le sas du vestiaire et la tour)
 
 ## Zone 3 · Planète
 - [ ] 18. Atterrissage · [ ] 19. Le campement · [ ] 20. La brume · [ ] 21. Les spores
@@ -33,3 +33,7 @@ Souvenirs de la Zone 1 : 5 journaux (dont 1 secret) + 3 hologrammes (dont 1 secr
 - Mission 4 : le code du volet se lit en examinant le dessous de la console à la lampe (le scanner n'arrive qu'à la mission 5).
 - Mission 3 : les indices des cabines s'examinent (bouton Interagir) ; le scanner les signale aussi plus tard.
 - Mission 2 : l'ancienne énigme de connecteurs est remplacée par les 3 câbles à rebrancher.
+- Mission 13 : le « moment fort » est la sortie sur la coque : on marche jusqu'à la tour du réacteur, on monte sur ses parois, puis on entre par l'écoutille du sommet.
+- Mission 14 : chaque anneau se réaligne depuis une console murale ; on atteint les consoles en marchant sur les parois du puits avec les bottes. Zones irradiées : rester plus de 2 s environ = redémarrage.
+- Mission 16 : les trois pièces flottent dans l'épave extérieure, battue par des vagues de débris venant de l'est : s'abriter derrière les blocs.
+- Mission 17 : la descente est une cinématique (flammes, secousses, nuages, forêt de nuit), pas encore une séquence pilotée.

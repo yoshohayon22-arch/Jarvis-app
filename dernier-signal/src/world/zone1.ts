@@ -9,7 +9,7 @@ import { LightCone } from '../fx/volumetric';
 import { Hologram, Arc, Footprints, SteamJet, Shutter, Valve, buildShuttle, buildStationExterior } from './elements';
 import type { AudioEngine } from '../audio/audio';
 import type { Quality } from '../core/quality';
-import { OBJECTIVES } from '../story/zone1';
+import type { ObjectiveKey as OK } from '../story/index';
 
 // Zone 1 · Station Halcyon — missions 0 à 9 (voir MISSIONS.md).
 //
@@ -23,9 +23,9 @@ import { OBJECTIVES } from '../story/zone1';
 //                      │
 //                      A Maintenance (réveil)
 
-export type ObjectiveKey = keyof typeof OBJECTIVES;
+export type ObjectiveKey = OK;
 
-export interface Shot { pos: V3; look: V3; to?: V3; lookTo?: V3; dur: number; fov?: number; }
+export interface Shot { pos: V3; look: V3; to?: V3; lookTo?: V3; dur: number; fov?: number; shake?: number; }
 
 export interface GameApi {
   flags: Record<string, boolean>;
@@ -38,11 +38,16 @@ export interface GameApi {
   toast(msg: string, sub?: string): void;
   enterRoom(id: string): void;
   clue(id: string): void;
-  unlock(what: 'lamp' | 'scan' | 'jetpack' | 'notebook'): void;
+  unlock(what: 'lamp' | 'scan' | 'jetpack' | 'notebook' | 'boots'): void;
+  rumble?(strong: number, weak: number, ms: number): void;
   openKeypad(onCode: (code: string) => boolean): void;
   cinematic(shots: Shot[], onDone?: () => void): void;
   endOfZone(): void;
   saveNow(): void;
+  /** Bandeau d'alerte (tempête…) ; null pour l'effacer. */
+  alert(text: string | null): void;
+  /** Exposition aux radiations 0-1 (effet visuel). */
+  radiation(v: number): void;
 }
 
 export interface Interactable { id: string; pos: THREE.Vector3; r: number; label: string; verb: string; enabled: () => boolean; act: () => void; }
@@ -912,6 +917,18 @@ export class Zone1 {
   }
 
   revealFootprints() { for (const f of this.footprints) f.reveal = 7; }
+  readonly cpOrder = CP_ORDER;
+  readonly zoneId = 1;
+  readonly zoneName = 'Station Halcyon';
+  mapBounds = { minX: -26, maxX: 52, minZ: -72, maxZ: 12 };
+  /** Environnement physique au point donné (apesanteur, gravité imposée, parois magnétiques). */
+  env(_p: THREE.Vector3) { return { zeroG: false, forcedUp: null, magnetic: false }; }
+  titleCamera(t: number, cam: THREE.PerspectiveCamera) {
+    const a = t * 0.05;
+    cam.up.set(0, 1, 0);
+    cam.position.set(Math.sin(a) * 2.2, 2.3 + Math.sin(a * 0.7) * 0.3, -41.5 + Math.cos(a * 0.6) * 0.6);
+    cam.lookAt(Math.sin(a * 0.8) * 1.5, 3.4, -60);
+  }
 
   // ---------- textures dessinées ----------
   private drawSignal(g: CanvasRenderingContext2D, t: number, p: boolean) {

@@ -10,10 +10,10 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,400;0,600;1,400&family=Barlow+Condensed:wght@500;600;700&display=swap" rel="stylesheet" />
-  <script type="module" crossorigin src="./assets/index-B_2kiCPf.js"></script>
-  <link rel="modulepreload" crossorigin href="./assets/volumetric-CyTtlfTJ.js">
+  <script type="module" crossorigin src="./assets/index-BfrNVEBO.js"></script>
+  <link rel="modulepreload" crossorigin href="./assets/volumetric-r-UbQpr_.js">
   <link rel="stylesheet" crossorigin href="./assets/volumetric-n4qUiZz7.css">
-  <link rel="stylesheet" crossorigin href="./assets/index-B3w6NaJw.css">
+  <link rel="stylesheet" crossorigin href="./assets/index-Cx5VrV4r.css">
 </head>
 <body>
   <canvas id="c"></canvas>
@@ -29,6 +29,7 @@
     <div id="toast"></div>
     <div id="labels"></div>
     <div id="saved">Sauvegarde automatique</div>
+    <div id="alert"></div>
     <div id="nosound">Son coupé — touche l'écran pour le réactiver</div>
   </div>
 
@@ -39,6 +40,8 @@
     <button class="tb jump" data-btn="jump"><span>Saut</span></button>
     <button class="tb act" data-btn="interact"><span>Interagir</span></button>
     <button class="tb scan" data-btn="scan"><span>Scan</span></button>
+    <button class="tb up" data-btn="up" aria-label="Monter"><span>▲</span></button>
+    <button class="tb down" data-btn="down" aria-label="Descendre"><span>▼</span></button>
     <button class="tb lamp" data-btn="lamp" aria-label="Allumer ou éteindre la lampe"><span>Lampe</span></button>
     <button id="pausebtn" aria-label="Pause">❚❚</button>
   </div>
@@ -132,6 +135,7 @@
     <button id="btn-end-continue" class="f primary">Retour à l'écran titre</button>
   </div>
 
+  <div id="rad"></div>
   <div id="bars"><i></i><i></i></div>
   <div id="boot"><div class="lines"></div></div>
   <div id="reboot"><div class="scan"></div><div class="txt">REDÉMARRAGE DU SYSTÈME<small class="why"></small><i></i></div></div>

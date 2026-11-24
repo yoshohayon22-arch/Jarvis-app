@@ -85,7 +85,14 @@ export class Physics {
   }
 }
 
-/** Corps du joueur : cylindre approché par une boîte. */
+export type Axis = 'x' | 'y' | 'z';
+const AX: Axis[] = ['x', 'y', 'z'];
+
+/**
+ * Corps du joueur : boîte alignée. Le « haut » peut être n'importe lequel des 6 axes
+ * (sol, plafond avec la gravité inversée, murs avec les bottes magnétiques).
+ * `pos` est le point des pieds.
+ */
 export class Body {
   pos = new THREE.Vector3();
   vel = new THREE.Vector3();
@@ -95,64 +102,104 @@ export class Body {
   ground: Collider | null = null;
   stepHeight = 0.28;
   hitCeiling = false;
+  /** Axe et sens du « haut » (gravité = -haut). */
+  upAxis: Axis = 'y';
+  upSign = 1;
+  /** Dernier contact latéral (pour passer d'une surface à une autre avec les bottes). */
+  lateralHit: { collider: Collider; axis: Axis; dir: number } | null = null;
 
-  private boxAt(p: THREE.Vector3, out: THREE.Box3) {
-    out.min.set(p.x - this.radius, p.y, p.z - this.radius);
-    out.max.set(p.x + this.radius, p.y + this.height, p.z + this.radius);
+  get up() { const v = new THREE.Vector3(); v[this.upAxis] = this.upSign; return v; }
+
+  boxAt(p: THREE.Vector3, out: THREE.Box3) {
+    for (const a of AX) {
+      if (a === this.upAxis) {
+        const lo = this.upSign > 0 ? p[a] : p[a] - this.height, hi = this.upSign > 0 ? p[a] + this.height : p[a];
+        out.min[a] = lo; out.max[a] = hi;
+      } else { out.min[a] = p[a] - this.radius; out.max[a] = p[a] + this.radius; }
+    }
     return out;
   }
 
   move(ph: Physics, dt: number) {
     const wasGrounded = this.grounded;
-    this.grounded = false; this.hitCeiling = false;
+    this.grounded = false; this.hitCeiling = false; this.lateralHit = null;
     const d = this.vel.clone().multiplyScalar(dt);
-    // sous-pas pour éviter de traverser les murs fins
     const steps = Math.max(1, Math.ceil(d.length() / 0.2));
     d.divideScalar(steps);
+    const lat = AX.filter((a) => a !== this.upAxis);
     for (let s = 0; s < steps; s++) {
-      this.axis(ph, 'x', d.x, wasGrounded);
-      this.axis(ph, 'z', d.z, wasGrounded);
-      this.axis(ph, 'y', d.y, wasGrounded);
+      for (const a of lat) this.axis(ph, a, d[a], wasGrounded);
+      this.axis(ph, this.upAxis, d[this.upAxis], wasGrounded);
     }
-    // collage au sol (descente de marches)
-    if (!this.grounded && wasGrounded && this.vel.y <= 0) {
-      const probe = this.pos.clone(); probe.y -= this.stepHeight;
+    // collage à la surface (descente de marches)
+    const u = this.upAxis, us = this.upSign;
+    if (!this.grounded && wasGrounded && this.vel[u] * us <= 0) {
+      const probe = this.pos.clone(); probe[u] -= us * this.stepHeight;
       this.boxAt(probe, _b);
-      let top = -Infinity, hit: Collider | null = null;
-      for (const c of ph.colliders) if (c.enabled && overlaps(c.box, _b) && c.box.max.y <= this.pos.y + 0.01 && c.box.max.y > top) { top = c.box.max.y; hit = c; }
-      if (hit) { this.pos.y = top; this.grounded = true; this.ground = hit; this.vel.y = 0; }
+      let best = -Infinity, hit: Collider | null = null;
+      for (const c of ph.colliders) {
+        if (!c.enabled || !overlaps(c.box, _b)) continue;
+        const surf = us > 0 ? c.box.max[u] : -c.box.min[u];
+        if (surf <= us * this.pos[u] + 0.01 && surf > best) { best = surf; hit = c; }
+      }
+      if (hit) { this.pos[u] = us * best; this.grounded = true; this.ground = hit; this.vel[u] = 0; }
     }
   }
 
-  private axis(ph: Physics, a: 'x' | 'y' | 'z', delta: number, wasGrounded: boolean) {
-    if (delta === 0) {
-      if (a !== 'y') return;
-    }
+  private axis(ph: Physics, a: Axis, delta: number, wasGrounded: boolean) {
+    if (delta === 0 && a !== this.upAxis) return;
     this.pos[a] += delta;
     this.boxAt(this.pos, _b);
+    const u = this.upAxis, us = this.upSign;
     for (const c of ph.colliders) {
       if (!c.enabled || !overlaps(c.box, _b)) continue;
-      if (a === 'y') {
-        if (delta <= 0) { this.pos.y = c.box.max.y; this.grounded = true; this.ground = c; if (this.vel.y < 0) this.vel.y = 0; }
-        else { this.pos.y = c.box.min.y - this.height - 1e-3; this.hitCeiling = true; if (this.vel.y > 0) this.vel.y = 0; }
+      if (a === u) {
+        if (delta * us <= 0) { // on tombe vers la surface
+          this.pos[a] = us > 0 ? c.box.max[a] : c.box.min[a];
+          this.grounded = true; this.ground = c;
+          if (this.vel[a] * us < 0) this.vel[a] = 0;
+        } else {
+          this.pos[a] = us > 0 ? c.box.min[a] - this.height - 1e-3 : c.box.max[a] + this.height + 1e-3;
+          this.hitCeiling = true;
+          if (this.vel[a] * us > 0) this.vel[a] = 0;
+        }
       } else {
         // marche : monter si l'obstacle est bas
-        const rise = c.box.max.y - this.pos.y;
-        if (rise > 0 && rise <= this.stepHeight && (wasGrounded || this.vel.y <= 0) && this.free(ph, c.box.max.y + 1e-3)) {
-          this.pos.y = c.box.max.y + 1e-3;
+        const rise = us > 0 ? c.box.max[u] - this.pos[u] : this.pos[u] - c.box.min[u];
+        if (rise > 0 && rise <= this.stepHeight && (wasGrounded || this.vel[u] * us <= 0) && this.free(ph, us > 0 ? c.box.max[u] + 1e-3 : c.box.min[u] - 1e-3)) {
+          this.pos[u] = us > 0 ? c.box.max[u] + 1e-3 : c.box.min[u] - 1e-3;
           continue;
         }
         if (delta > 0) this.pos[a] = c.box.min[a] - this.radius - 1e-4;
         else this.pos[a] = c.box.max[a] + this.radius + 1e-4;
         this.vel[a] = 0;
+        this.lateralHit = { collider: c, axis: a, dir: Math.sign(delta) };
       }
       this.boxAt(this.pos, _b);
     }
   }
 
-  private free(ph: Physics, y: number) {
-    const p = this.pos.clone(); p.y = y;
+  private free(ph: Physics, upCoord: number) {
+    const p = this.pos.clone(); p[this.upAxis] = upCoord;
     const b = this.boxAt(p, new THREE.Box3());
     return !ph.colliders.some((c) => c.enabled && overlaps(c.box, b));
+  }
+
+  /** Vrai si la boîte placée à `p` avec ce « haut » est libre. */
+  fits(ph: Physics, p: THREE.Vector3, axis: Axis, sign: number) {
+    const sa = this.upAxis, ss = this.upSign;
+    this.upAxis = axis; this.upSign = sign;
+    const b = this.boxAt(p, new THREE.Box3());
+    this.upAxis = sa; this.upSign = ss;
+    return !ph.colliders.some((c) => c.enabled && overlaps(c.box, b));
+  }
+
+  /** Change le « haut » en gardant les pieds au même endroit. */
+  setUp(axis: Axis, sign: number) { this.upAxis = axis; this.upSign = sign; }
+  /** Change la verticale en gardant la boîte au même endroit (bascule autour du centre). */
+  reorient(axis: Axis, sign: number) {
+    const c = this.pos.clone().addScaledVector(this.up, this.height / 2);
+    this.setUp(axis, sign);
+    this.pos.copy(c).addScaledVector(this.up, -this.height / 2);
   }
 }

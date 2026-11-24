@@ -23,6 +23,7 @@ export interface Trigger {
 }
 
 const _b = new THREE.Box3();
+const _bPrev = new THREE.Box3();
 const EPS = 1e-4;
 /** Chevauchement strict (deux boîtes qui se touchent ne se chevauchent pas). */
 export function overlaps(a: THREE.Box3, b: THREE.Box3) {
@@ -148,6 +149,7 @@ export class Body {
 
   private axis(ph: Physics, a: Axis, delta: number, wasGrounded: boolean) {
     if (delta === 0 && a !== this.upAxis) return;
+    const prev = this.boxAt(this.pos, _bPrev);
     this.pos[a] += delta;
     this.boxAt(this.pos, _b);
     const u = this.upAxis, us = this.upSign;
@@ -170,6 +172,8 @@ export class Body {
           this.pos[u] = us > 0 ? c.box.max[u] + 1e-3 : c.box.min[u] - 1e-3;
           continue;
         }
+        // déjà enfoncé avant ce pas : ne jamais « éjecter » de l'autre côté d'un grand bloc
+        if (overlaps(c.box, prev)) continue;
         if (delta > 0) this.pos[a] = c.box.min[a] - this.radius - 1e-4;
         else this.pos[a] = c.box.max[a] + this.radius + 1e-4;
         this.vel[a] = 0;

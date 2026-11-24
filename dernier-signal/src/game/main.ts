@@ -337,7 +337,7 @@ function kill(reason: string) {
 }
 function respawn() {
   const cp = level.checkpoints[save.cp] ?? level.checkpoints[level.cpOrder[0]];
-  player.teleport(cp.pos, cp.yaw);
+  player.teleport(cp.pos, cp.yaw, cp.up);
   tp.snap(cp.pos, cp.yaw + Math.PI);
   level.current = cp.room;
   enterRoom(level.current);

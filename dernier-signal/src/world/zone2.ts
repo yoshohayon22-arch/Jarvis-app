@@ -20,7 +20,7 @@ import type { Footprints } from './elements';
 //                                                             │
 //   R4 Puits du réacteur (parois magnétiques) ── R5 Commandement ── R6 Capsules ── X2 Épave extérieure
 
-export const CP2 = ['X', 'R1', 'R2', 'R3', 'X3', 'R4', 'R5', 'R6', 'X2'];
+export const CP2 = ['X', 'R1', 'R2', 'R3', 'X3', 'R4', 'R4a', 'R4b', 'R4c', 'R4d', 'R5', 'R6', 'X2'];
 
 interface Storm { period: number; t: number; dir: THREE.Vector3; region: THREE.Box3; rooms: string[]; state: 'calm' | 'warn' | 'wave'; }
 
@@ -62,6 +62,8 @@ export class Zone2 {
   private magRegions: THREE.Box3[] = [];
   private radZones: { box: THREE.Box3; mat: THREE.MeshBasicMaterial }[] = [];
   private exposure = 0;
+  private shaft = new THREE.Box3(new THREE.Vector3(-10.2, -70.5, -10.2), new THREE.Vector3(10.2, -26, 10.2));
+  private wallHint = false;
   private rings: { mesh: THREE.Group; tilt: THREE.Euler; aligned: boolean; k: number }[] = [];
   private coreMat: THREE.MeshBasicMaterial;
   private reactorLight: LightSource | null = null;
@@ -306,6 +308,12 @@ export class Zone2 {
       const scr = new THREE.MeshBasicMaterial({ color: new THREE.Color(3, 1.2, 0.2) });
       const sm = new THREE.Mesh(new THREE.PlaneGeometry(1.0, 0.6), scr); sm.position.set(pos[0] + out.x * 0.75, y + 0.1, pos[2] + out.z * 0.75); sm.rotation.y = ry; g4.add(sm);
       sm.userData.ring = i; (this.rings[i] as unknown as { scr: THREE.MeshBasicMaterial }).scr = scr;
+      const upv = out.clone().normalize().round();
+      const ax: Axis = Math.abs(upv.x) > 0.5 ? 'x' : 'z';
+      const side = new THREE.Vector3(0, 1, 0).cross(upv).multiplyScalar(1.6);
+      const wallP = new THREE.Vector3(cp[0] + upv.x * -0.3, y + 1.2, cp[2] + upv.z * -0.3).add(side);
+      wallP[ax] = Math.sign(cp[ax === 'x' ? 0 : 2]) * 10;
+      this.checkpoints['R4' + 'abcd'[i]] = { id: 'R4' + 'abcd'[i], room: 'R4', pos: wallP, yaw: 0, up: { axis: ax, sign: ax === 'x' ? upv.x : upv.z } };
       this.interact.push({ id: 'ring' + i, pos: new THREE.Vector3(pos[0] + out.x * 2, y, pos[2] + out.z * 2), r: 2.4, label: `Anneau de confinement ${i + 1} sur 4`, verb: 'Réaligner', enabled: () => !this.rings[i].aligned, act: () => this.alignRing(i) });
     });
     this.scannables.push({ id: 's_anneaux', pos: new THREE.Vector3(0, -62, 4.4), label: 'Anneaux désalignés', clue: 'anneaux' });
@@ -410,7 +418,7 @@ export class Zone2 {
     const cpT = (id: string, min: V3, max: V3) => this.ph.trigger(min, max, { onEnter: () => this.api.checkpoint(id) });
     cpT('R2', [-33, -27, 5], [-30.3, -22, 11]); cpT('R3', [-66, -27, 2], [-62.3, -22, 14]); cpT('R5', [-10, -35, 10.3], [10, -30, 14]); cpT('R6', [10.3, -35, 10.3], [14, -30, 26]);
     // hors limites (dérive dans le vide)
-    this.ph.trigger([-400, -400, -400], [400, -120, 400], { onEnter: () => this.api.kill('Perdu dans le vide') });
+    this.ph.trigger([-400, -400, -400], [400, -86, 400], { onEnter: () => { if (this.descentT < 0) this.api.kill('Perdu dans le vide'); } });
 
     for (const r of Object.values(this.rooms)) r.builder.build();
     this.root.traverse((o) => { const m = o as THREE.Mesh; if (m.isMesh && !m.castShadow) { const mat = m.material as THREE.Material; if (!mat.transparent && !(mat as THREE.MeshBasicMaterial).isMeshBasicMaterial && !(mat as THREE.ShaderMaterial).isShaderMaterial) m.castShadow = true; } });
@@ -435,6 +443,7 @@ export class Zone2 {
   }
   alignRing(i: number) {
     const r = this.rings[i]; r.aligned = true;
+    this.api.checkpoint('R4' + 'abcd'[i]);
     this.audio.door(r.mesh.position.clone(), true); this.audio.land(r.mesh.position.clone(), 1);
     const n = this.rings.filter((x) => x.aligned).length;
     this.api.flags['ring' + i] = true;
@@ -535,7 +544,8 @@ export class Zone2 {
     if (this.gravity.region.containsPoint(p)) forcedUp = { axis: 'y', sign: this.gravity.inverted ? -1 : 1 };
     const zeroG = this.zeroGRegions.some((b) => b.containsPoint(p));
     const magnetic = this.magRegions.some((b) => b.containsPoint(p));
-    return { zeroG, forcedUp, magnetic };
+    const sticky = this.shaft.containsPoint(p);
+    return { zeroG, forcedUp, magnetic, sticky };
   }
 
   visibleRooms() {
@@ -628,10 +638,16 @@ export class Zone2 {
     this.rocks.count = rockN; this.rocks.instanceMatrix.needsUpdate = true;
     this.api.alert(alert);
 
+    // puits du réacteur : filet de sécurité si le robot passe derrière une paroi
+    if (gameplay && this.current === 'R4' && this.descentT < 0) {
+      const o = Math.abs(playerPos.x) > 10.8 || playerPos.z < -10.8 || (playerPos.z > 10.8 && playerPos.y < -34.6) || playerPos.y < -71;
+      if (o) this.api.kill('Sortie du puits : repositionnement');
+      if (!this.wallHint && playerPos.y > -68.5) { this.wallHint = true; this.api.toast('Marche sur les parois', 'Le haut de l\'écran suit tes pieds. Si tu sautes, les bottes te ramènent contre la paroi.'); }
+    }
     // radiations
     let inRad = false;
     for (const z of this.radZones) { z.mat.opacity = 0.25 + Math.sin(t * 6) * 0.1; if (gameplay && playerBox(z.box)) inRad = true; }
-    this.exposure = inRad ? this.exposure + dt / 2.2 : Math.max(0, this.exposure - dt * 0.6);
+    this.exposure = inRad ? this.exposure + dt / 3.5 : Math.max(0, this.exposure - dt * 0.6);
     this.api.radiation(this.exposure);
     if (inRad && Math.random() < 0.3) this.audio.spark(playerPos, 0.15);
     if (this.exposure >= 1) { this.exposure = 0; this.api.kill('Dose de radiation mortelle'); }

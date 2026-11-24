@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { Builder, rbox, bcyl, lathe, vent, cable, type V3 } from '../robots/parts';
 import * as M from '../robots/materials';
 import { Kit, buildRoom, Door, Props, type Room, type RoomSpec } from './kit';
-import { Physics } from './physics';
+import { Physics, type Axis } from './physics';
 import { LightPool, type LightSource } from './lights';
 import { Particles } from '../fx/particles';
 import { LightCone } from '../fx/volumetric';
@@ -52,7 +52,7 @@ export interface GameApi {
 
 export interface Interactable { id: string; pos: THREE.Vector3; r: number; label: string; verb: string; enabled: () => boolean; act: () => void; }
 export interface Scannable { id: string; pos: THREE.Vector3; label: string; clue?: string; onScan?: () => void; }
-export interface Checkpoint { id: string; pos: THREE.Vector3; yaw: number; room: string; }
+export interface Checkpoint { id: string; pos: THREE.Vector3; yaw: number; room: string; up?: { axis: Axis; sign: number }; }
 
 export const CP_ORDER = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'K', 'L'];
 

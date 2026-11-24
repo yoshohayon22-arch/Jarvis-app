@@ -68,9 +68,10 @@ export class Player {
 
   get pos() { return this.body.pos; }
 
-  teleport(p: THREE.Vector3, yaw: number) {
+  teleport(p: THREE.Vector3, yaw: number, up?: { axis: Axis; sign: number }) {
     this.body.pos.copy(p); this.body.vel.set(0, 0, 0); this.yaw = yaw; this.energy = 1;
-    this.body.setUp('y', 1); this.visUp.set(0, 1, 0);
+    this.body.setUp(up?.axis ?? 'y', up?.sign ?? 1); this.visUp.copy(this.body.up);
+    if (up) { this.body.grounded = true; this.airLoose = 0; }
     this.facing.set(Math.sin(yaw), 0, Math.cos(yaw));
     this.robot.position.copy(p); this.robot.quaternion.setFromEuler(new THREE.Euler(0, yaw, 0));
   }
@@ -78,7 +79,7 @@ export class Player {
   scan() { if (this.scanT <= 0) { this.scanT = 1.6; this.robot.wave.trigger(); return true; } return false; }
 
   /** Environnement fourni par la zone à chaque image. */
-  env: { zeroG: boolean; forcedUp: { axis: Axis; sign: number } | null; magnetic: boolean } = { zeroG: false, forcedUp: null, magnetic: false };
+  env: { zeroG: boolean; forcedUp: { axis: Axis; sign: number } | null; magnetic: boolean; sticky?: boolean } = { zeroG: false, forcedUp: null, magnetic: false };
   hasBoots = false;
   /** Direction de regard du robot (monde), dans le plan perpendiculaire au haut. */
   facing = new THREE.Vector3(0, 0, -1);
@@ -169,7 +170,7 @@ export class Player {
       // ---- bottes magnétiques : passer sur un mur / un plafond, ou contourner une arête ----
       if (this.hasBoots && env.magnetic && !env.forcedUp) this.magnetize(ph, wasG, audio);
       this.airLoose = b.grounded ? 0 : this.airLoose + dt;
-      if (!b.grounded && this.airLoose > 0.6 && !env.forcedUp && (b.upAxis !== 'y' || b.upSign !== 1) && !(env.zeroG)) { b.reorient('y', 1); }
+      if (!b.grounded && this.airLoose > 0.6 && !env.forcedUp && (b.upAxis !== 'y' || b.upSign !== 1) && !(env.zeroG) && !env.sticky) { b.reorient('y', 1); }
       // atterrissage
       if (!b.grounded) this.airTime += dt;
       if (b.grounded && !this.wasGrounded) {

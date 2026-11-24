@@ -41,6 +41,15 @@ export class AudioEngine {
     const s = ctx.createBufferSource(); s.buffer = ctx.createBuffer(1, 1, 22050); s.connect(ctx.destination); s.start();
   }
 
+  /** Vrai si le son est réellement audible (contexte créé et en marche). */
+  get running() { return !!this.ctx && this.ctx.state === 'running'; }
+
+  /** Crée ou relance le contexte audio (après une coupure : manette Bluetooth, appel, mise en veille…). */
+  ensure() {
+    if (!this.ctx) { this.unlock(); return; }
+    if (this.ctx.state !== 'running') this.ctx.resume().catch(() => { /* attend un vrai geste */ });
+  }
+
   setVolumes(v: Partial<typeof this.volumes>) {
     Object.assign(this.volumes, v);
     if (!this.ctx) return;

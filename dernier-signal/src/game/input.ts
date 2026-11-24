@@ -4,7 +4,7 @@ import * as THREE from 'three';
 // Le dernier mode utilisé détermine les icônes d'aide affichées.
 
 export type Device = 'keyboard' | 'gamepad' | 'touch';
-type Btn = 'jump' | 'interact' | 'scan' | 'pause' | 'up' | 'down' | 'map';
+type Btn = 'jump' | 'interact' | 'scan' | 'pause' | 'up' | 'down' | 'map' | 'lamp';
 
 export class Input {
   move = new THREE.Vector2();      // x : droite, y : avant
@@ -17,6 +17,8 @@ export class Input {
   /** Navigation dans les menus (manette / flèches). */
   onNav: ((dir: 'up' | 'down' | 'left' | 'right' | 'ok' | 'back') => void) | null = null;
   menuMode = false;
+  /** Vrai pendant la trame où un bouton de manette vient d'être pressé. */
+  padPressed = false;
 
   private keys = new Set<string>();
   private mouse = new THREE.Vector2();
@@ -75,6 +77,7 @@ export class Input {
       case 'ShiftLeft': case 'ShiftRight': return 'up';
       case 'ControlLeft': case 'ControlRight': return 'down';
       case 'KeyM': case 'Tab': return 'map';
+      case 'KeyL': return 'lamp';
     }
     return null;
   }
@@ -173,13 +176,14 @@ export class Input {
     const b = (i: number) => !!gp.buttons[i]?.pressed;
     const any = lx || ly || rx || ry || gp.buttons.some((x) => x.pressed);
     if (any) this.setDevice('gamepad');
+    this.padPressed = gp.buttons.some((x, i) => x.pressed && !this.padPrev[i]);
     if (this.device !== 'gamepad') { this.padPrev = gp.buttons.map((x) => x.pressed); return; }
     if (!this.menuMode) {
       if (lx || ly) { this.move.set(lx, -ly); if (this.move.lengthSq() > 1) this.move.normalize(); }
       this.look.x += rx * Math.abs(rx) * 3.0 * dt * this.sensitivity;
       this.look.y += ry * Math.abs(ry) * 2.2 * dt * this.sensitivity;
     }
-    const map: [number, Btn][] = [[0, 'jump'], [1, 'interact'], [2, 'scan'], [9, 'pause'], [8, 'map'], [7, 'up'], [6, 'down'], [5, 'up'], [4, 'down']];
+    const map: [number, Btn][] = [[0, 'jump'], [1, 'interact'], [2, 'scan'], [3, 'lamp'], [9, 'pause'], [8, 'map'], [7, 'up'], [6, 'down'], [5, 'up'], [4, 'down']];
     for (const [i, name] of map) {
       const now = b(i), was = this.padPrev[i];
       if (now && !was) this.pressed.add(name);
@@ -204,6 +208,6 @@ export class Input {
     gp?.vibrationActuator?.playEffect('dual-rumble', { duration: ms, strongMagnitude: strong, weakMagnitude: weak }).catch(() => {});
   }
 
-  endFrame() { this.pressed.clear(); }
+  endFrame() { this.pressed.clear(); this.padPressed = false; }
   releasePointer() { if (document.pointerLockElement) document.exitPointerLock(); }
 }

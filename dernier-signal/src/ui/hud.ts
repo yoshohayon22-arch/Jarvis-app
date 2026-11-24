@@ -5,9 +5,9 @@ import type { Device } from '../game/input';
 // invite d'interaction, sous-titres, notifications, étiquettes de scan.
 
 const ICONS: Record<Device, Record<string, string>> = {
-  keyboard: { interact: 'E', jump: 'Espace', scan: 'F', pause: 'Échap' },
-  gamepad: { interact: 'B / ○', jump: 'A / ✕', scan: 'X / □', pause: 'Start' },
-  touch: { interact: 'Interagir', jump: 'Saut', scan: 'Scan', pause: '❚❚' },
+  keyboard: { interact: 'E', jump: 'Espace', scan: 'F', pause: 'Échap', lamp: 'L' },
+  gamepad: { interact: 'B / ○', jump: 'A / ✕', scan: 'X / □', pause: 'Start', lamp: 'Y / △' },
+  touch: { interact: 'Interagir', jump: 'Saut', scan: 'Scan', pause: '❚❚', lamp: 'Lampe' },
 };
 
 export class Hud {

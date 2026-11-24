@@ -164,3 +164,9 @@ td:first-child { color: var(--dim); }
 
 #loader .err { display: none; max-width: min(640px, 86vw); margin: 18px auto 0; font: 500 13px/1.5 ui-monospace, Menlo, monospace; letter-spacing: 0; text-transform: none; color: #ff9b85; user-select: text; -webkit-user-select: text; }
 #loader .time { display: block; margin-top: 14px; font: 500 12px var(--font); letter-spacing: .05em; text-transform: none; color: #55697a; }
+
+.tb.lamp { width: 62px; height: 62px; right: calc(max(22px, env(safe-area-inset-right)) + 140px); bottom: calc(max(22px, env(safe-area-inset-bottom)) + 124px); font-size: 11px; }
+.tb.lamp.off { opacity: .55; border-style: dashed; }
+#nosound { position: absolute; left: 50%; top: calc(max(18px, env(safe-area-inset-top)) + 8px); transform: translateX(-50%); padding: 8px 14px; border-radius: 999px;
+  background: rgba(40, 14, 8, .75); border: 1px solid rgba(255, 138, 106, .5); color: #ffc2b0; font: 600 13px var(--font); opacity: 0; transition: opacity .3s; pointer-events: none; }
+#nosound.show { opacity: 1; }

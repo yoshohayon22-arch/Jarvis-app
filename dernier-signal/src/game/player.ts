@@ -30,6 +30,9 @@ export class Player {
   private dust: Particles;
   speed = 0;
   lampLevel = 1;
+  /** Lampe frontale allumée / éteinte par le joueur. */
+  lampOn = true;
+  private lampFade = 1;
 
   constructor(scene: THREE.Scene, q: Quality) {
     this.robot = new CompactRobot('rouille');
@@ -155,7 +158,10 @@ export class Player {
     r.wave.position.set(b.pos.x, b.pos.y, b.pos.z);
     r.wave.update(dt, t, b.pos.y);
 
-    this.headlamp.intensity = 26 * this.lampLevel;
+    this.lampFade += ((this.lampOn ? 1 : 0) - this.lampFade) * Math.min(1, dt * 14);
+    this.headlamp.intensity = 26 * this.lampLevel * this.lampFade;
+    this.headlamp.visible = this.lampFade > 0.01;
+    if (this.beam) this.beam.visible = this.lampFade > 0.01;
     this.dust.update(dt);
   }
 

@@ -244,6 +244,21 @@ function respawn() {
   enterRoom(level.current);
 }
 
+// ---------- lampe ----------
+function toggleLamp() {
+  player.lampOn = !player.lampOn;
+  save.flags.lampOff = !player.lampOn;
+  audio.servo(player.pos, 0.8); audio.ui(player.lampOn ? 'ok' : 'back');
+  input.rumble(0.05, 0.2, 60);
+  $('#touch .tb.lamp').classList.toggle('off', !player.lampOn);
+}
+
+// ---------- son : relance après coupure ----------
+function updateSoundHint() {
+  const muted = state !== 'title' && !audio.running;
+  $('#nosound').classList.toggle('show', muted);
+}
+
 // ---------- interactions & scan ----------
 let nearest: (typeof level.interact)[number] | null = null;
 function updateInteract() {
@@ -469,6 +484,8 @@ function toTitle() {
 function restoreFromSave() {
   Object.assign(api.flags, save.flags);
   player.hasJetpack = !!save.flags.jetpack;
+  player.lampOn = !save.flags.lampOff;
+  $('#touch .tb.lamp').classList.toggle('off', !player.lampOn);
   if (save.flags.doorA) { level.doors.dA.target = 0.42; level.doors.dA.open = 0.42; }
   if (save.flags.power) applyPower(false);
   endShown = save.cp === 'F';
@@ -515,6 +532,7 @@ async function intro() {
 
 // ---------- boucle ----------
 let envTarget = 0.06;
+let soundCheck = 0;
 function onResize() {
   const w = innerWidth, h = innerHeight;
   renderer.setSize(w, h, false);
@@ -538,6 +556,10 @@ function frame() {
 function step(dt: number) {
   t += dt;
   input.update(dt);
+  // la manette ne compte pas comme un « geste » pour Safari : on tente quand même de relancer le son
+  if (input.padPressed && !audio.running) audio.ensure();
+  soundCheck -= dt;
+  if (soundCheck <= 0) { soundCheck = 0.5; updateSoundHint(); }
 
   if (state === 'title') {
     titleT += dt;
@@ -553,6 +575,7 @@ function step(dt: number) {
       else {
         if (input.wasPressed('interact') && nearest) { nearest.act(); audio.servo(player.pos); }
         if (input.wasPressed('scan')) doScan();
+        if (input.wasPressed('lamp')) toggleLamp();
       }
     }
     const playing = state === 'play' || state === 'intro';
@@ -616,8 +639,14 @@ async function boot() {
   // lancement réussi après quelques secondes de rendu stable
   setTimeout(bootSucceeded, 4000);
   if (recoveredFromCrash) setTimeout(() => hud.toast('Mode économe activé', 'Le lancement précédent n\'a pas abouti. Tu peux remonter la qualité dans Options.'), 1500);
-  const first = () => { audio.unlock(); audio.startAmbience('menu'); removeEventListener('pointerdown', first); removeEventListener('keydown', first); };
-  addEventListener('pointerdown', first); addEventListener('keydown', first);
+  let ambienceStarted = false;
+  // chaque toucher / touche relance le son s'il a été coupé (connexion d'une manette, appel, veille…)
+  const wake = () => {
+    audio.ensure();
+    if (!ambienceStarted && audio.ctx) { ambienceStarted = true; if (state === 'title') audio.startAmbience('menu'); }
+  };
+  addEventListener('pointerdown', wake, true); addEventListener('keydown', wake, true); addEventListener('touchend', wake, true);
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') audio.ensure(); });
   if (location.hash === '#new') { history.replaceState(null, '', location.pathname); save = newSave(); api.flags = save.flags; writeSave(save); toTitleThen(true); }
   else toTitle();
 }

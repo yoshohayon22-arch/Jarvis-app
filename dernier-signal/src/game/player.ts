@@ -31,7 +31,9 @@ export class Player {
   speed = 0;
   lampLevel = 1;
   /** Lampe frontale allumée / éteinte par le joueur. */
-  lampOn = true;
+  lampOn = false;
+  /** Force externe (m/s²) : aspiration de la brèche, etc. */
+  external = new THREE.Vector3();
   private lampFade = 1;
 
   constructor(scene: THREE.Scene, q: Quality) {
@@ -83,6 +85,8 @@ export class Player {
     const mag = Math.min(1, wish.length());
     const maxSpeed = 3.1;
     const target = wish.clone().normalize().multiplyScalar(mag * maxSpeed * (this.scanT > 0.6 ? 0.25 : 1));
+    // une force externe (aspiration) déplace la vitesse « voulue » : on dérive malgré soi
+    target.addScaledVector(this.external, 0.55);
     const accel = b.grounded ? 16 : 6;
     const hv = new THREE.Vector3(b.vel.x, 0, b.vel.z);
     hv.lerp(target, Math.min(1, accel * dt / Math.max(0.5, hv.distanceTo(target) + 0.5) * 2));

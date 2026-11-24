@@ -107,22 +107,20 @@ td { padding: 10px 8px; border-top: 1px solid rgba(255,255,255,.07); }
 td:first-child { color: var(--dim); }
 @media (max-width: 700px) { .grid { grid-template-columns: 1fr; } table { font-size: 13px; } }
 
-/* ---------- énigme ---------- */
-#puzzle { width: min(640px, calc(100vw - 32px)); }
-#puzzle p { color: var(--dim); margin: 0 0 18px; }
-.pwrap { display: flex; align-items: center; gap: 10px; }
-.pwrap { align-items: stretch; }
-.src, .dst { font: 600 12px var(--cond); letter-spacing: .15em; color: #ffd36a; writing-mode: vertical-rl; transform: rotate(180deg); align-self: flex-start; margin-top: 4%; }
-.dst { color: #7dffb2; transform: none; align-self: flex-end; margin: 0 0 4%; }
-.pgrid { flex: 1; display: grid; gap: 6px; }
-.ptile { aspect-ratio: 1; border-radius: 12px; background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.09); padding: 0; cursor: pointer; transition: transform .15s; }
-.ptile:active { transform: scale(.94); }
-.ptile svg { width: 100%; height: 100%; display: block; transition: transform .2s; }
-.ptile line { stroke: #46525e; stroke-width: 14; stroke-linecap: round; }
-.ptile circle { fill: #46525e; }
-.ptile.on line, .ptile.on circle { stroke: var(--accent); fill: var(--accent); filter: drop-shadow(0 0 5px var(--accent)); }
-.ptile.sel { outline: 2px solid #ffd36a; outline-offset: -2px; }
-#puzzle.solved .ptile.on line, #puzzle.solved .ptile.on circle { stroke: #7dffb2; fill: #7dffb2; filter: drop-shadow(0 0 8px #7dffb2); }
+/* ---------- clavier à code ---------- */
+#keypad { width: min(380px, calc(100vw - 32px)); }
+#kp-display { font: 600 44px ui-monospace, Menlo, monospace; letter-spacing: .2em; text-align: center; padding: 14px; margin-bottom: 14px; border-radius: 14px; background: #02070b; color: #7fe6ff; text-shadow: 0 0 10px rgba(95,214,255,.6); }
+#kp-display.err { color: #ff8a6a; text-shadow: 0 0 10px rgba(255,120,90,.6); animation: shake .3s; }
+@keyframes shake { 25% { transform: translateX(-8px) } 75% { transform: translateX(8px) } }
+.kpgrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.kp { min-height: 62px; border-radius: 14px; border: 1px solid var(--line); background: rgba(255,255,255,.05); font: 600 26px var(--cond); cursor: pointer; }
+.kp:active { transform: scale(.96); background: rgba(95,214,255,.2); }
+
+/* ---------- cinématiques : bandes noires ---------- */
+#bars i { position: fixed; left: 0; right: 0; height: 0; background: #000; z-index: 15; transition: height .8s ease; pointer-events: none; }
+#bars i:first-child { top: 0; } #bars i:last-child { bottom: 0; }
+body.cine #bars i { height: 9vh; }
+body.cine #hud, body.cine #touch { opacity: 0 !important; pointer-events: none; transition: opacity .5s; }
 
 /* ---------- titre, démarrage, redémarrage ---------- */
 #title { position: fixed; inset: 0; pointer-events: none; opacity: 0; transition: opacity 1.2s; background: linear-gradient(90deg, rgba(0,0,0,.75), transparent 55%); }

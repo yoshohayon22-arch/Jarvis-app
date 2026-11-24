@@ -108,20 +108,26 @@
     </table>
   </div>
 
-  <div id="puzzle" class="panel">
-    <div class="head"><h2>Panneau de distribution</h2><button class="f pclose">Fermer</button></div>
-    <p>Fais pivoter les connecteurs pour relier la <b>source</b> au <b>bus principal</b>.</p>
-    <div class="pwrap"><span class="src">SOURCE ▶</span><div class="pgrid"></div><span class="dst">▶ BUS</span></div>
+  <div id="keypad" class="panel">
+    <div class="head"><h2>Commande du volet</h2><button class="f back">Fermer</button></div>
+    <div id="kp-display">· · · ·</div>
+    <div class="kpgrid">
+      <button class="f kp" data-k="1">1</button><button class="f kp" data-k="2">2</button><button class="f kp" data-k="3">3</button>
+      <button class="f kp" data-k="4">4</button><button class="f kp" data-k="5">5</button><button class="f kp" data-k="6">6</button>
+      <button class="f kp" data-k="7">7</button><button class="f kp" data-k="8">8</button><button class="f kp" data-k="9">9</button>
+      <span></span><button class="f kp" data-k="0">0</button><button class="f kp" data-k="del" aria-label="Effacer">⌫</button>
+    </div>
   </div>
 
   <div id="endcard" class="panel">
-    <small>Tranche verticale · Zone 1</small>
-    <h2>À suivre…</h2>
-    <p>R-12 a rétabli l'énergie et retrouvé la trace de l'équipage. Dehors, l'Asterion dérive toujours.</p>
-    <div class="stats"><div><span id="end-logs"></span>journaux</div><div><span id="end-holos"></span>hologrammes</div><div><span id="end-clues"></span>indices</div><div><span id="end-pct"></span>découverte</div></div>
-    <button id="btn-end-continue" class="f primary">Continuer à explorer</button>
+    <small>Fin de la Zone 1 · Station Halcyon</small>
+    <h2>Cap sur l'Asterion</h2>
+    <p>La navette s'éloigne de la station. Devant elle, l'épave immense dérive en silence. La suite : Zone 2.</p>
+    <div class="stats"><div><span id="end-logs"></span>journaux</div><div><span id="end-holos"></span>hologrammes</div><div><span id="end-clues"></span>indices</div><div><span id="end-pct"></span>souvenirs</div></div>
+    <button id="btn-end-continue" class="f primary">Retour à l'écran titre</button>
   </div>
 
+  <div id="bars"><i></i><i></i></div>
   <div id="boot"><div class="lines"></div></div>
   <div id="reboot"><div class="scan"></div><div class="txt">REDÉMARRAGE DU SYSTÈME<small class="why"></small><i></i></div></div>
   <div id="tap">Touchez l'écran pour commencer</div>

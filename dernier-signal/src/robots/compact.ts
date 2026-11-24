@@ -25,6 +25,8 @@ export class CompactRobot extends Robot {
   private tipMat!: THREE.MeshBasicMaterial;
   private ledMats: THREE.MeshBasicMaterial[] = [];
   private flicker = 0;
+  /** Puissance des yeux 0-1 (prologue : ils s'allument). */
+  eyePower = 1;
 
   constructor(style: Style) {
     super(style,
@@ -230,10 +232,10 @@ export class CompactRobot extends Robot {
         if (this.flicker < -2.5 - Math.random() * 3) this.flicker = 0.45;
         const on = this.flicker > 0 ? (Math.sin(t * 90) > 0.2 ? 0.15 : 1) * (0.6 + 0.4 * smoothNoise(t * 40)) : 1;
         open *= this.flicker > 0 ? 0.85 : 1;
-        this.eyeMats[2].color.copy(this.eyeBase[2]).multiplyScalar(on * 0.8);
-        this.eyeMats[3].color.copy(this.eyeBase[3]).multiplyScalar(on * 0.8);
+        this.eyeMats[2].color.copy(this.eyeBase[2]).multiplyScalar(on * 0.8 * this.eyePower);
+        this.eyeMats[3].color.copy(this.eyeBase[3]).multiplyScalar(on * 0.8 * this.eyePower);
       } else {
-        const k = 1 + beam * 0.6;
+        const k = (1 + beam * 0.6) * this.eyePower;
         this.eyeMats[i * 2].color.copy(this.eyeBase[i * 2]).multiplyScalar(k);
         this.eyeMats[i * 2 + 1].color.copy(this.eyeBase[i * 2 + 1]).multiplyScalar(k);
       }

@@ -2,7 +2,7 @@
 
 Jeu d'aventure-exploration spatial en 3D, jouable dans le navigateur (iPad / Safari en priorité, et ordinateur).
 
-**Étape en cours : 3 — Tranche verticale** (les 10 premières minutes de la Station Halcyon).
+**Étape en cours : 4 — Zone 1 complète** (missions 0 à 9, voir `MISSIONS.md`).
 Design retenu pour R-12 : **B · Rouille**.
 
 - `index.html` : le jeu (écran titre → partie)

@@ -22,6 +22,39 @@ export function createContext(canvas: HTMLCanvasElement, mobile: boolean): WebGL
   return gl;
 }
 
+/**
+ * Obtient un contexte WebGL2 de façon patiente : attend que la page soit visible, puis réessaie
+ * avec un NOUVEAU canvas à chaque fois (un canvas dont le contexte est perdu le reste).
+ */
+export async function acquireContext(mobile: boolean, onTry: (n: number) => void): Promise<{ canvas: HTMLCanvasElement; gl: WebGL2RenderingContext } | { error: string }> {
+  const raf = () => new Promise<void>((r) => requestAnimationFrame(() => r()));
+  const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+  // attendre que la page soit visible (le panneau d'artefact peut encore s'ouvrir)
+  for (let i = 0; i < 40 && document.visibilityState !== 'visible'; i++) await sleep(250);
+  await raf(); await raf();
+  const old = document.getElementById('c') as HTMLCanvasElement;
+  const notes: string[] = [];
+  for (let n = 1; n <= 30; n++) {
+    onTry(n);
+    const c = document.createElement('canvas');
+    c.id = 'c';
+    old.parentNode!.replaceChild(c, document.getElementById('c')!);
+    try { return { canvas: c, gl: createContext(c, mobile) }; }
+    catch (e) { if (n === 1 || n === 30) notes.push(`essai ${n} : ${(e as Error).message}`); }
+    await sleep(n < 5 ? 300 : 600);
+  }
+  // diagnostic
+  const t = document.createElement('canvas');
+  const g1 = t.getContext('webgl') as WebGLRenderingContext | null;
+  let gpu = 'aucun';
+  if (g1) {
+    const ext = g1.getExtension('WEBGL_debug_renderer_info');
+    gpu = `${g1.isContextLost() ? 'perdu' : 'ok'} · ${ext ? g1.getParameter(ext.UNMASKED_RENDERER_WEBGL) : g1.getParameter(g1.RENDERER)}`;
+  }
+  notes.push(`WebGL1 : ${gpu}`, `visibilité : ${document.visibilityState}`, `écran : ${innerWidth}×${innerHeight} @${devicePixelRatio}`, `navigateur : ${navigator.userAgent.slice(0, 120)}`);
+  return { error: notes.join(' | ') };
+}
+
 export function createRenderer(canvas: HTMLCanvasElement, q: Quality, context?: WebGL2RenderingContext) {
   const r = new THREE.WebGLRenderer({
     canvas, context, antialias: false, stencil: false, depth: true, powerPreference: 'high-performance',

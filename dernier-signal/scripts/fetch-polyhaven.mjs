@@ -11,6 +11,12 @@ const TEXTURES = {
   metal_plate: ['Diffuse', 'nor_gl', 'arm'],
   smooth_concrete_floor: ['Diffuse', 'nor_gl', 'arm'],
   rust_coarse_01: ['Diffuse', 'nor_gl', 'arm'],
+  blue_metal_plate: ['Diffuse', 'nor_gl', 'arm'],
+  painted_metal_shutter: ['Diffuse', 'nor_gl', 'arm'],
+  container_side: ['Diffuse', 'nor_gl', 'arm'],
+  metal_grate_rusty: ['Diffuse', 'nor_gl', 'arm'],
+  corrugated_iron_02: ['Diffuse', 'nor_gl', 'arm'],
+  concrete_floor_worn_001: ['Diffuse', 'nor_gl', 'arm'],
 };
 const HDRIS = { studio_small_09: ['1k'] };
 const RES = ['1k', '2k'];

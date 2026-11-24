@@ -119,6 +119,8 @@ export class Builder {
     for (const [joint, mats] of this.buckets) {
       for (const [mat, geos] of mats) {
         let merged = mergeGeometries(geos, false)!;
+        const uvs = (mat.userData as { uvScale?: number }).uvScale;
+        if (uvs) worldUV(merged, uvs);
         merged = mergeVertices(merged, 1e-5);
         merged.computeBoundingSphere();
         const mesh = new THREE.Mesh(merged, mat);
@@ -129,6 +131,21 @@ export class Builder {
     }
     this.buckets.clear();
   }
+}
+
+/** UV « planaires » en coordonnées monde selon l'orientation de chaque face (textures à l'échelle réelle). */
+export function worldUV(g: THREE.BufferGeometry, scale: number) {
+  const p = g.attributes.position, n = g.attributes.normal;
+  const uv = new Float32Array(p.count * 2);
+  for (let i = 0; i < p.count; i++) {
+    const ax = Math.abs(n.getX(i)), ay = Math.abs(n.getY(i)), az = Math.abs(n.getZ(i));
+    let u: number, v: number;
+    if (ay >= ax && ay >= az) { u = p.getX(i); v = p.getZ(i); }
+    else if (ax >= az) { u = p.getZ(i) * Math.sign(n.getX(i)); v = p.getY(i); }
+    else { u = -p.getX(i) * Math.sign(n.getZ(i)); v = p.getY(i); }
+    uv[i * 2] = u * scale; uv[i * 2 + 1] = v * scale;
+  }
+  g.setAttribute('uv', new THREE.BufferAttribute(uv, 2));
 }
 
 /** Petite fonction de bruit lisse 1D (pour les regards, vacillements). */

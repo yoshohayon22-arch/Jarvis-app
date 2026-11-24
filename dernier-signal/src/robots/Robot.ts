@@ -6,11 +6,11 @@ import { smoothNoise } from './parts';
 // Chaque « action » calcule une pose (rotations / décalages des articulations) ;
 // les poses sont fondues entre elles pour des transitions douces.
 
-export type ActionId = 'idle' | 'walk' | 'jump' | 'jetpack' | 'float' | 'scan' | 'roll';
+export type ActionId = 'idle' | 'walk' | 'jump' | 'jetpack' | 'float' | 'scan' | 'roll' | 'fall';
 export type Pose = Record<string, number[]>;
 
 export const ACTION_LABELS: Record<ActionId, string> = {
-  idle: 'Attente', walk: 'Marche', jump: 'Saut', jetpack: 'Jetpack', float: 'Apesanteur', scan: 'Scan', roll: 'Rouler',
+  idle: 'Attente', walk: 'Marche', jump: 'Saut', jetpack: 'Jetpack', float: 'Apesanteur', scan: 'Scan', roll: 'Rouler', fall: 'Chute',
 };
 
 export interface Gait {
@@ -52,6 +52,10 @@ export abstract class Robot extends THREE.Group {
   private lastScanPhase = 0;
   /** Pour l'atelier : intensité du halo de sélection. */
   focus = 0;
+  /** En jeu : la physique gère la position, on ignore les déplacements de la pose. */
+  gameMode = false;
+  /** En jeu : allure de marche 0-1 (adapte la cadence). */
+  walkSpeed = 1;
 
   constructor(id: string, title: string, tagline: string) {
     super();
@@ -208,6 +212,17 @@ export abstract class Robot extends THREE.Group {
 
   protected poseRoll(_t: number, _p: Pose) { /* spécifique à Orbe */ }
 
+  /** En l'air (sans jetpack) : jambes repliées, bras écartés pour l'équilibre. */
+  protected poseFall(t: number, p: Pose) {
+    addP(p, 'legL', -0.45, 0, 0.06); addP(p, 'legR', -0.2, 0, -0.06);
+    addP(p, 'shinL', 0.8, 0, 0); addP(p, 'shinR', 0.5, 0, 0);
+    addP(p, 'footL', -0.2, 0, 0); addP(p, 'footR', -0.1, 0, 0);
+    addP(p, 'armL', -0.5, 0, 0.5 + Math.sin(t * 9) * 0.05); addP(p, 'armR', -0.5, 0, -0.5 - Math.sin(t * 9) * 0.05);
+    addP(p, 'foreL', -0.4, 0, 0); addP(p, 'foreR', -0.4, 0, 0);
+    addP(p, 'torso', -0.06, 0, 0); addP(p, 'head', 0.1, 0, 0);
+    addP(p, 'antenna', -0.4, 0, Math.sin(t * 12) * 0.1);
+  }
+
   protected computeAction(a: ActionId, t: number, p: Pose) {
     switch (a) {
       case 'idle': this.poseIdle(t, p); break;
@@ -217,6 +232,7 @@ export abstract class Robot extends THREE.Group {
       case 'float': this.poseFloat(t, p); break;
       case 'scan': this.poseScan(t, p); break;
       case 'roll': this.poseRoll(t, p); break;
+      case 'fall': this.poseFall(t, p); break;
     }
   }
 
@@ -237,7 +253,7 @@ export abstract class Robot extends THREE.Group {
     const p = this.pose;
     for (const k in p) delete p[k];
     for (const [a, w] of this.weights) {
-      const ct = (this.clocks.get(a) ?? 0) + dt;
+      const ct = (this.clocks.get(a) ?? 0) + dt * (a === 'walk' ? THREE.MathUtils.clamp(this.walkSpeed, 0.3, 1.8) : 1);
       this.clocks.set(a, ct);
       const tp = this.tmp;
       for (const k in tp) delete tp[k];
@@ -251,6 +267,7 @@ export abstract class Robot extends THREE.Group {
       }
     }
 
+    if (this.gameMode) { delete p['p.rig']; delete p['rig']; }
     // application aux articulations
     for (const [o, r] of this.rest) {
       const key = o === this.rig ? 'rig' : o.name;

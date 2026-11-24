@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="theme-color" content="#000000" />
+  <title>Dernier Signal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,400;0,600;1,400&family=Barlow+Condensed:wght@500;600;700&display=swap" rel="stylesheet" />
+  <script type="module" crossorigin src="./assets/index-DN8oq7IJ.js"></script>
+  <link rel="modulepreload" crossorigin href="./assets/volumetric-Dlzz3RG_.js">
+  <link rel="stylesheet" crossorigin href="./assets/volumetric-B5UYofrn.css">
+  <link rel="stylesheet" crossorigin href="./assets/index-DdxqRfiH.css">
+</head>
+<body>
+  <canvas id="c"></canvas>
+
+  <!-- HUD -->
+  <div id="hud">
+    <div id="zone"><span class="name">Station Halcyon</span><span class="room">Baie de maintenance</span></div>
+    <div id="objective"><i></i><span class="txt"></span></div>
+    <div id="marker"><i></i><span class="dist"></span></div>
+    <div id="gauge"><svg viewBox="0 0 40 40"><circle class="bg" cx="20" cy="20" r="16"/><circle class="arc" cx="20" cy="20" r="16"/></svg></div>
+    <div id="prompt"></div>
+    <div id="subs"></div>
+    <div id="toast"></div>
+    <div id="labels"></div>
+    <div id="saved">Sauvegarde automatique</div>
+  </div>
+
+  <!-- commandes tactiles -->
+  <div id="touch">
+    <div class="zone"></div>
+    <div class="stick"><div class="knob"></div></div>
+    <button class="tb jump" data-btn="jump"><span>Saut</span></button>
+    <button class="tb act" data-btn="interact"><span>Interagir</span></button>
+    <button class="tb scan" data-btn="scan"><span>Scan</span></button>
+    <button id="pausebtn" aria-label="Pause">❚❚</button>
+  </div>
+
+  <!-- titre -->
+  <div id="title">
+    <div class="logo"><small>Station orbitale Halcyon</small><h1>Dernier<br/>Signal</h1></div>
+  </div>
+  <div id="title-menu" class="panel menu">
+    <button id="btn-continue" class="f">Continuer</button>
+    <button id="btn-new" class="f">Nouvelle partie</button>
+    <button id="btn-options-title" class="f">Options</button>
+    <button id="btn-controls-title" class="f">Commandes</button>
+    <a class="f link" href="atelier.html">Atelier des robots</a>
+  </div>
+
+  <!-- pause -->
+  <div id="pause" class="panel menu">
+    <h2>Pause</h2>
+    <button id="btn-resume" class="f">Reprendre</button>
+    <button id="btn-notebook" class="f">Carnet</button>
+    <button id="btn-options" class="f">Options</button>
+    <button id="btn-controls" class="f">Commandes</button>
+    <button id="btn-quit" class="f">Écran titre</button>
+  </div>
+
+  <div id="notebook" class="panel wide">
+    <div class="head"><h2>Carnet de R-12</h2><span id="nb-progress"></span><button class="f back">Fermer</button></div>
+    <div class="tabs">
+      <button class="f tab" data-tab="logs">Journaux</button>
+      <button class="f tab" data-tab="holos">Hologrammes</button>
+      <button class="f tab" data-tab="clues">Indices</button>
+      <button class="f tab" data-tab="map">Carte</button>
+      <button class="f tab" data-tab="crew">Équipage</button>
+    </div>
+    <div id="nb-body"></div>
+  </div>
+
+  <div id="options" class="panel wide">
+    <div class="head"><h2>Options</h2><button class="f back">Fermer</button></div>
+    <div class="grid">
+      <label>Préréglage graphique<select id="o-preset" class="f"></select></label>
+      <label>Résolution de rendu<input id="o-res" class="f" type="range" min="0.5" max="1" step="0.05" /></label>
+      <label>Qualité des ombres<select id="o-shadows" class="f"><option value="low">Basse</option><option value="high">Haute</option></select></label>
+      <label>Densité des particules<input id="o-particles" class="f" type="range" min="0.2" max="1" step="0.1" /></label>
+      <label class="chk"><input id="o-vol" class="f" type="checkbox" />Brouillard volumétrique</label>
+      <label class="chk"><input id="o-bloom" class="f" type="checkbox" />Halos lumineux (bloom)</label>
+      <label class="chk"><input id="o-fps" class="f" type="checkbox" />Compteur d'images/s</label>
+      <label class="chk"><input id="o-voices" class="f" type="checkbox" />Voix des journaux</label>
+      <label>Musique<input id="o-music" class="f" type="range" min="0" max="1" step="0.05" /></label>
+      <label>Bruitages<input id="o-sfx" class="f" type="range" min="0" max="1" step="0.05" /></label>
+      <label>Sensibilité caméra<input id="o-sens" class="f" type="range" min="0.4" max="2" step="0.1" /></label>
+      <label class="chk"><input id="o-invert" class="f" type="checkbox" />Inverser l'axe vertical</label>
+    </div>
+    <div class="row"><button id="o-reload" class="f primary" hidden>Appliquer (recharge)</button><button id="o-reset" class="f danger">Effacer la sauvegarde</button></div>
+  </div>
+
+  <div id="controls" class="panel wide">
+    <div class="head"><h2>Commandes</h2><button class="f back">Fermer</button></div>
+    <table>
+      <tr><th></th><th>Clavier / souris</th><th>Manette</th><th>Tactile</th></tr>
+      <tr><td>Se déplacer</td><td>ZQSD ou WASD</td><td>Stick gauche</td><td>Joystick (gauche)</td></tr>
+      <tr><td>Caméra</td><td>Souris (clic pour capturer)</td><td>Stick droit</td><td>Glisser à droite</td></tr>
+      <tr><td>Saut / jetpack (maintenir)</td><td>Espace</td><td>A / ✕</td><td>Saut</td></tr>
+      <tr><td>Interagir</td><td>E</td><td>B / ○</td><td>Interagir</td></tr>
+      <tr><td>Scanner</td><td>F</td><td>X / □</td><td>Scan</td></tr>
+      <tr><td>Monter / descendre (apesanteur)</td><td>Maj / Ctrl</td><td>Gâchettes</td><td>—</td></tr>
+      <tr><td>Carte</td><td>M ou Tab</td><td>Select</td><td>Pause → Carnet</td></tr>
+      <tr><td>Pause et carnet</td><td>Échap</td><td>Start</td><td>❚❚</td></tr>
+    </table>
+  </div>
+
+  <div id="puzzle" class="panel">
+    <div class="head"><h2>Panneau de distribution</h2><button class="f pclose">Fermer</button></div>
+    <p>Fais pivoter les connecteurs pour relier la <b>source</b> au <b>bus principal</b>.</p>
+    <div class="pwrap"><span class="src">SOURCE ▶</span><div class="pgrid"></div><span class="dst">▶ BUS</span></div>
+  </div>
+
+  <div id="endcard" class="panel">
+    <small>Tranche verticale · Zone 1</small>
+    <h2>À suivre…</h2>
+    <p>R-12 a rétabli l'énergie et retrouvé la trace de l'équipage. Dehors, l'Asterion dérive toujours.</p>
+    <div class="stats"><div><span id="end-logs"></span>journaux</div><div><span id="end-holos"></span>hologrammes</div><div><span id="end-clues"></span>indices</div><div><span id="end-pct"></span>découverte</div></div>
+    <button id="btn-end-continue" class="f primary">Continuer à explorer</button>
+  </div>
+
+  <div id="boot"><div class="lines"></div></div>
+  <div id="reboot"><div class="scan"></div><div class="txt">REDÉMARRAGE DU SYSTÈME<small class="why"></small><i></i></div></div>
+  <div id="tap">Touchez l'écran pour commencer</div>
+  <span id="fps" hidden>— i/s</span>
+  <div id="loader"><span class="msg">Chargement de la station…</span><i></i><small class="err"></small></div>
+  <script>
+    // Rapporteur de chargement : affiche l'étape en cours et toute erreur (diagnostic sur iPad).
+    (function () {
+      var t0 = Date.now(), stage = 'Démarrage du moteur';
+      function el(s) { return document.querySelector('#loader ' + s); }
+      window.__stage = function (s) { stage = s; var m = el('.msg'); if (m) m.textContent = s + '…'; };
+      function show(msg) { var e = el('.err'); if (e) { e.textContent = 'Erreur pendant « ' + stage + ' » : ' + msg; e.style.display = 'block'; } }
+      window.addEventListener('error', function (ev) { show((ev.message || ev.type) + (ev.filename ? ' (' + ev.filename.split('/').pop() + ':' + ev.lineno + ')' : '')); }, true);
+      window.addEventListener('unhandledrejection', function (ev) { show(String(ev.reason && (ev.reason.message || ev.reason))); });
+      setInterval(function () { var l = document.getElementById('loader'); if (!l || l.classList.contains('done')) return; var s = Math.round((Date.now() - t0) / 1000); var x = el('.time'); if (!x) { x = document.createElement('small'); x.className = 'time'; l.appendChild(x); } x.textContent = stage + ' · ' + s + ' s'; }, 1000);
+    })();
+  </script>
+</body>
+</html>

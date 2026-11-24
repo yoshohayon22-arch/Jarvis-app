@@ -36,10 +36,9 @@ if ('error' in acq) {
   ($('#loader .msg')).textContent = 'La carte graphique est inaccessible';
   const err = $('#loader .err'); err.style.display = 'block';
   err.textContent = 'Diagnostic à envoyer à Claude : ' + acq.error;
-  throw new Error('WebGL indisponible');
+  await new Promise(() => {}); // on s'arrête ici en gardant le diagnostic à l'écran
 }
-const canvas = acq.canvas;
-const gl = acq.gl;
+const { canvas, gl } = acq as { canvas: HTMLCanvasElement; gl: WebGL2RenderingContext };
 const renderer = createRenderer(canvas, q, gl);
 canvas.addEventListener('webglcontextlost', (e) => { e.preventDefault(); (document.querySelector('#loader') as HTMLElement).classList.remove('done'); ($('#loader .msg')).textContent = 'Contexte graphique perdu — rechargement…'; setTimeout(() => location.reload(), 1500); });
 const basePR = Math.min(window.devicePixelRatio || 1, q.pixelRatio);

@@ -32,13 +32,13 @@ export async function acquireContext(mobile: boolean, onTry: (n: number) => void
   // attendre que la page soit visible (le panneau d'artefact peut encore s'ouvrir)
   for (let i = 0; i < 40 && document.visibilityState !== 'visible'; i++) await sleep(250);
   await raf(); await raf();
-  const old = document.getElementById('c') as HTMLCanvasElement;
   const notes: string[] = [];
   for (let n = 1; n <= 30; n++) {
     onTry(n);
     const c = document.createElement('canvas');
     c.id = 'c';
-    old.parentNode!.replaceChild(c, document.getElementById('c')!);
+    const cur = document.getElementById('c')!;
+    cur.parentNode!.replaceChild(c, cur);
     try { return { canvas: c, gl: createContext(c, mobile) }; }
     catch (e) { if (n === 1 || n === 30) notes.push(`essai ${n} : ${(e as Error).message}`); }
     await sleep(n < 5 ? 300 : 600);

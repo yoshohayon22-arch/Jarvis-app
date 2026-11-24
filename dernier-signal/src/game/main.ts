@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import '../ui/base.css';
 import '../ui/game.css';
 import { loadQuality, saveQuality, PRESETS, isTouchDevice, type PresetId } from '../core/quality';
-import { createRenderer, Post, FpsMeter } from '../core/post';
+import { createRenderer, createContext, ContextLostError, Post, FpsMeter } from '../core/post';
 import { texturesReady, setMaxAnisotropy, textureProgress } from '../core/textures';
 import { setMaterialRes, unifyScene } from '../robots/materials';
 import { Input } from './input';
@@ -27,10 +27,37 @@ q.volumetric = opts.volumetric; q.particles = opts.particles; q.bloom = opts.blo
 setMaterialRes(q.textureRes);
 document.body.dataset.device = isTouchDevice() ? 'touch' : 'keyboard';
 
+
 // ---------- rendu ----------
 (window as unknown as { __stage?: (s: string) => void }).__stage?.('Initialisation graphique (WebGL)');
 const canvas = $<HTMLCanvasElement>('#c');
-const renderer = createRenderer(canvas, q);
+const touch = isTouchDevice();
+let gl: WebGL2RenderingContext;
+try { gl = createContext(canvas, touch); }
+catch (e) {
+  if (e instanceof ContextLostError) {
+    // Contexte refusé : on réessaie automatiquement quelques fois (la mémoire graphique peut se libérer),
+    // puis on explique quoi faire.
+    let tries = 3; try { tries = +(sessionStorage.getItem('ds:gltries') ?? '0'); } catch { /* stockage bloqué : pas de nouvel essai */ }
+    const msg = document.querySelector('#loader .msg') as HTMLElement;
+    if (tries < 3) {
+      try { sessionStorage.setItem('ds:gltries', String(tries + 1)); } catch { /* */ }
+      msg.textContent = `Mémoire graphique saturée — nouvel essai (${tries + 1}/3)…`;
+      canvas.addEventListener('webglcontextrestored', () => location.reload());
+      setTimeout(() => location.reload(), 2500);
+    } else {
+      try { sessionStorage.removeItem('ds:gltries'); } catch { /* */ }
+      msg.textContent = 'La carte graphique de l\'iPad est saturée';
+      const err = document.querySelector('#loader .err') as HTMLElement;
+      err.style.display = 'block';
+      err.textContent = 'Ferme complètement l\'app Claude (balaye-la vers le haut dans le sélecteur d\'apps), ferme les autres onglets 3D, puis rouvre l\'artefact.';
+    }
+  }
+  throw e;
+}
+try { sessionStorage.removeItem('ds:gltries'); } catch { /* */ }
+const renderer = createRenderer(canvas, q, gl);
+canvas.addEventListener('webglcontextlost', (e) => { e.preventDefault(); (document.querySelector('#loader') as HTMLElement).classList.remove('done'); ($('#loader .msg')).textContent = 'Contexte graphique perdu — rechargement…'; setTimeout(() => location.reload(), 1500); });
 const basePR = Math.min(window.devicePixelRatio || 1, q.pixelRatio);
 renderer.setPixelRatio(basePR * opts.resScale);
 setMaxAnisotropy(Math.min(8, renderer.capabilities.getMaxAnisotropy()));

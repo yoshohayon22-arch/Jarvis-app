@@ -9,9 +9,22 @@ import type { Quality } from './quality';
 // Chaîne de post-traitement : rendu HDR → occlusion ambiante (N8AO) → bloom → tone mapping AgX
 // → vignettage + grain → aberration chromatique légère → anti-crénelage SMAA.
 
-export function createRenderer(canvas: HTMLCanvasElement, q: Quality) {
+export class ContextLostError extends Error {}
+
+/** Crée le contexte WebGL2 nous-mêmes pour détecter un contexte refusé ou perdu dès la naissance (iPad saturé). */
+export function createContext(canvas: HTMLCanvasElement, mobile: boolean): WebGL2RenderingContext {
+  const gl = canvas.getContext('webgl2', {
+    antialias: false, stencil: false, depth: true, alpha: false, premultipliedAlpha: true,
+    powerPreference: mobile ? 'default' : 'high-performance', failIfMajorPerformanceCaveat: false, preserveDrawingBuffer: false,
+  }) as WebGL2RenderingContext | null;
+  if (!gl) throw new ContextLostError('WebGL2 indisponible');
+  if (gl.isContextLost() || !gl.getShaderPrecisionFormat(gl.VERTEX_SHADER, gl.HIGH_FLOAT)) throw new ContextLostError('contexte graphique perdu');
+  return gl;
+}
+
+export function createRenderer(canvas: HTMLCanvasElement, q: Quality, context?: WebGL2RenderingContext) {
   const r = new THREE.WebGLRenderer({
-    canvas, antialias: false, stencil: false, depth: true, powerPreference: 'high-performance',
+    canvas, context, antialias: false, stencil: false, depth: true, powerPreference: 'high-performance',
   });
   r.setPixelRatio(Math.min(window.devicePixelRatio || 1, q.pixelRatio));
   r.outputColorSpace = THREE.SRGBColorSpace;

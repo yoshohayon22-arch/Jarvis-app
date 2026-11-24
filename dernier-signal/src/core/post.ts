@@ -92,7 +92,7 @@ export class Post {
 
     this.bloom = new BloomEffect({
       mipmapBlur: true, luminanceThreshold: 1.0, luminanceSmoothing: 0.35, intensity: 1.05, radius: 0.75,
-      levels: q.id === 'equilibre' ? 6 : 8,
+      levels: (q.id === 'equilibre' || q.id === 'econome') ? 6 : 8,
     });
     this.bloom.blendMode.opacity.value = q.bloom ? 1 : 0;
     this.tone = new ToneMappingEffect({ mode: ToneMappingMode.AGX });
@@ -107,7 +107,7 @@ export class Post {
       }));
       this.composer.addPass(this.ca);
     }
-    this.composer.addPass(new EffectPass(camera, new SMAAEffect({ preset: q.id === 'equilibre' ? SMAAPreset.MEDIUM : SMAAPreset.HIGH })));
+    this.composer.addPass(new EffectPass(camera, new SMAAEffect({ preset: (q.id === 'equilibre' || q.id === 'econome') ? SMAAPreset.MEDIUM : SMAAPreset.HIGH })));
   }
 
   setSize(w: number, h: number) { this.composer.setSize(w, h); }

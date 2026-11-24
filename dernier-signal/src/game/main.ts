@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import '../ui/base.css';
 import '../ui/game.css';
-import { loadQuality, saveQuality, PRESETS, isTouchDevice, type PresetId } from '../core/quality';
+import { loadQuality, saveQuality, PRESETS, isTouchDevice, bootSucceeded, recoveredFromCrash, type PresetId } from '../core/quality';
 import { createRenderer, acquireContext, Post, FpsMeter } from '../core/post';
 import { texturesReady, setMaxAnisotropy, textureProgress } from '../core/textures';
 import { setMaterialRes, unifyScene } from '../robots/materials';
@@ -22,8 +22,8 @@ const $$ = (s: string) => [...document.querySelectorAll<HTMLElement>(s)];
 
 // ---------- réglages ----------
 const q = loadQuality();
-const opts: Options = loadOptions({ preset: q.id, resScale: 1, shadows: q.id === 'equilibre' ? 'low' : 'high', volumetric: q.volumetric, particles: q.particles, bloom: q.bloom, fps: false, music: 0.7, sfx: 0.9, sensitivity: 1, invertY: false, voices: true });
-q.volumetric = opts.volumetric; q.particles = opts.particles; q.bloom = opts.bloom;
+const opts: Options = loadOptions({ preset: q.id, resScale: 1, shadows: (q.id === 'equilibre' || q.id === 'econome') ? 'low' : 'high', volumetric: q.volumetric, particles: q.particles, bloom: q.bloom, fps: false, music: 0.7, sfx: 0.9, sensitivity: 1, invertY: false, voices: true });
+if (q.id !== 'econome') { q.volumetric = opts.volumetric; q.particles = opts.particles; q.bloom = opts.bloom; }
 setMaterialRes(q.textureRes);
 document.body.dataset.device = isTouchDevice() ? 'touch' : 'keyboard';
 
@@ -445,7 +445,7 @@ function bindOptions() {
   toggle('#o-invert', 'invertY', (v) => (input.invertY = v));
   toggle('#o-voices', 'voices', () => {});
   const sh = $<HTMLSelectElement>('#o-shadows'); sh.value = opts.shadows;
-  sh.onchange = () => { opts.shadows = sh.value as 'low' | 'high'; saveOptions(opts); const s = player.headlamp.shadow; s.mapSize.setScalar(opts.shadows === 'low' ? 512 : q.id === 'equilibre' ? 1024 : 2048); s.map?.dispose(); s.map = null as unknown as THREE.WebGLRenderTarget; };
+  sh.onchange = () => { opts.shadows = sh.value as 'low' | 'high'; saveOptions(opts); const s = player.headlamp.shadow; s.mapSize.setScalar(opts.shadows === 'low' ? 512 : (q.id === 'equilibre' || q.id === 'econome') ? 1024 : 2048); s.map?.dispose(); s.map = null as unknown as THREE.WebGLRenderTarget; };
   $('#o-reload').onclick = () => location.reload();
   $('#o-reset').onclick = () => { if (confirm('Effacer la sauvegarde ?')) { clearSave(); location.reload(); } };
 }
@@ -613,6 +613,9 @@ async function boot() {
   tm.compile = performance.now() - _t; tm.total = performance.now();
   $('#loader').classList.add('done');
   frame();
+  // lancement réussi après quelques secondes de rendu stable
+  setTimeout(bootSucceeded, 4000);
+  if (recoveredFromCrash) setTimeout(() => hud.toast('Mode économe activé', 'Le lancement précédent n\'a pas abouti. Tu peux remonter la qualité dans Options.'), 1500);
   const first = () => { audio.unlock(); audio.startAmbience('menu'); removeEventListener('pointerdown', first); removeEventListener('keydown', first); };
   addEventListener('pointerdown', first); addEventListener('keydown', first);
   if (location.hash === '#new') { history.replaceState(null, '', location.pathname); save = newSave(); api.flags = save.flags; writeSave(save); toTitleThen(true); }

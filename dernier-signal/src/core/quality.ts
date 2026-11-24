@@ -1,6 +1,6 @@
 // Préréglages de qualité : détection automatique + surcharge par l'utilisateur (localStorage).
 
-export type PresetId = 'equilibre' | 'haut' | 'ultra';
+export type PresetId = 'econome' | 'equilibre' | 'haut' | 'ultra';
 
 export interface Quality {
   id: PresetId;
@@ -19,8 +19,13 @@ export interface Quality {
 }
 
 export const PRESETS: Record<PresetId, Quality> = {
+  econome: {
+    id: 'econome', label: 'Économe', pixelRatio: 1, shadowMap: 512, textureRes: '1k',
+    reflections: 'off', reflectionScale: 0.3, ao: 'off', bloom: true, volumetric: false,
+    particles: 0.35, chromatic: false, robotLights: false,
+  },
   equilibre: {
-    id: 'equilibre', label: 'Équilibré', pixelRatio: 1.5, shadowMap: 1024, textureRes: '1k',
+    id: 'equilibre', label: 'Équilibré', pixelRatio: 1.25, shadowMap: 1024, textureRes: '1k',
     reflections: 'low', reflectionScale: 0.35, ao: 'performance', bloom: true, volumetric: true,
     particles: 0.5, chromatic: false, robotLights: false,
   },
@@ -62,14 +67,24 @@ export function detectPreset(): PresetId {
 
 const KEY = 'dernier-signal:quality';
 
+const BOOT = 'dernier-signal:booting';
+/** Vrai si le lancement précédent n'est jamais arrivé au bout (plantage graphique probable). */
+export let recoveredFromCrash = false;
+
 export function loadQuality(): Quality {
-  let id: PresetId = detectPreset();
+  // Sur iPad, premier lancement prudent : « Économe » tant que l'utilisateur n'a rien choisi.
+  let id: PresetId = isTouchDevice() ? 'econome' : detectPreset();
   try {
     const saved = localStorage.getItem(KEY) as PresetId | null;
     if (saved && saved in PRESETS) id = saved;
+    if (localStorage.getItem(BOOT)) { recoveredFromCrash = true; id = 'econome'; }
+    localStorage.setItem(BOOT, String(Date.now()));
   } catch { /* stockage indisponible */ }
   return { ...PRESETS[id] };
 }
+
+/** À appeler une fois l'écran titre affiché sans problème. */
+export function bootSucceeded() { try { localStorage.removeItem(BOOT); } catch { /* */ } }
 
 export function saveQuality(id: PresetId) {
   try { localStorage.setItem(KEY, id); } catch { /* ignore */ }

@@ -141,7 +141,7 @@ export class Level {
     this.q = q;
     this.api = api; this.audio = audio;
     this.kit = new Kit(q.textureRes);
-    this.pool = new LightPool(scene, q.id === 'equilibre' ? 4 : 6);
+    this.pool = new LightPool(scene, (q.id === 'equilibre' || q.id === 'econome') ? 4 : 6);
     scene.add(this.root);
     this.steam = new Particles({ max: Math.round(500 * q.particles + 100), additive: false, gravity: -0.25, drag: 1.2, soft: true, grow: 3.5 });
     this.sparks = new Particles({ max: 400, additive: true, gravity: 9.8, drag: 0.4, bounceY: 0, bounce: 0.35, soft: false });

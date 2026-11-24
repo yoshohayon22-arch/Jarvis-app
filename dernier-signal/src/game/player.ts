@@ -45,7 +45,7 @@ export class Player {
     this.headlamp = new THREE.SpotLight(0xdfeaff, 26, 18, 0.48, 0.55, 1.6);
     this.headlamp.position.set(0, 0.16, 0.2);
     this.headlamp.castShadow = true;
-    this.headlamp.shadow.mapSize.setScalar(q.id === 'equilibre' ? 1024 : 2048);
+    this.headlamp.shadow.mapSize.setScalar((q.id === 'equilibre' || q.id === 'econome') ? 1024 : 2048);
     this.headlamp.shadow.bias = -0.0004; this.headlamp.shadow.normalBias = 0.03; this.headlamp.shadow.radius = 3;
     this.headlamp.shadow.camera.near = 0.3; this.headlamp.shadow.camera.far = 18;
     const tgt = new THREE.Object3D(); tgt.position.set(0, -0.35, 4);

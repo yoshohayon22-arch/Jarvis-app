@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="theme-color" content="#030405" />
+  <title>Dernier Signal — Atelier</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;600&family=Barlow+Condensed:wght@600;700&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <canvas id="c"></canvas>
+  <div id="brand" class="hud">
+    <h1>Dernier Signal</h1>
+    <h2>Atelier · R-12</h2>
+    <p>Quatre prototypes pour le robot de maintenance. Touche un robot pour le voir de près, fais-le tourner au doigt.</p>
+  </div>
+  <div id="tools" class="hud">
+    <span id="fps" hidden>— i/s</span>
+    <button id="fpsbtn" title="Afficher les images par seconde">i/s</button>
+    <select id="quality" aria-label="Qualité"></select>
+  </div>
+  <div id="panel" class="hud">
+    <h3 id="p-title"></h3>
+    <p id="p-text"></p>
+    <div class="row"><button id="back">← Tous</button><button id="choose">Choisir ce design</button></div>
+    <div id="hint">Glisse sur l'écran pour faire tourner le socle.</div>
+  </div>
+  <div id="actionsWrap" class="hud"><div id="actions"></div></div>
+  <div id="cards" class="hud"></div>
+  <div id="toast" class="hud"></div>
+  <div id="loader">Réactivation…<i></i></div>
+  <script type="module" src="/src/atelier/main.ts"></script>
+</body>
+</html>

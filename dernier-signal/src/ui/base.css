@@ -1,0 +1,9 @@
+:root {
+  --ink: #e9f1f7; --dim: #8fa3b3; --accent: #5fd6ff; --glass: rgba(10, 16, 22, 0.55); --line: rgba(160, 210, 240, 0.18);
+  --font: 'Barlow', system-ui, -apple-system, sans-serif; --cond: 'Barlow Condensed', 'Arial Narrow', sans-serif;
+}
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { margin: 0; height: 100%; background: #030405; color: var(--ink); font-family: var(--font); overflow: hidden; overscroll-behavior: none; }
+body { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; touch-action: none; }
+canvas#c { position: fixed; inset: 0; width: 100vw; height: 100vh; height: 100dvh; display: block; touch-action: none; }
+button, select { font: inherit; color: inherit; }

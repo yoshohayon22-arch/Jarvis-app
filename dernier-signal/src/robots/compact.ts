@@ -36,6 +36,7 @@ export class CompactRobot extends Robot {
         : 'Même gabarit, mais vieux et rafistolé : peinture écaillée, antenne tordue, plaque dépareillée, un œil qui grésille.');
     this.style = style;
     this.lightAnchor = { parent: 'pack', pos: [0, -0.3, -0.05] };
+    this.gait = { stride: 0.55, knee: 0.95, armSwing: 0.5, bob: 0.022, period: 0.95, elbow: -0.35 };
     this.build();
     this.captureRest();
   }

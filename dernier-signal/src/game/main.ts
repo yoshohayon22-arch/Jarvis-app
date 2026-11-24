@@ -22,7 +22,7 @@ const $$ = (s: string) => [...document.querySelectorAll<HTMLElement>(s)];
 
 // ---------- réglages ----------
 const q = loadQuality();
-const opts: Options = loadOptions({ preset: q.id, resScale: 1, shadows: (q.id === 'equilibre' || q.id === 'econome') ? 'low' : 'high', volumetric: q.volumetric, particles: q.particles, bloom: q.bloom, fps: false, music: 0.7, sfx: 0.9, sensitivity: 1, invertY: false, voices: true });
+const opts: Options = loadOptions({ preset: q.id, resScale: 1, shadows: (q.id === 'equilibre' || q.id === 'econome') ? 'low' : 'high', volumetric: q.volumetric, particles: q.particles, bloom: q.bloom, fps: false, music: 0.7, sfx: 0.9, sensitivity: 1, invertY: false, voices: true, speech: 1.3 });
 if (q.id !== 'econome') { q.volumetric = opts.volumetric; q.particles = opts.particles; q.bloom = opts.bloom; }
 setMaterialRes(q.textureRes);
 document.body.dataset.device = isTouchDevice() ? 'touch' : 'keyboard';
@@ -80,6 +80,7 @@ input.sensitivity = opts.sensitivity; input.invertY = opts.invertY;
 const audio = new AudioEngine();
 audio.setVolumes({ music: opts.music, sfx: opts.sfx });
 const voices = new Voices();
+voices.speed = opts.speech ?? 1.3;
 const hud = new Hud();
 hud.device = input.device;
 input.onDevice.push((d) => { hud.device = d; refreshHints(); });
@@ -108,22 +109,25 @@ const tp = new ThirdPersonCamera(camera);
 const robotEyes = player.robot as unknown as { eyePower: number };
 
 // ---------- histoire ----------
-let story: { cancel: () => void } | null = null;
+let story: { cancel: () => void; skip: () => void } | null = null;
 function stopStory() { story?.cancel(); story = null; voices.stop(); hud.subtitle(null); }
 
 async function speakLines(lines: { crew: string; text: string }[], onLine?: (i: number) => void) {
   let cancelled = false;
   let cur: { cancel: () => void } | null = null;
-  story = { cancel: () => { cancelled = true; cur?.cancel(); } };
+  let skipWait: (() => void) | null = null;
+  const me = { cancel: () => { cancelled = true; cur?.cancel(); skipWait?.(); }, skip: () => { cur?.cancel(); skipWait?.(); } };
+  story = me;
   for (let i = 0; i < lines.length && !cancelled; i++) {
     const c = CREW[lines[i].crew];
     hud.subtitle(c.name, lines[i].text);
     onLine?.(i);
     if (opts.voices) { const s = voices.speak(lines[i].text, c.voice, c.voiceIndex, 1); cur = s; await s.done; }
-    else await new Promise((r) => setTimeout(r, 900 + lines[i].text.length * 55));
-    if (!cancelled) await new Promise((r) => setTimeout(r, 350));
+    else await new Promise<void>((r) => { const h = setTimeout(r, (500 + lines[i].text.length * 42) / voices.speed); skipWait = () => { clearTimeout(h); r(); }; });
+    if (!cancelled) await new Promise((r) => setTimeout(r, 150));
   }
   if (!cancelled) hud.subtitle(null);
+  if (story === me) story = null;
   return !cancelled;
 }
 const MEMORIES = () => Object.keys(LOGS).length + Object.keys(HOLOS).length;
@@ -531,6 +535,7 @@ function bindOptions() {
   range('#o-music', 'music', (v) => audio.setVolumes({ music: v }));
   range('#o-sfx', 'sfx', (v) => audio.setVolumes({ sfx: v }));
   range('#o-sens', 'sensitivity', (v) => (input.sensitivity = v));
+  range('#o-speech', 'speech', (v) => (voices.speed = v));
   toggle('#o-bloom', 'bloom', (v) => (post.bloom.blendMode.opacity.value = v ? 1 : 0));
   toggle('#o-vol', 'volumetric', () => {}, true);
   toggle('#o-fps', 'fps', (v) => ($('#fps').hidden = !v));
@@ -671,6 +676,7 @@ function step(dt: number) {
       else if (input.wasPressed('map') && save.flags.notebook) { renderNotebook('map'); state = 'pause'; openPanel('#notebook'); }
       else {
         if (input.wasPressed('interact') && nearest) { nearest.act(); audio.servo(player.pos); }
+        else if (input.wasPressed('interact') && story) { story.skip(); audio.ui('move'); }
         if (input.wasPressed('scan')) doScan();
         if (input.wasPressed('lamp')) toggleLamp();
       }

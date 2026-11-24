@@ -28,7 +28,7 @@ export function clearSave() { try { localStorage.removeItem(KEY); } catch { /* *
 // Options (indépendantes de la partie)
 export interface Options {
   preset: string; resScale: number; shadows: 'low' | 'high'; volumetric: boolean; particles: number; bloom: boolean; fps: boolean;
-  music: number; sfx: number; sensitivity: number; invertY: boolean; voices: boolean;
+  music: number; sfx: number; sensitivity: number; invertY: boolean; voices: boolean; speech: number;
 }
 const OKEY = 'dernier-signal:options';
 export function loadOptions(defaults: Options): Options {

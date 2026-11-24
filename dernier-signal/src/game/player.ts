@@ -83,7 +83,7 @@ export class Player {
     const right = new THREE.Vector3(-fwd.z, 0, fwd.x);
     const wish = new THREE.Vector3().addScaledVector(right, mv.x).addScaledVector(fwd, mv.y);
     const mag = Math.min(1, wish.length());
-    const maxSpeed = 3.1;
+    const maxSpeed = 2.3;
     const target = wish.clone().normalize().multiplyScalar(mag * maxSpeed * (this.scanT > 0.6 ? 0.25 : 1));
     // une force externe (aspiration) déplace la vitesse « voulue » : on dérive malgré soi
     target.addScaledVector(this.external, 0.55);
@@ -134,7 +134,7 @@ export class Player {
     this.speed = Math.hypot(b.vel.x, b.vel.z);
     if (b.grounded && this.speed > 0.4) {
       this.stepAcc += this.speed * dt;
-      if (this.stepAcc > 0.42) { this.stepAcc = 0; this.stepSide ^= 1; audio.step(b.ground?.surface ?? 'metal', this.pos, 0.7 + this.speed * 0.1); if (this.stepSide && Math.random() < 0.15) audio.servo(this.pos, 0.6); }
+      if (this.stepAcc > 0.36) { this.stepAcc = 0; this.stepSide ^= 1; audio.step(b.ground?.surface ?? 'metal', this.pos, 0.7 + this.speed * 0.1); if (this.stepSide && Math.random() < 0.15) audio.servo(this.pos, 0.6); }
     }
 
     // --- orientation ---
@@ -150,6 +150,7 @@ export class Player {
     this.scanT = Math.max(0, this.scanT - dt);
     const r = this.robot;
     r.walkSpeed = this.speed / 2.2;
+    r.groundSpeed = b.grounded ? this.speed : 0;
     if (this.scanT > 0) r.setAction('scan');
     else if (!b.grounded) r.setAction(this.jetting ? 'jetpack' : 'fall');
     else if (this.speed > 0.35) r.setAction('walk');

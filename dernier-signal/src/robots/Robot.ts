@@ -54,8 +54,12 @@ export abstract class Robot extends THREE.Group {
   focus = 0;
   /** En jeu : la physique gère la position, on ignore les déplacements de la pose. */
   gameMode = false;
-  /** En jeu : allure de marche 0-1 (adapte la cadence). */
+  /** En jeu : allure de marche (adapte la cadence). */
   walkSpeed = 1;
+  /** En jeu : vitesse réelle au sol (m/s). Si > 0, la cadence des pas suit cette vitesse (pieds qui ne glissent pas). */
+  groundSpeed = 0;
+  /** Longueur de jambe (hanche → cheville), pour caler les pas. */
+  protected legLength = 0.33;
 
   constructor(id: string, title: string, tagline: string) {
     super();
@@ -95,8 +99,8 @@ export abstract class Robot extends THREE.Group {
     }
   }
 
-  setAction(a: ActionId) {
-    if (a === this.action) { this.clocks.set(a, 0); return; }
+  setAction(a: ActionId, restart = false) {
+    if (a === this.action) { if (restart) this.clocks.set(a, 0); return; }
     this.action = a;
     this.clocks.set(a, 0);
     if (!this.weights.has(a)) this.weights.set(a, 0);
@@ -123,8 +127,10 @@ export abstract class Robot extends THREE.Group {
     addP(p, 'legR', s * g.stride, 0, 0);
     addP(p, 'shinL', Math.max(0, c) * g.knee + 0.08, 0, 0);
     addP(p, 'shinR', Math.max(0, -c) * g.knee + 0.08, 0, 0);
-    addP(p, 'footL', s * g.stride * 0.6 - Math.max(0, c) * g.knee * 0.5, 0, 0);
-    addP(p, 'footR', -s * g.stride * 0.6 - Math.max(0, -c) * g.knee * 0.5, 0, 0);
+    // pied : se pose à plat (compense cuisse + genou), décolle du talon en fin d'appui, pointe relevée en l'air
+    const rollL = Math.max(0, -s) * Math.max(0, -c) * 0.55, rollR = Math.max(0, s) * Math.max(0, c) * 0.55;
+    addP(p, 'footL', s * g.stride - Math.max(0, c) * g.knee - 0.08 + rollL - Math.max(0, c) * 0.25, 0, 0);
+    addP(p, 'footR', -s * g.stride - Math.max(0, -c) * g.knee - 0.08 + rollR - Math.max(0, -c) * 0.25, 0, 0);
     addP(p, 'p.hips', 0, -Math.abs(Math.cos(ph)) * g.bob * -1 - g.bob, 0);
     addP(p, 'hips', 0, s * 0.06, Math.sin(ph) * 0.035);
     addP(p, 'torso', 0.06, -s * 0.1, -Math.sin(ph) * 0.02);
@@ -253,7 +259,11 @@ export abstract class Robot extends THREE.Group {
     const p = this.pose;
     for (const k in p) delete p[k];
     for (const [a, w] of this.weights) {
-      const ct = (this.clocks.get(a) ?? 0) + dt * (a === 'walk' ? THREE.MathUtils.clamp(this.walkSpeed, 0.3, 1.8) : 1);
+      const walkRate = this.groundSpeed > 0
+        // distance parcourue par cycle ≈ 4 × amplitude × longueur de jambe
+        ? THREE.MathUtils.clamp(0.8 * (this.groundSpeed * this.gait.period) / (4 * this.gait.stride * this.legLength), 0.3, 2.4)
+        : THREE.MathUtils.clamp(this.walkSpeed, 0.3, 1.8);
+      const ct = (this.clocks.get(a) ?? 0) + dt * (a === 'walk' ? walkRate : 1);
       this.clocks.set(a, ct);
       const tp = this.tmp;
       for (const k in tp) delete tp[k];

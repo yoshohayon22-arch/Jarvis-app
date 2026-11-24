@@ -444,13 +444,16 @@ export class Voices {
     return list[index % list.length];
   }
   /** Lit une réplique ; résout quand elle est terminée (ou après une durée estimée). */
+  /** Multiplicateur de vitesse des voix (réglable dans Options). */
+  speed = 1.3;
   speak(text: string, p: VoiceProfile, index: number, volume = 1): { done: Promise<void>; cancel: () => void } {
-    const est = 600 + text.length * 62 / p.rate;
+    const rate = Math.min(2, p.rate * this.speed);
+    const est = 400 + text.length * 62 / rate;
     if (!this.enabled) return { done: new Promise((r) => setTimeout(r, est)), cancel: () => {} };
     const u = new SpeechSynthesisUtterance(text);
     u.lang = 'fr-FR';
     const v = this.pick(p, index); if (v) u.voice = v;
-    u.pitch = p.pitch; u.rate = p.rate; u.volume = volume;
+    u.pitch = p.pitch; u.rate = rate; u.volume = volume;
     let resolve!: () => void;
     const done = new Promise<void>((r) => { resolve = r; });
     let finished = false;

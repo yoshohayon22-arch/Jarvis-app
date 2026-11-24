@@ -28,6 +28,7 @@ setMaterialRes(q.textureRes);
 document.body.dataset.device = isTouchDevice() ? 'touch' : 'keyboard';
 
 // ---------- rendu ----------
+(window as unknown as { __stage?: (s: string) => void }).__stage?.('Initialisation graphique (WebGL)');
 const canvas = $<HTMLCanvasElement>('#c');
 const renderer = createRenderer(canvas, q);
 const basePR = Math.min(window.devicePixelRatio || 1, q.pixelRatio);
@@ -38,28 +39,32 @@ scene.background = new THREE.Color(0x000000);
 scene.fog = new THREE.FogExp2(0x06090d, 0.05);
 const camera = new THREE.PerspectiveCamera(62, innerWidth / innerHeight, 0.05, 1600);
 const post = new Post(renderer, scene, camera, q);
+(window as unknown as { __stage?: (s: string) => void }).__stage?.('Éclairage d’ambiance');
 if (post.ao) { post.ao.configuration.aoRadius = 0.6; post.ao.configuration.intensity = 3; }
 const pmrem = new THREE.PMREMGenerator(renderer);
 // environnement de reflets : simple dégradé (aucune compilation de matériau éclairé)
 {
-  const W = 64, H = 32, data = new Float32Array(W * H * 4);
+  const W = 64, H = 32, data = new Uint16Array(W * H * 4);
   for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
     const v = 1 - y / (H - 1); // 1 = haut
     const panel = (v > 0.75 && (x % 16) < 5) ? 5 : 0;
     const r = 0.08 + v * 0.75 + panel, g = 0.09 + v * 0.85 + panel, b = 0.12 + v * 1.0 + panel;
-    data.set([r, g, b, 1], (y * W + x) * 4);
+    data.set([r, g, b, 1].map((v) => THREE.DataUtils.toHalfFloat(v)), (y * W + x) * 4);
   }
-  const eq = new THREE.DataTexture(data, W, H, THREE.RGBAFormat, THREE.FloatType);
+  const eq = new THREE.DataTexture(data, W, H, THREE.RGBAFormat, THREE.HalfFloatType);
+  eq.magFilter = THREE.LinearFilter; eq.minFilter = THREE.LinearFilter;
   eq.mapping = THREE.EquirectangularReflectionMapping; eq.needsUpdate = true;
   scene.environment = pmrem.fromEquirectangular(eq).texture;
 }
 scene.environmentIntensity = 0.06;
 const hemi = new THREE.HemisphereLight(0x3a4c66, 0x0a0806, 0.12);
 scene.add(hemi);
+(window as unknown as { __stage?: (s: string) => void }).__stage?.('Ciel et planète');
 const sky = new Sky(new THREE.Color(0.1, 0.42, 0.75), q.particles);
 scene.add(sky);
 
 // ---------- systèmes ----------
+(window as unknown as { __stage?: (s: string) => void }).__stage?.('Commandes et son');
 const input = new Input(canvas, $('#touch'));
 input.sensitivity = opts.sensitivity; input.invertY = opts.invertY;
 const audio = new AudioEngine();
@@ -82,9 +87,11 @@ const api: GameApi = {
   flags: save.flags,
   playLog, playHolo, openPuzzle, gainJetpack, setObjective, checkpoint, kill, toast: (a, b) => hud.toast(a, b), enterRoom, clue, endOfSlice,
 };
+(window as unknown as { __stage?: (s: string) => void }).__stage?.('Construction de la station');
 const _t0 = performance.now();
 const level = new Level(scene, q, api, audio);
 (window as unknown as { __timing: Record<string, number> }).__timing = { level: performance.now() - _t0, sinceNav: performance.now() };
+(window as unknown as { __stage?: (s: string) => void }).__stage?.('Assemblage de R-12');
 const player = new Player(scene, q);
 if (opts.shadows === 'low') player.headlamp.shadow.mapSize.setScalar(512);
 const tp = new ThirdPersonCamera(camera);
@@ -571,6 +578,7 @@ async function boot() {
   const tm = (window as unknown as { __timing: Record<string, number> }).__timing;
   let _t = performance.now();
   const lt = $('#loader .msg');
+  (window as unknown as { __stage?: (s: string) => void }).__stage?.('Téléchargement des textures');
   const prog = setInterval(() => { const p = textureProgress(); lt.textContent = `Chargement de la station… ${Math.round((p.loaded / Math.max(1, p.total)) * 100)} %`; }, 120);
   await texturesReady();
   clearInterval(prog);
@@ -578,7 +586,7 @@ async function boot() {
   // compilation des shaders avant d'afficher (évite les saccades)
   level.current = 'F';
   for (const r of Object.values(level.rooms)) r.group.visible = true;
-  lt.textContent = 'Préparation des effets…';
+  (window as unknown as { __stage?: (s: string) => void }).__stage?.('Préparation des effets graphiques');
   await new Promise((r) => requestAnimationFrame(r));
   unifyScene(scene);
   // compiler pour la vraie cible (tampon HDR linéaire du post-traitement), sinon tout serait recompilé

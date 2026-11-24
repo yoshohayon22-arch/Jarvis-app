@@ -123,7 +123,19 @@
   <div id="reboot"><div class="scan"></div><div class="txt">REDÉMARRAGE DU SYSTÈME<small class="why"></small><i></i></div></div>
   <div id="tap">Touchez l'écran pour commencer</div>
   <span id="fps" hidden>— i/s</span>
-  <div id="loader"><span class="msg">Chargement de la station…</span><i></i></div>
+  <div id="loader"><span class="msg">Chargement de la station…</span><i></i><small class="err"></small></div>
+  <script>
+    // Rapporteur de chargement : affiche l'étape en cours et toute erreur (diagnostic sur iPad).
+    (function () {
+      var t0 = Date.now(), stage = 'Démarrage du moteur';
+      function el(s) { return document.querySelector('#loader ' + s); }
+      window.__stage = function (s) { stage = s; var m = el('.msg'); if (m) m.textContent = s + '…'; };
+      function show(msg) { var e = el('.err'); if (e) { e.textContent = 'Erreur pendant « ' + stage + ' » : ' + msg; e.style.display = 'block'; } }
+      window.addEventListener('error', function (ev) { show((ev.message || ev.type) + (ev.filename ? ' (' + ev.filename.split('/').pop() + ':' + ev.lineno + ')' : '')); }, true);
+      window.addEventListener('unhandledrejection', function (ev) { show(String(ev.reason && (ev.reason.message || ev.reason))); });
+      setInterval(function () { var l = document.getElementById('loader'); if (!l || l.classList.contains('done')) return; var s = Math.round((Date.now() - t0) / 1000); var x = el('.time'); if (!x) { x = document.createElement('small'); x.className = 'time'; l.appendChild(x); } x.textContent = stage + ' · ' + s + ' s'; }, 1000);
+    })();
+  </script>
   <script type="module" src="/src/game/main.ts"></script>
 </body>
 </html>

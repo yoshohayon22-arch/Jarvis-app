@@ -11,6 +11,7 @@ export default defineConfig({
       input: {
         index: resolve(__dirname, 'index.html'),
         atelier: resolve(__dirname, 'atelier.html'),
+        gouverneur: resolve(__dirname, 'gouverneur.html'),
       },
     },
   },

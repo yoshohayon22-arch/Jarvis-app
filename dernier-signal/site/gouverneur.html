@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="theme-color" content="#000000" />
+  <title>Dernier Signal · Gouverner</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,400;0,600;1,400&family=Barlow+Condensed:wght@500;600;700&display=swap" rel="stylesheet" />
+  <script type="module" crossorigin src="./assets/gouverneur-ZJSx-bvZ.js"></script>
+  <link rel="modulepreload" crossorigin href="./assets/compact-BjLPNqrW.js">
+  <link rel="stylesheet" crossorigin href="./assets/gouverneur-Bqj6eCfD.css">
+</head>
+<body class="gov">
+  <canvas id="c"></canvas>
+
+  <!-- interface du gouverneur -->
+  <div id="ui" hidden>
+    <div id="topbar">
+      <div id="res"></div>
+      <div id="clock"><span class="day"></span><span class="season"></span>
+        <div id="speed"><button class="sp" data-s="0" aria-label="Pause">❚❚</button><button class="sp" data-s="1">×1</button><button class="sp" data-s="2">×2</button><button class="sp" data-s="4">×4</button></div>
+      </div>
+    </div>
+    <div id="meters">
+      <div class="meter peace"><span>Paix</span><i><b></b></i></div>
+      <div class="meter tension"><span>Tension</span><i><b></b></i></div>
+    </div>
+    <div id="side">
+      <button class="sb" data-p="council"><span class="ic">◎</span>Conseil<small></small></button>
+      <button class="sb" data-p="relations"><span class="ic">⇄</span>Relations</button>
+      <button class="sb" data-p="leaders"><span class="ic">☖</span>Chefs</button>
+      <button class="sb" data-p="menu"><span class="ic">≡</span>Menu</button>
+    </div>
+    <div id="notes"></div>
+    <div id="reticle"></div>
+    <div id="buildbar">
+      <div class="tabs"><button class="bt" data-g="forges">Forgés</button><button class="bt" data-g="racines">Racines</button><button class="bt" data-g="commun">Commun</button></div>
+      <div class="items"></div>
+    </div>
+    <div id="placebar" hidden>
+      <span class="msg"></span>
+      <button class="pb rot" aria-label="Tourner">⟳</button><button class="pb ok">Construire</button><button class="pb cancel">Annuler</button>
+    </div>
+    <div id="info" hidden></div>
+  </div>
+
+  <!-- panneaux -->
+  <div id="panel" class="gpanel" hidden><div class="head"><h2></h2><button class="close" aria-label="Fermer">✕</button></div><div class="body"></div></div>
+
+  <!-- conseil -->
+  <div id="council" hidden>
+    <div class="stage">
+      <div class="circle"></div>
+      <div class="seat left"><div class="face"></div><b></b><small></small></div>
+      <div class="seat right"><div class="face"></div><b></b><small></small></div>
+      <div class="seat center"><div class="face r12"></div><b>R-12</b><small>Gouverneur</small></div>
+    </div>
+    <div class="dialog"><small class="who"></small><p class="line"></p><span class="next">Toucher pour continuer</span></div>
+    <div class="options" hidden></div>
+    <h2 class="ctitle"></h2>
+  </div>
+
+  <!-- souvenir de l'équipage -->
+  <div id="memory" hidden><div class="scan"></div><small class="tag"></small><p class="txt"></p><button class="skip">Passer</button></div>
+
+  <!-- écran de départ / résumé / bilan -->
+  <div id="start" class="gscreen">
+    <small>Dernier Signal · Acte 2</small>
+    <h1>Gouverner</h1>
+    <p>R-12 est sur la planète. Les Forgés qu'il a construits et le Clan des Racines doivent apprendre à vivre ensemble.</p>
+    <div class="col">
+      <button id="btn-resume" class="gbtn" hidden>Reprendre ma civilisation</button>
+      <button id="btn-found" class="gbtn primary">Nouvelle fondation</button>
+      <a class="gbtn ghost" href="index.html">Retour à l'écran titre</a>
+    </div>
+  </div>
+  <div id="summary" class="gscreen" hidden><p class="slide"></p><div class="dots"></div><button class="gbtn ghost skip">Passer</button></div>
+  <div id="bilan" class="gscreen" hidden></div>
+  <div id="loader"><span class="msg">Préparation de la planète…</span><i></i><small class="err"></small></div>
+</body>
+</html>

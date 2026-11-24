@@ -461,6 +461,7 @@ $('#btn-controls-title').onclick = () => openPanel('#controls');
 $('#btn-quit').onclick = () => { closeAllPanels(); stopStory(); toTitle(); };
 $$('.back').forEach((b) => (b.onclick = () => backPanel()));
 $('#btn-continue').onclick = () => startGame(false);
+$('#btn-govern').onclick = () => { let has = false; try { has = !!localStorage.getItem('dernier-signal:civ'); } catch { /* */ } $('#gov-resume').hidden = !has; openPanel('#govern'); };
 $('#btn-new').onclick = () => { if (loadSave() && !confirm('Recommencer une nouvelle partie ? La progression actuelle sera effacée.')) return; startGame(true); };
 $('#btn-end-continue').onclick = () => {
   closeAllPanels();

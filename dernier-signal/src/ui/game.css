@@ -157,7 +157,7 @@ td:first-child { color: var(--dim); }
 #endcard p { color: var(--dim); line-height: 1.5; }
 #endcard .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 22px 0; font-size: 12px; color: var(--dim); text-transform: uppercase; letter-spacing: .1em; }
 #endcard .stats span { display: block; font: 700 26px var(--cond); color: var(--ink); letter-spacing: 0; }
-#loader { position: fixed; inset: 0; display: grid; place-items: center; background: #000; z-index: 40; transition: opacity .9s; font: 600 14px var(--cond); letter-spacing: .4em; color: var(--dim); text-transform: uppercase; }
+#loader { position: fixed; inset: 0; display: grid; place-content: center; text-align: center; background: #000; z-index: 40; transition: opacity .9s; font: 600 14px var(--cond); letter-spacing: .4em; color: var(--dim); text-transform: uppercase; }
 #loader.done { opacity: 0; pointer-events: none; }
 #loader i { display: block; width: 160px; height: 1px; margin: 14px auto 0; background: linear-gradient(90deg, transparent, var(--accent), transparent); animation: lscan 1.6s infinite; }
 @keyframes lscan { 0% { transform: scaleX(.1); opacity: .2 } 50% { transform: scaleX(1); opacity: 1 } 100% { transform: scaleX(.1); opacity: .2 } }

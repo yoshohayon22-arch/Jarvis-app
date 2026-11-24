@@ -79,13 +79,13 @@ export function paint(color: THREE.ColorRepresentation, o: WearOptions & { rough
     color, roughness: o.rough ?? 0.42, metalness: 0.0,
     clearcoat: o.clearcoat ?? 0.5, clearcoatRoughness: 0.22,
   });
-  const s = pbr('rust_coarse_01', RES, 1);
+  const s = pbr('rust_coarse_01', RES, 1, false);
   m.normalMap = s.normalMap; m.normalScale.set(0.05, 0.05);
   return addWear(m, o);
 }
 
 export function steel(color: THREE.ColorRepresentation = 0x55585e, o: WearOptions & { rough?: number } = {}) {
-  const s = pbr('rust_coarse_01', RES, 1.5);
+  const s = pbr('rust_coarse_01', RES, 1.5, false);
   const m = new THREE.MeshStandardMaterial({
     color, metalness: 1.0, roughness: o.rough ?? 0.45,
     normalMap: s.normalMap, normalScale: new THREE.Vector2(0.15, 0.15),
@@ -94,7 +94,7 @@ export function steel(color: THREE.ColorRepresentation = 0x55585e, o: WearOption
 }
 
 export function treadPlate(color: THREE.ColorRepresentation = 0x2c2f34, repeat = 2) {
-  const s = pbr('metal_plate', RES, repeat);
+  const s = pbr('metal_plate', RES, repeat, false);
   return new THREE.MeshStandardMaterial({
     color, metalness: 0.9, roughnessMap: s.arm, metalnessMap: s.arm, aoMap: s.arm,
     roughness: 1.0, normalMap: s.normalMap, normalScale: new THREE.Vector2(0.8, 0.8),
@@ -176,4 +176,59 @@ export function textTexture(lines: { text: string; size: number; y: number; font
   t.colorSpace = THREE.SRGBColorSpace;
   t.anisotropy = 8;
   return t;
+}
+
+// ---------- Unification des matériaux (temps de chargement) ----------
+// Safari compile un programme GPU par combinaison de cartes/options. En donnant à tous les
+// matériaux éclairés EXACTEMENT les mêmes cartes (textures neutres 1×1 si besoin) et la même
+// extension d'usure, des dizaines de matériaux partagent un seul programme.
+
+function px(r: number, g: number, b: number, srgb = false) {
+  const t = new THREE.DataTexture(new Uint8Array([r, g, b, 255]), 1, 1);
+  t.colorSpace = srgb ? THREE.SRGBColorSpace : THREE.NoColorSpace;
+  t.needsUpdate = true;
+  return t;
+}
+let defaults: { white: THREE.Texture; flat: THREE.Texture; arm: THREE.Texture } | null = null;
+function defs() { return defaults ?? (defaults = { white: px(255, 255, 255, true), flat: px(128, 128, 255), arm: px(255, 255, 255) }); }
+
+const unifiedCache = new Map<THREE.Material, THREE.Material>();
+
+export function unifyMaterial(src: THREE.Material): THREE.Material {
+  const hit = unifiedCache.get(src);
+  if (hit) return hit;
+  const s = src as THREE.MeshStandardMaterial;
+  if (!s.isMeshStandardMaterial || s.fog === false) { unifiedCache.set(src, src); return src; }
+  let m: THREE.MeshStandardMaterial;
+  if ((s as THREE.MeshPhysicalMaterial).isMeshPhysicalMaterial) {
+    const p = s as THREE.MeshPhysicalMaterial;
+    m = new THREE.MeshStandardMaterial();
+    THREE.MeshStandardMaterial.prototype.copy.call(m, p);
+    // le vernis (clearcoat) est approché par une surface un peu plus lisse
+    m.roughness = Math.max(0.04, p.roughness * (1 - 0.35 * p.clearcoat));
+    const w = p.userData.wear as Record<string, { value: unknown }> | undefined;
+    m.userData = {};
+    if (w) addWear(m, {
+      wear: w.uWear.value as number, scratches: w.uScratch.value as number, dirt: w.uDirt.value as number, roughVar: w.uRoughVar.value as number,
+      bareColor: w.uBare.value as THREE.Color, bareRough: w.uBareRough.value as number, scale: w.uGScale.value as number,
+    });
+  } else m = s;
+  const d = defs();
+  if (!m.map) m.map = d.white;
+  if (!m.normalMap) { m.normalMap = d.flat; m.normalScale.set(1, 1); }
+  if (!m.roughnessMap) m.roughnessMap = d.arm;
+  if (!m.metalnessMap) m.metalnessMap = d.arm;
+  m.aoMap = null;
+  if (!m.userData.wear) addWear(m, { wear: 0, scratches: 0, dirt: 0, roughVar: 0 });
+  m.needsUpdate = true;
+  unifiedCache.set(src, m);
+  return m;
+}
+
+export function unifyScene(root: THREE.Object3D) {
+  root.traverse((o) => {
+    const mesh = o as THREE.Mesh;
+    if (!mesh.isMesh || !mesh.material) return;
+    mesh.material = Array.isArray(mesh.material) ? mesh.material.map(unifyMaterial) : unifyMaterial(mesh.material);
+  });
 }

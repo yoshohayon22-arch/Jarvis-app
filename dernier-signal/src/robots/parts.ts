@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js';
-import { mergeGeometries, mergeVertices } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
+import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 
 // Boîte à outils de « kitbashing » procédural : formes biseautées, vis, câbles, joints.
 
@@ -91,8 +91,10 @@ export class Builder {
   private e = new THREE.Euler();
 
   add(joint: THREE.Object3D, mat: THREE.Material, geo: THREE.BufferGeometry, pos: V3 = [0, 0, 0], rot: V3 = [0, 0, 0], scale: V3 = [1, 1, 1]) {
-    const g = geo.index ? geo.toNonIndexed() : geo.clone();
+    const g = geo.clone();
     for (const k of Object.keys(g.attributes)) if (!['position', 'normal', 'uv'].includes(k)) g.deleteAttribute(k);
+    if (!g.index) { const n = g.attributes.position.count; const idx = new (n > 65535 ? Uint32Array : Uint16Array)(n); for (let i = 0; i < n; i++) idx[i] = i; g.setIndex(new THREE.BufferAttribute(idx, 1)); }
+    g.morphAttributes = {};
     if (!g.attributes.uv) g.setAttribute('uv', new THREE.BufferAttribute(new Float32Array(g.attributes.position.count * 2), 2));
     this.e.set(rot[0], rot[1], rot[2]);
     this.q.setFromEuler(this.e);
@@ -118,10 +120,9 @@ export class Builder {
   build(castShadow = true) {
     for (const [joint, mats] of this.buckets) {
       for (const [mat, geos] of mats) {
-        let merged = mergeGeometries(geos, false)!;
+        const merged = mergeGeometries(geos, false)!;
         const uvs = (mat.userData as { uvScale?: number }).uvScale;
         if (uvs) worldUV(merged, uvs);
-        merged = mergeVertices(merged, 1e-5);
         merged.computeBoundingSphere();
         const mesh = new THREE.Mesh(merged, mat);
         mesh.castShadow = castShadow && !(mat as THREE.MeshBasicMaterial).isMeshBasicMaterial && !mat.transparent;

@@ -17,7 +17,7 @@ export class Kit {
   constructor(res: '1k' | '2k') {
     this.res = res;
     const tex = (id: string, o: { color?: number; map?: boolean; normal?: number; metal?: number; rough?: number; uv?: number; env?: number }) => {
-      const s = pbr(id, res, 1);
+      const s = pbr(id, res, 1, o.map !== false);
       const m = new THREE.MeshStandardMaterial({
         color: o.color ?? 0xffffff, map: o.map === false ? null : s.map, normalMap: s.normalMap,
         normalScale: new THREE.Vector2(o.normal ?? 1, o.normal ?? 1), roughnessMap: s.arm, metalnessMap: s.arm, aoMap: null,

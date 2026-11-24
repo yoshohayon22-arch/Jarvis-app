@@ -1,11 +1,10 @@
 import * as THREE from 'three';
-import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
 import '../ui/base.css';
 import '../ui/game.css';
 import { loadQuality, saveQuality, PRESETS, isTouchDevice, type PresetId } from '../core/quality';
 import { createRenderer, Post, FpsMeter } from '../core/post';
-import { texturesReady, setMaxAnisotropy } from '../core/textures';
-import { setMaterialRes } from '../robots/materials';
+import { texturesReady, setMaxAnisotropy, textureProgress } from '../core/textures';
+import { setMaterialRes, unifyScene } from '../robots/materials';
 import { Input } from './input';
 import { Player } from './player';
 import { ThirdPersonCamera } from './camera';
@@ -41,7 +40,19 @@ const camera = new THREE.PerspectiveCamera(62, innerWidth / innerHeight, 0.05, 1
 const post = new Post(renderer, scene, camera, q);
 if (post.ao) { post.ao.configuration.aoRadius = 0.6; post.ao.configuration.intensity = 3; }
 const pmrem = new THREE.PMREMGenerator(renderer);
-scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+// environnement de reflets : simple dégradé (aucune compilation de matériau éclairé)
+{
+  const W = 64, H = 32, data = new Float32Array(W * H * 4);
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+    const v = 1 - y / (H - 1); // 1 = haut
+    const panel = (v > 0.75 && (x % 16) < 5) ? 5 : 0;
+    const r = 0.08 + v * 0.75 + panel, g = 0.09 + v * 0.85 + panel, b = 0.12 + v * 1.0 + panel;
+    data.set([r, g, b, 1], (y * W + x) * 4);
+  }
+  const eq = new THREE.DataTexture(data, W, H, THREE.RGBAFormat, THREE.FloatType);
+  eq.mapping = THREE.EquirectangularReflectionMapping; eq.needsUpdate = true;
+  scene.environment = pmrem.fromEquirectangular(eq).texture;
+}
 scene.environmentIntensity = 0.06;
 const hemi = new THREE.HemisphereLight(0x3a4c66, 0x0a0806, 0.12);
 scene.add(hemi);
@@ -71,7 +82,9 @@ const api: GameApi = {
   flags: save.flags,
   playLog, playHolo, openPuzzle, gainJetpack, setObjective, checkpoint, kill, toast: (a, b) => hud.toast(a, b), enterRoom, clue, endOfSlice,
 };
+const _t0 = performance.now();
 const level = new Level(scene, q, api, audio);
+(window as unknown as { __timing: Record<string, number> }).__timing = { level: performance.now() - _t0, sinceNav: performance.now() };
 const player = new Player(scene, q);
 if (opts.shadows === 'low') player.headlamp.shadow.mapSize.setScalar(512);
 const tp = new ThirdPersonCamera(camera);
@@ -555,11 +568,31 @@ function step(dt: number) {
 // ---------- démarrage ----------
 async function boot() {
   onResize();
+  const tm = (window as unknown as { __timing: Record<string, number> }).__timing;
+  let _t = performance.now();
+  const lt = $('#loader .msg');
+  const prog = setInterval(() => { const p = textureProgress(); lt.textContent = `Chargement de la station… ${Math.round((p.loaded / Math.max(1, p.total)) * 100)} %`; }, 120);
   await texturesReady();
+  clearInterval(prog);
+  tm.textures = performance.now() - _t; _t = performance.now();
   // compilation des shaders avant d'afficher (évite les saccades)
   level.current = 'F';
   for (const r of Object.values(level.rooms)) r.group.visible = true;
-  renderer.compile(scene, camera);
+  lt.textContent = 'Préparation des effets…';
+  await new Promise((r) => requestAnimationFrame(r));
+  unifyScene(scene);
+  // compiler pour la vraie cible (tampon HDR linéaire du post-traitement), sinon tout serait recompilé
+  const rtProbe = new THREE.WebGLRenderTarget(4, 4, { type: THREE.HalfFloatType });
+  renderer.setRenderTarget(rtProbe);
+  // rendre visibles un instant les objets cachés (flammes, hologrammes, arcs…) pour les précompiler aussi
+  const hidden: THREE.Object3D[] = [];
+  scene.traverse((o) => { if (!o.visible) { hidden.push(o); o.visible = true; } });
+  await renderer.compileAsync(scene, camera);
+  for (const o of hidden) o.visible = false;
+  renderer.setRenderTarget(null); rtProbe.dispose();
+  // deux images de préchauffage (post-traitement) cachées sous l'écran de chargement
+  step(1 / 60); post.render(1 / 60); step(1 / 60); post.render(1 / 60);
+  tm.compile = performance.now() - _t; tm.total = performance.now();
   $('#loader').classList.add('done');
   frame();
   const first = () => { audio.unlock(); audio.startAmbience('menu'); removeEventListener('pointerdown', first); removeEventListener('keydown', first); };

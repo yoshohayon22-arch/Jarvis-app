@@ -7,6 +7,8 @@ const loader = new THREE.TextureLoader();
 const cache = new Map<string, THREE.Texture>();
 const clones = new Map<string, THREE.Texture[]>();
 let pendingCount = 0;
+let totalCount = 0;
+export function textureProgress() { return { loaded: totalCount - pendingCount, total: totalCount }; }
 
 export interface PBRSet { map: THREE.Texture; normalMap: THREE.Texture; arm: THREE.Texture; }
 
@@ -27,7 +29,7 @@ function tex(path: string, srgb: boolean): THREE.Texture {
   const k = path + srgb;
   let t = cache.get(k);
   if (!t) {
-    pendingCount++;
+    pendingCount++; totalCount++;
     const key = k;
     t = loader.load(BASE + path, () => {
       pendingCount--;
@@ -42,13 +44,13 @@ function tex(path: string, srgb: boolean): THREE.Texture {
 }
 
 /** Charge diffuse / normale / ARM (AO-Rugosité-Métal) d'une texture Poly Haven. */
-export function pbr(id: string, res: '1k' | '2k', repeat = 1): PBRSet {
+export function pbr(id: string, res: '1k' | '2k', repeat = 1, withMap = true): PBRSet {
   const s = {
-    map: texClone(`${id}/diff_${res}.jpg`, true),
+    map: withMap ? texClone(`${id}/diff_${res}.jpg`, true) : (null as unknown as THREE.Texture),
     normalMap: texClone(`${id}/nor_${res}.jpg`, false),
     arm: texClone(`${id}/arm_${res}.jpg`, false),
   };
-  for (const t of Object.values(s)) t.repeat.set(repeat, repeat);
+  for (const t of Object.values(s)) t?.repeat.set(repeat, repeat);
   return s;
 }
 

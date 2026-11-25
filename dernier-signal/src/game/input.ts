@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import type { NavEvent, NavDir } from '../ui/padnav';
 
 // Commandes unifiées : clavier + souris, manette (Xbox / PlayStation), écran tactile.
 // Le dernier mode utilisé détermine les icônes d'aide affichées.
@@ -15,7 +16,9 @@ export class Input {
   onDevice: ((d: Device) => void)[] = [];
   enabled = true;
   /** Navigation dans les menus (manette / flèches). */
-  onNav: ((dir: 'up' | 'down' | 'left' | 'right' | 'ok' | 'back') => void) | null = null;
+  onNav: ((e: NavEvent) => void) | null = null;
+  /** Défilement des textes de menu (stick droit), en pixels. */
+  onScroll: ((dy: number) => void) | null = null;
   menuMode = false;
   /** Vrai pendant la trame où un bouton de manette vient d'être pressé. */
   padPressed = false;
@@ -24,6 +27,8 @@ export class Input {
   private mouse = new THREE.Vector2();
   private padPrev: boolean[] = [];
   private padNavCooldown = 0;
+  private padNavDir: NavDir | null = null;
+  private padBlock: boolean[] = [];
   private touchLook = new THREE.Vector2();
   private joy = { id: -1, ox: 0, oy: 0, x: 0, y: 0 };
   private lookTouch = { id: -1, x: 0, y: 0 };
@@ -41,10 +46,11 @@ export class Input {
       this.setDevice('keyboard');
       this.keys.add(e.code);
       const b = this.keyBtn(e.code);
-      if (b) { this.held.add(b); this.pressed.add(b); }
+      // dans un menu, les touches servent seulement au menu (sinon Échap fermerait puis rouvrirait la pause)
+      if (b && !this.menuMode) { this.held.add(b); this.pressed.add(b); }
       if (this.menuMode && this.onNav) {
-        const nav = ({ ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'left', ArrowRight: 'right', Enter: 'ok', Escape: 'back' } as const)[e.code as 'ArrowUp'];
-        if (nav) { this.onNav(nav); e.preventDefault(); }
+        const nav = ({ ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'left', ArrowRight: 'right', Enter: 'ok', Escape: 'back', PageUp: 'prev', PageDown: 'next' } as const)[e.code as 'ArrowUp'];
+        if (nav) { document.body.classList.add('padnav'); this.onNav(nav); e.preventDefault(); }
       }
       if (['Space', 'ArrowUp', 'ArrowDown', 'Tab'].includes(e.code) && !this.menuMode) e.preventDefault();
     });
@@ -86,6 +92,7 @@ export class Input {
     if (d === this.device) return;
     this.device = d;
     document.body.dataset.device = d;
+    document.body.classList.toggle('padnav', d === 'gamepad');
     for (const f of this.onDevice) f(d);
   }
 
@@ -184,21 +191,30 @@ export class Input {
       this.look.y += ry * Math.abs(ry) * 2.2 * dt * this.sensitivity;
     }
     const map: [number, Btn][] = [[0, 'jump'], [1, 'interact'], [2, 'scan'], [3, 'lamp'], [9, 'pause'], [8, 'map'], [7, 'up'], [6, 'down'], [5, 'up'], [4, 'down']];
+    const menu = this.menuMode;
     for (const [i, name] of map) {
       const now = b(i), was = this.padPrev[i];
+      // un bouton appuyé dans un menu ne compte pour le jeu qu'après avoir été relâché
+      if (now && menu) this.padBlock[i] = true;
+      if (!now) this.padBlock[i] = false;
+      if (this.padBlock[i]) continue;
       if (now && !was) this.pressed.add(name);
       if (now) this.held.add(name);
       else if (was) this.held.delete(name);
     }
-    if (this.menuMode && this.onNav) {
-      this.padNavCooldown -= dt;
+    if (menu && this.onNav) {
       const edge = (i: number) => b(i) && !this.padPrev[i];
       if (edge(0)) this.onNav('ok');
       if (edge(1) || edge(9)) this.onNav('back');
-      const dirs: [boolean, 'up' | 'down' | 'left' | 'right'][] = [[b(12) || ly < -0.6, 'up'], [b(13) || ly > 0.6, 'down'], [b(14) || lx < -0.6, 'left'], [b(15) || lx > 0.6, 'right']];
-      const d = dirs.find(([v]) => v);
-      if (d && this.padNavCooldown <= 0) { this.onNav(d[1]); this.padNavCooldown = 0.22; }
-      if (!d) this.padNavCooldown = 0;
+      if (edge(4)) this.onNav('prev');
+      if (edge(5)) this.onNav('next');
+      const dirs: [boolean, NavDir][] = [[b(12) || ly < -0.55, 'up'], [b(13) || ly > 0.55, 'down'], [b(14) || lx < -0.55, 'left'], [b(15) || lx > 0.55, 'right']];
+      const d = dirs.find(([v]) => v)?.[1] ?? null;
+      this.padNavCooldown -= dt;
+      // première impulsion immédiate, puis répétition si on maintient
+      if (d !== this.padNavDir) { this.padNavDir = d; if (d) { this.onNav(d); this.padNavCooldown = 0.38; } }
+      else if (d && this.padNavCooldown <= 0) { this.onNav(d); this.padNavCooldown = 0.13; }
+      if (ry) this.onScroll?.(ry * Math.abs(ry) * 900 * dt);
     }
     this.padPrev = gp.buttons.map((x) => x.pressed);
   }

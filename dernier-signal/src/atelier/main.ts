@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import '../ui/base.css';
 import './atelier.css';
-import { loadQuality, saveQuality, PRESETS, type PresetId } from '../core/quality';
+import { loadQuality, saveQuality, PRESETS, bootSucceeded, type PresetId } from '../core/quality';
 import { createRenderer, Post, FpsMeter } from '../core/post';
 import { loadHDRI, texturesReady, setMaxAnisotropy } from '../core/textures';
 import { setMaterialRes } from '../robots/materials';
@@ -12,6 +12,7 @@ import { Robot, ACTION_LABELS, type ActionId } from '../robots/Robot';
 import { CompactRobot } from '../robots/compact';
 import { HaloRobot } from '../robots/halo';
 import { OrbeRobot } from '../robots/orbe';
+import { PadNav, PadReader, hidePadFocusOnPointer } from '../ui/padnav';
 
 const $ = <T extends HTMLElement>(s: string) => document.querySelector(s) as T;
 const q = loadQuality();
@@ -216,7 +217,7 @@ for (const p of Object.values(PRESETS)) {
   const o = document.createElement('option'); o.value = p.id; o.textContent = p.label; qsel.appendChild(o);
 }
 qsel.value = q.id;
-qsel.onchange = () => { saveQuality(qsel.value as PresetId); location.reload(); };
+qsel.onchange = () => { saveQuality(qsel.value as PresetId); bootSucceeded(); location.reload(); };
 const fpsEl = $('#fps');
 const fps = new FpsMeter(fpsEl);
 let showFps = false;
@@ -265,6 +266,24 @@ canvas.addEventListener('pointerup', (e) => {
 });
 canvas.addEventListener('pointercancel', () => { drag = null; });
 
+// ---------- manette : choisir un robot, le faire tourner ----------
+const pad = new PadReader();
+hidePadFocusOnPointer();
+const nav = new PadNav({ root: () => document.body, back: () => { if (focused >= 0) focus(-1); } });
+function pollPad(dt: number) {
+  const { ax } = pad.read(dt, (e) => {
+    // LB / RB : robot précédent / suivant
+    if (e === 'prev' || e === 'next') { focus(((focused < 0 ? (e === 'next' ? -1 : 0) : focused) + (e === 'next' ? 1 : -1) + robots.length) % robots.length); return; }
+    nav.handle(e);
+  });
+  if (!pad.gp) return;
+  nav.refresh();
+  const rx = ax[2];
+  if (!rx) return;
+  if (focused >= 0) { const s = spin[focused]; s.angle += rx * 2.4 * dt; s.vel = 0; s.auto = 0; }
+  else { overviewYaw = THREE.MathUtils.clamp(overviewYaw - rx * 0.6 * dt, -0.4, 0.4); layoutCamera(); }
+}
+
 // ---------- boucle ----------
 const timer = new THREE.Timer();
 let t = 0;
@@ -273,6 +292,7 @@ function frame() {
   const dt = Math.min(timer.getDelta(), 1 / 20);
   t += dt;
   fps.tick(dt);
+  pollPad(dt);
   robots.forEach((r, i) => {
     const s = spin[i];
     if (!drag || focused !== i) {
@@ -308,5 +328,6 @@ async function start() {
   renderer.compile(scene, camera);
   $('#loader').classList.add('done');
   frame();
+  setTimeout(bootSucceeded, 4000);
 }
 start().catch((e) => { $('#loader').textContent = 'Erreur de chargement : ' + e; console.error(e); });

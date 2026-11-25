@@ -5,12 +5,13 @@ import { ToneMappingMode } from 'postprocessing';
 import '../ui/base.css';
 import '../ui/game.css';
 import './valley.css';
-import { loadQuality, saveQuality, PRESETS, isTouchDevice, bootSucceeded, type PresetId } from '../core/quality';
+import { loadQuality, saveQuality, PRESETS, isTouchDevice, bootSucceeded, gpuBlockedHelp, watchContextLoss, type PresetId } from '../core/quality';
 import { acquireContext, createRenderer, Post, FpsMeter } from '../core/post';
 import { texturesReady, setMaxAnisotropy } from '../core/textures';
 import { setMaterialRes } from '../robots/materials';
 import { Physics } from '../world/physics';
 import { Input } from '../game/input';
+import { PadNav } from '../ui/padnav';
 import { Player } from '../game/player';
 import { ThirdPersonCamera } from '../game/camera';
 import { AudioEngine } from '../audio/audio';
@@ -37,13 +38,15 @@ const P = { // réglages par préréglage
   haut: { grass: 80000, patch: 42, shadow: 2048, shadowR: 48, flora: 1, motes: 600, shafts: 14 },
   ultra: { grass: 130000, patch: 52, shadow: 4096, shadowR: 56, flora: 1.15, motes: 800, shafts: 18 },
 }[q.id];
+if (isTouchDevice()) P.shadow = Math.min(P.shadow, 2048); // mémoire graphique limitée sur iPad
 
 // ---------- rendu ----------
 stage('Initialisation graphique');
 const acq = await acquireContext(touch, () => {});
-if ('error' in acq) { $('#loader .msg').textContent = 'La carte graphique est inaccessible'; const e = $('#loader .err'); e.style.display = 'block'; e.textContent = acq.error; await new Promise(() => {}); }
+if ('error' in acq) { $('#loader .msg').textContent = 'La 3D est bloquée'; const e = $('#loader .err'); e.style.display = 'block'; e.textContent = gpuBlockedHelp() + '  —  Diagnostic : ' + acq.error; await new Promise(() => {}); }
 const { canvas, gl } = acq as { canvas: HTMLCanvasElement; gl: WebGL2RenderingContext };
 const renderer = createRenderer(canvas, q, gl);
+watchContextLoss(canvas, (msg) => { $('#loader').classList.remove('done'); $('#loader .msg').textContent = msg; });
 renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, q.pixelRatio));
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFShadowMap;
@@ -188,15 +191,23 @@ let paused = false;
 let freeCam: { p: THREE.Vector3; l: THREE.Vector3 } | null = null;
 function setSpeed(s: number) { speed = s; document.querySelectorAll<HTMLElement>('#vpause [data-s]').forEach((b) => b.classList.toggle('on', +b.dataset.s! === s)); }
 function openPause() { paused = true; $('#vpause').hidden = false; input.menuMode = true; input.releasePointer(); }
-function closePause() { paused = false; $('#vpause').hidden = true; input.menuMode = false; }
+function closePause() { paused = false; $('#vpause').hidden = true; input.menuMode = holoView; }
 $('#pausebtn').addEventListener('pointerdown', (e) => { e.stopPropagation(); openPause(); });
+// menus à la manette : pause et écran de gouverneur
+const nav = new PadNav({
+  root: () => (!$('#vpause').hidden ? $('#vpause') : panel?.isOpen ? panel.el : null),
+  back: () => { if (!$('#vpause').hidden) closePause(); else panel.close(); },
+  sound: (k) => audio.ui(k),
+});
+input.onNav = (d) => nav.handle(d);
+input.onScroll = (dy) => nav.scroll(dy);
 $('#v-resume').addEventListener('click', closePause);
 document.querySelectorAll<HTMLElement>('#vpause [data-s]').forEach((b) => b.addEventListener('click', () => setSpeed(+b.dataset.s!)));
 document.querySelectorAll<HTMLElement>('#vpause [data-h]').forEach((b) => b.addEventListener('click', () => { hour = +b.dataset.h!; auroraNight = true; }));
 {
   const sel = $<HTMLSelectElement>('#vq');
   for (const p of Object.values(PRESETS)) { const o = document.createElement('option'); o.value = p.id; o.textContent = p.label; sel.appendChild(o); }
-  sel.value = q.id; sel.onchange = () => { saveQuality(sel.value as PresetId); location.reload(); };
+  sel.value = q.id; sel.onchange = () => { saveQuality(sel.value as PresetId); bootSucceeded(); location.reload(); };
   const f = $<HTMLInputElement>('#vfps'); f.onchange = () => ($('#fps').hidden = !f.checked);
 }
 setSpeed(1);
@@ -220,7 +231,7 @@ panel.onClose = () => { audio.holo(false, hq.holoAnchor); holoView = false; holo
 function updatePrompt() {
   const near = !holoView && !paused && player.pos.distanceTo(hq.consolePos) < 1.5;
   const pr = $('#vprompt');
-  if (near) { pr.hidden = false; pr.querySelector('span')!.textContent = 'Écran de gouverneur'; } else pr.hidden = true;
+  if (near) { pr.hidden = false; pr.querySelector('b')!.textContent = input.device === 'gamepad' ? 'B' : 'E'; pr.querySelector('span')!.textContent = 'Écran de gouverneur'; } else pr.hidden = true;
   return near;
 }
 let holoDraw = 0;
@@ -272,7 +283,8 @@ let t = 0, saveAcc = 0;
 function step(dt: number) {
   t += dt;
   input.update(dt);
-  if (input.padPressed && !audio.running) audio.ensure();
+  if (input.padPressed) wake();
+  nav.refresh();
   if (!paused) {
     if (input.wasPressed('pause')) openPause();
     if (input.wasPressed('lamp')) player.lampOn = !player.lampOn;
@@ -288,7 +300,7 @@ function step(dt: number) {
     const lim = 150;
     if (Math.abs(player.pos.x) > lim || Math.abs(player.pos.z) > lim) { player.pos.x = THREE.MathUtils.clamp(player.pos.x, -lim, lim); player.pos.z = THREE.MathUtils.clamp(player.pos.z, -lim, lim); player.body.vel.set(0, 0, 0); }
     if (player.pos.y < terrain.heightAt(player.pos.x, player.pos.z) - 2) player.teleport(new THREE.Vector3(SPAWN.x, spawnY, SPAWN.y), spawnYaw);
-  } else if (input.wasPressed('pause')) closePause();
+  }
   if (freeCam) { camera.position.copy(freeCam.p); camera.up.set(0, 1, 0); camera.lookAt(freeCam.l); }
   applyTime(dt, t);
   hq.update(dt, t, U.uNight.value, camera);
@@ -299,6 +311,9 @@ function step(dt: number) {
   updateSound(dt);
   saveAcc += dt; if (saveAcc > 10) { saveAcc = 0; try { localStorage.setItem(SAVE, JSON.stringify({ hour, day })); } catch { /* */ } }
 }
+// chaque toucher, touche ou bouton de manette relance le son ; le premier démarre la musique
+let woke = false;
+function wake() { audio.ensure(); if (audio.ctx && !woke) { woke = true; audio.startAmbience(U.uNight.value > 0.55 ? 'night' : 'day'); } }
 function frame() {
   requestAnimationFrame(frame);
   timer.update();
@@ -324,7 +339,6 @@ async function boot() {
   $('#loader').classList.add('done');
   frame();
   setTimeout(bootSucceeded, 4000);
-  const wake = () => { audio.ensure(); if (audio.ctx && !(wake as unknown as { done?: boolean }).done) { (wake as unknown as { done?: boolean }).done = true; audio.startAmbience(U.uNight.value > 0.55 ? 'night' : 'day'); } };
   addEventListener('pointerdown', wake, true); addEventListener('keydown', wake, true);
 }
 (window as unknown as { __valley: unknown }).__valley = {

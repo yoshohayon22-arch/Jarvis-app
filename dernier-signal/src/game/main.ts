@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import '../ui/base.css';
 import '../ui/game.css';
-import { loadQuality, saveQuality, PRESETS, isTouchDevice, bootSucceeded, recoveredFromCrash, type PresetId } from '../core/quality';
+import { loadQuality, saveQuality, PRESETS, isTouchDevice, bootSucceeded, recoveredFromCrash, crashedPreset, gpuBlockedHelp, watchContextLoss, type PresetId } from '../core/quality';
 import { createRenderer, acquireContext, Post, FpsMeter } from '../core/post';
 import { texturesReady, setMaxAnisotropy, textureProgress } from '../core/textures';
 import { setMaterialRes, unifyScene } from '../robots/materials';
@@ -18,6 +18,7 @@ import { Hud } from '../ui/hud';
 import { loadSave, writeSave, newSave, clearSave, loadOptions, saveOptions, type SaveData, type Options } from './save';
 import { LOGS, HOLOS, CLUES, OBJECTIVES, ROOMS, MISSION_NAMES } from '../story';
 import { CREW } from '../story/crew';
+import { PadNav, ask, askCancel } from '../ui/padnav';
 
 const $ = <T extends HTMLElement = HTMLElement>(s: string) => document.querySelector(s) as T;
 const $$ = (s: string) => [...document.querySelectorAll<HTMLElement>(s)];
@@ -35,14 +36,14 @@ document.body.dataset.device = isTouchDevice() ? 'touch' : 'keyboard';
 const touch = isTouchDevice();
 const acq = await acquireContext(touch, (n) => { if (n > 1) ($('#loader .msg')).textContent = `En attente de la carte graphique… (essai ${n})`; });
 if ('error' in acq) {
-  ($('#loader .msg')).textContent = 'La carte graphique est inaccessible';
+  ($('#loader .msg')).textContent = 'La 3D est bloquée';
   const err = $('#loader .err'); err.style.display = 'block';
-  err.textContent = 'Diagnostic à envoyer à Claude : ' + acq.error;
+  err.textContent = gpuBlockedHelp() + '  —  Diagnostic : ' + acq.error;
   await new Promise(() => {}); // on s'arrête ici en gardant le diagnostic à l'écran
 }
 const { canvas, gl } = acq as { canvas: HTMLCanvasElement; gl: WebGL2RenderingContext };
 const renderer = createRenderer(canvas, q, gl);
-canvas.addEventListener('webglcontextlost', (e) => { e.preventDefault(); (document.querySelector('#loader') as HTMLElement).classList.remove('done'); ($('#loader .msg')).textContent = 'Contexte graphique perdu — rechargement…'; setTimeout(() => location.reload(), 1500); });
+watchContextLoss(canvas, (msg) => { (document.querySelector('#loader') as HTMLElement).classList.remove('done'); ($('#loader .msg')).textContent = msg; });
 const basePR = Math.min(window.devicePixelRatio || 1, q.pixelRatio);
 renderer.setPixelRatio(basePR * opts.resScale);
 setMaxAnisotropy(Math.min(8, renderer.capabilities.getMaxAnisotropy()));
@@ -401,46 +402,39 @@ function doScan() {
 
 // ---------- menus ----------
 let panelStack: string[] = [];
-let focusIdx = 0;
-function focusables() {
-  const top = panelStack[panelStack.length - 1];
-  return top ? $$(`${top} .f:not([hidden])`).filter((e) => e.offsetParent !== null) : [];
-}
-function setFocus(i: number) {
-  const f = focusables();
-  if (!f.length) return;
-  focusIdx = (i + f.length) % f.length;
-  f.forEach((e, k) => e.classList.toggle('focus', k === focusIdx));
-  if (input.device !== 'touch') f[focusIdx].focus({ preventScroll: false });
-}
+// navigation spatiale à la manette / aux flèches dans le menu du dessus
+const nav = new PadNav({
+  // pendant « Touchez l'écran pour commencer », la manette sert seulement à démarrer
+  root: () => { const top = panelStack[panelStack.length - 1]; return top && !tapGo ? $(top) : null; },
+  back: () => { if (panelStack[panelStack.length - 1] === '#ask') askCancel(); else backPanel(); },
+  sound: (k) => audio.ui(k),
+  focusClass: 'focus',
+});
+function setFocus() { nav.reset(); if (input.device === 'keyboard' && nav.current) nav.current.focus({ preventScroll: true }); }
 function openPanel(sel: string) {
   panelStack.push(sel);
   $(sel).classList.add('show');
   input.menuMode = true; input.releasePointer();
-  input.onNav = (d) => {
-    const f = focusables();
-    if (d === 'back') return backPanel();
-    if (d === 'ok') { f[focusIdx]?.click(); audio.ui('ok'); return; }
-    const el = f[focusIdx];
-    if (el instanceof HTMLInputElement && el.type === 'range' && (d === 'left' || d === 'right')) {
-      el.value = String(+el.value + (d === 'right' ? 1 : -1) * +el.step); el.dispatchEvent(new Event('input')); return;
-    }
-    if (el?.tagName === 'SELECT' && (d === 'left' || d === 'right')) {
-      const s = el as HTMLSelectElement; s.selectedIndex = Math.max(0, Math.min(s.options.length - 1, s.selectedIndex + (d === 'right' ? 1 : -1))); s.dispatchEvent(new Event('change')); return;
-    }
-    setFocus(focusIdx + (d === 'down' || d === 'right' ? 1 : -1)); audio.ui('move');
-  };
-  setTimeout(() => setFocus(0), 30);
+  input.onNav = (d) => { nav.handle(d); if (input.device === 'keyboard') nav.current?.focus({ preventScroll: true }); };
+  input.onScroll = (dy) => nav.scroll(dy);
+  setTimeout(() => setFocus(), 30);
 }
 function backPanel() {
   const top = panelStack.pop();
   if (top) $(top).classList.remove('show');
   audio.ui('back');
   if (top === '#title-menu') { panelStack.push(top); $(top).classList.add('show'); return; }
-  if (!panelStack.length) { input.menuMode = false; input.onNav = null; if (state === 'pause') resume(); }
-  else setTimeout(() => setFocus(0), 30);
+  if (!panelStack.length) { input.menuMode = false; input.onNav = null; nav.set(null); if (state === 'pause') resume(); }
+  else setTimeout(() => setFocus(), 30);
 }
-function closeAllPanels() { for (const p of panelStack) $(p).classList.remove('show'); panelStack = []; input.menuMode = false; input.onNav = null; }
+function closeAllPanels() { for (const p of panelStack) $(p).classList.remove('show'); panelStack = []; input.menuMode = false; input.onNav = null; nav.set(null); }
+/** Confirmation dans le jeu (la fenêtre du navigateur ne se pilote pas à la manette). */
+function confirmIn(text: string, yes: string) {
+  return ask(text, yes, 'Annuler', {
+    open: () => openPanel('#ask'),
+    close: () => { if (panelStack[panelStack.length - 1] === '#ask') { panelStack.pop(); if (!panelStack.length) { input.menuMode = false; input.onNav = null; } else setTimeout(() => setFocus(), 30); } },
+  });
+}
 
 function pause() {
   if (state !== 'play') return;
@@ -464,7 +458,7 @@ $('#btn-quit').onclick = () => { closeAllPanels(); stopStory(); toTitle(); };
 $$('.back').forEach((b) => (b.onclick = () => backPanel()));
 $('#btn-continue').onclick = () => startGame(false);
 $('#btn-govern').onclick = () => { location.href = 'vallee.html'; };
-$('#btn-new').onclick = () => { if (loadSave() && !confirm('Recommencer une nouvelle partie ? La progression actuelle sera effacée.')) return; startGame(true); };
+$('#btn-new').onclick = async () => { if (loadSave() && !(await confirmIn('Recommencer une nouvelle partie ? La progression actuelle sera effacée.', 'Recommencer'))) return; startGame(true); };
 $('#btn-end-continue').onclick = () => {
   closeAllPanels();
   if (zoneNum === 1) { goToZone2(); return; }
@@ -519,7 +513,7 @@ function renderNotebook(tab: string) {
       body.appendChild(d);
     }
   }
-  setTimeout(() => setFocus(0), 30);
+  setTimeout(() => setFocus(), 30);
 }
 function drawMap(cv: HTMLCanvasElement) {
   const g = cv.getContext('2d')!;
@@ -576,10 +570,12 @@ function bindOptions() {
   toggle('#o-voices', 'voices', () => {});
   const sh = $<HTMLSelectElement>('#o-shadows'); sh.value = opts.shadows;
   sh.onchange = () => { opts.shadows = sh.value as 'low' | 'high'; saveOptions(opts); const s = player.headlamp.shadow; s.mapSize.setScalar(opts.shadows === 'low' ? 512 : (q.id === 'equilibre' || q.id === 'econome') ? 1024 : 2048); s.map?.dispose(); s.map = null as unknown as THREE.WebGLRenderTarget; };
-  $('#o-reload').onclick = () => location.reload();
-  $('#o-reset').onclick = () => { if (confirm('Effacer la sauvegarde ?')) { clearSave(); location.reload(); } };
+  $('#o-reload').onclick = () => { bootSucceeded(); location.reload(); };
+  $('#o-reset').onclick = async () => { if (await confirmIn('Effacer la sauvegarde ? Toute la progression sera perdue.', 'Effacer')) { clearSave(); location.reload(); } };
 }
 bindOptions();
+
+function loadSavedPresetLabel(): PresetId { try { const v = localStorage.getItem('dernier-signal:quality') as PresetId | null; return v && v in PRESETS ? v : 'econome'; } catch { return 'econome'; } }
 
 function refreshHints() {
   $$('[data-hint]').forEach((e) => (e.textContent = hud.icon(e.dataset.hint as string)));
@@ -726,7 +722,8 @@ function step(dt: number) {
   t += dt;
   input.update(dt);
   // la manette ne compte pas comme un « geste » pour Safari : on tente quand même de relancer le son
-  if (input.padPressed && !audio.running) audio.ensure();
+  if (input.padPressed) { if (!audio.running) audio.ensure(); padWake?.(); tapGo?.(); }
+  if (panelStack.length) nav.refresh();
   soundCheck -= dt;
   if (soundCheck <= 0) { soundCheck = 0.5; updateSoundHint(); }
 
@@ -828,7 +825,7 @@ async function boot() {
   frame();
   // lancement réussi après quelques secondes de rendu stable
   setTimeout(bootSucceeded, 4000);
-  if (recoveredFromCrash) setTimeout(() => hud.toast('Mode économe activé', 'Le lancement précédent n\'a pas abouti. Tu peux remonter la qualité dans Options.'), 1500);
+  if (recoveredFromCrash) setTimeout(() => hud.toast('Mode économe activé', crashedPreset ? `Le réglage « ${PRESETS[crashedPreset].label} » demandait trop de mémoire à cet appareil : il passe à « ${PRESETS[loadSavedPresetLabel()].label} » au prochain lancement.` : 'Le lancement précédent n\'a pas abouti. Tu peux remonter la qualité dans Options.'), 1500);
   let ambienceStarted = false;
   // chaque toucher / touche relance le son s'il a été coupé (connexion d'une manette, appel, veille…)
   const wake = () => {
@@ -836,18 +833,22 @@ async function boot() {
     if (!ambienceStarted && audio.ctx) { ambienceStarted = true; if (state === 'title') audio.startAmbience('menu'); }
   };
   addEventListener('pointerdown', wake, true); addEventListener('keydown', wake, true); addEventListener('touchend', wake, true);
+  padWake = wake;
   document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') audio.ensure(); });
   if (location.hash === '#go') { history.replaceState(null, '', location.pathname); toTitleThen(true); }
   else if (location.hash === '#new') { history.replaceState(null, '', location.pathname); save = newSave(); api.flags = save.flags; writeSave(save); toTitleThen(true); }
   else toTitle();
 }
+let padWake: (() => void) | null = null;
+let tapGo: (() => void) | null = null;
 function toTitleThen(fresh: boolean) {
   toTitle();
   if (fresh) {
     // après un rechargement « nouvelle partie », un geste est requis pour le son (Safari)
     $('#tap').classList.add('show');
-    const go = () => { $('#tap').classList.remove('show'); removeEventListener('pointerdown', go); removeEventListener('keydown', go); startGame(false); };
+    const go = () => { tapGo = null; $('#tap').classList.remove('show'); removeEventListener('pointerdown', go); removeEventListener('keydown', go); startGame(false); };
     addEventListener('pointerdown', go); addEventListener('keydown', go);
+    tapGo = go;
   }
 }
 // outils de test automatisé : simulation accélérée sans rendu

@@ -85,7 +85,7 @@ export class Post {
       c.aoRadius = 0.45; c.distanceFalloff = 1.0; c.intensity = 2.6;
       c.color = new THREE.Color(0x05070c);
       c.gammaCorrection = false;
-      c.halfRes = q.ao === 'performance';
+      c.halfRes = q.ao === 'performance' || !!q.aoHalf;
       this.ao.setQualityMode(q.ao === 'performance' ? 'Performance' : 'Medium');
       this.composer.addPass(this.ao);
     }

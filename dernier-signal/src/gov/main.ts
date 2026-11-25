@@ -1,7 +1,7 @@
 // Prototype du mode gouverneur (étape 2 du document « civilisation »).
 import * as THREE from 'three';
 import './gov.css';
-import { loadQuality, isTouchDevice, bootSucceeded } from '../core/quality';
+import { loadQuality, isTouchDevice, bootSucceeded, gpuBlockedHelp, watchContextLoss } from '../core/quality';
 import { acquireContext, createRenderer, Post } from '../core/post';
 import { texturesReady } from '../core/textures';
 import { setMaterialRes } from '../robots/materials';
@@ -9,6 +9,7 @@ import { CompactRobot } from '../robots/compact';
 import { BUILDINGS, DECISIONS, GROUPS, LATER, RES, RES_ORDER, SUMMARY_SLIDES, type BuildingId, type GroupId, type Line } from './content';
 import { Sim, BEACON, clamp } from './sim';
 import { World, heightAt } from './world';
+import { PadNav, PadReader, ask, askOpen, askRoot, askCancel, hidePadFocusOnPointer } from '../ui/padnav';
 
 const $ = <T extends HTMLElement = HTMLElement>(s: string) => document.querySelector(s) as T;
 const $$ = (s: string) => [...document.querySelectorAll<HTMLElement>(s)];
@@ -19,9 +20,10 @@ const q = loadQuality();
 setMaterialRes(q.textureRes);
 const touch = isTouchDevice();
 const acq = await acquireContext(touch, () => {});
-if ('error' in acq) { $('#loader .msg').textContent = 'La carte graphique est inaccessible'; const e = $('#loader .err'); e.style.display = 'block'; e.textContent = acq.error; await new Promise(() => {}); }
+if ('error' in acq) { $('#loader .msg').textContent = 'La 3D est bloquée'; const e = $('#loader .err'); e.style.display = 'block'; e.textContent = gpuBlockedHelp() + '  —  Diagnostic : ' + acq.error; await new Promise(() => {}); }
 const { canvas, gl } = acq as { canvas: HTMLCanvasElement; gl: WebGL2RenderingContext };
 const renderer = createRenderer(canvas, q, gl);
+watchContextLoss(canvas, (msg) => { $('#loader').classList.remove('done'); $('#loader .msg').textContent = msg; });
 renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, q.pixelRatio));
 renderer.shadowMap.enabled = q.id !== 'econome';
 const scene = new THREE.Scene();
@@ -214,11 +216,11 @@ function openPanel(kind: string) {
       <button class="act" data-m="save">Sauvegarder</button> <button class="act" data-m="new">Nouvelle fondation</button> <button class="act" data-m="title">Écran titre du jeu</button>
       <h3>Commandes</h3><p class="hist">Doigt : glisser pour déplacer la vue, pincer pour zoomer, tourner à deux doigts pour pivoter, toucher un bâtiment pour le gérer.</p>
       <p class="hist">Souris : glisser (déplacer), clic droit glissé (pivoter), molette (zoom). Clavier : ZQSD / WASD, R et T pour pivoter, Espace pour la pause, 1 à 4 pour la vitesse.</p>
-      <p class="hist">Manette : stick gauche (déplacer), stick droit (pivoter, zoomer), A (choisir au centre), B (annuler), LB / RB (bâtiments), gâchettes (vitesse), X (conseil), Y (relations).</p>`);
+      <p class="hist">Manette : stick gauche (déplacer), stick droit (pivoter, zoomer), A (choisir au centre), B (annuler), LB / RB (bâtiments), Y (tourner le bâtiment à placer, sinon relations), gâchettes (vitesse), X (conseil), Select (chefs), Start (menu). Dans les fenêtres : croix ou stick pour choisir, A pour valider, B pour fermer, stick droit pour faire défiler.</p>`);
     $$('[data-m]').forEach((b) => b.addEventListener('click', () => {
       const m = b.dataset.m;
       if (m === 'save') { save(); note('Partie sauvegardée'); }
-      if (m === 'new' && confirm('Recommencer une nouvelle fondation ?')) { localStorage.removeItem(SAVE); location.hash = 'new'; location.reload(); }
+      if (m === 'new') ask('Recommencer une nouvelle fondation ? La civilisation actuelle sera effacée.', 'Recommencer').then((ok) => { if (ok) { localStorage.removeItem(SAVE); location.hash = 'new'; location.reload(); } });
       if (m === 'title') { save(); location.href = 'index.html'; }
     }));
   }
@@ -436,39 +438,56 @@ addEventListener('keydown', (e) => {
 });
 addEventListener('keyup', (e) => keys.delete(e.code));
 
-const padPrev: boolean[] = [];
 let buildCursor = 0;
+const pad = new PadReader();
+hidePadFocusOnPointer();
+// menus et fenêtres à la manette : la croix ou le stick choisit, A valide, B ferme
+function navRoot(): HTMLElement | null {
+  const a = askRoot(); if (a) return a;
+  if (!$('#bilan').hidden) return $('#bilan');
+  if (!$('#summary').hidden) return $('#summary');
+  if (!$('#memory').hidden) return $('#memory');
+  if (!$('#council').hidden) return $('#council .options').hidden ? $('#council') : $('#council .options');
+  if (!$('#start').hidden) return $('#start');
+  if (!$('#panel').hidden) return $('#panel');
+  if (!$('#info').hidden) return $('#info');
+  return null;
+}
+const nav = new PadNav({
+  root: navRoot,
+  back: (root) => {
+    if (askOpen()) askCancel();
+    else if (root.id === 'panel') $('#panel').hidden = true;
+    else if (root.id === 'info') closeInfo();
+    else if (root.id === 'memory' || root.id === 'summary') root.querySelector<HTMLElement>('.skip')?.click();
+  },
+});
 function pollPad(dt: number) {
-  const gp = [...(navigator.getGamepads?.() ?? [])].find((g) => g && g.connected);
-  if (!gp) return;
-  const ax = (i: number) => Math.abs(gp.axes[i] ?? 0) > 0.15 ? gp.axes[i] : 0;
-  const pressed = (i: number) => { const v = !!gp.buttons[i]?.pressed; const was = padPrev[i]; padPrev[i] = v; return v && !was; };
-  if (ax(0) || ax(1) || ax(2) || ax(3)) document.body.classList.add('pad');
+  const root = navRoot();
+  const { down, ax } = pad.read(dt, root ? (e) => nav.handle(e) : undefined);
+  if (!pad.gp) return;
+  if (ax.some((v) => v) || down.size) document.body.classList.add('pad');
+  if (root) { nav.refresh(); if (ax[3]) nav.scroll(ax[3] * Math.abs(ax[3]) * 900 * dt); return; }
+  nav.set(null);
+  if (!sim) return;
+  const pressed = (i: number) => down.has(i);
   if (!modal) {
-    pan(-ax(0) * 900 * dt, -ax(1) * 900 * dt);
-    cam.yaw -= ax(2) * 1.8 * dt; zoom(Math.exp(ax(3) * 1.2 * dt));
+    pan(-ax[0] * 900 * dt, -ax[1] * 900 * dt);
+    cam.yaw -= ax[2] * 1.8 * dt; zoom(Math.exp(ax[3] * 1.2 * dt));
     if (placing) movePlacing(cam.target.x, cam.target.z);
   }
-  if (pressed(0)) { if (modal) { const o = $('#council .options'); if (!$('#council').hidden && o.hidden) ($('#council .dialog')).click(); else if (!$('#memory').hidden) ($('#memory .skip')).click(); else if (!$('#summary').hidden) ($('#summary .skip')).click(); } else if (placing) confirmPlacing(); else tapAt(innerWidth / 2, innerHeight / 2); }
-  if (pressed(1)) { if (placing) cancelPlacing(); else if (!$('#panel').hidden) $('#panel').hidden = true; else closeInfo(); }
-  if (pressed(2) && !modal) openPanel('council');
-  if (pressed(3) && !modal) openPanel('relations');
+  if (modal) return;
+  if (pressed(0)) { if (placing) confirmPlacing(); else tapAt(innerWidth / 2, innerHeight / 2); }
+  if (pressed(1) && placing) cancelPlacing();
+  if (pressed(2)) openPanel('council');
+  if (pressed(3)) { if (placing) { placing.rot += Math.PI / 4; movePlacing(placing.x, placing.z); } else openPanel('relations'); }
+  if (pressed(8)) openPanel('leaders');
   const ids = (Object.keys(BUILDINGS) as BuildingId[]);
-  if ((pressed(4) || pressed(5)) && !modal) { buildCursor = (buildCursor + (padPrev[5] ? 1 : ids.length - 1)) % ids.length; const id = ids[buildCursor]; buildTab = BUILDINGS[id].group; if (sim.unlocked(id) && sim.canAfford(id)) startPlacing(id); else { renderBuild(); note(BUILDINGS[id].name, sim.unlocked(id) ? 'Ressources insuffisantes' : BUILDINGS[id].unlock); } }
+  if (pressed(4) || pressed(5)) { buildCursor = (buildCursor + (pressed(5) ? 1 : ids.length - 1)) % ids.length; const id = ids[buildCursor]; buildTab = BUILDINGS[id].group; if (placing) cancelPlacing(); if (sim.unlocked(id) && sim.canAfford(id)) startPlacing(id); else { renderBuild(); note(BUILDINGS[id].name, sim.unlocked(id) ? 'Ressources insuffisantes' : BUILDINGS[id].unlock); } }
   if (pressed(6)) setSpeed(speed === 4 ? 2 : speed === 2 ? 1 : 0);
   if (pressed(7)) setSpeed(speed === 0 ? 1 : speed === 1 ? 2 : 4);
-  if (pressed(9) && !modal) openPanel('menu');
-  // options du conseil à la manette : croix directionnelle + A
-  if (modal && !$('#council .options').hidden) {
-    const opts = $$('#council .opt');
-    if (pressed(12) || pressed(14)) { padSel = (padSel + opts.length - 1) % opts.length; }
-    if (pressed(13) || pressed(15)) { padSel = (padSel + 1) % opts.length; }
-    opts.forEach((o, i) => o.classList.toggle('sel', i === padSel)); opts.forEach((o, i) => { o.style.borderColor = i === padSel ? '#ffd36a' : ''; });
-    if (gp.buttons[0]?.pressed && !padA) { padA = true; opts[padSel]?.click(); }
-    if (!gp.buttons[0]?.pressed) padA = false;
-  }
+  if (pressed(9)) openPanel('menu');
 }
-let padSel = 0, padA = false;
 
 // ---------- boucle ----------
 function onResize() {
@@ -519,6 +538,7 @@ function step(dt: number) {
     world.syncAgents(sim, dt, t, modal ? 0 : speed, { forges: 0, racines: emotion('racines') });
     r12.update(dt, t);
   } else {
+    pollPad(dt);
     // écran d'accueil : la caméra tourne lentement au-dessus de la vallée
     cam.yaw += dt * 0.04; placeCamera();
     world.setTime(21, false, t, cam.target);
@@ -549,7 +569,7 @@ function resume() {
   try { const j = localStorage.getItem(SAVE); if (j) return begin(Sim.load(j), false); } catch { /* */ }
   newFoundation();
 }
-$('#btn-found').addEventListener('click', () => { if (hasSave() && !confirm('Une civilisation existe déjà. La remplacer par une nouvelle fondation ?')) return; localStorage.removeItem(SAVE); newFoundation(); });
+$('#btn-found').addEventListener('click', async () => { if (hasSave() && !(await ask('Une civilisation existe déjà. La remplacer par une nouvelle fondation ?', 'Remplacer'))) return; localStorage.removeItem(SAVE); newFoundation(); });
 $('#btn-resume').addEventListener('click', resume);
 ($('#btn-resume')).hidden = !hasSave();
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden' && sim) save(); });

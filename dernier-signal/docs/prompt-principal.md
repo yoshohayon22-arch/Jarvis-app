@@ -1,5 +1,7 @@
 # Projet : « DERNIER SIGNAL » — jeu d'aventure-exploration spatial en 3D (navigateur)
 
+> **Mise à jour** : pour l'acte 2, `docs/prompt-acte2-complet.md` fait foi. Les « deux fins » (section 6) sont retirées : le jeu ne se termine plus. La musique (section 9) reste dans l'acte 1 seulement ; l'acte 2 n'a que les sons du monde. R-12 parle dans l'acte 2 (voix robotique).
+
 Tu vas construire avec moi un jeu 3D jouable dans le navigateur, sur iPad (Safari) en priorité, et aussi sur ordinateur. Je m'appelle Yosh, je ne suis pas développeur : explique-moi simplement ce que tu fais, en français, et arrête-toi aux points de validation indiqués plus bas pour me montrer le résultat avant de continuer.
 
 Objectif n°1 : **le rendu le plus réaliste possible dans un navigateur**. Chaque décision technique doit servir la qualité visuelle, sans faire tomber le jeu sous 30 images par seconde sur iPad.

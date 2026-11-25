@@ -1,5 +1,7 @@
 # Plan court · le quartier général de R-12
 
+> **Mise à jour** : l'étape 3 du QG est intégrée au plan de l'acte 2 (`docs/plan-acte2.md`) : atelier des Forgés à l'étape 8, recharge (avancer jusqu'au matin, réactivation après « hors service ») à l'étape 5, personnalisation de R-12 à l'étape 5.
+
 Référence : `prompt-civilisation.md`, partie 4.
 
 **Emplacement** : dans la plaine, à l'est de la balise, à la place de la petite capsule actuelle, qu'il remplace (c'est la même épave). Nez tourné vers l'ouest : le hublot du cockpit regarde la balise et la forêt. La tranchée part vers l'est.

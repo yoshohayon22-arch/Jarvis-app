@@ -1,5 +1,7 @@
 # « DERNIER SIGNAL » : partie 2, la civilisation (le cœur du jeu)
 
+> **Mise à jour (acte 2 complet)** : `docs/prompt-acte2-complet.md` fait désormais foi pour tout l'acte 2. Principaux changements : **plus aucune fin** (la section 8 « Les fins » est supprimée, le jeu continue sans limite), **pas de musique** dans l'acte 2 (sons du monde seulement), **R-12 parle** (voix robotique), **trois clans vaëls** qui encerclent R-12 à l'arrivée, **humains dans un bunker sous la balise** dirigés par un ancien du premier équipage, factions humaines qui **naissent plus tard**, **générations**, **saisons**, **meute**, **six pouvoirs**, **plusieurs sauvegardes**. Les parties ci-dessous restent valables quand elles ne contredisent pas ce document.
+
 Ce document complète le prompt principal et le prompt des missions. Il **change la structure du jeu** : l'aventure dans la station et l'épave devient l'**acte 1**, et la plus grande partie du jeu se passe sur la planète, où R-12 devient le **gouverneur** d'une civilisation qu'il fait naître. Lis-le en entier avant de toucher au code, puis propose-moi un plan de mise à jour du projet.
 
 L'ambiance s'inspire de séries de survie politique comme *The 100* : des clans qui se méfient les uns des autres, des ressources rares, des alliances fragiles, des décisions difficiles sans bonne réponse. Ne reprends **aucun** nom, personnage, lieu ou élément propre à cette série : tout doit être original.
@@ -117,7 +119,9 @@ Ajoute à chaque zone de l'acte 1 une **mécanique propre** :
 - **Les humains** : c'est le plus difficile dans un navigateur, surtout sur iPad. Ne cherche pas un réalisme photographique des visages, qui tomberait dans la « vallée de l'étrange ». Vise des humains **réalistes stylisés** : bonnes proportions, tenues et matières très détaillées, capuches, casques, masques respiratoires ou visières selon les situations, éclairage cinématographique, animations naturelles. Si tu peux utiliser des personnages **CC0** de qualité (vérifie la licence) et des animations libres, propose-le-moi.
 - Beaucoup d'habitants à l'écran : utilise des niveaux de détail (LOD) agressifs et l'instanciation, avec des personnages détaillés seulement en gros plan (conseil, dialogues).
 
-## 8. Les fins
+## 8. Les fins (supprimées)
+
+> ⟶ *Supprimé par `prompt-acte2-complet.md` : le jeu ne se termine jamais, il n'y a plus de fins ni d'écran final. Texte d'origine conservé pour mémoire.*
 
 Fins de gouvernance, calculées selon l'état de la civilisation à la fin de l'ère 4 (paix, confiance entre les groupes, liberté des Forgés, survie des clans, choix moraux) :
 - **La Fédération** : les trois espèces vivent ensemble, R-12 se retire et laisse un conseil commun gouverner. Fin lumineuse.
@@ -281,7 +285,7 @@ Plusieurs repères en même temps :
 
 ## 11. Ce qui reste inchangé
 
-Tout le reste du document de civilisation : les trois espèces et leurs groupes, les crises, les saisons, les souvenirs de l'équipage aux grandes décisions, les fins de gouvernance, et le bouton « Gouverner » sur l'écran titre (qui lance maintenant directement R-12 dans la vallée).
+Tout le reste du document de civilisation : les trois espèces et leurs groupes, les crises, les saisons, les souvenirs de l'équipage aux grandes décisions (rares, voir `prompt-acte2-complet.md`), ~~les fins de gouvernance~~ (supprimées), et le bouton « Gouverner » sur l'écran titre (qui lance maintenant directement R-12 dans la vallée).
 
 ## 12. Organisation
 

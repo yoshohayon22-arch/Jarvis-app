@@ -1,5 +1,7 @@
 # Plan de refonte · la vallée et le gouvernement par R-12
 
+> **Mise à jour** : la suite de la vallée suit `docs/plan-acte2.md`. La musique de la vallée est retirée (acte 2 sans musique) et les fins de l'étape 5 sont supprimées.
+
 Référence : `docs/prompt-civilisation.md`, partie 3 (elle remplace la vue du dessus et l'interface du prototype).
 
 ## Ce qu'on garde du prototype

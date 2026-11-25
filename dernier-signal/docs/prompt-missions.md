@@ -1,5 +1,7 @@
 # « DERNIER SIGNAL » : les missions du jeu
 
+> **Mise à jour** : la mission 25 (« Répondre / Rester ») et les fins sont supprimées (`prompt-acte2-complet.md`). La place des missions 18 à 24 dans le nouvel acte 2 est une question ouverte (voir `plan-acte2.md`, question 2). La vérité sur la balise est précisée : c'est un **héritage** qui cherche un successeur capable de faire vivre ensemble des êtres différents, et la tempête de débris a été déclenchée quand l'ancien du premier équipage a voulu s'emparer de ses cristaux.
+
 Ce document complète le prompt principal du projet. Il décrit **toutes les missions**, dans l'ordre, pour les trois zones. Utilise-le comme référence pour le level design, l'histoire, les énigmes et les moments visuels forts. Garde exactement l'ordre et l'esprit des missions ; tu peux ajuster les détails de mise en œuvre si un point pose un problème technique, mais préviens-moi.
 
 Pour chaque mission, implémente : l'**objectif** affiché à l'écran (court), le **marqueur en losange** vers l'objectif, l'**énigme ou le danger**, le **morceau d'histoire** révélé, la **récompense**, et le **moment visuel fort** (caméra, lumière, musique) qui doit marquer le joueur. Ajoute un **point de contrôle** au début de chaque mission.

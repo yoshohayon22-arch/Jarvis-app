@@ -1,5 +1,7 @@
 # Dernier Signal · Plan général (mis à jour avec le document « civilisation »)
 
+> **Mise à jour** : l'acte 2 suit maintenant `docs/prompt-acte2-complet.md` et son plan `docs/plan-acte2.md`. Plus de fins de gouvernance ni de choix « Répondre / Rester » : le jeu continue sans limite. L'ouverture de l'acte 2 est l'encerclement de R-12 par les Vaëls autour de la capsule écrasée.
+
 Référence : `docs/prompt-principal.md`, `docs/prompt-missions.md`, `docs/prompt-civilisation.md`.
 En cas de contradiction, le document civilisation fait foi, y compris pour l'ordre des étapes.
 

@@ -59,7 +59,15 @@ Référence : `docs/prompt-acte2-complet.md` (il fait foi). Chaque étape se ter
 
 **Étape 13** · Équilibrage, performances sur iPad, finitions.
 
-## Questions
+## Décisions prises
+
+- **Q1 · B** : les six pouvoirs d'abord dans la vallée (R-12 les a tous dès le début de l'acte 2) ; leur obtention dans l'acte 1 viendra plus tard.
+- **Q2 · A** : les anciennes missions 18 à 24 deviennent des lieux à explorer dans l'acte 2 (campement, grotte d'Ilse, entrée de la balise).
+- **Q3 · A** : l'ancien s'appelle **Aldric Moreau** ; il est le **père du Dr Ilan Moreau**, qui dort aussi dans le bunker.
+- **Q4 · A** : voix de R-12 enregistrée avec ElevenLabs, rendue robotique dans le jeu ; l'effet diminue au fil des ères.
+- **Q5 · B** : une saison = 4 jours, une année = 12 jours (2 h de jeu à ×1).
+
+## Questions (posées avant les décisions ci-dessus)
 
 **Q1 · Les pouvoirs.** Le document renvoie à `docs/prompt-pouvoirs-r12.md` et dit qu'ils sont obtenus dans l'acte 1, mais ce fichier n'existe pas et le jeu n'a encore aucun pouvoir.
 - **A** · Tu m'envoies ce document, et je l'intègre (acte 1 compris).

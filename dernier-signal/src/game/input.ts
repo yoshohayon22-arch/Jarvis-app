@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import type { NavEvent, NavDir } from '../ui/padnav';
+import { readPad, type NavEvent, type NavDir } from '../ui/padnav';
 
 // Commandes unifiées : clavier + souris, manette (Xbox / PlayStation), écran tactile.
 // Le dernier mode utilisé détermine les icônes d'aide affichées.
@@ -175,8 +175,7 @@ export class Input {
   }
 
   private pollGamepad(dt: number) {
-    const pads = navigator.getGamepads?.() ?? [];
-    const gp = [...pads].find((p) => p && p.connected);
+    const gp = readPad();
     if (!gp) return;
     const dz = (v: number) => (Math.abs(v) < 0.16 ? 0 : (v - Math.sign(v) * 0.16) / 0.84);
     const lx = dz(gp.axes[0] ?? 0), ly = dz(gp.axes[1] ?? 0), rx = dz(gp.axes[2] ?? 0), ry = dz(gp.axes[3] ?? 0);
@@ -220,7 +219,7 @@ export class Input {
   }
 
   rumble(strong = 0.5, weak = 0.3, ms = 120) {
-    const gp = [...(navigator.getGamepads?.() ?? [])].find((p) => p && p.connected) as (Gamepad & { vibrationActuator?: { playEffect: (t: string, o: object) => Promise<unknown> } }) | undefined;
+    const gp = readPad() as (Gamepad & { vibrationActuator?: { playEffect: (t: string, o: object) => Promise<unknown> } }) | undefined;
     gp?.vibrationActuator?.playEffect('dual-rumble', { duration: ms, strongMagnitude: strong, weakMagnitude: weak }).catch(() => {});
   }
 

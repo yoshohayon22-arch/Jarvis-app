@@ -11,7 +11,7 @@ import { texturesReady, setMaxAnisotropy } from '../core/textures';
 import { setMaterialRes } from '../robots/materials';
 import { Physics } from '../world/physics';
 import { Input } from '../game/input';
-import { PadNav } from '../ui/padnav';
+import { PadNav, bindPadStatus } from '../ui/padnav';
 import { Player } from '../game/player';
 import { ThirdPersonCamera } from '../game/camera';
 import { AudioEngine } from '../audio/audio';
@@ -200,6 +200,7 @@ const nav = new PadNav({
   sound: (k) => audio.ui(k),
 });
 input.onNav = (d) => nav.handle(d);
+bindPadStatus($('#padstatus'));
 input.onScroll = (dy) => nav.scroll(dy);
 $('#v-resume').addEventListener('click', closePause);
 document.querySelectorAll<HTMLElement>('#vpause [data-s]').forEach((b) => b.addEventListener('click', () => setSpeed(+b.dataset.s!)));

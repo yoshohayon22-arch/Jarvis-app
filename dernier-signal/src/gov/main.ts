@@ -9,7 +9,7 @@ import { CompactRobot } from '../robots/compact';
 import { BUILDINGS, DECISIONS, GROUPS, LATER, RES, RES_ORDER, SUMMARY_SLIDES, type BuildingId, type GroupId, type Line } from './content';
 import { Sim, BEACON, clamp } from './sim';
 import { World, heightAt } from './world';
-import { PadNav, PadReader, ask, askOpen, askRoot, askCancel, hidePadFocusOnPointer } from '../ui/padnav';
+import { PadNav, PadReader, padStatus, ask, askOpen, askRoot, askCancel, hidePadFocusOnPointer } from '../ui/padnav';
 
 const $ = <T extends HTMLElement = HTMLElement>(s: string) => document.querySelector(s) as T;
 const $$ = (s: string) => [...document.querySelectorAll<HTMLElement>(s)];
@@ -216,6 +216,7 @@ function openPanel(kind: string) {
       <button class="act" data-m="save">Sauvegarder</button> <button class="act" data-m="new">Nouvelle fondation</button> <button class="act" data-m="title">Écran titre du jeu</button>
       <h3>Commandes</h3><p class="hist">Doigt : glisser pour déplacer la vue, pincer pour zoomer, tourner à deux doigts pour pivoter, toucher un bâtiment pour le gérer.</p>
       <p class="hist">Souris : glisser (déplacer), clic droit glissé (pivoter), molette (zoom). Clavier : ZQSD / WASD, R et T pour pivoter, Espace pour la pause, 1 à 4 pour la vitesse.</p>
+      <p class="hist" style="color:#ffd36a">${padStatus()}</p>
       <p class="hist">Manette : stick gauche (déplacer), stick droit (pivoter, zoomer), A (choisir au centre), B (annuler), LB / RB (bâtiments), Y (tourner le bâtiment à placer, sinon relations), gâchettes (vitesse), X (conseil), Select (chefs), Start (menu). Dans les fenêtres : croix ou stick pour choisir, A pour valider, B pour fermer, stick droit pour faire défiler.</p>`);
     $$('[data-m]').forEach((b) => b.addEventListener('click', () => {
       const m = b.dataset.m;

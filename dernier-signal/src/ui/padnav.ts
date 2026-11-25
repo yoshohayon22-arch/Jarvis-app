@@ -3,6 +3,55 @@
 // direction choisie (grilles, onglets, listes). A valide, B revient, LB / RB changent
 // d'onglet, le stick droit fait défiler les textes longs.
 
+// ---------- lecture sûre de la manette ----------
+// Selon l'endroit où tourne le jeu (application Claude, Safari, cadre d'une autre page), la lecture
+// peut être refusée ou rester vide : on ne plante jamais, et on garde la raison pour l'afficher.
+const seen = new Map<number, Gamepad>();
+export const padState = { api: typeof navigator !== 'undefined' && 'getGamepads' in navigator, blocked: '', events: 0, name: '', buttons: 0, lastPress: '' };
+if (typeof window !== 'undefined') {
+  addEventListener('gamepadconnected', (e) => { const g = (e as GamepadEvent).gamepad; seen.set(g.index, g); padState.events++; padState.name = g.id; });
+  addEventListener('gamepaddisconnected', (e) => { seen.delete((e as GamepadEvent).gamepad.index); });
+}
+let announced = false, warned = false;
+/** Petit message en bas de l'écran (connexion de la manette). */
+function badge(text: string, ms = 3500) {
+  injectStyle();
+  let b = document.getElementById('padbadge');
+  if (!b) { b = document.createElement('div'); b.id = 'padbadge'; document.body.appendChild(b); }
+  b.textContent = text; b.classList.add('show');
+  clearTimeout((b as unknown as { _t: number })._t);
+  (b as unknown as { _t: number })._t = window.setTimeout(() => b!.classList.remove('show'), ms);
+}
+/** Affiche l'état de la manette dans un élément, tant qu'il est à l'écran. */
+export function bindPadStatus(el: HTMLElement) {
+  const tick = () => { if (el.getClientRects().length) el.textContent = padStatus(); };
+  setInterval(tick, 400); tick();
+}
+/** La première manette branchée, ou null. */
+export function readPad(): Gamepad | null {
+  let list: (Gamepad | null)[] = [];
+  try { list = padState.api ? [...navigator.getGamepads()] : []; padState.blocked = ''; }
+  catch (e) { padState.blocked = (e as Error).name || 'refus'; }
+  let gp = list.find((p) => p && p.connected) ?? null;
+  if (!gp && padState.blocked) gp = [...seen.values()].find((p) => p.connected) ?? null; // repli : objet reçu à la connexion
+  if (gp && !announced) { announced = true; badge('🎮 Manette détectée : ' + gp.id.slice(0, 40)); }
+  if (!gp && padState.blocked && !warned) { warned = true; badge('🎮 La page qui affiche le jeu refuse l’accès à la manette (' + padState.blocked + ')', 7000); }
+  if (gp) {
+    padState.name = gp.id; padState.buttons = gp.buttons.length;
+    const i = gp.buttons.findIndex((b) => b.pressed);
+    if (i >= 0) padState.lastPress = 'bouton ' + i;
+  }
+  return gp;
+}
+/** Texte lisible sur l'état de la manette (pour les menus). */
+export function padStatus(): string {
+  if (!padState.api) return 'Manette : ce navigateur ne donne pas accès aux manettes.';
+  const gp = readPad();
+  if (padState.blocked && !gp) return `Manette : accès refusé par la page qui affiche le jeu (${padState.blocked}).`;
+  if (!gp) return padState.events ? 'Manette : connectée puis perdue. Appuie sur un bouton.' : 'Manette : rien de détecté. Appuie sur un bouton de la manette (A ou ✕).';
+  return `Manette détectée : ${gp.id.slice(0, 48)} · ${gp.buttons.length} boutons${padState.lastPress ? ' · dernier appui : ' + padState.lastPress : ''}`;
+}
+
 export type NavDir = 'up' | 'down' | 'left' | 'right';
 export type NavEvent = NavDir | 'ok' | 'back' | 'prev' | 'next';
 
@@ -14,6 +63,9 @@ function injectStyle() {
   const s = document.createElement('style');
   s.textContent = `
   body.padnav .pad-focus { outline: 3px solid #ffd36a !important; outline-offset: 3px; box-shadow: 0 0 0 6px rgba(255,211,106,.22), 0 0 18px rgba(255,211,106,.35) !important; }
+  #padbadge { position: fixed; left: 50%; bottom: max(18px, env(safe-area-inset-bottom)); transform: translate(-50%, 20px); z-index: 10000; padding: 9px 16px; border-radius: 10px; background: rgba(6,14,22,.9); border: 1px solid rgba(255,211,106,.6); color: #ffe9b0; font: 600 15px Barlow, system-ui, sans-serif; opacity: 0; pointer-events: none; transition: .35s; max-width: calc(100vw - 32px); text-align: center; }
+  #padbadge.show { opacity: 1; transform: translate(-50%, 0); }
+  .padstatus { margin: 12px 0 0; font: 14px/1.4 Barlow, system-ui, sans-serif; color: #ffd36a; }
   .askbox { position: fixed; inset: 0; z-index: 9999; display: none; align-items: center; justify-content: center; background: rgba(2,6,10,.62); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); }
   .askbox.show { display: flex; }
   .askbox .in { max-width: min(480px, calc(100vw - 32px)); padding: 24px 26px; border: 1px solid rgba(140,220,255,.45); border-radius: 14px; background: rgba(6,14,22,.94); color: #e8f4fa; font: 17px/1.45 Barlow, system-ui, sans-serif; text-align: center; }
@@ -220,7 +272,7 @@ export class PadReader {
   gp: Gamepad | null = null;
   /** Appelé pour les événements de menu ; renvoie la liste des boutons pressés à cette image. */
   read(dt: number, nav?: (e: NavEvent) => void) {
-    const gp = [...(navigator.getGamepads?.() ?? [])].find((p) => p && p.connected) ?? null;
+    const gp = readPad();
     this.gp = gp;
     const down = new Set<number>();
     if (!gp) return { down, ax: [0, 0, 0, 0] };

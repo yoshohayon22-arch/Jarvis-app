@@ -18,7 +18,7 @@ import { Hud } from '../ui/hud';
 import { loadSave, writeSave, newSave, clearSave, loadOptions, saveOptions, type SaveData, type Options } from './save';
 import { LOGS, HOLOS, CLUES, OBJECTIVES, ROOMS, MISSION_NAMES } from '../story';
 import { CREW } from '../story/crew';
-import { PadNav, ask, askCancel } from '../ui/padnav';
+import { PadNav, ask, askCancel, bindPadStatus } from '../ui/padnav';
 
 const $ = <T extends HTMLElement = HTMLElement>(s: string) => document.querySelector(s) as T;
 const $$ = (s: string) => [...document.querySelectorAll<HTMLElement>(s)];
@@ -576,6 +576,8 @@ function bindOptions() {
 bindOptions();
 
 function loadSavedPresetLabel(): PresetId { try { const v = localStorage.getItem('dernier-signal:quality') as PresetId | null; return v && v in PRESETS ? v : 'econome'; } catch { return 'econome'; } }
+
+bindPadStatus($('#padstatus'));
 
 function refreshHints() {
   $$('[data-hint]').forEach((e) => (e.textContent = hud.icon(e.dataset.hint as string)));

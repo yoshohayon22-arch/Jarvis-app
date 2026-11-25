@@ -20,6 +20,8 @@ import { Grass } from './grass';
 import { Flora } from './flora';
 import { River } from './water';
 import { Beacon, Motes, Shafts } from './props';
+import { HQBase } from './hq';
+import { Holo3D, HoloPanel, loadCiv } from './holo';
 
 const $ = <T extends HTMLElement = HTMLElement>(s: string) => document.querySelector(s) as T;
 const stage = (s: string) => (window as unknown as { __stage?: (s: string) => void }).__stage?.(s) ?? (($('#loader .msg').textContent = s + '…'));
@@ -72,6 +74,11 @@ scene.add(flora.group);
 const grass = new Grass(terrain.dataTex, P.grass, P.patch); scene.add(grass);
 const river = new River(terrain); scene.add(river);
 const beacon = new Beacon(terrain, ph, q.textureRes); scene.add(beacon.group, beacon.ruins);
+stage('Quartier général');
+const hq = new HQBase(terrain, ph, q.textureRes, true); hq.addColliders(ph);
+scene.add(hq.group, hq.outside);
+const civ = loadCiv();
+const holo = new Holo3D(civ); holo.position.copy(hq.holoAnchor); holo.rotation.y = Math.PI / 2; scene.add(holo);
 const motes = new Motes(P.motes); (motes.material as THREE.ShaderMaterial).uniforms.tData.value = terrain.dataTex; scene.add(motes);
 const forestTrunks = flora.trunks.filter((p) => terrain.sample(terrain.f.forest, p.x, p.z) > 0.5).sort((a, b) => a.distanceTo(new THREE.Vector3(SPAWN.x, 0, SPAWN.y)) - b.distanceTo(new THREE.Vector3(SPAWN.x, 0, SPAWN.y)));
 const shafts = new Shafts(forestTrunks, P.shafts); scene.add(shafts);
@@ -193,6 +200,29 @@ document.querySelectorAll<HTMLElement>('#vpause [data-h]').forEach((b) => b.addE
 }
 setSpeed(1);
 
+// ---------- écran de gouverneur ----------
+const panel = new HoloPanel(civ, {
+  get: () => ({ hour, day, speed }),
+  setSpeed: (v) => setSpeed(v),
+  skip: (h) => { hour += h; while (hour >= 24) { hour -= 24; day++; } envHour = -99; },
+});
+let holoView = false;
+function openHolo() {
+  holoView = true; panel.open(); input.menuMode = true; input.releasePointer();
+  holo.visible = false; // le panneau interactif remplace l'image projetée
+  const a = hq.holoAnchor;
+  freeCam = { p: new THREE.Vector3(a.x + 2.35, a.y + 0.05, a.z), l: a.clone().add(new THREE.Vector3(0, 0.05, 0)) };
+  $('#vprompt').hidden = true;
+}
+panel.onClose = () => { holoView = false; holo.visible = true; freeCam = null; input.menuMode = false; tp.snap(player.pos, tp.yaw); };
+function updatePrompt() {
+  const near = !holoView && !paused && player.pos.distanceTo(hq.consolePos) < 1.5;
+  const pr = $('#vprompt');
+  if (near) { pr.hidden = false; pr.querySelector('span')!.textContent = 'Écran de gouverneur'; } else pr.hidden = true;
+  return near;
+}
+let holoDraw = 0;
+
 // ---------- boucle ----------
 function onResize() {
   renderer.setSize(innerWidth, innerHeight, false);
@@ -209,13 +239,14 @@ function step(dt: number) {
   if (!paused) {
     if (input.wasPressed('pause')) openPause();
     if (input.wasPressed('lamp')) player.lampOn = !player.lampOn;
+    if (updatePrompt() && input.wasPressed('interact')) openHolo();
     hour += (dt * speed) / HOUR_SECONDS;
     if (hour >= 24) { hour -= 24; day++; auroraNight = Math.random() < 0.6; }
-    tp.update(dt, input.look, player.pos, player.body.vel, player.visUp, ph, t);
+    if (!holoView) tp.update(dt, input.look, player.pos, player.body.vel, player.visUp, ph, t);
     player.update(dt, t, input, tp.frame, tp.yaw, tp.forward(), ph, audio);
     // la caméra ne passe pas sous le sol
     const gy = terrain.heightAt(camera.position.x, camera.position.z) + 0.45;
-    if (camera.position.y < gy) camera.position.y = gy;
+    if (camera.position.y < gy && !hq.contains(camera.position)) camera.position.y = gy;
     // limites de la tranche
     const lim = 150;
     if (Math.abs(player.pos.x) > lim || Math.abs(player.pos.z) > lim) { player.pos.x = THREE.MathUtils.clamp(player.pos.x, -lim, lim); player.pos.z = THREE.MathUtils.clamp(player.pos.z, -lim, lim); player.body.vel.set(0, 0, 0); }
@@ -223,6 +254,10 @@ function step(dt: number) {
   } else if (input.wasPressed('pause')) closePause();
   if (freeCam) { camera.position.copy(freeCam.p); camera.up.set(0, 1, 0); camera.lookAt(freeCam.l); }
   applyTime(dt, t);
+  hq.update(dt, t, U.uNight.value, camera);
+  holo.update(dt, t, player.pos.distanceTo(hq.consolePos) < 4 || holoView);
+  { const want = Math.atan2(camera.position.x - holo.position.x, camera.position.z - holo.position.z); let d = want - holo.rotation.y; d = Math.atan2(Math.sin(d), Math.cos(d)); holo.rotation.y += d * Math.min(1, dt * 3); }
+  holoDraw -= dt; if (holoDraw < 0) { holoDraw = 0.25; holo.draw(t, hour, day); }
   audio.updateListener(camera);
   saveAcc += dt; if (saveAcc > 10) { saveAcc = 0; try { localStorage.setItem(SAVE, JSON.stringify({ hour, day })); } catch { /* */ } }
 }
@@ -255,7 +290,7 @@ async function boot() {
   addEventListener('pointerdown', wake, true); addEventListener('keydown', wake, true);
 }
 (window as unknown as { __valley: unknown }).__valley = {
-  step, player, tp, terrain, flora, camera, renderer,
+  step, player, tp, terrain, flora, camera, renderer, hq, openHolo, panel,
   setHour: (h: number) => { hour = h; envHour = -99; }, setSpeed, U,
   simulate: (sec: number, keys: string[] = []) => { const k = (input as unknown as { keys: Set<string> }).keys; keys.forEach((c) => k.add(c)); for (let i = 0; i < sec * 30; i++) { step(1 / 30); input.endFrame(); } keys.forEach((c) => k.delete(c)); },
   render: () => post.render(1 / 60),

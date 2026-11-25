@@ -2,7 +2,7 @@
 // et les effets d'ambiance : pollen, lucioles, rayons de lumière sous la canopée.
 import * as THREE from 'three';
 import { U } from './atmosphere';
-import { Terrain, BEACON, SPAWN } from './terrain';
+import { Terrain, BEACON, SPAWN, inHQZone } from './terrain';
 import { rng } from './noise';
 import { pbr } from '../core/textures';
 import type { Physics } from '../world/physics';
@@ -78,7 +78,7 @@ export class Beacon {
     for (let i = 0; i < 11; i++) {
       const a = (i / 11) * Math.PI * 2 + 0.2, r = 16 + R() * 3;
       const x = BEACON.x + Math.cos(a) * r, z = BEACON.y + Math.sin(a) * r;
-      if (Math.hypot(x - SPAWN.x, z - SPAWN.y) < 6) continue;
+      if (Math.hypot(x - SPAWN.x, z - SPAWN.y) < 6 || inHQZone(x, z, 3)) continue;
       const h = 1.2 + R() * 4.5;
       const p = add(pillarGeo(h, R), x, z, -0.8, (R() - 0.5) * 0.25, a, (R() - 0.5) * 0.2);
       const g = new THREE.Mesh(new THREE.BoxGeometry(0.07, h * 0.55, 0.04), this.glyphs); g.position.set(0, h * 0.42, 0.7); p.add(g);
@@ -94,19 +94,6 @@ export class Beacon {
     const ag = new THREE.Mesh(new THREE.TorusGeometry(4.9, 0.05, 4, 40, Math.PI), this.glyphs); ag.position.z = 1.12; arch.add(ag);
     for (let i = 0; i < 14; i++) { const a = R() * Math.PI * 2, r = 9 + R() * 24; add(new THREE.BoxGeometry(1.5 + R() * 2, 0.35, 1.5 + R() * 2), BEACON.x + Math.cos(a) * r, BEACON.y + Math.sin(a) * r, -0.12, (R() - 0.5) * 0.15, R() * 3, (R() - 0.5) * 0.15); }
 
-    // capsule de R-12, écrasée dans la plaine, sol brûlé
-    const cap = new THREE.Group();
-    const white = new THREE.MeshStandardMaterial({ color: 0xc9c5bd, roughness: 0.55, metalness: 0.35 });
-    const burnt = new THREE.MeshStandardMaterial({ color: 0x15110f, roughness: 0.9, metalness: 0.3 });
-    const shell = new THREE.Mesh(new THREE.LatheGeometry([[0, 2.4], [0.7, 2.2], [1.25, 1.2], [1.4, 0.2], [1.35, 0], [0, 0]].map(([a, b]) => new THREE.Vector2(a, b)), 28), white);
-    shell.castShadow = true; shell.receiveShadow = true; cap.add(shell);
-    const ring = new THREE.Mesh(new THREE.CylinderGeometry(1.46, 1.46, 0.3, 28), burnt); ring.position.y = 0.1; cap.add(ring);
-    const cx = SPAWN.x + 9, cz = SPAWN.y + 7;
-    cap.position.set(cx, t.heightAt(cx, cz) - 0.5, cz); cap.rotation.set(0.9, 0.6, 0.4);
-    ruins.add(cap);
-    ph.add([cx - 1.5, t.heightAt(cx, cz) - 1, cz - 1.5], [cx + 1.5, t.heightAt(cx, cz) + 1.6, cz + 1.5], { camera: false });
-    const scorch = new THREE.Mesh(new THREE.CircleGeometry(4.5, 32), new THREE.MeshStandardMaterial({ color: 0x050403, roughness: 1, transparent: true, opacity: 0.4, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2 }));
-    scorch.rotation.x = -Math.PI / 2; scorch.position.set(cx - 1.5, t.heightAt(cx - 1.5, cz - 1) + 0.05, cz - 1); ruins.add(scorch);
   }
   ruins!: THREE.Group;
 

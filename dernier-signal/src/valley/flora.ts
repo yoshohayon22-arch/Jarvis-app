@@ -4,7 +4,7 @@
 import * as THREE from 'three';
 import { rng, fbm, smooth } from './noise';
 import { U } from './atmosphere';
-import { Terrain, SIZE, BEACON, SPAWN } from './terrain';
+import { Terrain, SIZE, BEACON, SPAWN, inHQZone } from './terrain';
 import { pbr } from '../core/textures';
 import type { Physics } from '../world/physics';
 
@@ -243,7 +243,7 @@ export class Flora {
     const occupied: { x: number; z: number; r: number }[] = [];
     const free = (x: number, z: number, r: number) => occupied.every((o) => Math.hypot(o.x - x, o.z - z) > o.r + r);
     const inWater = (x: number, z: number) => { const ri = t.riverInfo(x, z); return ri.d < ri.width / 2 + 2; };
-    const nearSpawn = (x: number, z: number, r: number) => Math.hypot(x - SPAWN.x, z - SPAWN.y) < r || Math.hypot(x - BEACON.x, z - BEACON.y) < 14;
+    const nearSpawn = (x: number, z: number, r: number) => Math.hypot(x - SPAWN.x, z - SPAWN.y) < r || Math.hypot(x - BEACON.x, z - BEACON.y) < 14 || inHQZone(x, z, r > 10 ? 4 : 0);
     const slope = (x: number, z: number) => 1 - t.normalAt(x, z).y;
     const bark = barkMat(res);
     const leafA = leafTextures(3, 168), leafB = leafTextures(11, 200), leafC = leafTextures(23, 280);

@@ -20,3 +20,39 @@ body.valley canvas#c { position: fixed; inset: 0; width: 100vw; height: 100vh; d
 #loader.done { opacity: 0; pointer-events: none; }
 #loader .err { color: #ff9a80; display: none; max-width: 80vw; }
 #fps { position: fixed; right: 12px; top: 12px; font: 600 13px 'Barlow Condensed', sans-serif; }
+
+/* invite d'interaction */
+#vprompt { position: fixed; left: 50%; bottom: calc(max(20px, env(safe-area-inset-bottom)) + 120px); transform: translateX(-50%); display: flex; align-items: center; gap: 10px; padding: 8px 14px; border-radius: 12px; background: rgba(4,14,18,.7); border: 1px solid rgba(120,230,255,.4); color: #c8f6ff; font: 600 16px 'Barlow Condensed', sans-serif; letter-spacing: .05em; pointer-events: none; }
+#vprompt b { display: inline-flex; align-items: center; justify-content: center; min-width: 26px; height: 26px; border-radius: 7px; background: #7ae6ff; color: #02161c; }
+body[data-device="touch"] #vprompt b { display: none; }
+/* écran holographique de gouverneur */
+#holo { position: fixed; inset: 0; z-index: 25; display: flex; align-items: center; justify-content: center; padding: max(14px, env(safe-area-inset-top)) 14px max(14px, env(safe-area-inset-bottom)); pointer-events: auto; }
+#holo .hp { position: relative; width: min(860px, 96vw); max-height: 88vh; overflow: auto; padding: 16px 18px 20px; border-radius: 14px; color: #bff4ff;
+  background: linear-gradient(180deg, rgba(10,60,80,.42), rgba(4,30,44,.55)); border: 1px solid rgba(120,230,255,.55);
+  box-shadow: 0 0 40px rgba(80,220,255,.25), inset 0 0 60px rgba(80,220,255,.12); backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px); text-shadow: 0 0 8px rgba(120,230,255,.6); }
+#holo.in .hp { animation: holoIn .55s cubic-bezier(.2,.8,.2,1); }
+@keyframes holoIn { from { opacity: 0; transform: scaleY(.04) scaleX(.6); filter: brightness(3); } 60% { opacity: 1; transform: scaleY(1.02) scaleX(1); } }
+#holo .scan { position: absolute; inset: 0; pointer-events: none; border-radius: 14px; background: repeating-linear-gradient(0deg, rgba(120,230,255,.07) 0 1px, transparent 1px 4px); animation: holoScan 8s linear infinite; }
+@keyframes holoScan { to { background-position: 0 240px; } }
+#holo .hh { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; font-family: 'Barlow Condensed', sans-serif; letter-spacing: .12em; }
+#holo .hh b { font-size: 22px; }
+#holo .hh .ht { flex: 1; font-size: 14px; opacity: .8; letter-spacing: .06em; }
+#holo button { font: 600 15px 'Barlow Condensed', sans-serif; letter-spacing: .06em; color: #bff4ff; background: rgba(120,230,255,.08); border: 1px solid rgba(120,230,255,.45); border-radius: 9px; min-height: 42px; padding: 0 14px; cursor: pointer; }
+#holo button.on { background: rgba(120,230,255,.85); color: #02161c; text-shadow: none; }
+#holo button:disabled { opacity: .4; }
+#holo .hx { min-width: 44px; }
+#holo .tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+#holo .hb { display: flex; flex-direction: column; gap: 8px; }
+#holo .row, #holo .card { opacity: 0; animation: holoItem .45s ease-out forwards; animation-delay: calc(var(--d, 0) * 70ms + 120ms); }
+@keyframes holoItem { from { opacity: 0; transform: translateX(-12px); } to { opacity: 1; transform: none; } }
+#holo .row { display: grid; grid-template-columns: minmax(120px, 34%) 1fr 46px; align-items: center; gap: 10px; font-size: 15px; }
+#holo .row em { font-style: normal; text-align: right; font-variant-numeric: tabular-nums; }
+#holo .bar { display: block; height: 9px; border-radius: 5px; background: rgba(120,230,255,.15); overflow: hidden; }
+#holo .bar b { display: block; height: 100%; box-shadow: 0 0 10px currentColor; }
+#holo .card { padding: 10px 12px; border-radius: 10px; border: 1px solid rgba(120,230,255,.3); background: rgba(120,230,255,.05); }
+#holo .card b { font: 600 18px 'Barlow Condensed', sans-serif; letter-spacing: .05em; }
+#holo .card p { margin: 6px 0 0; font-size: 14px; line-height: 1.45; }
+#holo .card p em { font-style: normal; opacity: .65; text-transform: uppercase; font-size: 12px; letter-spacing: .08em; margin-right: 4px; }
+#holo .card.obj b { color: #ffe2a0; }
+#holo .btns { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+#holo .wide { margin-top: 10px; width: 100%; }

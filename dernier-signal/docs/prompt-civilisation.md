@@ -4,6 +4,8 @@ Ce document complète le prompt principal et le prompt des missions. Il **change
 
 L'ambiance s'inspire de séries de survie politique comme *The 100* : des clans qui se méfient les uns des autres, des ressources rares, des alliances fragiles, des décisions difficiles sans bonne réponse. Ne reprends **aucun** nom, personnage, lieu ou élément propre à cette série : tout doit être original.
 
+> **Mise à jour (quartier général)** : la partie 4, à la fin de ce fichier, remplace la section « La base de R-12 » (partie 3, §4).
+>
 > **Mise à jour (refonte du mode gouverneur et de la planète)** : la partie 3, à la fin de ce fichier, **remplace** tout ce qui la contredit ici, en particulier la vue du dessus (§3), l'interface du mode gouverneur (§9), le bouton « Gouverner » (§10, qui lance désormais R-12 directement dans la vallée) et l'organisation du travail (§11). Les sections remplacées sont signalées par ⟶.
 
 ---
@@ -208,6 +210,8 @@ Chaque espèce a **son propre village dans son territoire**, relié aux autres p
 
 ## 4. La base de R-12
 
+⟶ *Remplacé par la partie 4 (le quartier général de R-12 : la capsule écrasée).*
+
 - R-12 a **sa propre base**, près de la balise : un abri construit dans une épave, qui s'agrandit au fil du jeu.
 - Au centre, son **écran holographique de gouverneur**. C'est là qu'on consulte :
   - les **ressources** (énergie, métal, nourriture, eau, médicaments, cristaux de la balise) et leur évolution ;
@@ -288,3 +292,56 @@ Tout le reste du document de civilisation : les trois espèces et leurs groupes,
 5. Affrontements, Forgés, humains, puis les ères.
 
 À chaque étape : le lien GitHub Pages, ce qui est fait, ce qui reste, et les problèmes éventuels. Si un choix n'est pas couvert ici, proposer 2 ou 3 options courtes.
+
+
+---
+
+# Partie 4 · Le quartier général de R-12 (la capsule écrasée)
+
+Cet ajout porte **uniquement** sur le quartier général de R-12 et ne modifie rien d'autre du jeu. Il **remplace** la section « La base de R-12 » (l'abri dans une épave près de la balise). En cas de conflit avec l'existant, demander avant de changer.
+
+## 1. Le concept
+
+Le quartier général de R-12, c'est **la capsule de descente de l'Asterion** avec laquelle il est arrivé sur la planète à la fin de l'acte 1. Elle s'est écrasée **au centre de la vallée, entre les villages des différentes espèces**. R-12 en a fait sa maison et son poste de gouverneur.
+
+Cohérence avec l'acte 1 : la cinématique de descente (mission 17) doit se terminer **exactement à cet endroit**, et l'épave que le joueur voit en arrivant dans l'acte 2 est la même capsule. Elle doit être assez grande pour contenir plusieurs salles : une capsule de sauvetage lourde d'environ 15 à 20 mètres de long.
+
+## 2. L'extérieur
+
+- **Écrasée et encastrée dans le sol** : longue tranchée de terre retournée derrière elle, rochers projetés, coque fendue et cabossée, plaques arrachées, parachute ou débris de bouclier thermique accrochés aux alentours.
+- **Pas envahie par la végétation** : la nature autour reste comme dans le reste de la vallée ; l'herbe repousse simplement autour de la tranchée avec le temps.
+- Au début de l'acte 2 : coque noircie par la rentrée atmosphérique, petite fumée, quelques étincelles, lumières de bord qui clignotent.
+- Matières très soignées : métal PBR (Poly Haven) avec brûlures, rayures, traces de chaleur, vitres fêlées, marquages de l'Asterion à moitié effacés.
+- La nuit, la lumière intérieure filtre par les hublots et la porte ; une lumière de signalisation cyan tourne lentement au sommet. Le QG est **reconnaissable de loin**, de jour comme de nuit.
+- Les **chemins** entre les villages convergent peu à peu vers le QG.
+
+## 3. L'intérieur : trois salles visitables
+
+On entre avec R-12 par le sas, sans écran de chargement (transition fluide). Éclairage de secours au début, puis éclairage réparé. Ambiance cockpit et soute de vaisseau : confiné mais lisible, câbles, panneaux, écrans.
+
+- **Le poste de commandement** (ancien cockpit) : au centre, l'**écran holographique de gouverneur** projeté au-dessus de la console : ressources, tableau des relations, fiches des habitants et des chefs, objectifs du moment et ère en cours, contrôle du temps, convocation du conseil. Par le grand hublot, on voit la vallée. Hologramme soigné : lumière cyan, lignes de balayage, éléments qui apparaissent en s'animant, reflets sur les parois.
+- **L'atelier des Forgés** (ancienne soute) : établi, bras articulés, pièces récupérées, étincelles de soudure. R-12 y **construit les Forgés** : il choisit un modèle, apporte les matériaux, le robot s'assemble sur l'établi, s'allume et sort de la capsule. Les nouveaux modèles se débloquent au fil des ères.
+- **La salle de recharge** : alcôve avec socle. R-12 s'y branche pour se reposer : la caméra se pose, la lumière baisse, le temps peut **avancer jusqu'au matin**, et la partie est **sauvegardée**. Bruit de la pluie ou du vent sur la coque, lumières de la vallée par un hublot.
+
+## 4. L'évolution à chaque ère
+
+- **Ère 1 · Survie** : capsule abîmée, lumières de secours, fumée, intérieur encombré.
+- **Ère 2 · Fondation** : coque réparée, éclairage rétabli, premières extensions en pièces d'épaves (auvent, panneaux d'énergie, antenne).
+- **Ère 3 · Expansion** : extensions construites par les espèces dans leur style (passerelle tressée vaël, tour d'énergie des Forgés, module humain), une place autour du QG.
+- **Ère 4 · Unité ou rupture** : cœur lumineux d'une ville commune, ou poste isolé et fortifié.
+Chaque changement est visible de l'extérieur comme de l'intérieur.
+
+## 5. Les visiteurs
+
+- Les habitants **viennent au QG** : un chef qui veut négocier, un habitant qui demande de l'aide, un messager porteur d'une mauvaise nouvelle, un groupe en colère devant la porte.
+- Quand quelqu'un attend R-12, une petite alerte s'affiche ; le visiteur attend devant le sas ou dans le poste de commandement.
+- Ces visites utilisent les dialogues existants (à choix et libres).
+- Le **conseil** peut se tenir près du QG aux premières ères, avant la construction du lieu de conseil commun.
+
+## 6. Organisation
+
+1. Mettre à jour les documents et montrer un plan court.
+2. Extérieur et poste de commandement au niveau de qualité de la vallée. **Stop** : captures de l'extérieur de jour et de nuit, et de l'intérieur.
+3. Atelier des Forgés, salle de recharge, évolution par ère, visiteurs.
+
+Vérifier à chaque étape que rien de ce qui existait ne s'est cassé.

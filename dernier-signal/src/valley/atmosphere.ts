@@ -99,7 +99,7 @@ vec3 skyColor(vec3 d, bool stars) {
       float m = dot(d, md);
       if (m > cos(rad * 1.6)) {
         float disc = smoothstep(cos(rad), cos(rad * 0.94), m);
-        vec3 tng = normalize(cross(md, vec3(0,1,0))); vec3 bt = cross(tng, md);
+        vec3 refU = abs(md.y) > 0.98 ? vec3(1.0, 0.0, 0.0) : vec3(0.0, 1.0, 0.0); vec3 tng = normalize(cross(md, refU)); vec3 bt = cross(tng, md);
         vec2 q = vec2(dot(d - md, tng), dot(d - md, bt)) / rad;
         float z = sqrt(max(0.0, 1.0 - dot(q, q)));
         vec3 nrm = normalize(q.x * tng + q.y * bt + z * md);

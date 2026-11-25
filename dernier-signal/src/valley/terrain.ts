@@ -11,7 +11,14 @@ const CELL = SIZE / (N - 1);
 /** Tracé de la rivière (du nord au sud-ouest), le long de l'orée de la forêt. */
 export const RIVER_PTS: [number, number][] = [[-8, -175], [-20, -120], [-38, -72], [-40, -30], [-52, 12], [-78, 56], [-104, 100], [-128, 175]];
 export const BEACON = new THREE.Vector2(26, 6);
-export const SPAWN = new THREE.Vector2(40, 34);
+/** Quartier général : la capsule écrasée (axe est-ouest, nez à l'ouest vers la balise). */
+export const HQ = { x: 55, z: 38, half: 9 };
+export const SPAWN = new THREE.Vector2(HQ.x + 0.5, HQ.z + 6.5);
+/** Coordonnées locales du QG (x vers l'est, z vers le sud) → vrai si dans la zone de l'épave et de la tranchée. */
+export function inHQZone(x: number, z: number, m = 0) {
+  const lx = x - HQ.x, lz = z - HQ.z;
+  return (lx > -HQ.half - 7 - m && lx < HQ.half + 46 + m && Math.abs(lz) < 7 + m) || Math.hypot(lx, lz) < 12 + m;
+}
 
 export interface Field {
   h: Float32Array; forest: Float32Array; wet: Float32Array; grass: Float32Array; river: Float32Array; water: Float32Array;
@@ -76,6 +83,7 @@ export class Terrain {
       h[idx(i, j)] = y;
     }
     this.erode(h);
+    this.carveHQ(h);
     // lit de la rivière et berges
     for (let j = 0; j < N; j++) for (let i = 0; i < N; i++) {
       const x = -SIZE / 2 + i * CELL, z = -SIZE / 2 + j * CELL;
@@ -100,9 +108,41 @@ export class Terrain {
       grass[k] = Math.max(0, (1 - smooth(0.45, 0.8, slope)) * (1 - fm * 0.85) * (1 - smooth(0.3, 0.8, river[k])) * (0.55 + 0.45 * smooth(-0.2, 0.4, fbm(x * 0.04, z * 0.04 + 5, 3))));
       const db = Math.hypot(x - BEACON.x, z - BEACON.y);
       if (db < 9) grass[k] *= smooth(5, 9, db);
+      // tranchée de l'épave : terre retournée, l'herbe repousse sur les bords
+      const lx = x - HQ.x, lz = z - HQ.z;
+      if (lx > -HQ.half - 6 && lx < HQ.half + 48) grass[k] *= smooth(2.5, 6.5, Math.abs(lz) - (lx > HQ.half ? 0 : 1));
+      if (Math.hypot(lx, lz) < 8) grass[k] *= smooth(4.5, 8, Math.hypot(lx * 0.6, lz));
     }
     return { h, forest, wet, grass, river, water };
   }
+
+  /** Plate-forme sous la capsule, tranchée derrière elle, bourrelets et terre poussée devant le nez. */
+  private carveHQ(h: Float32Array) {
+    const gi = Math.round(toGrid(HQ.x)), gj = Math.round(toGrid(HQ.z));
+    const h0 = h[idx(gi, gj)];
+    this.hqGround = h0;
+    for (let j = 0; j < N; j++) for (let i = 0; i < N; i++) {
+      const x = -SIZE / 2 + i * CELL, z = -SIZE / 2 + j * CELL, k = idx(i, j);
+      const lx = x - HQ.x, lz = z - HQ.z, az = Math.abs(lz);
+      // plate-forme (raccord doux)
+      const pad = smooth(14, 7, Math.hypot(Math.max(0, Math.abs(lx) - HQ.half), az * 1.2));
+      let y = lerp(h[k], h0, pad);
+      // tranchée vers l'est
+      if (lx > HQ.half - 2 && lx < HQ.half + 46) {
+        const u = (lx - (HQ.half - 2)) / 48;
+        const depth = 1.25 * Math.pow(1 - u, 0.6) + 0.15;
+        const w = 3.4 * (1 - u * 0.4);
+        y = lerp(y, Math.min(y, h0 + 0.1), smooth(w + 5, w, az) * 0.9);
+        y -= depth * smooth(w, w * 0.25, az) * smooth(0, 0.06, u);
+        y += 0.9 * (1 - u) * Math.exp(-((az - w - 1.3) ** 2) / 1.6) * (0.75 + 0.25 * Math.sin(lx * 0.9));
+      }
+      // terre poussée devant le nez
+      const nose = Math.hypot((lx + HQ.half + 2.5) * 0.7, lz * 0.55);
+      y += 1.1 * Math.exp(-nose * nose / 6) * (lx < -HQ.half + 1 ? 1 : 0.3);
+      h[k] = y;
+    }
+  }
+  hqGround = 0;
 
   private slopeAt(h: Float32Array, i: number, j: number) {
     const a = h[idx(Math.max(0, i - 1), j)], b = h[idx(Math.min(N - 1, i + 1), j)];

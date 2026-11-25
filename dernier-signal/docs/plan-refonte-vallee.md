@@ -35,7 +35,7 @@ Une zone d'environ 300 × 300 m : **la plaine de la balise et l'orée de la for�
 
 ## Étape 3 · Base de R-12, construction, premier village
 
-- **Base de R-12** dans une épave près de la balise, avec l'**écran holographique** : ressources, relations, fiches, objectifs, temps, conseil.
+- **Quartier général de R-12** : la capsule de descente écrasée au centre de la vallée (voir `prompt-civilisation.md`, partie 4 et `plan-qg.md`).
 - **Construction holographique** : silhouette cyan ou rouge devant R-12, puis chantier visible où les habitants travaillent ; R-12 aide en maintenant un bouton.
 - **Premier village vaël** (Clan des Racines, maisons dans les arbres) et premiers bâtiments réalistes.
 - **Pluie**, interface minimale en exploration (heure, objectif, alertes).

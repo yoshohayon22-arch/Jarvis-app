@@ -2,7 +2,7 @@ import * as THREE from 'three';
 
 // Collisions simples et robustes : le niveau est fait de boîtes alignées (AABB).
 
-export type Surface = 'metal' | 'grate' | 'concrete';
+export type Surface = 'metal' | 'grate' | 'concrete' | 'grass' | 'dirt';
 
 export interface Collider {
   box: THREE.Box3;

@@ -1,10 +1,14 @@
 import * as THREE from 'three';
+import { SampleBank, STEP_SLICES } from './samples';
+import { Score, type Mood } from './music';
+export type { Mood } from './music';
 
-// Son entièrement généré avec la Web Audio API : nappes d'ambiance, bruitages
-// spatialisés en 3D et voix des journaux (synthèse vocale du navigateur).
+// Son : bruitages enregistrés (banque de sons) spatialisés en 3D, avec repli sur
+// des sons synthétisés tant qu'ils chargent ; musique générative adaptative
+// (music.ts) ; voix des journaux (synthèse vocale du navigateur).
 // Le contexte audio ne démarre qu'après le premier toucher/clic (contrainte Safari).
 
-export type Surface = 'metal' | 'grate' | 'concrete';
+export type Surface = 'metal' | 'grate' | 'concrete' | 'grass' | 'dirt';
 
 export class AudioEngine {
   ctx: AudioContext | null = null;
@@ -14,7 +18,13 @@ export class AudioEngine {
   private reverb!: ConvolverNode;
   private reverbSend!: GainNode;
   private noiseBuf!: AudioBuffer;
-  private ambience: Ambience | null = null;
+  private ambience: Score | null = null;
+  bank: SampleBank | null = null;
+  /** Dossier des sons (relatif à la page). */
+  soundBase = import.meta.env.BASE_URL + 'assets/audio/';
+  /** Sons à charger en premier (ambiances de la scène). */
+  preloadFirst: string[] = [];
+  private lastSlice = new Map<string, number>();
   private loops = new Map<string, { gain: GainNode; stop: () => void; panner?: PannerNode }>();
   volumes = { master: 0.9, music: 0.7, sfx: 0.9 };
 
@@ -37,6 +47,8 @@ export class AudioEngine {
     this.noiseBuf = ctx.createBuffer(1, ctx.sampleRate * 2, ctx.sampleRate);
     const d = this.noiseBuf.getChannelData(0);
     for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+    this.bank = new SampleBank(ctx, this.soundBase);
+    this.bank.load(this.preloadFirst);
     // iOS : jouer un son vide débloque la sortie
     const s = ctx.createBufferSource(); s.buffer = ctx.createBuffer(1, 1, 22050); s.connect(ctx.destination); s.start();
   }
@@ -114,9 +126,41 @@ export class AudioEngine {
     g.gain.exponentialRampToValueAtTime(0.0001, t + a + d);
   }
 
+  /** Joue un son enregistré ; renvoie false s'il n'est pas (encore) chargé. */
+  play(name: string, o: { pos?: THREE.Vector3; vol?: number; rate?: number; offset?: number; dur?: number; wet?: number; ref?: number } = {}) {
+    const buf = this.ctx && this.bank?.get(name);
+    if (!buf || !this.ctx) return false;
+    const ctx = this.ctx, t = ctx.currentTime;
+    const s = ctx.createBufferSource(); s.buffer = buf;
+    s.playbackRate.value = o.rate ?? 1;
+    const g = ctx.createGain(); g.gain.value = o.vol ?? 1;
+    s.connect(g);
+    if (o.dur) {
+      // petit fondu de sortie pour ne pas couper net une tranche
+      g.gain.setValueAtTime(o.vol ?? 1, t + o.dur * 0.75);
+      g.gain.linearRampToValueAtTime(0, t + o.dur);
+      s.start(t, o.offset ?? 0, o.dur);
+    } else s.start(t, o.offset ?? 0);
+    this.out(g, o.pos, o.wet ?? 0.25, o.ref ?? 1.5);
+    return true;
+  }
+
   // ---------- bruitages ----------
   step(surface: Surface, pos?: THREE.Vector3, heavy = 1) {
     if (!this.ctx) return;
+    const key = 'step_' + surface; // le béton de la station garde son pas synthétique
+    const sl = STEP_SLICES[key];
+    if (sl && this.bank?.get(key)) {
+      // tranche au hasard, jamais deux fois la même de suite, hauteur légèrement variée
+      let i = Math.floor(Math.random() * sl.length);
+      if (i === this.lastSlice.get(key)) i = (i + 1) % sl.length;
+      this.lastSlice.set(key, i);
+      const [off, dur, lvl] = sl[i];
+      const base = surface === 'grass' ? 0.75 : surface === 'dirt' ? 0.5 : surface === 'grate' ? 0.4 : 0.45;
+      this.play(key, { pos, vol: Math.min(1.6, base * heavy / Math.max(0.35, lvl)), rate: 0.93 + Math.random() * 0.14, offset: off, dur, wet: surface === 'grass' || surface === 'dirt' ? 0.08 : 0.25 });
+      return;
+    }
+    if (surface === 'grass' || surface === 'dirt') surface = 'concrete';
     const ctx = this.ctx, t = ctx.currentTime;
     const n = this.noise(0.12);
     const f = ctx.createBiquadFilter(); f.type = 'bandpass';
@@ -135,6 +179,7 @@ export class AudioEngine {
 
   land(pos?: THREE.Vector3, power = 1) {
     if (!this.ctx) return;
+    if (this.play('land', { pos, vol: Math.min(1.2, 0.45 * power), rate: 1.05 - Math.min(0.2, power * 0.08) + Math.random() * 0.06, wet: 0.35 })) return;
     const ctx = this.ctx, t = ctx.currentTime;
     const o = ctx.createOscillator(); o.type = 'sine';
     o.frequency.setValueAtTime(140, t); o.frequency.exponentialRampToValueAtTime(45, t + 0.18);
@@ -146,6 +191,7 @@ export class AudioEngine {
 
   jump(pos?: THREE.Vector3) {
     if (!this.ctx) return;
+    if (this.play('jump', { pos, vol: 0.55, rate: 0.95 + Math.random() * 0.1, wet: 0.15 })) return;
     const ctx = this.ctx;
     const n = this.noise(0.15);
     const f = ctx.createBiquadFilter(); f.type = 'highpass'; f.frequency.value = 1200;
@@ -195,6 +241,7 @@ export class AudioEngine {
 
   door(pos: THREE.Vector3, open = true) {
     if (!this.ctx) return;
+    if (this.play('door', { pos, vol: 0.8, rate: open ? 1 : 0.88, wet: 0.5, ref: 2.5 })) return;
     const ctx = this.ctx, t = ctx.currentTime;
     const n = this.noise(1.2);
     const f = ctx.createBiquadFilter(); f.type = 'bandpass'; f.Q.value = 1.2;
@@ -218,6 +265,7 @@ export class AudioEngine {
 
   spark(pos: THREE.Vector3, power = 1) {
     if (!this.ctx) return;
+    if (this.play('spark', { pos, vol: Math.min(1.2, 0.35 + power * 0.6), rate: 0.85 + Math.random() * 0.3, offset: Math.random() * 0.4, wet: 0.3, ref: 2 })) return;
     const ctx = this.ctx, t = ctx.currentTime;
     const n = this.noise(0.4);
     const f = ctx.createBiquadFilter(); f.type = 'highpass'; f.frequency.value = 2500;
@@ -245,6 +293,7 @@ export class AudioEngine {
 
   powerUp() {
     if (!this.ctx) return;
+    if (this.play('powerup', { vol: 0.9, wet: 0.5 })) { this.ambience?.swell(); return; }
     const ctx = this.ctx, t = ctx.currentTime;
     const o = ctx.createOscillator(); o.type = 'sawtooth';
     o.frequency.setValueAtTime(30, t); o.frequency.exponentialRampToValueAtTime(60, t + 2.5);
@@ -294,6 +343,7 @@ export class AudioEngine {
 
   ui(kind: 'move' | 'ok' | 'back' = 'ok') {
     if (!this.ctx) return;
+    if (this.play('ui_' + kind, { vol: kind === 'move' ? 0.35 : 0.5, wet: 0 })) return;
     const ctx = this.ctx, t = ctx.currentTime;
     const o = ctx.createOscillator(); o.type = 'sine';
     o.frequency.value = kind === 'move' ? 1200 : kind === 'ok' ? 1600 : 800;
@@ -302,13 +352,29 @@ export class AudioEngine {
     g.connect(this.sfx);
   }
 
+  /** Projecteur holographique qui s'allume ou s'éteint. */
+  holo(open: boolean, pos?: THREE.Vector3) {
+    if (!this.ctx) return;
+    if (!this.play(open ? 'holo_open' : 'holo_close', { pos, vol: open ? 0.9 : 0.7, wet: 0.4 })) this.beep(open ? 'boot' : 'sad', pos);
+  }
+
   // ---------- boucles (jetpack, vapeur, bourdonnement) ----------
   loop(id: string, kind: 'jet' | 'steam' | 'hum' | 'arc' | 'alarm', pos?: THREE.Vector3, vol = 1) {
     if (!this.ctx || this.loops.has(id)) return;
     const ctx = this.ctx;
     const gain = ctx.createGain(); gain.gain.value = 0;
     const nodes: AudioScheduledSourceNode[] = [];
-    if (kind === 'jet' || kind === 'steam') {
+    const sample = kind === 'jet' ? 'jet' : kind === 'steam' ? 'steam' : '';
+    const sbuf = sample ? this.bank?.get(sample) : undefined;
+    if (sbuf) {
+      const src = ctx.createBufferSource(); src.buffer = sbuf; src.loop = true;
+      const tr = this.bank!.trim(sample)!;
+      src.loopStart = tr[0]; src.loopEnd = tr[1];
+      if (kind === 'steam') { src.loopStart = tr[0] + 0.25; src.loopEnd = Math.max(tr[0] + 0.6, tr[1] - 0.4); }
+      src.playbackRate.value = 0.95 + Math.random() * 0.1;
+      const sg = ctx.createGain(); sg.gain.value = kind === 'jet' ? 0.9 : 0.6;
+      src.connect(sg); sg.connect(gain); src.start(0, tr[0] + Math.random() * 0.5); nodes.push(src);
+    } else if (kind === 'jet' || kind === 'steam') {
       const n = ctx.createBufferSource(); n.buffer = this.noiseBuf; n.loop = true;
       const f = ctx.createBiquadFilter(); f.type = kind === 'jet' ? 'lowpass' : 'highpass';
       f.frequency.value = kind === 'jet' ? 900 : 2600;
@@ -351,75 +417,55 @@ export class AudioEngine {
     this.loops.delete(id);
   }
 
-  // ---------- musique ----------
-  startAmbience(zone: 'station' | 'menu') {
-    if (!this.ctx) return;
-    this.ambience?.stop();
-    this.ambience = new Ambience(this.ctx, this.music, this.reverbSend, this.noiseBuf, zone);
+  /**
+   * Boucle d'un son enregistré (ambiance ou source fixe), pilotée comme les autres
+   * boucles avec setLoop / moveLoop / stopLoop. Sans pos : nappe non spatialisée.
+   * Renvoie false si le son n'est pas encore chargé (on réessaie plus tard).
+   */
+  loopSample(id: string, name: string, pos?: THREE.Vector3, vol = 0, ref = 4) {
+    if (!this.ctx) return false;
+    if (this.loops.has(id)) return true;
+    const buf = this.bank?.get(name);
+    if (!buf) return false;
+    const ctx = this.ctx;
+    const src = ctx.createBufferSource(); src.buffer = buf; src.loop = true;
+    const tr = this.bank!.trim(name)!;
+    src.loopStart = tr[0]; src.loopEnd = tr[1];
+    const gain = ctx.createGain(); gain.gain.value = 0;
+    src.connect(gain);
+    let last: AudioNode = gain;
+    if (pos) { const p = this.panner(pos, ref, 200); p.rolloffFactor = 1; gain.connect(p); last = p; }
+    last.connect(this.sfx);
+    if (pos) { const w = ctx.createGain(); w.gain.value = 0.15; last.connect(w); w.connect(this.reverbSend); }
+    // départ au hasard dans la boucle : deux sons identiques ne se calent pas
+    src.start(0, tr[0] + Math.random() * (tr[1] - tr[0]) * 0.9);
+    this.loops.set(id, { gain, stop: () => { try { src.stop(); } catch { /* */ } }, panner: last instanceof PannerNode ? last : undefined });
+    this.setLoop(id, vol, 1.5);
+    return true;
   }
+
+  // ---------- musique ----------
+  /** Démarre la musique (et, pour la station, son ambiance enregistrée). */
+  startAmbience(zone: Mood) {
+    if (!this.ctx) return;
+    if (this.ambience) { this.ambience.setMood(zone); }
+    else this.ambience = new Score(this.ctx, this.music, zone);
+    this.bed = zone === 'station' ? 'station_amb' : '';
+    this.tickBed();
+  }
+  /** Change l'humeur de la musique (transition douce). */
+  setMood(m: Mood) { if (this.ambience) this.ambience.setMood(m); else this.startAmbience(m); }
   setTension(v: number) { this.ambience?.setTension(v); }
   setPowered(v: boolean) { this.ambience?.setPowered(v); }
-}
 
-/** Nappe spatiale lente : accords suspendus, filtre qui respire, tintements métalliques lointains. */
-class Ambience {
-  private ctx: AudioContext;
-  private out: GainNode;
-  private filter: BiquadFilterNode;
-  private nodes: AudioScheduledSourceNode[] = [];
-  private timer = 0;
-  private powered = false;
-  private dead = false;
-  constructor(ctx: AudioContext, music: GainNode, send: GainNode, noise: AudioBuffer, zone: 'station' | 'menu') {
-    this.ctx = ctx;
-    this.out = ctx.createGain(); this.out.gain.value = 0;
-    this.out.gain.setTargetAtTime(zone === 'menu' ? 0.5 : 0.42, ctx.currentTime, 3);
-    this.filter = ctx.createBiquadFilter(); this.filter.type = 'lowpass'; this.filter.frequency.value = 500; this.filter.Q.value = 0.8;
-    this.filter.connect(this.out); this.out.connect(music);
-    const wet = ctx.createGain(); wet.gain.value = 0.9; this.out.connect(wet); wet.connect(send);
-    // accord : ré mineur suspendu, très grave → froid et métallique
-    const notes = zone === 'menu' ? [73.42, 110, 146.83, 220, 329.63] : [55, 82.41, 110, 164.81, 246.94];
-    notes.forEach((f, i) => {
-      for (const det of [-6, 5]) {
-        const o = ctx.createOscillator(); o.type = i < 2 ? 'sawtooth' : 'triangle';
-        o.frequency.value = f; o.detune.value = det + (Math.random() - 0.5) * 4;
-        const g = ctx.createGain(); g.gain.value = (i < 2 ? 0.05 : 0.035) / (1 + i * 0.3);
-        // respiration lente de chaque voix
-        const lfo = ctx.createOscillator(); lfo.frequency.value = 0.03 + Math.random() * 0.06;
-        const lg = ctx.createGain(); lg.gain.value = g.gain.value * 0.8; lfo.connect(lg); lg.connect(g.gain);
-        o.connect(g); g.connect(this.filter); o.start(); lfo.start(); this.nodes.push(o, lfo);
-      }
-    });
-    const flfo = ctx.createOscillator(); flfo.frequency.value = 0.025;
-    const flg = ctx.createGain(); flg.gain.value = 260; flfo.connect(flg); flg.connect(this.filter.frequency); flfo.start(); this.nodes.push(flfo);
-    // souffle d'air (ventilation)
-    const n = ctx.createBufferSource(); n.buffer = noise; n.loop = true;
-    const nf = ctx.createBiquadFilter(); nf.type = 'bandpass'; nf.frequency.value = 420; nf.Q.value = 0.5;
-    const ng = ctx.createGain(); ng.gain.value = 0.035; n.connect(nf); nf.connect(ng); ng.connect(this.out); n.start(); this.nodes.push(n);
-    this.timer = window.setInterval(() => this.ping(), 4200);
-  }
-  private ping() {
-    if (this.dead || Math.random() < 0.35) return;
-    const ctx = this.ctx, t = ctx.currentTime;
-    const base = [440, 587.33, 659.25, 880, 1174.66][Math.floor(Math.random() * 5)] * (this.powered ? 1 : 0.5);
-    for (const m of [1, 2.76, 5.4]) {
-      const o = ctx.createOscillator(); o.type = 'sine'; o.frequency.value = base * m;
-      const g = ctx.createGain(); g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.025 / m, t + 0.01); g.gain.exponentialRampToValueAtTime(0.0001, t + 3.5 / m);
-      o.connect(g); g.connect(this.out); o.start(t); o.stop(t + 4);
-    }
-  }
-  setTension(v: number) { this.filter.Q.setTargetAtTime(0.8 + v * 6, this.ctx.currentTime, 1); }
-  setPowered(v: boolean) { this.powered = v; this.filter.frequency.setTargetAtTime(v ? 900 : 500, this.ctx.currentTime, 2); }
-  swell() {
-    const t = this.ctx.currentTime;
-    this.filter.frequency.cancelScheduledValues(t);
-    this.filter.frequency.setTargetAtTime(2400, t, 0.8);
-    this.filter.frequency.setTargetAtTime(this.powered ? 900 : 500, t + 4, 3);
-  }
-  stop() {
-    this.dead = true; clearInterval(this.timer);
-    this.out.gain.setTargetAtTime(0, this.ctx.currentTime, 1);
-    setTimeout(() => this.nodes.forEach((n) => { try { n.stop(); } catch { /* */ } }), 5000);
+  /** Ambiance enregistrée de la station : démarre dès que le son est chargé. */
+  private bed = '';
+  private bedTimer = 0;
+  private tickBed() {
+    if (!this.bed) { this.setLoop('bed', 0, 1.5); return; }
+    if (this.loopSample('bed', this.bed, undefined, 0.7)) { this.setLoop('bed', 0.7, 2); return; }
+    clearTimeout(this.bedTimer);
+    this.bedTimer = window.setTimeout(() => this.tickBed(), 500);
   }
 }
 

@@ -14,7 +14,7 @@ import { Input } from '../game/input';
 import { Player } from '../game/player';
 import { ThirdPersonCamera } from '../game/camera';
 import { AudioEngine } from '../audio/audio';
-import { Terrain, SPAWN, BEACON } from './terrain';
+import { Terrain, SPAWN, BEACON, HQ } from './terrain';
 import { U, installHeightFog, withAtmosphere, SkyDome, timeOfDay } from './atmosphere';
 import { Grass } from './grass';
 import { Flora } from './flora';
@@ -108,6 +108,7 @@ const player = new Player(scene, q);
 player.hasJetpack = true; player.hasBoots = true; player.lampOn = false;
 const input = new Input(canvas, $('#touch'));
 const audio = new AudioEngine();
+audio.preloadFirst = ['amb_day', 'amb_night', 'step_grass', 'step_dirt', 'wreck_fire', 'capsule_int', 'step_grate'];
 const tp = new ThirdPersonCamera(camera);
 tp.dist = 4.6;
 const spawnY = terrain.heightAt(SPAWN.x, SPAWN.y);
@@ -208,13 +209,14 @@ const panel = new HoloPanel(civ, {
 });
 let holoView = false;
 function openHolo() {
+  audio.holo(true, hq.holoAnchor);
   holoView = true; panel.open(); input.menuMode = true; input.releasePointer();
   holo.visible = false; // le panneau interactif remplace l'image projetée
   const a = hq.holoAnchor;
   freeCam = { p: new THREE.Vector3(a.x + 2.35, a.y + 0.05, a.z), l: a.clone().add(new THREE.Vector3(0, 0.05, 0)) };
   $('#vprompt').hidden = true;
 }
-panel.onClose = () => { holoView = false; holo.visible = true; freeCam = null; input.menuMode = false; tp.snap(player.pos, tp.yaw); };
+panel.onClose = () => { audio.holo(false, hq.holoAnchor); holoView = false; holo.visible = true; freeCam = null; input.menuMode = false; tp.snap(player.pos, tp.yaw); };
 function updatePrompt() {
   const near = !holoView && !paused && player.pos.distanceTo(hq.consolePos) < 1.5;
   const pr = $('#vprompt');
@@ -222,6 +224,41 @@ function updatePrompt() {
   return near;
 }
 let holoDraw = 0;
+
+// ---------- son : ambiances selon le lieu et l'heure ----------
+const SND = {
+  wreck: new THREE.Vector3(HQ.x + 9.6, 0, HQ.z),
+  beacon: new THREE.Vector3(BEACON.x, terrain.heightAt(BEACON.x, BEACON.y) + 3, BEACON.y),
+  river: new THREE.Vector3(),
+};
+let sndAcc = 0, forestK = 0;
+function updateSound(dt: number) {
+  if (!audio.ctx) return;
+  // le sol sous R-12 : herbe ou terre battue (tranchée, berges, sentiers)
+  const gk = terrain.sample(terrain.f.grass, player.pos.x, player.pos.z);
+  ph.terrainCollider.surface = gk > 0.3 ? 'grass' : 'dirt';
+  // la rivière : la source suit le point de berge le plus proche
+  const ri = terrain.riverInfo(player.pos.x, player.pos.z);
+  const rs = terrain.riverSamples[ri.k];
+  SND.river.set(rs.p.x, rs.level + 0.3, rs.p.y);
+  audio.moveLoop('river', SND.river);
+  sndAcc -= dt; if (sndAcc > 0) return;
+  sndAcc = 0.12;
+  SND.wreck.y = hq.ground + 2.4;
+  const night = U.uNight.value, inside = hq.inside;
+  const out = inside ? 0.22 : 1;
+  forestK += (THREE.MathUtils.clamp(terrain.forestMask(player.pos.x, player.pos.z) * 1.4, 0, 1) - forestK) * 0.15;
+  const bed = (id: string, name: string, v: number) => { audio.loopSample(id, name, undefined, 0); audio.setLoop(id, v, 1.2); };
+  bed('a-day', 'amb_day', (1 - night) * (1 - forestK * 0.7) * 1.4 * out);
+  bed('a-night', 'amb_night', night * (1 - forestK * 0.4) * 1.2 * out);
+  bed('a-forest', 'amb_forest', forestK * (1 - night * 0.5) * 1.3 * out);
+  bed('a-cabin', 'capsule_int', inside ? 0.9 : 0);
+  audio.loopSample('river', 'river', SND.river, 0, 7); audio.setLoop('river', (inside ? 0.25 : 1) * 1.1, 1);
+  audio.loopSample('wreck', 'wreck_fire', SND.wreck, 0, 3); audio.setLoop('wreck', inside ? 0.45 : 1.2, 1);
+  audio.loop('beacon', 'hum', SND.beacon, 0); audio.setLoop('beacon', (0.05 + night * 0.07) * out, 1);
+  audio.setMood(inside || holoView ? 'hq' : night > 0.55 ? 'night' : 'day');
+}
+hq.onSpark = (p) => audio.spark(p, 0.35);
 
 // ---------- boucle ----------
 function onResize() {
@@ -259,6 +296,7 @@ function step(dt: number) {
   { const want = Math.atan2(camera.position.x - holo.position.x, camera.position.z - holo.position.z); let d = want - holo.rotation.y; d = Math.atan2(Math.sin(d), Math.cos(d)); holo.rotation.y += d * Math.min(1, dt * 3); }
   holoDraw -= dt; if (holoDraw < 0) { holoDraw = 0.25; holo.draw(t, hour, day); }
   audio.updateListener(camera);
+  updateSound(dt);
   saveAcc += dt; if (saveAcc > 10) { saveAcc = 0; try { localStorage.setItem(SAVE, JSON.stringify({ hour, day })); } catch { /* */ } }
 }
 function frame() {
@@ -286,11 +324,11 @@ async function boot() {
   $('#loader').classList.add('done');
   frame();
   setTimeout(bootSucceeded, 4000);
-  const wake = () => { audio.ensure(); if (audio.ctx && !(wake as unknown as { done?: boolean }).done) { (wake as unknown as { done?: boolean }).done = true; audio.startAmbience('menu'); } };
+  const wake = () => { audio.ensure(); if (audio.ctx && !(wake as unknown as { done?: boolean }).done) { (wake as unknown as { done?: boolean }).done = true; audio.startAmbience(U.uNight.value > 0.55 ? 'night' : 'day'); } };
   addEventListener('pointerdown', wake, true); addEventListener('keydown', wake, true);
 }
 (window as unknown as { __valley: unknown }).__valley = {
-  step, player, tp, terrain, flora, camera, renderer, hq, openHolo, panel,
+  step, player, tp, terrain, flora, camera, renderer, hq, openHolo, panel, audio,
   setHour: (h: number) => { hour = h; envHour = -99; }, setSpeed, U,
   simulate: (sec: number, keys: string[] = []) => { const k = (input as unknown as { keys: Set<string> }).keys; keys.forEach((c) => k.add(c)); for (let i = 0; i < sec * 30; i++) { step(1 / 30); input.endFrame(); } keys.forEach((c) => k.delete(c)); },
   render: () => post.render(1 / 60),

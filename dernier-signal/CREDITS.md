@@ -27,7 +27,10 @@ Téléchargées via l'API publique (`scripts/fetch-polyhaven.mjs`), recompressé
 | HDRI Studio Small 09 | Poly Haven | https://polyhaven.com/a/studio_small_09 |
 
 ## Son
-Musique d'ambiance et bruitages : entièrement synthétisés en direct (Web Audio API), aucun fichier externe.
+- **Musique** : composée en direct par le jeu (Web Audio API, `src/audio/music.ts`) — accords, mélodie et cloches générés à chaque partie, différents selon le lieu et l'heure. Aucun fichier externe.
+- **Bruitages et ambiances enregistrés** (`public/assets/audio/`) : générés pour ce projet avec ElevenLabs Sound Effects (compte du propriétaire du projet), puis normalisés et découpés : pas sur herbe, terre, métal et grille ; vent de la plaine, nuit, forêt, rivière, épave fumante, cabine de la capsule, station ; atterrissage, saut, porte, étincelles, vapeur, jetpack, démarrage de générateur, hologramme.
+- **Sons d'interface** : « Interface Sounds » de Kenney (CC0, domaine public) — https://kenney.nl/assets/interface-sounds
+- Les bips de R-12, le scanner, l'arc électrique et l'alarme restent synthétisés en direct.
 Voix des journaux : synthèse vocale du navigateur (speechSynthesis), en attendant de vrais enregistrements.
 
 ## Modèles

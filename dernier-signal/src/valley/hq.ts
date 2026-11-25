@@ -108,7 +108,9 @@ export class HQBase {
   private screens: { tex: THREE.CanvasTexture; draw: (g: CanvasRenderingContext2D, t: number) => void }[] = [];
   private smoke: Puffs; private sparks: Puffs;
   private sparkT = 2;
-  private ground: number;
+  /** Appelé à chaque gerbe d'étincelles (bruitage). */
+  onSpark?: (p: THREE.Vector3) => void;
+  ground: number;
 
   constructor(t: Terrain, ph: Physics, res: '1k' | '2k', shadows: boolean) {
     const g0 = t.hqGround;
@@ -395,6 +397,7 @@ diffuseColor.rgb *= 1.0 - clamp(plate, 0.0, 1.0) * 0.45;`)
       this.sparkT = 1.5 + Math.random() * 4;
       const o = new THREE.Vector3(HQ.x + 5.0, this.ground + AX + RO - 0.1, HQ.z - 0.3);
       for (let i = 0; i < 18; i++) this.sparks.emit(o, new THREE.Vector3((Math.random() - 0.5) * 3, Math.random() * 3, (Math.random() - 0.5) * 3), 0.5 + Math.random() * 0.6);
+      this.onSpark?.(o);
     }
     this.smoke.update(dt, 0.05, 0.25); this.sparks.update(dt, -9, 0.5);
   }

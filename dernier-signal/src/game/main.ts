@@ -80,6 +80,8 @@ scene.add(sky);
 const input = new Input(canvas, $('#touch'));
 input.sensitivity = opts.sensitivity; input.invertY = opts.invertY;
 const audio = new AudioEngine();
+(window as unknown as { __audio: AudioEngine }).__audio = audio; // débogage et tests
+audio.preloadFirst = ['station_amb', 'step_metal', 'step_grate', 'door', 'ui_move', 'ui_ok', 'ui_back'];
 audio.setVolumes({ music: opts.music, sfx: opts.sfx });
 const voices = new Voices();
 voices.speed = opts.speech ?? 1.3;

@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="theme-color" content="#030405" />
+  <title>Dernier Signal — Atelier des espèces</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;600&family=Barlow+Condensed:wght@600;700&display=swap" rel="stylesheet" />
+  <script type="module" crossorigin src="./assets/especes-G0Oh47mn.js"></script>
+  <link rel="modulepreload" crossorigin href="./assets/parts-BNMX0yhE.js">
+  <link rel="modulepreload" crossorigin href="./assets/volumetric-CrIrmPLh.js">
+  <link rel="modulepreload" crossorigin href="./assets/studio-Dus28s_n.js">
+  <link rel="stylesheet" crossorigin href="./assets/volumetric-n4qUiZz7.css">
+  <link rel="stylesheet" crossorigin href="./assets/studio-DJJI6gnB.css">
+  <link rel="stylesheet" crossorigin href="./assets/especes-C6dOGAGm.css">
+</head>
+<body>
+  <canvas id="c"></canvas>
+  <div id="brand" class="hud">
+    <h1>Dernier Signal</h1>
+    <h2>Atelier des espèces</h2>
+    <p>Choisis l’apparence des Vaëls et de la meute. Touche une proposition pour la voir de près, fais-la tourner au doigt.</p>
+  </div>
+  <div id="tools" class="hud">
+    <span id="fps" hidden>— i/s</span>
+    <select id="quality" aria-label="Qualité"></select>
+    <a class="toolbtn" href="index.html">Écran titre</a>
+  </div>
+  <div id="tabs" class="hud"><button class="chip" data-k="vael">Vaëls · 4 propositions</button><button class="chip" data-k="meute">Meute · 3 propositions</button></div>
+  <div id="panel" class="hud">
+    <h3 id="p-title"></h3>
+    <p id="p-text"></p>
+    <div class="row"><button id="back">← Toutes</button><button id="choose">Choisir ce design</button></div>
+    <div id="hint">Glisse sur l’écran (ou stick droit) pour faire tourner le socle. LB / RB : proposition précédente / suivante.</div>
+  </div>
+  <div id="actionsWrap" class="hud"><div id="act" class="chips"></div><div id="emo" class="chips"></div><div id="clan" class="chips"></div></div>
+  <div id="cards" class="hud"></div>
+  <div id="toast" class="hud"></div>
+  <div id="loader"><span class="msg">Façonnage…</span><i></i></div>
+</body>
+</html>

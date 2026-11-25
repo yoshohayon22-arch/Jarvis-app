@@ -13,6 +13,7 @@ export default defineConfig({
         atelier: resolve(__dirname, 'atelier.html'),
         gouverneur: resolve(__dirname, 'gouverneur.html'),
         vallee: resolve(__dirname, 'vallee.html'),
+        especes: resolve(__dirname, 'especes.html'),
       },
     },
   },

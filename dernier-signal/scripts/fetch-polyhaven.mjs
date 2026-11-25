@@ -24,6 +24,13 @@ const TEXTURES = {
   mossy_rock: ['Diffuse', 'nor_gl', 'arm'],
   coast_sand_01: ['Diffuse', 'nor_gl', 'arm'],
   bark_willow_02: ['Diffuse', 'nor_gl', 'arm'],
+  // armures et vêtements des Vaëls (atelier des espèces)
+  brown_leather: ['Diffuse', 'nor_gl', 'arm'],
+  fabric_leather_02: ['Diffuse', 'nor_gl', 'arm'],
+  hessian_230: ['Diffuse', 'nor_gl', 'arm'],
+  rough_linen: ['Diffuse', 'nor_gl', 'arm'],
+  pine_bark: ['Diffuse', 'nor_gl', 'arm'],
+  shell_floor_01: ['Diffuse', 'nor_gl', 'arm'],
 };
 const HDRIS = { studio_small_09: ['1k'] };
 const RES = ['1k', '2k'];

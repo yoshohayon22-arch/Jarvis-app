@@ -35,3 +35,8 @@ Voix des journaux : synthèse vocale du navigateur (speechSynthesis), en attenda
 
 ## Modèles
 Robots, socles, station (murs, portes, consoles, mobilier), hologrammes, planète et Asterion : modélisés de façon procédurale dans le code (aucun modèle externe pour l'instant).
+
+## Peuples vaëls (atelier des espèces)
+- Corps, squelette et déformations de musculature : **MakeHuman** (base mesh hm08, `default.mhskel`, poids et cibles « macrodetails »), licence **CC0 1.0** — https://github.com/makehumancommunity/makehuman. Corps transformés par `tools/build_vaels.py`.
+- Matières des armures et vêtements : **Poly Haven** (CC0) — brown_leather, fabric_leather_02, hessian_230, rough_linen, pine_bark, shell_floor_01.
+- Images de référence des espèces : générées avec vidIQ (GPT Image) et Canva à partir de nos descriptions (`docs/concepts/`).

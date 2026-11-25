@@ -10,7 +10,7 @@ import { createFloor } from '../fx/floor';
 import { LightCone, Dust } from '../fx/volumetric';
 import { Pedestal, createBackdrop } from '../atelier/studio';
 import { PadNav, PadReader, hidePadFocusOnPointer } from '../ui/padnav';
-import { DESIGNS, type Creature, type Clan, type Design } from './designs';
+import { DESIGNS, type Creature, type Design } from './designs';
 import type { Action, Emotion } from './rig';
 
 // Atelier des espèces : propositions de Vaëls et de meutes, à choisir comme le robot.
@@ -71,7 +71,6 @@ const cur = () => slots[tab];
 
 let action: Action = 'repos';
 let emotion: Emotion = 'calme';
-let clan: Clan = 'racines';
 let focused = -1;
 
 async function buildTab(kind: 'vael' | 'meute') {
@@ -81,13 +80,12 @@ async function buildTab(kind: 'vael' | 'meute') {
     $('#loader .msg').textContent = `Façonnage : ${s.d.name}…`;
     await new Promise((r) => setTimeout(r, 30));
     const t0 = performance.now();
-    s.c = s.d.build();
+    s.c = await s.d.build();
     console.info(s.d.id, Math.round(performance.now() - t0) + ' ms', s.c.body.mesh.geometry.attributes.position.count + ' sommets');
     s.c.group.position.y = s.ped.topY * s.ped.scale.y - 0.01;
     s.ped.turntable.add(s.c.group);
     s.c.group.scale.setScalar(1 / s.ped.scale.x);
     s.c.group.position.y = 0.012;
-    s.c.setClan?.(clan);
   }
 }
 
@@ -102,7 +100,6 @@ function showTab(kind: 'vael' | 'meute') {
 // ---------- interface ----------
 const LABEL_A: Record<Action, string> = { repos: 'Repos', marche: 'Marche', course: 'Course' };
 const LABEL_E: Record<Emotion, string> = { calme: 'Calme · bleu', colere: 'Colère · rouge', joie: 'Joie · or', tristesse: 'Tristesse · violet', respect: 'Respect · blanc', menace: 'Menace · rouge' };
-const LABEL_C: Record<Clan, string> = { racines: 'Racines', hauteurs: 'Hauteurs', eaux: 'Eaux' };
 function chips(el: HTMLElement, items: [string, string][], on: string, pick: (v: string) => void) {
   el.innerHTML = '';
   for (const [v, l] of items) {
@@ -111,47 +108,32 @@ function chips(el: HTMLElement, items: [string, string][], on: string, pick: (v:
     el.appendChild(b);
   }
 }
-const KEY = (k: 'vael' | 'meute') => `dernier-signal:design-${k}`;
-function chosen(k: 'vael' | 'meute') { try { return localStorage.getItem(KEY(k)) ?? ''; } catch { return ''; } }
 function renderUI() {
   $$('#tabs .chip').forEach((b) => b.classList.toggle('on', b.dataset.k === tab));
   const cards = $('#cards'); cards.innerHTML = '';
   cur().forEach((s, i) => {
     const b = document.createElement('button'); b.className = 'card' + (i === focused ? ' on' : '');
-    b.innerHTML = `<span class="letter">${s.d.letter}</span><span class="name">${s.d.name}${chosen(tab) === s.d.id ? ' ✓' : ''}</span>`;
+    b.innerHTML = `<span class="letter">${s.d.letter}</span><span class="name">${s.d.name}<small>${s.d.people.split(' · ')[0]}</small></span>`;
     b.onclick = () => focus(focused === i ? -1 : i);
     cards.appendChild(b);
   });
   chips($('#act'), (['repos', 'marche', 'course'] as Action[]).map((a) => [a, LABEL_A[a]]), action, (v) => (action = v as Action));
   const emos: Emotion[] = tab === 'vael' ? ['calme', 'colere', 'joie', 'tristesse', 'respect'] : ['calme', 'menace'];
   chips($('#emo'), emos.map((e) => [e, LABEL_E[e]]), emotion, (v) => (emotion = v as Emotion));
-  $('#clan').hidden = tab !== 'vael';
-  chips($('#clan'), (['racines', 'hauteurs', 'eaux'] as Clan[]).map((c) => [c, 'Clan des ' + LABEL_C[c]]), clan, (v) => { clan = v as Clan; for (const s of slots.vael) s.c?.setClan?.(clan); });
   const p = $('#panel');
   if (focused >= 0) {
     const d = cur()[focused].d;
-    $('#p-title').textContent = `${d.letter} · ${d.name}`;
+    $('#p-title').textContent = d.name;
+    $('#p-people').textContent = d.people;
     $('#p-text').textContent = d.text;
-    $('#choose').textContent = chosen(tab) === d.id ? '✓ Design retenu' : 'Choisir ce design';
+    $<HTMLImageElement>('#p-img').src = import.meta.env.BASE_URL + 'assets/species/concepts/' + d.concept;
   }
   p.classList.toggle('show', focused >= 0);
 }
 const $$ = (s: string) => [...document.querySelectorAll<HTMLElement>(s)];
 function focus(i: number) { focused = i; renderUI(); layoutCamera(); }
 $('#back').onclick = () => focus(-1);
-$('#choose').onclick = () => {
-  if (focused < 0) return;
-  const d = cur()[focused].d;
-  try { localStorage.setItem(KEY(tab), d.id); } catch { /* */ }
-  renderUI();
-  toast(`${tab === 'vael' ? 'Vaël' : 'Meute'} « ${d.name} » retenu. Dis-le à Claude dans la conversation pour valider.`);
-};
 $$('#tabs .chip').forEach((b) => (b.onclick = async () => { const k = b.dataset.k as 'vael' | 'meute'; if (k === tab) return; $('#loader').classList.remove('done'); await buildTab(k); $('#loader').classList.add('done'); showTab(k); }));
-function toast(msg: string) {
-  const t = $('#toast'); t.textContent = msg; t.classList.add('show');
-  clearTimeout((t as unknown as { _h: number })._h);
-  (t as unknown as { _h: number })._h = window.setTimeout(() => t.classList.remove('show'), 4200);
-}
 const qsel = $<HTMLSelectElement>('#quality');
 for (const p of Object.values(PRESETS)) { const o = document.createElement('option'); o.value = p.id; o.textContent = p.label; qsel.appendChild(o); }
 qsel.value = q.id;
@@ -248,5 +230,5 @@ async function start() {
   frame();
   setTimeout(bootSucceeded, 4000);
 }
-(window as unknown as { __species: unknown }).__species = { slots, focus, showTab, buildTab, set: (a: Action, e: Emotion, c?: Clan) => { action = a; emotion = e; if (c) { clan = c; for (const s of slots.vael) s.c?.setClan?.(c); } renderUI(); }, camera, render: () => post.render(1 / 60) };
+(window as unknown as { __species: unknown }).__species = { slots, focus, showTab, buildTab, set: (a: Action, e: Emotion) => { action = a; emotion = e; renderUI(); }, camera, render: () => post.render(1 / 60) };
 start().catch((e) => { $('#loader .msg').textContent = 'Erreur : ' + e; console.error(e); });

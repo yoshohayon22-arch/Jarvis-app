@@ -17,7 +17,23 @@ export interface SkinOptions {
   scale?: number;                     // densité des motifs
   bump?: number;                      // relief de la peau
   scales?: number;                    // écailles (0-1)
+  detail?: string;                    // texture de peau tirée de l'image de référence (relief + teinte)
+  detailScale?: number;               // répétitions par mètre
+  detailAmt?: number;                 // force du relief de la texture
 }
+
+const loader = new THREE.TextureLoader();
+const cache = new Map<string, THREE.Texture>();
+function tex(url: string, srgb: boolean) {
+  let t = cache.get(url);
+  if (!t) {
+    t = loader.load(url); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.anisotropy = 4;
+    if (srgb) t.colorSpace = THREE.SRGBColorSpace;
+    cache.set(url, t);
+  }
+  return t;
+}
+const BASE = import.meta.env.BASE_URL + 'assets/species/';
 
 const NOISE = /* glsl */ `
 float sk_h(vec3 p){ p = fract(p * 0.3183099 + 0.1); p *= 17.0; return fract(p.x * p.y * p.z * (p.x + p.y + p.z)); }
@@ -47,17 +63,28 @@ export function makeSkin(o: SkinOptions) {
     uBump: { value: o.bump ?? 1 },
     uScales: { value: o.scales ?? 0 },
     uDark: { value: new THREE.Color(o.color2 ?? o.color) },
+    uDetH: { value: o.detail ? tex(BASE + o.detail + '_h.png', false) : null },
+    uDetC: { value: o.detail ? tex(BASE + o.detail + '_c.jpg', true) : null },
+    uDetS: { value: o.detailScale ?? 9 },
+    uDetA: { value: o.detail ? (o.detailAmt ?? 1) : 0 },
   };
   mat.userData.skin = u;
   mat.onBeforeCompile = (sh) => {
     Object.assign(sh.uniforms, u);
     sh.vertexShader = sh.vertexShader
       .replace('#include <common>', '#include <common>\nattribute float aGlow;\nvarying vec3 vRest;\nvarying float vGlow;')
-      .replace('#include <begin_vertex>', '#include <begin_vertex>\nvRest = position;\nvGlow = aGlow;');
+      .replace('#include <begin_vertex>', '#include <begin_vertex>\nvRest = position;\nvRestN = normal;\nvGlow = aGlow;')
+      .replace('varying float vGlow;', 'varying float vGlow;\nvarying vec3 vRestN;');
     sh.fragmentShader = sh.fragmentShader
       .replace('#include <common>', `#include <common>
-varying vec3 vRest; varying float vGlow;
-uniform vec3 uGlowCol, uDark; uniform float uGlow, uTime, uPattern, uPScale, uBump, uScales;
+varying vec3 vRest; varying float vGlow; varying vec3 vRestN;
+uniform vec3 uGlowCol, uDark; uniform float uGlow, uTime, uPattern, uPScale, uBump, uScales, uDetS, uDetA;
+uniform sampler2D uDetH, uDetC;
+// texture de peau en projection sur trois axes (pas de coutures, pas besoin de dépliage UV)
+vec4 sk_tri(sampler2D t, vec3 p, vec3 n){
+  vec3 w = pow(abs(n), vec3(4.0)); w /= (w.x + w.y + w.z);
+  return texture2D(t, p.zy) * w.x + texture2D(t, p.xz) * w.y + texture2D(t, p.xy) * w.z;
+}
 ${NOISE}
 float sk_pattern(vec3 p){
   p *= uPScale;
@@ -85,6 +112,14 @@ float skN = sk_fbm(vRest * 9.0);
 // teinte : zones plus sombres sur le dos et marbrures
 diffuseColor.rgb = mix(diffuseColor.rgb, uDark, smoothstep(0.35, 0.75, skN) * 0.65);
 diffuseColor.rgb *= 0.9 + 0.2 * mix(0.5, sk_n(vRest * 38.0), SK_AA(38.0));
+float skDetH = 0.5;
+if (uDetA > 0.0) {
+  vec3 dn = normalize(vRestN);
+  skDetH = sk_tri(uDetH, vRest * uDetS, dn).r;
+  vec3 dc = sk_tri(uDetC, vRest * uDetS * 0.5, dn).rgb;
+  diffuseColor.rgb *= mix(vec3(1.0), dc * 2.0, 0.7 * uDetA);
+  diffuseColor.rgb *= mix(1.0, 0.55 + 0.9 * skDetH, uDetA);
+}
 vec2 skC = sk_cell(vRest * 60.0);
 float skScale = uScales * SK_AA(60.0) * smoothstep(0.0, 0.18, skC.y - skC.x);
 diffuseColor.rgb *= 1.0 - uScales * SK_AA(60.0) * 0.18 * (1.0 - smoothstep(0.0, 0.2, skC.y - skC.x));`)
@@ -92,7 +127,8 @@ diffuseColor.rgb *= 1.0 - uScales * SK_AA(60.0) * 0.18 * (1.0 - smoothstep(0.0, 
 roughnessFactor = clamp(roughnessFactor * (0.85 + 0.35 * mix(0.5, sk_n(vRest * 25.0), SK_AA(25.0))), 0.08, 1.0);`)
       .replace('#include <normal_fragment_maps>', `#include <normal_fragment_maps>
 { // micro-relief : pores, plis, écailles
-  float hgt = (sk_fbm(vRest * 70.0) * 0.6 * SK_AA(70.0) + sk_n(vRest * 210.0) * 0.25 * SK_AA(210.0)) * uBump + skScale * 0.9;
+  float hgt = (sk_fbm(vRest * 70.0) * 0.6 * SK_AA(70.0) + sk_n(vRest * 210.0) * 0.25 * SK_AA(420.0)) * uBump * (1.0 - 0.6 * uDetA) + skScale * 0.9
+            + skDetH * uDetA * 1.3 * SK_AA(uDetS * 6.0);
   vec3 sP = -vViewPosition; vec3 sX = dFdx(sP), sY = dFdy(sP);
   vec3 R1 = cross(sY, normal), R2 = cross(normal, sX);
   float det = dot(sX, R1) * faceDirection;
@@ -123,4 +159,60 @@ export function makeEye(radius: number, iris: THREE.ColorRepresentation, glow = 
   pupil.position.z = radius * 0.99; g.add(pupil);
   g.userData.iris = irisMat;
   return g;
+}
+
+/**
+ * Fourrure par couches : copies de la peau gonflées le long des normales ; chaque couche ne garde
+ * que des brins (petits disques qui rétrécissent vers la pointe). Les couches suivent le squelette.
+ */
+export function addFur(mesh: THREE.SkinnedMesh, o: { layers: number; length: number; density: number; color: THREE.ColorRepresentation; detail?: string; detailScale?: number; tip?: THREE.ColorRepresentation }) {
+  const group = new THREE.Group();
+  const shared = {
+    uLen: { value: o.length }, uDens: { value: o.density },
+    uDetC: { value: o.detail ? tex(BASE + o.detail + '_c.jpg', true) : null },
+    uDetS: { value: o.detailScale ?? 6 }, uTip: { value: new THREE.Color(o.tip ?? o.color) },
+    uWind: { value: 0 },
+  };
+  for (let i = 1; i <= o.layers; i++) {
+    const layer = i / o.layers;
+    const m = new THREE.MeshStandardMaterial({ color: o.color, roughness: 0.85, metalness: 0 });
+    m.onBeforeCompile = (sh) => {
+      Object.assign(sh.uniforms, shared, { uLayer: { value: layer } });
+      sh.vertexShader = sh.vertexShader
+        .replace('#include <common>', '#include <common>\nattribute float aGlow;\nuniform float uLayer, uLen, uWind;\nvarying vec3 vRest; varying vec3 vRestN; varying float vGlow;')
+        .replace('#include <skinning_vertex>', `#include <skinning_vertex>
+vRest = position; vRestN = normal; vGlow = aGlow;
+float fl = uLen * (1.0 - smoothstep(0.55, 0.9, aGlow));
+transformed += normalize(objectNormal) * uLayer * fl;
+transformed.y -= uLayer * uLayer * fl * 0.45;
+transformed.x += sin(uWind + position.y * 9.0) * uLayer * uLayer * fl * 0.15;`);
+      sh.fragmentShader = sh.fragmentShader
+        .replace('#include <common>', `#include <common>
+uniform float uLayer, uDens, uDetS; uniform sampler2D uDetC; uniform vec3 uTip;
+varying vec3 vRest; varying vec3 vRestN; varying float vGlow;
+float fh(vec3 p){ p = fract(p * 0.3183099 + 0.1); p *= 17.0; return fract(p.x * p.y * p.z * (p.x + p.y + p.z)); }
+vec4 fk_tri(sampler2D t, vec3 p, vec3 n){ vec3 w = pow(abs(n), vec3(4.0)); w /= (w.x + w.y + w.z); return texture2D(t, p.zy) * w.x + texture2D(t, p.xz) * w.y + texture2D(t, p.xy) * w.z; }`)
+        .replace('#include <map_fragment>', `#include <map_fragment>
+{
+  if (vGlow > 0.75) discard;
+  vec3 q = vRest * uDens; vec3 c = floor(q); vec3 f = fract(q) - 0.5;
+  float r = fh(c);
+  float len = 0.45 + 0.55 * r;
+  if (uLayer > len) discard;
+  float rad = 0.5 * (1.0 - uLayer / len);
+  if (length(f) > rad + 0.08) discard;
+  vec3 n = normalize(vRestN);
+  ${o.detail ? 'diffuseColor.rgb *= fk_tri(uDetC, vRest * uDetS * 0.5, n).rgb * 2.0;' : ''}
+  diffuseColor.rgb = mix(diffuseColor.rgb, uTip, uLayer * 0.5);
+  diffuseColor.rgb *= 0.35 + 0.65 * uLayer;   // ombre au pied des poils
+}`);
+    };
+    m.customProgramCacheKey = () => 'fur' + (o.detail ? '1' : '0');
+    const s = new THREE.SkinnedMesh(mesh.geometry, m);
+    s.bind(mesh.skeleton, mesh.bindMatrix);
+    s.frustumCulled = false; s.castShadow = i < 3; s.receiveShadow = true;
+    group.add(s);
+  }
+  mesh.add(group);
+  return shared;
 }

@@ -125,10 +125,11 @@ export class HoloPanel {
   el: HTMLElement;
   private tab = 'res';
   onClose: () => void = () => {};
+  onSaves: () => void = () => {};
   constructor(private sim: Sim, private time: { get: () => { hour: number; day: number; speed: number }; setSpeed: (s: number) => void; skip: (h: number) => void }) {
     this.el = document.createElement('div'); this.el.id = 'holo'; this.el.hidden = true;
     this.el.innerHTML = `<div class="hp"><div class="hh"><b>R-12 · GOUVERNEUR</b><span class="ht"></span><button class="hx" aria-label="Fermer">✕</button></div>
-      <div class="tabs">${[['res', 'Ressources'], ['rel', 'Relations'], ['pop', 'Habitants'], ['obj', 'Objectifs'], ['time', 'Temps'], ['cons', 'Conseil']].map(([k, l]) => `<button data-t="${k}">${l}</button>`).join('')}</div>
+      <div class="tabs">${[['res', 'Ressources'], ['rel', 'Relations'], ['pop', 'Habitants'], ['obj', 'Objectifs'], ['time', 'Temps'], ['cons', 'Conseil'], ['save', 'Sauvegardes']].map(([k, l]) => `<button data-t="${k}">${l}</button>`).join('')}</div>
       <div class="hb"></div><div class="scan"></div></div>`;
     document.body.appendChild(this.el);
     this.el.querySelector('.hx')!.addEventListener('click', () => this.close());
@@ -150,7 +151,9 @@ export class HoloPanel {
     else if (this.tab === 'time') h = `<div class="card" style="--d:0"><b>Vitesse du temps</b><div class="btns">${[[0, '❚❚ Pause'], [1, '×1'], [2, '×2'], [4, '×4']].map(([v, l]) => `<button data-s="${v}" class="${T.speed === v ? 'on' : ''}">${l}</button>`).join('')}</div></div>
       <div class="card" style="--d:1"><b>Avancer</b><div class="btns"><button data-k="1">+1 heure</button><button data-k="6">+6 heures</button><button data-k="m">Jusqu'au matin</button></div><p>La recharge complète (salle de recharge) arrivera à l'étape suivante.</p></div>`;
     else if (this.tab === 'cons') { const n = DECISIONS.find((d) => !s.decisions[d.id]); h = `<div class="card" style="--d:0"><b>Conseil</b><p>${n ? `Question en attente : « ${n.title} ».` : 'Aucune question en attente.'}</p><p>Les chefs ne vivent pas encore dans la vallée : le conseil pourra être convoqué ici, devant la capsule, quand les habitants arriveront (étape suivante).</p><button class="wide" disabled>Convoquer le conseil</button></div>`; }
+    else if (this.tab === 'save') h = `<div class="card" style="--d:0"><b>Sauvegardes</b><p>Cinq emplacements et une sauvegarde automatique, stockés sur cet appareil.</p><div class="btns"><button data-open-saves>Ouvrir les sauvegardes</button></div></div>`;
     const hb = this.el.querySelector('.hb')!; hb.innerHTML = h;
+    hb.querySelector<HTMLElement>('[data-open-saves]')?.addEventListener('click', () => this.onSaves());
     hb.querySelectorAll<HTMLElement>('[data-s]').forEach((b) => b.addEventListener('click', () => { this.time.setSpeed(+b.dataset.s!); this.render(); }));
     hb.querySelectorAll<HTMLElement>('[data-k]').forEach((b) => b.addEventListener('click', () => { const k = b.dataset.k!; const cur = this.time.get().hour; this.time.skip(k === 'm' ? ((7 - cur + 24) % 24 || 24) : +k); this.render(); }));
   }

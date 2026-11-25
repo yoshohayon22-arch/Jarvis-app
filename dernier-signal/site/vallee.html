@@ -9,14 +9,14 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,400;0,600;1,400&family=Barlow+Condensed:wght@500;600;700&display=swap" rel="stylesheet" />
-  <script type="module" crossorigin src="./assets/vallee-Dn3iYkN-.js"></script>
+  <script type="module" crossorigin src="./assets/vallee-DRPBNGPC.js"></script>
   <link rel="modulepreload" crossorigin href="./assets/compact-BLhn07sb.js">
   <link rel="modulepreload" crossorigin href="./assets/volumetric-CDFiGvNq.js">
   <link rel="modulepreload" crossorigin href="./assets/audio-DYyRAc3C.js">
   <link rel="modulepreload" crossorigin href="./assets/sim-BzNUNnEt.js">
   <link rel="stylesheet" crossorigin href="./assets/volumetric-n4qUiZz7.css">
   <link rel="stylesheet" crossorigin href="./assets/audio-Cx5VrV4r.css">
-  <link rel="stylesheet" crossorigin href="./assets/vallee-DcPw3G6S.css">
+  <link rel="stylesheet" crossorigin href="./assets/vallee-BLKGarxU.css">
 </head>
 <body class="valley">
   <canvas id="c"></canvas>
@@ -40,9 +40,12 @@
     <div class="row"><span>Heure</span><div class="speeds"><button data-h="7">Matin</button><button data-h="13">Midi</button><button data-h="18.2">Coucher</button><button data-h="23">Nuit</button></div></div>
     <div class="row"><span>Qualité graphique</span><select id="vq"></select></div>
     <div class="row"><label><input type="checkbox" id="vfps" /> Compteur d'images/s</label></div>
+    <div class="row"><span>Taille des sous-titres</span><select id="vsubs"><option value="petite">Petite</option><option value="moyenne">Moyenne</option><option value="grande">Grande</option></select></div>
+    <div class="row"><label><input type="checkbox" id="vvoice" /> Voix de R-12</label><label><input type="checkbox" id="vthoughts" /> Pensées à voix haute</label></div>
     <p id="padstatus" class="padstatus"></p>
     <div class="col">
       <button class="big pad-first" id="v-resume">Reprendre</button>
+      <button class="big ghost" id="v-saves">Sauvegardes</button>
       <a class="big ghost" href="gouverneur.html">Prototype de gestion (provisoire)</a>
       <a class="big ghost" href="index.html">Écran titre</a>
     </div>

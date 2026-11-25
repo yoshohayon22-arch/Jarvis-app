@@ -11,7 +11,9 @@ import { texturesReady, setMaxAnisotropy } from '../core/textures';
 import { setMaterialRes } from '../robots/materials';
 import { Physics } from '../world/physics';
 import { Input } from '../game/input';
-import { PadNav, bindPadStatus } from '../ui/padnav';
+import { PadNav, bindPadStatus, askRoot, askCancel } from '../ui/padnav';
+import * as Saves from './saves';
+import { CURRENT, SavePanel, autosave, loadOptions, saveOptions, applyOptions, type SaveSource } from './saves';
 import { Player } from '../game/player';
 import { ThirdPersonCamera } from '../game/camera';
 import { AudioEngine } from '../audio/audio';
@@ -116,8 +118,13 @@ const tp = new ThirdPersonCamera(camera);
 tp.dist = 4.6;
 const spawnY = terrain.heightAt(SPAWN.x, SPAWN.y);
 const spawnYaw = Math.atan2(BEACON.x - SPAWN.x, BEACON.y - SPAWN.y);
-player.teleport(new THREE.Vector3(SPAWN.x, spawnY, SPAWN.y), spawnYaw);
-tp.snap(player.pos, spawnYaw + Math.PI);
+{
+  // reprise : position enregistrée (sauvegarde chargée ou dernière session), sinon le point de départ
+  let pos: number[] | undefined, yaw: number | undefined;
+  try { const c = JSON.parse(localStorage.getItem('dernier-signal:vallee') ?? 'null'); pos = c?.pos; yaw = c?.yaw; } catch { /* */ }
+  if (pos && pos.every(Number.isFinite)) { player.teleport(new THREE.Vector3(pos[0], Math.max(pos[1], terrain.heightAt(pos[0], pos[2])), pos[2]), yaw ?? spawnYaw); tp.snap(player.pos, (yaw ?? spawnYaw) + Math.PI); }
+  else { player.teleport(new THREE.Vector3(SPAWN.x, spawnY, SPAWN.y), spawnYaw); tp.snap(player.pos, spawnYaw + Math.PI); }
+}
 $('#touch').classList.add('show');
 
 // tous les matériaux standards reçoivent l'atmosphère (brouillard de hauteur, soleil)
@@ -130,10 +137,10 @@ function patchScene() {
 }
 
 // ---------- temps ----------
-const SAVE = 'dernier-signal:vallee';
+const SAVE = CURRENT;
 let hour = 16.5, day = 1, speed = 1;
 try { const s = JSON.parse(localStorage.getItem(SAVE) ?? 'null'); if (s) { hour = s.hour; day = s.day; } } catch { /* */ }
-const HOUR_SECONDS = 30; // une heure de jeu = 30 s à ×1 (une journée = 12 min)
+const HOUR_SECONDS = 25; // une heure de jeu = 25 s à ×1 (une journée = 10 min)
 let auroraNight = Math.random() < 0.6;
 
 function applyTime(dt: number, t: number) {
@@ -193,10 +200,24 @@ function setSpeed(s: number) { speed = s; document.querySelectorAll<HTMLElement>
 function openPause() { paused = true; $('#vpause').hidden = false; input.menuMode = true; input.releasePointer(); }
 function closePause() { paused = false; $('#vpause').hidden = true; input.menuMode = holoView; }
 $('#pausebtn').addEventListener('pointerdown', (e) => { e.stopPropagation(); openPause(); });
-// menus à la manette : pause et écran de gouverneur
+// sauvegardes (5 emplacements + automatique)
+const saveSrc: SaveSource = { snapshot: () => ({ hour, day, pos: [player.pos.x, player.pos.y, player.pos.z], yaw: player.yaw }) };
+function writeCurrent() { try { localStorage.setItem(SAVE, JSON.stringify({ hour, day, pos: [player.pos.x, player.pos.y, player.pos.z], yaw: player.yaw })); } catch { /* */ } }
+addEventListener('pagehide', () => { if (Saves.loading) return; writeCurrent(); autosave(saveSrc, 'en quittant'); });
+const saves = new SavePanel(saveSrc);
+saves.onClose = () => { input.menuMode = paused || holoView; };
+$('#v-saves').addEventListener('click', () => { saves.open(); input.menuMode = true; });
+// options de l'acte 2
+const a2 = loadOptions(); applyOptions(a2);
+{
+  const sub = $<HTMLSelectElement>('#vsubs'); sub.value = a2.subs; sub.onchange = () => { a2.subs = sub.value as typeof a2.subs; saveOptions(a2); applyOptions(a2); };
+  const vo = $<HTMLInputElement>('#vvoice'); vo.checked = a2.voice; vo.onchange = () => { a2.voice = vo.checked; saveOptions(a2); };
+  const th = $<HTMLInputElement>('#vthoughts'); th.checked = a2.thoughts; th.onchange = () => { a2.thoughts = th.checked; saveOptions(a2); };
+}
+// menus à la manette : confirmation, sauvegardes, pause et écran de gouverneur
 const nav = new PadNav({
-  root: () => (!$('#vpause').hidden ? $('#vpause') : panel?.isOpen ? panel.el : null),
-  back: () => { if (!$('#vpause').hidden) closePause(); else panel.close(); },
+  root: () => askRoot() ?? (saves.isOpen ? saves.el : !$('#vpause').hidden ? $('#vpause') : panel?.isOpen ? panel.el : null),
+  back: () => { if (askRoot()) askCancel(); else if (saves.isOpen) saves.close(); else if (!$('#vpause').hidden) closePause(); else panel.close(); },
   sound: (k) => audio.ui(k),
 });
 input.onNav = (d) => nav.handle(d);
@@ -228,6 +249,7 @@ function openHolo() {
   freeCam = { p: new THREE.Vector3(a.x + 2.35, a.y + 0.05, a.z), l: a.clone().add(new THREE.Vector3(0, 0.05, 0)) };
   $('#vprompt').hidden = true;
 }
+panel.onSaves = () => { saves.open(); };
 panel.onClose = () => { audio.holo(false, hq.holoAnchor); holoView = false; holo.visible = true; freeCam = null; input.menuMode = false; tp.snap(player.pos, tp.yaw); };
 function updatePrompt() {
   const near = !holoView && !paused && player.pos.distanceTo(hq.consolePos) < 1.5;
@@ -268,7 +290,6 @@ function updateSound(dt: number) {
   audio.loopSample('river', 'river', SND.river, 0, 7); audio.setLoop('river', (inside ? 0.25 : 1) * 1.1, 1);
   audio.loopSample('wreck', 'wreck_fire', SND.wreck, 0, 3); audio.setLoop('wreck', inside ? 0.45 : 1.2, 1);
   audio.loop('beacon', 'hum', SND.beacon, 0); audio.setLoop('beacon', (0.05 + night * 0.07) * out, 1);
-  audio.setMood(inside || holoView ? 'hq' : night > 0.55 ? 'night' : 'day');
 }
 hq.onSpark = (p) => audio.spark(p, 0.35);
 
@@ -280,7 +301,7 @@ function onResize() {
 }
 addEventListener('resize', onResize);
 const timer = new THREE.Timer();
-let t = 0, saveAcc = 0;
+let t = 0, saveAcc = 0, autoAcc = 0;
 function step(dt: number) {
   t += dt;
   input.update(dt);
@@ -310,11 +331,11 @@ function step(dt: number) {
   holoDraw -= dt; if (holoDraw < 0) { holoDraw = 0.25; holo.draw(t, hour, day); }
   audio.updateListener(camera);
   updateSound(dt);
-  saveAcc += dt; if (saveAcc > 10) { saveAcc = 0; try { localStorage.setItem(SAVE, JSON.stringify({ hour, day })); } catch { /* */ } }
+  saveAcc += dt; if (saveAcc > 10) { saveAcc = 0; writeCurrent(); }
+  autoAcc += dt; if (autoAcc > 120) { autoAcc = 0; autosave(saveSrc); }
 }
 // chaque toucher, touche ou bouton de manette relance le son ; le premier démarre la musique
-let woke = false;
-function wake() { audio.ensure(); if (audio.ctx && !woke) { woke = true; audio.startAmbience(U.uNight.value > 0.55 ? 'night' : 'day'); } }
+function wake() { audio.ensure(); } // pas de musique dans l'acte 2 : seulement les sons du monde
 function frame() {
   requestAnimationFrame(frame);
   timer.update();
@@ -343,7 +364,7 @@ async function boot() {
   addEventListener('pointerdown', wake, true); addEventListener('keydown', wake, true);
 }
 (window as unknown as { __valley: unknown }).__valley = {
-  step, player, tp, terrain, flora, camera, renderer, hq, openHolo, panel, audio,
+  step, saves, autosave: () => autosave(saveSrc), player, tp, terrain, flora, camera, renderer, hq, openHolo, panel, audio,
   setHour: (h: number) => { hour = h; envHour = -99; }, setSpeed, U,
   simulate: (sec: number, keys: string[] = []) => { const k = (input as unknown as { keys: Set<string> }).keys; keys.forEach((c) => k.add(c)); for (let i = 0; i < sec * 30; i++) { step(1 / 30); input.endFrame(); } keys.forEach((c) => k.delete(c)); },
   render: () => post.render(1 / 60),

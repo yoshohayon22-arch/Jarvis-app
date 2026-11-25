@@ -360,11 +360,11 @@ function playSummary() {
 function showBilan() {
   bilanShown = true; sim.flags.bilan = true; modal = true; setSpeed(0);
   const b = $('#bilan'); b.hidden = false;
-  b.innerHTML = `<small>Fin du prototype · Jour ${sim.day}</small><h1 style="font-size:clamp(34px,6vw,56px)">Bilan</h1>
+  b.innerHTML = `<small>Récapitulatif · Jour ${sim.day}</small><h1 style="font-size:clamp(34px,6vw,56px)">Bilan</h1>
     <div class="stats"><div><b>${sim.pop('forges')}</b>Forgés</div><div><b>${sim.pop('racines')}</b>Vaëls</div><div><b>${sim.buildings.length}</b>bâtiments</div>
     <div><b>${Math.round(sim.paix)}</b>paix</div><div><b>${Math.round(sim.tension)}</b>tension</div><div><b>${Math.round(sim.mutual())}</b>confiance mutuelle</div></div>
     <div class="hist">${sim.history.filter((h) => h.includes(' · ')).map((h) => `<p>${h}</p>`).join('')}</div>
-    <p>Tu peux continuer à gouverner librement. Dis-moi ce qui t'a amusé ou ennuyé : c'est ce qui décidera de la suite.</p>
+    <p>La vallée continue de vivre : il n'y a pas de fin. Dis-moi ce qui t'a amusé ou ennuyé.</p>
     <div class="col"><button class="gbtn primary" id="b-cont">Continuer à gouverner</button><a class="gbtn ghost" href="index.html">Écran titre</a></div>`;
   $('#b-cont').onclick = () => { b.hidden = true; modal = false; setSpeed(1); };
   save();

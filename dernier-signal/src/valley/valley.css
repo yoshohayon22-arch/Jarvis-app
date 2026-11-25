@@ -56,3 +56,18 @@ body[data-device="touch"] #vprompt b { display: none; }
 #holo .card.obj b { color: #ffe2a0; }
 #holo .btns { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
 #holo .wide { margin-top: 10px; width: 100%; }
+
+/* sauvegardes */
+#vsaves { position: fixed; inset: 0; z-index: 30; display: flex; align-items: center; justify-content: center; background: rgba(2,6,8,.78); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); padding: 16px; }
+#vsaves .sp { width: min(620px, 94vw); max-height: 90vh; overflow: auto; display: flex; flex-direction: column; gap: 8px; }
+#vsaves h2 { margin: 0; font: 700 30px 'Barlow Condensed', sans-serif; letter-spacing: .12em; text-transform: uppercase; text-align: center; }
+#vsaves .note { margin: 0 0 6px; text-align: center; opacity: .7; font-size: 14px; }
+#vsaves .srow { display: flex; align-items: center; gap: 12px; padding: 8px 10px; border-radius: 12px; border: 1px solid rgba(200,230,240,.18); background: rgba(255,255,255,.04); }
+#vsaves .sn { width: 46px; text-align: center; font: 700 20px 'Barlow Condensed', sans-serif; opacity: .8; }
+#vsaves .si { flex: 1; display: flex; flex-direction: column; }
+#vsaves .si b { font: 600 17px 'Barlow Condensed', sans-serif; letter-spacing: .04em; }
+#vsaves .si small, #vsaves .si em { opacity: .65; font-size: 13px; }
+#vsaves .sb { display: flex; gap: 6px; }
+#vsaves button { min-height: 44px; padding: 0 14px; border-radius: 10px; border: 1px solid rgba(200,230,240,.3); background: rgba(255,255,255,.06); color: inherit; font: 600 15px 'Barlow Condensed', sans-serif; letter-spacing: .04em; cursor: pointer; }
+#vsaves button.done { background: #7dffb0; color: #031a0c; }
+#vsaves .back { align-self: center; min-width: 200px; margin-top: 6px; background: #eef4f6; color: #05080a; }

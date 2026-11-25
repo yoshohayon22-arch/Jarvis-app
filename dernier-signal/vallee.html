@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="theme-color" content="#000000" />
+  <title>Dernier Signal · La vallée</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,400;0,600;1,400&family=Barlow+Condensed:wght@500;600;700&display=swap" rel="stylesheet" />
+  <script type="module" src="/src/valley/main.ts"></script>
+</head>
+<body class="valley">
+  <canvas id="c"></canvas>
+  <div id="vhud">
+    <div class="clock"><b class="time"></b><small class="day"></small></div>
+    <div class="obj"><i></i><span>Explorer la plaine de la balise</span></div>
+  </div>
+  <div id="touch">
+    <div class="zone"></div>
+    <div class="stick"><div class="knob"></div></div>
+    <button class="tb jump" data-btn="jump"><span>Saut</span></button>
+    <button class="tb act" data-btn="interact"><span>Interagir</span></button>
+    <button class="tb lamp" data-btn="lamp" aria-label="Lampe"><span>Lampe</span></button>
+    <button id="pausebtn" aria-label="Pause">❚❚</button>
+  </div>
+  <div id="vpause" hidden>
+    <h2>Pause</h2>
+    <div class="row"><span>Vitesse du temps</span>
+      <div class="speeds"><button data-s="0">❚❚</button><button data-s="1">×1</button><button data-s="2">×2</button><button data-s="4">×4</button></div></div>
+    <div class="row"><span>Heure</span><div class="speeds"><button data-h="7">Matin</button><button data-h="13">Midi</button><button data-h="18.2">Coucher</button><button data-h="23">Nuit</button></div></div>
+    <div class="row"><span>Qualité graphique</span><select id="vq"></select></div>
+    <div class="row"><label><input type="checkbox" id="vfps" /> Compteur d'images/s</label></div>
+    <div class="col">
+      <button class="big" id="v-resume">Reprendre</button>
+      <a class="big ghost" href="gouverneur.html">Prototype de gestion (provisoire)</a>
+      <a class="big ghost" href="index.html">Écran titre</a>
+    </div>
+  </div>
+  <span id="fps" hidden>— i/s</span>
+  <div id="loader"><span class="msg">Préparation de la vallée…</span><i></i><small class="err"></small></div>
+</body>
+</html>

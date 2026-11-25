@@ -1,0 +1,22 @@
+/* Vallée : interface minimale (heure, objectif) et menu pause. */
+body.valley { margin: 0; background: #000; color: #eef4f6; font: 15px/1.4 'Barlow', system-ui, sans-serif; overflow: hidden; }
+body.valley canvas#c { position: fixed; inset: 0; width: 100vw; height: 100vh; display: block; touch-action: none; }
+[hidden] { display: none !important; }
+#vhud { position: fixed; top: max(12px, env(safe-area-inset-top)); left: max(14px, env(safe-area-inset-left)); pointer-events: none; text-shadow: 0 1px 6px rgba(0,0,0,.6); }
+#vhud .clock b { font: 600 22px 'Barlow Condensed', sans-serif; letter-spacing: .04em; }
+#vhud .clock small { margin-left: 8px; font: 600 13px 'Barlow Condensed', sans-serif; letter-spacing: .18em; text-transform: uppercase; opacity: .75; }
+#vhud .obj { display: flex; align-items: center; gap: 8px; margin-top: 6px; padding-left: 10px; border-left: 2px solid rgba(255,255,255,.6); font-size: 14px; }
+#vhud .obj i { width: 8px; height: 8px; border: 1.5px solid #ffd36a; transform: rotate(45deg); }
+#vpause { position: fixed; inset: 0; z-index: 20; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; background: rgba(2,6,8,.72); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); padding: 20px; }
+#vpause h2 { margin: 0 0 6px; font: 700 34px 'Barlow Condensed', sans-serif; letter-spacing: .12em; text-transform: uppercase; }
+#vpause .row { display: flex; align-items: center; justify-content: space-between; gap: 14px; width: min(520px, 92vw); }
+#vpause .speeds { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+#vpause button, #vpause select { min-height: 44px; min-width: 52px; padding: 0 12px; border-radius: 10px; border: 1px solid rgba(200,230,240,.25); background: rgba(255,255,255,.06); color: inherit; font: 600 15px 'Barlow Condensed', sans-serif; }
+#vpause button.on { background: #eef4f6; color: #05080a; }
+#vpause .col { display: flex; flex-direction: column; gap: 10px; width: min(340px, 90vw); margin-top: 10px; }
+#vpause .big { display: flex; align-items: center; justify-content: center; min-height: 52px; border-radius: 12px; border: 1px solid rgba(200,230,240,.3); background: #eef4f6; color: #05080a; font: 600 18px 'Barlow Condensed', sans-serif; letter-spacing: .06em; text-decoration: none; }
+#vpause .big.ghost { background: none; color: inherit; }
+#loader { position: fixed; inset: 0; z-index: 60; background: #000; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; transition: opacity .8s; }
+#loader.done { opacity: 0; pointer-events: none; }
+#loader .err { color: #ff9a80; display: none; max-width: 80vw; }
+#fps { position: fixed; right: 12px; top: 12px; font: 600 13px 'Barlow Condensed', sans-serif; }

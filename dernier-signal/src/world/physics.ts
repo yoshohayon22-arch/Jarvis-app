@@ -34,6 +34,9 @@ const _inv = new THREE.Vector3();
 export class Physics {
   colliders: Collider[] = [];
   triggers: Trigger[] = [];
+  /** Sol en relief (vallée) : hauteur du terrain en (x, z), en plus des boîtes. */
+  terrain: ((x: number, z: number) => number) | null = null;
+  terrainCollider: Collider = { box: new THREE.Box3(), enabled: true, surface: 'concrete', camera: false } as Collider;
 
   add(min: [number, number, number], max: [number, number, number], o: Partial<Collider> = {}): Collider {
     const c: Collider = {
@@ -131,6 +134,14 @@ export class Body {
     for (let s = 0; s < steps; s++) {
       for (const a of lat) this.axis(ph, a, d[a], wasGrounded);
       this.axis(ph, this.upAxis, d[this.upAxis], wasGrounded);
+    }
+    // sol en relief : on ne passe jamais sous le terrain, et on reste collé en descente
+    if (ph.terrain && this.upAxis === 'y' && this.upSign > 0) {
+      const hg = ph.terrain(this.pos.x, this.pos.z);
+      const snap = wasGrounded && this.vel.y <= 0.01 && this.pos.y - hg < 0.45;
+      if (this.pos.y <= hg + 0.002 || (snap && !this.grounded)) {
+        if (!this.grounded || this.pos.y < hg) { this.pos.y = hg; this.grounded = true; this.ground = ph.terrainCollider; if (this.vel.y < 0) this.vel.y = 0; }
+      }
     }
     // collage à la surface (descente de marches)
     const u = this.upAxis, us = this.upSign;

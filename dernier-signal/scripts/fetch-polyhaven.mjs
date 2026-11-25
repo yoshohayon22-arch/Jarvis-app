@@ -17,6 +17,13 @@ const TEXTURES = {
   metal_grate_rusty: ['Diffuse', 'nor_gl', 'arm'],
   corrugated_iron_02: ['Diffuse', 'nor_gl', 'arm'],
   concrete_floor_worn_001: ['Diffuse', 'nor_gl', 'arm'],
+  // planète (vallée de l'acte 2)
+  forest_ground_04: ['Diffuse', 'nor_gl', 'arm'],
+  forest_leaves_02: ['Diffuse', 'nor_gl', 'arm'],
+  cliff_side: ['Diffuse', 'nor_gl', 'arm'],
+  mossy_rock: ['Diffuse', 'nor_gl', 'arm'],
+  coast_sand_01: ['Diffuse', 'nor_gl', 'arm'],
+  bark_willow_02: ['Diffuse', 'nor_gl', 'arm'],
 };
 const HDRIS = { studio_small_09: ['1k'] };
 const RES = ['1k', '2k'];

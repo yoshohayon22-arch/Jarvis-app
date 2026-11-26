@@ -1,5 +1,7 @@
 # Plan de travail · Acte 2 complet
 
+> **Mise à jour** : l'étape 3 (atelier de designs) est remplacée, pour les humains, les Vaëls et les souvenirs, par le plan `docs/plan-personnages-metal.md`. Les meutes de l'atelier des espèces restent telles quelles.
+
 Référence : `docs/prompt-acte2-complet.md` (il fait foi). Chaque étape se termine par un **arrêt pour validation** : lien du jeu, captures, ce qui est fait, ce qui reste, problèmes. À chaque étape, je revérifie l'acte 1, la vallée, le QG, les commandes (tactile, manette, clavier) et les réglages de qualité.
 
 > Lien de test : tant que GitHub Pages n'est pas accessible (l'application Claude GitHub doit être installée sur le dépôt `dernier-signal`), je publie chaque version sur le lien d'artefact habituel.

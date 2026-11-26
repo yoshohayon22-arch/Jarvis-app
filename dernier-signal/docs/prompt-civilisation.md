@@ -1,5 +1,7 @@
 # « DERNIER SIGNAL » : partie 2, la civilisation (le cœur du jeu)
 
+> **Mise à jour (personnages en métal)** : la section 7 « Réalisme des personnages » est remplacée par `docs/prompt-personnages-metal.md` (humains en acier brossé, Vaëls en cuivre gravé, souvenirs en or lumineux).
+
 > **Mise à jour (acte 2 complet)** : `docs/prompt-acte2-complet.md` fait désormais foi pour tout l'acte 2. Principaux changements : **plus aucune fin** (la section 8 « Les fins » est supprimée, le jeu continue sans limite), **pas de musique** dans l'acte 2 (sons du monde seulement), **R-12 parle** (voix robotique), **trois clans vaëls** qui encerclent R-12 à l'arrivée, **humains dans un bunker sous la balise** dirigés par un ancien du premier équipage, factions humaines qui **naissent plus tard**, **générations**, **saisons**, **meute**, **six pouvoirs**, **plusieurs sauvegardes**. Les parties ci-dessous restent valables quand elles ne contredisent pas ce document.
 
 Ce document complète le prompt principal et le prompt des missions. Il **change la structure du jeu** : l'aventure dans la station et l'épave devient l'**acte 1**, et la plus grande partie du jeu se passe sur la planète, où R-12 devient le **gouverneur** d'une civilisation qu'il fait naître. Lis-le en entier avant de toucher au code, puis propose-moi un plan de mise à jour du projet.

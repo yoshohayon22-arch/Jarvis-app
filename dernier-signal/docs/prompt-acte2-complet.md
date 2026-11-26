@@ -1,5 +1,7 @@
 # « DERNIER SIGNAL » · ACTE 2 : DOCUMENT DE RÉFÉRENCE COMPLET
 
+> **Mise à jour (personnages en métal)** : l'apparence des humains, des Vaëls et des souvenirs de l'équipage suit désormais `docs/prompt-personnages-metal.md` (statues de métal vivantes : acier brossé, cuivre gravé de lumière, or pour les souvenirs). Elle remplace la « peau sombre aux motifs lumineux » des Vaëls (section 7) et l'atelier de designs qui leur était prévu. La meute garde son design.
+
 Ce document est la **référence complète et détaillée de l'acte 2** (la vie sur la planète et le rôle de gouverneur), y compris les **pouvoirs de R-12**. Il rassemble tout ce qui a été décidé et ajoute de nombreux détails.
 
 ## 0. Consignes de travail (à lire en premier)

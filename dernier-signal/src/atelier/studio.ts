@@ -9,7 +9,7 @@ export class Pedestal extends THREE.Group {
   ringMat: THREE.MeshBasicMaterial;
   labelMat: THREE.MeshBasicMaterial;
   readonly topY = 0.2;
-  constructor(letter: string) {
+  constructor(letter: string, caption = `PROTOTYPE  ${letter}`) {
     super();
     const B = new Builder();
     const dark = M.steel(0x1c1e22, { rough: 0.5, wear: 0.1, scratches: 0.08, dirt: 0.2 });
@@ -40,7 +40,7 @@ export class Pedestal extends THREE.Group {
     const c = document.createElement('canvas'); c.width = 512; c.height = 128;
     const g = c.getContext('2d')!;
     g.fillStyle = '#fff'; g.font = '600 64px "Barlow Condensed", Arial Narrow, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle';
-    g.fillText(`PROTOTYPE  ${letter}`, 256, 68, 480);
+    g.fillText(caption, 256, 68, 480);
     const tex = new THREE.CanvasTexture(c); tex.colorSpace = THREE.SRGBColorSpace;
     this.labelMat = new THREE.MeshBasicMaterial({ map: tex, transparent: true, color: new THREE.Color(0.6, 1.6, 2.2), depthWrite: false });
     const label = new THREE.Mesh(new THREE.PlaneGeometry(0.3, 0.075), this.labelMat);

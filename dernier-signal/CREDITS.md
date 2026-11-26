@@ -25,6 +25,9 @@ Téléchargées via l'API publique (`scripts/fetch-polyhaven.mjs`), recompressé
 | Corrugated Iron 02 | Poly Haven | https://polyhaven.com/a/corrugated_iron_02 |
 | Concrete Floor Worn 001 | Poly Haven | https://polyhaven.com/a/concrete_floor_worn_001 |
 | HDRI Studio Small 09 | Poly Haven | https://polyhaven.com/a/studio_small_09 |
+| HDRI Meadow 2 | Poly Haven | https://polyhaven.com/a/meadow_2 |
+| HDRI Satara Night | Poly Haven | https://polyhaven.com/a/satara_night |
+| HDRI Overcast Soil (Pure Sky) | Poly Haven | https://polyhaven.com/a/overcast_soil_puresky |
 
 ## Son
 - **Musique** : composée en direct par le jeu (Web Audio API, `src/audio/music.ts`) — accords, mélodie et cloches générés à chaque partie, différents selon le lieu et l'heure. Aucun fichier externe.
@@ -40,3 +43,8 @@ Robots, socles, station (murs, portes, consoles, mobilier), hologrammes, planèt
 - Corps, squelette et déformations de musculature : **MakeHuman** (base mesh hm08, `default.mhskel`, poids et cibles « macrodetails »), licence **CC0 1.0** — https://github.com/makehumancommunity/makehuman. Corps transformés par `tools/build_vaels.py`.
 - Matières des armures et vêtements : **Poly Haven** (CC0) — brown_leather, fabric_leather_02, hessian_230, rough_linen, pine_bark, shell_floor_01.
 - Images de référence des espèces : générées avec vidIQ (GPT Image) et Canva à partir de nos descriptions (`docs/concepts/`).
+
+## Personnages en métal (atelier des personnages)
+- Humains, Vaëls et souvenirs : **MakeHuman** (CC0 1.0) — corps, squelette, poids, cibles d'âge, de sexe, de musculature et de corpulence ; expressions du visage obtenues en déplaçant les os du visage MakeHuman. Fabriqués par `tools/build_people.py` (`public/assets/people/`).
+- Éclairages : HDRI Poly Haven (CC0) studio_small_09, meadow_2, satara_night, overcast_soil_puresky.
+- Matières métalliques (acier brossé, cuivre gravé, patines, or) : calculées dans le code, sans texture externe.

@@ -32,7 +32,7 @@ const TEXTURES = {
   pine_bark: ['Diffuse', 'nor_gl', 'arm'],
   shell_floor_01: ['Diffuse', 'nor_gl', 'arm'],
 };
-const HDRIS = { studio_small_09: ['1k'] };
+const HDRIS = { studio_small_09: ['1k'], meadow_2: ['1k'], satara_night: ['1k'], overcast_soil_puresky: ['1k'] };
 const RES = ['1k', '2k'];
 const SHORT = { Diffuse: 'diff', nor_gl: 'nor', arm: 'arm' };
 
@@ -61,5 +61,5 @@ for (const [id, maps] of Object.entries(TEXTURES)) {
 }
 for (const [id, resList] of Object.entries(HDRIS)) {
   const files = await (await fetch(`https://api.polyhaven.com/files/${id}`)).json();
-  for (const res of resList) await dl(files.hdri[res].hdr.url, join(OUT, 'hdri', `${id}_${res}.hdr`));
+  for (const res of resList) await dl(files.hdri[res].hdr.url, join(OUT, 'hdri', `${id}_${res}.hdr`));  // puis : python3 -I tools/hdr_to_png.py <fichier>.hdr <id>_1k.rgbe.png
 }

@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="theme-color" content="#030405" />
-  <title>Dernier Signal — Atelier des espèces</title>
+  <title>Dernier Signal — Atelier des personnages</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;600&family=Barlow+Condensed:wght@600;700&display=swap" rel="stylesheet" />
@@ -14,22 +14,24 @@
   <canvas id="c"></canvas>
   <div id="brand" class="hud">
     <h1>Dernier Signal</h1>
-    <h2>Atelier des espèces</h2>
-    <p>Les quatre peuples vaëls et les trois meutes de la vallée. Touche une proposition pour la voir de près, fais-la tourner au doigt.</p>
+    <h2>Atelier des personnages</h2>
+    <p>Humains en acier, Vaëls en cuivre, souvenirs de l’équipage en or. Choisis une proposition, un éclairage, puis touche un personnage pour le voir de près.</p>
   </div>
   <div id="tools" class="hud">
     <span id="fps" hidden>— i/s</span>
     <select id="quality" aria-label="Qualité"></select>
     <a class="toolbtn" href="index.html">Écran titre</a>
   </div>
-  <div id="tabs" class="hud"><button class="chip" data-k="vael">Peuples vaëls</button><button class="chip" data-k="meute">Meutes</button></div>
+  <div id="topbar" class="hud"><div id="tabs" class="chips"></div><div id="props" class="chips"></div><div id="lights" class="chips"></div></div>
   <div id="panel" class="hud">
     <img id="p-img" alt="Image de référence" />
     <h3 id="p-title"></h3>
     <small id="p-people"></small>
     <p id="p-text"></p>
-    <div class="row"><button id="back">← Toutes</button></div>
-    <div id="hint">Glisse sur l’écran (ou stick droit) pour faire tourner le socle. LB / RB : proposition précédente / suivante.</div>
+    <div id="ageRow" class="slider" hidden><label for="age">Âge : enfant → ancien</label><input id="age" type="range" min="0" max="100" step="1" /></div>
+    <div id="faceRow" hidden><div id="faces" class="chips"></div></div>
+    <div class="row"><button id="faceBtn" hidden>Gros plan du visage</button><button id="replayBtn" hidden>Rejouer l’apparition</button><button id="back">← Tous</button></div>
+    <div id="hint">Glisse sur l’écran (ou stick droit) pour faire tourner le socle. LB / RB : personnage précédent / suivant.</div>
   </div>
   <div id="actionsWrap" class="hud"><div id="act" class="chips"></div><div id="emo" class="chips"></div></div>
   <div id="cards" class="hud"></div>

@@ -43,6 +43,8 @@ Usure des arêtes et patine dans les creux sont calculées à partir de la forme
    - un curseur de vieillissement (enfant → ancien).
 
    **Stop : tu choisis.**
+
+   *Fait (version 24 de l'artefact)* : page `especes.html` ; corps fabriqués par `tools/build_people.py` (`public/assets/people/`), matières dans `src/people/metal.ts`, cheveux `src/people/hair.ts`, personnages `src/people/cast.ts`, éclairages `src/people/lights.ts`. Vaëls : trois formes nouvelles (la Lyre, le Faune, l'Oracle), chacune en quatre clans (Racines, Hauteurs, Eaux, Nomades en bronze sombre). Les éclairages HDR sont rangés en PNG RGBE (`tools/hdr_to_png.py`) car le service d'artefacts ne sert pas les `.hdr`.
 3. **Matières et effets dynamiques** sur les modèles choisis (mouillé, boue, givre, chaleur, blessures, âge, nuit). **Stop : captures.**
 4. **Générateur de variations**, personnages principaux faits à la main (chefs, Aldric Moreau et son éclat de cristal), enfants à l'alliage acier-cuivre.
 5. **Remplacement dans le jeu**, niveaux de détail, mesure des performances sur iPad. **Stop : captures de jour, de nuit, sous la pluie et au conseil.**

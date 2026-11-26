@@ -1,5 +1,4 @@
 import * as THREE from 'three';
-import { HDRLoader } from 'three/examples/jsm/loaders/HDRLoader.js';
 
 // Chargement des textures Poly Haven (CC0) à la résolution du préréglage.
 const BASE = import.meta.env.BASE_URL + 'assets/polyhaven/';
@@ -59,12 +58,29 @@ export function grunge(res: '1k' | '2k'): THREE.Texture {
   return tex(`rust_coarse_01/arm_${res}.jpg`, false);
 }
 
+/** Éclairage d'ambiance : image HDR rangée dans un PNG RGBE (le service d'artefacts ne sert pas les .hdr),
+ *  décodée sur la carte graphique puis préfiltrée pour les reflets. */
 export function loadHDRI(renderer: THREE.WebGLRenderer, id: string): Promise<THREE.Texture> {
   return new Promise((resolve, reject) => {
-    new HDRLoader().load(BASE + `hdri/${id}_1k.hdr`, (hdr) => {
+    new THREE.TextureLoader().load(BASE + `hdri/${id}_1k.rgbe.png`, (png) => {
+      png.premultiplyAlpha = false; png.colorSpace = THREE.NoColorSpace; png.generateMipmaps = false;
+      png.minFilter = png.magFilter = THREE.NearestFilter;
+      const img = png.image as { width: number; height: number };
+      const rt = new THREE.WebGLRenderTarget(img.width, img.height, { type: THREE.HalfFloatType, depthBuffer: false });
+      const mat = new THREE.ShaderMaterial({
+        uniforms: { t: { value: png } },
+        vertexShader: 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = vec4(position.xy, 0.0, 1.0); }',
+        fragmentShader: 'uniform sampler2D t; varying vec2 vUv; void main(){ vec4 c = texture2D(t, vUv); if (c.a == 0.0) { gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0); return; } gl_FragColor = vec4(min((c.rgb * 255.0 + 0.5) / 256.0 * exp2(c.a * 255.0 - 128.0), vec3(30000.0)), 1.0); }',
+        depthTest: false, depthWrite: false,
+      });
+      const quad = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), mat);
+      const cam = new THREE.Camera();
+      const prev = renderer.getRenderTarget();
+      renderer.setRenderTarget(rt); renderer.render(quad, cam); renderer.setRenderTarget(prev);
+      rt.texture.mapping = THREE.EquirectangularReflectionMapping;
       const pmrem = new THREE.PMREMGenerator(renderer);
-      const env = pmrem.fromEquirectangular(hdr).texture;
-      hdr.dispose(); pmrem.dispose();
+      const env = pmrem.fromEquirectangular(rt.texture).texture;
+      pmrem.dispose(); rt.dispose(); png.dispose(); mat.dispose(); quad.geometry.dispose();
       resolve(env);
     }, undefined, reject);
   });

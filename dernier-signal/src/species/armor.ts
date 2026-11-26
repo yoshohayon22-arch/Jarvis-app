@@ -20,6 +20,7 @@ export interface ArmorMat {
   plates?: number;           // rangées de plaques par mètre (0 = matière continue)
   seam?: THREE.ColorRepresentation;
   sheen?: number;
+  cloth?: boolean;           // tissu qui flotte (jupes, robes, mantelets)
 }
 
 const matCache = new Map<string, THREE.MeshStandardMaterial>();
@@ -38,7 +39,22 @@ export function armorMaterial(o: ArmorMat) {
     Object.assign(sh.uniforms, u);
     sh.vertexShader = sh.vertexShader
       .replace('#include <common>', '#include <common>\nattribute float aEdge;\nvarying vec3 vRP; varying vec3 vRN; varying float vEdge;')
-      .replace('#include <begin_vertex>', '#include <begin_vertex>\nvRP = position; vRN = normal; vEdge = aEdge;');
+      .replace('#include <begin_vertex>', `#include <begin_vertex>
+vRP = position; vRN = normal; vEdge = aEdge;
+#ifdef CLOTH
+{
+  // le tissu flotte : vagues, évasement avec la vitesse, balancement des hanches, vent
+  float h = clamp(aHang, 0.0, 1.0);
+  float ang = atan(position.x, position.z);
+  float wave = sin(uClothT * 2.3 + ang * 3.0 + h * 4.0) + 0.5 * sin(uClothT * 3.7 - ang * 5.0 + h * 2.0);
+  vec2 rad = normalize(position.xz + vec2(1e-5));
+  transformed.xz += rad * h * (uFlare * 0.07 + wave * 0.009 * (0.6 + uFlare));
+  transformed.z += h * h * uSwing * 0.06;
+  transformed.x += h * h * (sin(uClothT * 1.3) * 0.012 + uSwing * 0.02 * sin(ang));
+  transformed.y += h * uFlare * 0.02;
+}
+#endif`)
+      .replace('attribute float aEdge;', 'attribute float aEdge;\n#ifdef CLOTH\nattribute float aHang; uniform float uClothT, uFlare, uSwing;\n#endif');
     sh.fragmentShader = sh.fragmentShader
       .replace('#include <common>', `#include <common>
 uniform sampler2D aMap, aNor, aArm; uniform float aScale, aPlates; uniform vec3 aSeam;
@@ -82,7 +98,13 @@ reflectedLight.indirectDiffuse *= mix(1.0, armT.r, 0.8);`)
   normal = normalize(normal + mat3(viewMatrix) * dN * 0.9);
 }`);
   };
-  m.customProgramCacheKey = () => 'armor';
+  if (o.cloth) {
+    m.defines = { CLOTH: '' };
+    const cu = { uClothT: { value: 0 }, uFlare: { value: 0 }, uSwing: { value: 0 } };
+    Object.assign(u, cu);
+    m.userData.cloth = cu;
+  }
+  m.customProgramCacheKey = () => 'armor' + (o.cloth ? 'c' : '');
   matCache.set(key, m);
   return m;
 }
@@ -224,6 +246,22 @@ export const zones = {
     const face = v.p.z > ez - 0.035 && v.p.y < ey + 0.06;
     return face ? 0 : 1;
   },
+  /** Casque : dessus et arrière du crâne, au-dessus de la ligne des sourcils (et sous maxY). */
+  helmet: (eyes: V3[], P: Record<string, V3>, brow = 0.025, maxY = 9) => (v: VInfo) => {
+    const ez = (eyes[0][2] + eyes[1][2]) / 2, ey = (eyes[0][1] + eyes[1][1]) / 2;
+    if (W(v, 'head') < 0.55 || v.p.y < P.head[1] + 0.03 || v.p.y > ey + maxY) return 0;
+    const face = v.p.z > ez - 0.03 && v.p.y < ey + brow;
+    return face ? 0 : 1;
+  },
+  /** Masque : devant du visage. `lower` = voile sous les yeux ; sinon masque entier percé aux yeux. */
+  mask: (eyes: V3[], P: Record<string, V3>, lower: boolean, eyeR = 0.02) => (v: VInfo) => {
+    const ez = (eyes[0][2] + eyes[1][2]) / 2, ey = (eyes[0][1] + eyes[1][1]) / 2;
+    if (W(v, 'head') < 0.6 || v.p.z < ez - 0.035 || v.p.y < P.head[1] + 0.005) return 0;
+    if (lower) return v.p.y < ey - 0.022 ? 1 : 0;
+    if (v.p.y > ey + 0.06) return 0;
+    for (const e of eyes) if (Math.hypot(v.p.x - e[0], (v.p.y - e[1]) * 1.4) < eyeR * 1.5) return 0;
+    return 1;
+  },
   sm,
 };
 
@@ -248,6 +286,18 @@ export function pauldron(body: Body, P: Record<string, V3>, side: 'L' | 'R', mat
 }
 export { sm };
 
+function withHang(g: THREE.BufferGeometry, f: (y: number) => number) {
+  const p = g.attributes.position, e = new Float32Array(p.count);
+  for (let i = 0; i < p.count; i++) e[i] = f(p.getY(i));
+  g.setAttribute('aHang', new THREE.BufferAttribute(e, 1));
+}
+/** Fait bouger les tissus d'une créature (appelé à chaque image). */
+export function updateCloth(body: Body, t: number, flare: number, swing: number) {
+  body.mesh.traverse((o) => {
+    const c = ((o as THREE.Mesh).material as THREE.Material | undefined)?.userData?.cloth;
+    if (c) { c.uClothT.value = t; c.uFlare.value = flare; c.uSwing.value = swing; }
+  });
+}
 function withEdge(g: THREE.BufferGeometry, f: (y: number) => number) {
   const p = g.attributes.position, e = new Float32Array(p.count);
   for (let i = 0; i < p.count; i++) e[i] = f(p.getY(i));
@@ -273,6 +323,7 @@ export function skirt(body: Body, P: Record<string, V3>, mat: THREE.Material, o:
   }
   g.computeVertexNormals();
   withEdge(g, (y) => 0.35 + 0.65 * Math.min(1, (-y) / (o.length * 0.15)) * Math.min(1, (o.length + y) / (o.length * 0.12) + 0.2));
+  withHang(g, (y) => -y / o.length);
   const m = new THREE.Mesh(g, mat);
   (mat as THREE.Material).side = THREE.DoubleSide;
   m.castShadow = true; m.receiveShadow = true;
@@ -295,6 +346,7 @@ export function mantle(body: Body, P: Record<string, V3>, mat: THREE.Material, o
   }
   g.computeVertexNormals();
   withEdge(g, (y) => 0.4 + 0.6 * Math.min(1, (o.length + y) / (o.length * 0.25) + 0.1));
+  withHang(g, (y) => Math.max(0, -y / o.length) * 0.6);
   (mat as THREE.Material).side = THREE.DoubleSide;
   const m = new THREE.Mesh(g, mat);
   m.castShadow = true; m.receiveShadow = true;

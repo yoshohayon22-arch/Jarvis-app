@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { buildBody, attach, type Prim, type Body } from './sdf';
 import { quadJoints, animateBiped, animateQuad, type QuadSpec, type Action, type Emotion } from './rig';
 import { makeSkin, makeEye, addFur, type SkinOptions } from './skin';
-import { armorMaterial, garment, vertexInfo, zones, pauldron, skirt, mantle, type VInfo } from './armor';
+import { armorMaterial, garment, vertexInfo, zones, pauldron, skirt, mantle, updateCloth, type VInfo } from './armor';
 
 // Les peuples vaëls et les meutes, modelés d'après les images de référence (docs/concepts).
 // Chaque design correspond à un peuple ou à un territoire.
@@ -131,6 +131,8 @@ async function makeVaelMH(L: VaelMHLook): Promise<Creature> {
     group, body, skin, kind: 'biped',
     update(dt, t, action, emotion) {
       animateBiped(body, action, emotion, dt, L.digi);
+      const an = body.mesh.userData.anim as { walk: number; run: number; phase: number };
+      updateCloth(body, t, an.walk * 0.5 + an.run * 0.5, Math.sin(an.phase) * an.walk);
       const u = skin.userData.skin;
       u.uTime.value = t;
       u.uGlowCol.value.lerp(EMO_COLORS[emotion], 1 - Math.exp(-dt * 3));
@@ -165,7 +167,8 @@ export const DESIGNS: Design[] = [
         garment(b, info, zones.forearm(P, 0.12, 0.88), 0.007, leather);
         garment(b, info, zones.shin(P, 0.1, 0.85), 0.014, bark, 8);
         pauldron(b, P, 'L', bark, 0.085, 2); pauldron(b, P, 'R', bark, 0.085, 2);
-        skirt(b, P, armorMaterial({ tex: 'rough_linen', tint: 0x6a5c40, scale: 5, sheen: 0.5 }), { top: 0.14, hem: 0.19, length: 0.3, folds: 7 });
+        skirt(b, P, armorMaterial({ tex: 'rough_linen', tint: 0x6a5c40, scale: 5, sheen: 0.5, cloth: true }), { top: 0.14, hem: 0.19, length: 0.3, folds: 7 });
+        garment(b, info, zones.helmet(_e, P, 0.03, 0.085), 0.012, bark, 6); // couronne d'écorce
       },
       skin: { color: 0x6a5238, color2: 0x2c2118, sheen: 0xc0a080, pattern: 'spirales', scale: 1.1, bump: 0.4, detail: 'cervide', detailScale: 7, detailAmt: 1 },
       eye: { r: 1.05, sx: 1.15, iris: 0x2a1a0c },
@@ -205,8 +208,10 @@ export const DESIGNS: Design[] = [
         garment(b, info, zones.forearm(P, 0.1, 0.9), 0.008, dark);
         garment(b, info, zones.shin(P, 0.08, 0.9), 0.013, dark, 8);
         pauldron(b, P, 'L', bone, 0.11, 3); pauldron(b, P, 'R', bone, 0.11, 3);
-        skirt(b, P, armorMaterial({ tex: 'brown_leather', tint: 0x5a3c26, scale: 4, plates: 14, seam: 0x1a0e06, sheen: 0.3 }), { top: 0.15, hem: 0.21, length: 0.36, folds: 12 });
-        mantle(b, P, armorMaterial({ tex: 'hessian_230', tint: 0x3a3430, scale: 5, sheen: 0.8 }), { neck: 0.075, spread: 0.17, length: 0.16, back: 0.25 });
+        skirt(b, P, armorMaterial({ tex: 'brown_leather', tint: 0x5a3c26, scale: 4, plates: 14, seam: 0x1a0e06, sheen: 0.3, cloth: true }), { top: 0.15, hem: 0.21, length: 0.36, folds: 12 });
+        mantle(b, P, armorMaterial({ tex: 'hessian_230', tint: 0x3a3430, scale: 5, sheen: 0.8, cloth: true }), { neck: 0.075, spread: 0.17, length: 0.16, back: 0.25 });
+        garment(b, info, zones.helmet(_e, P, 0.062), 0.014, bone, 10); // casque d'os au-dessus des quatre yeux
+        boneCrest(b, _e);
       },
       skin: { color: 0x5e5868, color2: 0x2a2433, sheen: 0x9a88b8, pattern: 'taches', scale: 1, bump: 0.5, detail: 'veilleur', detailScale: 6, detailAmt: 1 },
       eye: { r: 1.05, sx: 1.35, sy: 0.85, rz: 0.22, extra: (e, side) => [{ p: add(e, [-side * 0.008, 0.045, -0.01]), r: 0.0075 }] },
@@ -229,7 +234,7 @@ export const DESIGNS: Design[] = [
       id: 'echassier', digi: true,
       armor: (b, P, _e, info) => {
         const shell = armorMaterial({ tex: 'shell_floor_01', tint: 0xe8e0d0, scale: 3.5, rough: 0.7 });
-        const jute = armorMaterial({ tex: 'hessian_230', tint: 0x9a8a6a, scale: 5, sheen: 0.6 });
+        const jute = armorMaterial({ tex: 'hessian_230', tint: 0x9a8a6a, scale: 5, sheen: 0.6, cloth: true });
         const linen = armorMaterial({ tex: 'rough_linen', tint: 0x6a7a6a, scale: 5, sheen: 0.5 });
         garment(b, info, zones.torso(P, 0.22, 0.88), 0.018, shell, 14);
         garment(b, info, zones.hips(P, 0.42, 0.18), 0.016, jute, 10);
@@ -237,6 +242,7 @@ export const DESIGNS: Design[] = [
         garment(b, info, zones.shin(P, 0.05, 0.6), 0.007, linen);
         pauldron(b, P, 'L', shell, 0.08, 2); pauldron(b, P, 'R', shell, 0.08, 2);
         skirt(b, P, jute, { top: 0.12, hem: 0.19, length: 0.34, folds: 14 });
+        garment(b, info, zones.mask(_e, P, false, 0.02), 0.01, armorMaterial({ tex: 'shell_floor_01', tint: 0xf2ecdc, scale: 6, rough: 0.6 }), 6); // masque de coquillages
       },
       skin: { color: 0x3d5a3e, color2: 0x182a1f, sheen: 0x8fd0b0, wet: 0.55, pattern: 'rayures', scale: 1, bump: 0.4, detail: 'echassier', detailScale: 5, detailAmt: 0.9 },
       eye: { r: 1.05, iris: 0x1a2410 },
@@ -273,8 +279,8 @@ export const DESIGNS: Design[] = [
     build: () => makeVaelMH({
       id: 'sylphe', digi: true,
       armor: (b, P, eyes, info) => {
-        const robe = armorMaterial({ tex: 'rough_linen', tint: 0x55647a, scale: 4, sheen: 0.7 });
-        const jute = armorMaterial({ tex: 'hessian_230', tint: 0x6a6460, scale: 5, sheen: 0.6 });
+        const robe = armorMaterial({ tex: 'rough_linen', tint: 0x55647a, scale: 4, sheen: 0.7, cloth: true });
+        const jute = armorMaterial({ tex: 'hessian_230', tint: 0x6a6460, scale: 5, sheen: 0.6, cloth: true });
         garment(b, info, zones.torso(P, 0.0, 1.0, true), 0.022, robe, 12);
         garment(b, info, zones.upperArm(), 0.016, robe, 6);
         garment(b, info, zones.hips(P, 0.25, 0.1), 0.022, robe, 10);
@@ -284,6 +290,7 @@ export const DESIGNS: Design[] = [
         garment(b, info, zones.hood(eyes, P), 0.028, jute, 10);
         skirt(b, P, robe, { top: 0.13, hem: 0.3, length: 0.78, folds: 10, depth: 0.85 });
         mantle(b, P, jute, { neck: 0.06, spread: 0.16, length: 0.2, back: 0.6 });
+        garment(b, info, zones.mask(eyes, P, true), 0.012, jute, 6); // voile sous les yeux
       },
       skin: { color: 0x1d2638, color2: 0x0a0f18, sheen: 0x5f86b0, wet: 0.25, pattern: 'veines', scale: 1.1, bump: 0.5, detail: 'veilleur', detailScale: 8, detailAmt: 0.6 },
       eye: { r: 1.05, sx: 1.45, sy: 0.85, rz: 0.32 },
@@ -343,7 +350,7 @@ export const DESIGNS: Design[] = [
   {
     id: 'faucheur', letter: 'C', kind: 'meute', name: 'Le Faucheur', people: 'Meute des marais · berges', concept: 'm_c.png',
     text: 'Se glisse dans les roseaux des marais. Bas et allongé comme un grand lézard, pattes écartées, longue queue qui balaie, écailles humides vert-gris, crête de plaques dorsales qui s’illuminent.',
-    build: () => makeQuad({ L: 1.25, hip: 0.4, sh: 0.4, w: 0.17, neck: 0.3, neckRise: 0.02, tail: 1.05, tailDrop: 0.3 }, 1.05,
+    build: () => makeQuad({ L: 1.25, hip: 0.42, sh: 0.42, w: 0.17, neck: 0.3, neckRise: 0.03, tail: 1.05, tailDrop: 0.1 }, 0.92,
       { color: 0x3c4a34, color2: 0x151b12, sheen: 0x7a9a70, wet: 0.45, pattern: 'veines', scale: 1.2, bump: 0.3, detail: 'cervide', detailScale: 10, detailAmt: 1 },
       (H) => ({
         prims: [
@@ -356,6 +363,47 @@ export const DESIGNS: Design[] = [
       }), 'plates', null, 'faucheur'),
   },
 ];
+
+function boneCrest(b: Body, eyes: V3[]) {
+  const eM = lerp3(eyes[0], eyes[1], 0.5);
+  const bone = new THREE.MeshPhysicalMaterial({ color: 0xe6dac0, roughness: 0.55, clearcoat: 0.2 });
+  const g = new THREE.Group();
+  for (let i = 0; i < 6; i++) {
+    const t = i / 5, c = new THREE.Mesh(new THREE.ConeGeometry(0.011 - t * 0.003, 0.055 - Math.abs(t - 0.35) * 0.04, 8), bone);
+    c.position.set(0, 0.12 - t * t * 0.07, 0.02 - t * 0.16); c.rotation.x = -0.4 - t * 0.9; c.castShadow = true; g.add(c);
+  }
+  const nasal = new THREE.Mesh(new THREE.BoxGeometry(0.014, 0.06, 0.008), bone); nasal.position.set(0, 0.035, 0.07); nasal.rotation.x = 0.15; g.add(nasal);
+  attach(b, 'head', g, add(eM, [0, -0.02, -0.04]));
+}
+
+/** Protections naturelles des meutes : épines, cornes, plaques d'os, écailles osseuses. */
+function natural(kind: string, b: Body, P: Record<string, V3>) {
+  const horn = new THREE.MeshPhysicalMaterial({ color: 0x2a2520, roughness: 0.42, clearcoat: 0.5, clearcoatRoughness: 0.4 });
+  const bone = new THREE.MeshPhysicalMaterial({ color: 0xd8cab0, roughness: 0.6, clearcoat: 0.15 });
+  const spike = (bone_: string, at: V3, len: number, r: number, tilt: number, mat: THREE.Material, side = 0) => {
+    const c = new THREE.Mesh(new THREE.ConeGeometry(r, len, 8), mat);
+    c.geometry.translate(0, len / 2, 0); c.rotation.set(-tilt, 0, side); c.castShadow = true;
+    attach(b, bone_, c, at);
+  };
+  const plate = (bone_: string, at: V3, rad: V3, rx: number, mat: THREE.Material) => {
+    const m = new THREE.Mesh(new THREE.SphereGeometry(1, 20, 12, 0, Math.PI * 2, 0, Math.PI / 2), mat);
+    m.scale.set(...rad); m.rotation.x = rx; m.castShadow = true; attach(b, bone_, m, at);
+  };
+  if (kind === 'lame') {
+    for (let i = 0; i < 9; i++) { const t = i / 8, at = lerp3(add(P.neck, [0, 0.07, -0.02]), add(P.pelvis, [0, 0.08, 0]), t); spike(t < 0.2 ? 'neck' : t < 0.7 ? 'spine' : 'pelvis', at, 0.05 - Math.abs(t - 0.4) * 0.04, 0.008, 0.9, horn); }
+    for (const sd of [1, -1]) spike('head', add(P.head, [sd * 0.035, 0.08, -0.07]), 0.13, 0.012, 1.25, horn, sd * 0.25);
+  }
+  if (kind === 'rodeur') {
+    for (let i = 0; i < 7; i++) { const t = i / 6, at = lerp3(add(P.head, [0, 0.03, -0.1]), add(P.chest, [0, 0.12, -0.06]), t); plate(t < 0.45 ? 'neck' : 'chest', at, [0.11 - Math.abs(t - 0.5) * 0.06, 0.035, 0.06], -0.25, bone); }
+    plate('head', add(P.head, [0, 0.09, 0.03]), [0.06, 0.02, 0.07], 0.1, bone);
+    for (const sd of [1, -1]) spike('head', add(P.head, [sd * 0.06, 0.07, -0.02]), 0.09, 0.014, 1.1, bone, sd * 0.5);
+  }
+  if (kind === 'faucheur') {
+    for (let i = 0; i < 16; i++) { const t = i / 15, bn = t < 0.15 ? 'neck' : t < 0.55 ? 'spine' : t < 0.75 ? 'pelvis' : 'tail1'; const at = lerp3(add(P.neck, [0, 0.06, 0]), add(P.tail2, [0, 0.04, 0]), t); for (const sd of [1, -1]) spike(bn, add(at, [sd * 0.055, -0.005, 0]), 0.055, 0.017, 0.35, horn, sd * 0.45); }
+    for (let i = 1; i <= 4; i++) spike('tail' + i, add(P['tail' + i], [0, 0.035 - i * 0.004, 0]), 0.075 - i * 0.01, 0.018 - i * 0.002, 0.9, horn);
+    for (const sd of [1, -1]) spike('head', add(P.head, [sd * 0.05, 0.05, -0.06]), 0.13, 0.02, 1.4, horn, sd * 0.3);
+  }
+}
 
 function antler(side: number) {
   const g = new THREE.Group(), mat = M.crystal();
@@ -410,6 +458,7 @@ function makeQuad(s: QuadSpec, girth: number, skinOpt: SkinOptions,
   for (const e of hd.eyes) { const ey = makeEye(e.r, hd.eyeCol, 1.4); irises.push(ey.userData.iris); attach(body, 'head', ey, e.p); }
   let furU: { uWind: { value: number } } | null = null;
   if (fur) furU = addFur(body.mesh, fur);
+  natural(id, body, P);
   // crinière de filaments lumineux (Rôdeur)
   const mane: THREE.Object3D[] = [];
   if (crest === 'mane') {
